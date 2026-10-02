@@ -12,6 +12,8 @@ on:
       - "app/lifecycle.py"
       - "app/geo.py"
       - "app/run_pipeline.py"
+      - "app/enrichment/*.py"
+      - "app/db.py"
 
 jobs:
   live-boe:
@@ -34,6 +36,10 @@ jobs:
             reports/change_reports/
             reports/coverage_latest.csv
             reports/coverage_latest.html
+            reports/ree_capacity_latest.csv
+            reports/miteco_registry_latest.csv
+            reports/miteco_exact_matches_latest.csv
+            reports/miteco_registry_latest.txt
             docs/data.json
             docs/index.html
           if-no-files-found: error
