@@ -21,8 +21,10 @@ class BOJACollector:
         self.session=requests.Session()
         self.session.headers.update({"User-Agent":user_agent,"Accept":"application/json"})
 
-    def _get_json(self,url,params=None):
+    def _get_json(self,url,params=None,allow_empty_400=False):
         r=self.session.get(url,params=params,timeout=self.timeout)
+        if allow_empty_400 and r.status_code==400:
+            return {"results":[],"total_hits":0}
         r.raise_for_status()
         return r.json()
 
@@ -40,6 +42,7 @@ class BOJACollector:
         while True:
             payload=self._get_json(
                 f"{API}/get/search_pagination",
+                allow_empty_400=True,
                 params={
                     "order_by":"dateUTC",
                     "mode":"DESC",
