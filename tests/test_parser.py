@@ -10,6 +10,14 @@ class ParserTests(unittest.TestCase):
         got=BOECollector.parse_summary_html(html)
         self.assertEqual({x["external_id"] for x in got},{"BOE-A-2026-12701","BOE-B-2026-20000"})
 
+    def test_boe_api_parser(self):
+        payload={"data":{"sumario":{"diario":[{"seccion":[{"departamento":[{"item":[
+            {"identificador":"BOE-B-2026-31656","titulo":"Instalación Fotovoltaica «Eclipse Solar» de 99,935 MW","url_html":"https://www.boe.es/diario_boe/txt.php?id=BOE-B-2026-31656"},
+            {"identificador":"BOE-A-2026-99999","titulo":"Universidad pública","url_html":"x"}
+        ]}]}]}]}}}
+        got=BOECollector.parse_api_json(payload)
+        self.assertEqual([x["external_id"] for x in got],["BOE-B-2026-31656"])
+
     def test_pv_auth(self):
         e=parse_event(
             source_code="BOE",external_id="BOE-A-2026-12701",publication_date="2026-06-11",
