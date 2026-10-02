@@ -42,4 +42,15 @@ jobs:
                           print("RESOURCE",res.get("format"),"|",res.get("name"),"|",res.get("url"))
               except Exception as exc:
                   print("ERROR",repr(exc))
+          print("\n===== DIRECT CSV =====")
+          direct="https://energia.serviciosmin.gob.es/Electra/descargarCSVProduccion.aspx"
+          try:
+              r=requests.get(direct,timeout=60,headers={"User-Agent":"SpainRenewablesRadar/0.1"})
+              print("STATUS",r.status_code,r.headers.get("content-type"),"BYTES",len(r.content))
+              print("DISPOSITION",r.headers.get("content-disposition"))
+              r.raise_for_status()
+              text=r.content.decode("utf-8-sig","replace")
+              print("\n".join(text.splitlines()[:35]))
+          except Exception as exc:
+              print("DIRECT_ERROR",repr(exc))
           PY
