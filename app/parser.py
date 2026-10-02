@@ -141,7 +141,9 @@ def parse_event(*,source_code,external_id,publication_date,title,url,raw_text)->
     if not province:
         province,ccaa=find_province(raw_text)
 
-    event_type=classify_event(combined)
+    event_type=classify_event(title)
+    if event_type=="OTHER":
+        event_type=classify_event(raw_text)
     stage=commercial_stage(event_type)
 
     return ParsedEvent(
