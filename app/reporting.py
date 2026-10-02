@@ -8,7 +8,7 @@ from pathlib import Path
 def write_changes(events,out_dir="reports/change_reports"):
     out=Path(out_dir);out.mkdir(parents=True,exist_ok=True)
     csv_path=out/"changes_latest.csv";html_path=out/"changes_latest.html"
-    fields=["publication_date","source_code","external_id","technology","power_mw","project_name","province","ccaa","event_type","commercial_stage","url"]
+    fields=["publication_date","source_code","external_id","technology","power_mw","project_name","promoter","expediente","province","ccaa","event_type","commercial_stage","url"]
     with csv_path.open("w",newline="",encoding="utf-8-sig") as f:
         w=csv.DictWriter(f,fieldnames=fields);w.writeheader()
         for e in events:
