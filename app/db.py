@@ -75,6 +75,20 @@ CREATE TABLE IF NOT EXISTS ree_node_capacity (
   PRIMARY KEY(snapshot_date,node_name)
 );
 CREATE INDEX IF NOT EXISTS idx_ree_node_capacity_ccaa ON ree_node_capacity(snapshot_date,ccaa);
+
+CREATE TABLE IF NOT EXISTS miteco_production_registry (
+  snapshot_date TEXT NOT NULL,
+  autoid TEXT,
+  installation_id TEXT,
+  regime TEXT,
+  installation_name TEXT NOT NULL,
+  normalized_name TEXT NOT NULL,
+  ccaa TEXT,
+  source_url TEXT NOT NULL,
+  PRIMARY KEY(snapshot_date,autoid,installation_name)
+);
+CREATE INDEX IF NOT EXISTS idx_miteco_registry_name ON miteco_production_registry(snapshot_date,normalized_name);
+CREATE INDEX IF NOT EXISTS idx_miteco_registry_ccaa ON miteco_production_registry(snapshot_date,ccaa);
 """
 
 def _ensure_column(conn,table,name,definition):
