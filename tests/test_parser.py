@@ -23,7 +23,7 @@ class ParserTests(unittest.TestCase):
         e=parse_event(
             source_code="BOE",external_id="BOE-A-2026-12701",publication_date="2026-06-11",
             title="Resolución",url="x",
-            raw_text="Se otorga autorización administrativa previa para la instalación fotovoltaica «FV Guijo», de 91 MW, en Cáceres."
+            raw_text="Se otorga autorización administrativa previa para la instalación fotovoltaica «FV Guijo», de 91 MW, en la provincia de Cáceres."
         )
         self.assertEqual(e.technology,"PV")
         self.assertEqual(e.power_mw,91.0)
@@ -69,6 +69,13 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(e.expediente,"CG-870")
         self.assertEqual(e.event_type,"PUBLIC_INFO")
         self.assertEqual(e.commercial_stage,"EARLY")
+
+    def test_uniprovincial_ccaa_beats_promoter_address(self):
+        title="Anuncio de la Dirección General de Industria del Gobierno de Cantabria sobre el parque eólico ALSA, de 18 MW."
+        raw="Peticionario con domicilio en Oviedo (Asturias)."
+        e=parse_event(source_code="BOE",external_id="BOE-X-CAN",publication_date="2026-10-02",title=title,url="x",raw_text=raw)
+        self.assertEqual(e.province,"Cantabria")
+        self.assertEqual(e.ccaa,"Cantabria")
 
     def test_ccaa_or_company_name_is_not_false_province(self):
         title="Anuncio de la Delegación del Gobierno en Castilla y León relativo a una instalación renovable."
