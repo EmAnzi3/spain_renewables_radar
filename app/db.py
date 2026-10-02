@@ -9,6 +9,8 @@ CREATE TABLE IF NOT EXISTS projects (
   project_name TEXT,
   technology TEXT,
   power_mw REAL,
+  promoter TEXT,
+  expediente TEXT,
   province TEXT,
   ccaa TEXT,
   commercial_stage TEXT NOT NULL,
@@ -31,6 +33,8 @@ CREATE TABLE IF NOT EXISTS events (
   commercial_stage TEXT NOT NULL,
   technology TEXT,
   power_mw REAL,
+  promoter TEXT,
+  expediente TEXT,
   province TEXT,
   ccaa TEXT,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -40,9 +44,22 @@ CREATE TABLE IF NOT EXISTS events (
 CREATE INDEX IF NOT EXISTS idx_events_date ON events(publication_date);
 CREATE INDEX IF NOT EXISTS idx_projects_geo ON projects(ccaa,province);
 CREATE INDEX IF NOT EXISTS idx_projects_stage ON projects(commercial_stage,technology);
+CREATE INDEX IF NOT EXISTS idx_projects_expediente ON projects(expediente);
 """
 
+def _ensure_column(conn,table,name,definition):
+    cols={r["name"] for r in conn.execute(f"PRAGMA table_info({table})")}
+    if name not in cols:
+        conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} {definition}")
+
 def connect(db_path:str)->sqlite3.Connection:
-    path=Path(db_path);path.parent.mkdir(parents=True,exist_ok=True)
-    conn=sqlite3.connect(path);conn.row_factory=sqlite3.Row;conn.executescript(SCHEMA)
+    path=Path(db_path)
+    path.parent.mkdir(parents=True,exist_ok=True)
+    conn=sqlite3.connect(path)
+    conn.row_factory=sqlite3.Row
+    conn.executescript(SCHEMA)
+    for table in ("projects","events"):
+        _ensure_column(conn,table,"promoter","TEXT")
+        _ensure_column(conn,table,"expediente","TEXT")
+    conn.commit()
     return conn
