@@ -17,7 +17,9 @@ jobs:
       - name: Probe MITECO open data catalog
         run: |
           python - <<'PY'
-          import json, requests, urllib.parse
+          import requests
+          import urllib3
+          urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
           q="Registro de instalaciones de producción de energía eléctrica"
           bases=[
@@ -27,9 +29,17 @@ jobs:
           for base in bases:
               print("\n=====",base,"=====")
               try:
-                  r=requests.get(base,params={"q":q},timeout=30,headers={"User-Agent":"SpainRenewablesRadar/0.1"})
+                  r=requests.get(base,params={"q":q},timeout=30,headers={"User-Agent":"SpainRenewablesRadar/0.1"},verify=False)
                   print("STATUS",r.status_code,r.headers.get("content-type"),r.url)
-                  print(r.text[:30000])
+                  if not r.ok:
+                      print(r.text[:5000])
+                      continue
+                  payload=r.json()
+                  print("SUCCESS",payload.get("success"))
+                  for pkg in payload.get("result",{}).get("results",[]):
+                      print("PACKAGE",pkg.get("name"),"|",pkg.get("title"))
+                      for res in pkg.get("resources",[]):
+                          print("RESOURCE",res.get("format"),"|",res.get("name"),"|",res.get("url"))
               except Exception as exc:
                   print("ERROR",repr(exc))
           PY
