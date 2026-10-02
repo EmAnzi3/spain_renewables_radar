@@ -28,3 +28,39 @@ def export_dashboard(conn,docs_dir="docs"):
     rows=[dict(r) for r in conn.execute("SELECT * FROM projects ORDER BY last_seen DESC,power_mw DESC").fetchall()]
     (docs/"data.json").write_text(json.dumps({"records":rows},ensure_ascii=False,indent=2),encoding="utf-8")
     return rows
+
+
+def write_coverage(records,out_dir="reports"):
+    import csv
+    import html
+    from pathlib import Path
+
+    out=Path(out_dir)
+    out.mkdir(parents=True,exist_ok=True)
+    csv_path=out/"coverage_latest.csv"
+    html_path=out/"coverage_latest.html"
+    fields=["source_code","date","status","candidates","inserted","new_projects","error"]
+
+    with csv_path.open("w",newline="",encoding="utf-8-sig") as f:
+        w=csv.DictWriter(f,fieldnames=fields)
+        w.writeheader()
+        for row in records:
+            w.writerow({k:row.get(k,"") for k in fields})
+
+    rows="".join(
+        "<tr>"+"".join(f"<td>{html.escape(str(row.get(k,'')))}</td>" for k in fields)+"</tr>"
+        for row in records
+    )
+    html_path.write_text(
+        "<!doctype html><html><head><meta charset='utf-8'><title>Coverage</title>"
+        "<style>body{font-family:Arial,sans-serif;margin:28px;color:#172033}"
+        "table{border-collapse:collapse;width:100%;font-size:13px}"
+        "th,td{border-bottom:1px solid #ddd;padding:8px;text-align:left}"
+        "th{background:#f3f6fa}</style></head><body>"
+        "<h1>Spain Renewables Radar — coverage ultimo run</h1>"
+        f"<p>Source/day checks: <b>{len(records)}</b></p>"
+        "<table><thead><tr>"+''.join(f"<th>{k}</th>" for k in fields)+"</tr></thead>"
+        "<tbody>"+rows+"</tbody></table></body></html>",
+        encoding="utf-8",
+    )
+    return csv_path,html_path
