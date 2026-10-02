@@ -20,6 +20,8 @@ EXPEDIENTE_RE=re.compile(
 PROJECT_PATTERNS=[
     re.compile(r"(?:instalaci[oó]n|planta)\s+(?:solar\s+)?fotovoltaica\s+(?:denominada\s+)?[«\"]?([^,»\"\.]{3,140})",re.I),
     re.compile(r"parque\s+e[oó]lico\s+(?:denominado\s+)?[«\"]?([^,»\"\.]{3,140})",re.I),
+    re.compile(r"instalaci[oó]n\s+de\s+producci[oó]n\s+de\s+energ[ií]a\s+el[eé]ctrica\s+[«\"]?([^,»\"\.]{3,140})",re.I),
+    re.compile(r"m[oó]dulo\s+de\s+almacenamiento\s+de\s+la\s+instalaci[oó]n\s+h[ií]brida\s+[«\"]?([^,»\"\.]{3,140})",re.I),
     re.compile(r"(?:m[oó]dulo|sistema)\s+de\s+almacenamiento\s+(?:denominado\s+)?[«\"]?([^,»\"\.]{3,140})",re.I),
 ]
 PROMOTER_PATTERNS=[
@@ -60,7 +62,10 @@ def detect_technology(text:str)->str|None:
     t=normalize_text(text)
     has_pv=any(k in t for k in ("fotovolta","solar pv"))
     has_wind=any(k in t for k in ("eolic","aerogenerador"))
-    has_storage=any(k in t for k in ("almacenamiento","bateria","bess"))
+    has_storage=any(k in t for k in (
+        "bateria","bess","modulo de almacenamiento","sistema de almacenamiento",
+        "almacenamiento de energia","almacenamiento energet","almacenamiento electr"
+    ))
     has_hybrid="hibrid" in t or sum((has_pv,has_wind,has_storage))>=2
     if has_hybrid:return "HYBRID"
     if has_pv:return "PV"
