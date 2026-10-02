@@ -14,7 +14,7 @@ QUOTED_RE=re.compile(r"[«\"]([^»\"]{3,120})[»\"]")
 EXPEDIENTE_RE=re.compile(
     r"(?:expediente|expdte\.?|exp\.?|c[oó]digo)"
     r"(?:\s*(?:n[ºo°]\.?|n[uú]mero))?\s*[:\-]?\s*"
-    r"([A-Z0-9][A-Z0-9._/\-]{2,60})",
+    r"(?:SIAGGE\s+)?([A-Z0-9][A-Z0-9._/\-]{2,60})",
     re.I,
 )
 PROJECT_PATTERNS=[
