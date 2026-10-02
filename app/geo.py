@@ -28,6 +28,7 @@ def find_province(text: str) -> tuple[str | None, str | None]:
     for province,ccaa in PROVINCE_TO_CCAA.items():
         esc=re.escape(province)
         strong=[
+            rf"servicio\s+provincial\s+de\s+{esc}\b",
             rf"provincia\s+de\s+{esc}\b",
             rf"provincia\s*[:\-]\s*{esc}\b",
             rf"\(\s*{esc}\s*\)",
