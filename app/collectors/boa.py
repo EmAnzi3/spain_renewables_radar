@@ -27,7 +27,11 @@ EXCLUDE = re.compile(
     r"autoconsumo|instalaci[oó]n\s+de\s+paneles\s+fotovoltaicos\s+en\s+(?:edificios|cubiertas)",
     re.I,
 )
-URL_RE = re.compile(r"https?://[^\s]+", re.I)
+URL_RE = re.compile(r"https?://[^\s\x60]+", re.I)
+MULTI_QUOTED_PROJECT = re.compile(
+    r'["«](Planta\s+(?:solar\s+)?fotovoltaica|Parque\s+e[oó]lico)\s+([^"»]{3,120})["»]',
+    re.I,
+)
 
 
 class BOACollector:
@@ -110,10 +114,51 @@ class BOACollector:
         )
         return event if event.technology else None
 
+    @classmethod
+    def events_from_row(cls, day: date, row: dict):
+        title = cls._clean(row.get("Titulo"))
+        detail = cls._clean(row.get("Texto"))
+
+        # Some expropriation/payment notices group several plants in one BOA
+        # disposition. Preserve one event per plant instead of silently
+        # collapsing the document to the first project.
+        if STRONG_TITLE.search(title):
+            matches = list(MULTI_QUOTED_PROJECT.finditer(detail))
+            unique = []
+            seen = set()
+            for match in matches:
+                name = match.group(2).strip(" ,.;:-")
+                key = name.casefold()
+                if key not in seen:
+                    seen.add(key)
+                    unique.append((match, name))
+
+            if len(unique) > 1:
+                events = []
+                for idx, (match, name) in enumerate(unique, start=1):
+                    next_start = unique[idx][0].start() if idx < len(unique) else len(detail)
+                    segment = detail[match.start():next_start]
+                    kind = match.group(1)
+                    synthetic_title = f'{title} | {kind} "{name}"'
+                    external_id = cls._clean(row.get("DOCN")) or f"BOA-{day.isoformat()}"
+                    event = parse_event(
+                        source_code=cls.code,
+                        external_id=f"{external_id}#{idx}",
+                        publication_date=day.isoformat(),
+                        title=synthetic_title,
+                        url=cls._source_url(row),
+                        raw_text=segment,
+                    )
+                    if event.technology:
+                        events.append(event)
+                if events:
+                    return events
+
+        event = cls.event_from_row(day, row)
+        return [event] if event else []
+
     def collect_day(self, day: date):
         events = []
         for row in self._day_rows(day):
-            event = self.event_from_row(day, row)
-            if event:
-                events.append(event)
+            events.extend(self.events_from_row(day, row))
         return events
