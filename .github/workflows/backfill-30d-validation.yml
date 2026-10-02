@@ -1,0 +1,49 @@
+name: backfill-30d-validation
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/backfill-30d-validation.yml"
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Run 30-day official-source backfill
+        run: python -m app.run_pipeline --days 30
+      - name: Print backfill metrics
+        run: |
+          python - <<'PY'
+          import sqlite3
+          con=sqlite3.connect("data/spain_renewables.sqlite")
+          con.row_factory=sqlite3.Row
+          print("PROJECTS",con.execute("select count(*) from projects").fetchone()[0])
+          print("EVENTS",con.execute("select count(*) from events").fetchone()[0])
+          print("BY_SOURCE")
+          for r in con.execute("select source_code,count(*) n from events group by source_code order by source_code"):
+              print(r["source_code"],r["n"])
+          print("BY_TECH_STAGE")
+          for r in con.execute("select technology,commercial_stage,count(*) n from projects group by technology,commercial_stage order by technology,commercial_stage"):
+              print(r["technology"],r["commercial_stage"],r["n"])
+          print("MISSING_CORE")
+          print(dict(con.execute("""select
+            sum(case when project_name is null then 1 else 0 end) no_name,
+            sum(case when power_mw is null then 1 else 0 end) no_mw,
+            sum(case when province is null then 1 else 0 end) no_province,
+            sum(case when expediente is null then 1 else 0 end) no_expediente
+            from projects""").fetchone()))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: backfill-30d-output
+          path: |
+            data/spain_renewables.sqlite
+            reports/
+            docs/
+          if-no-files-found: error
