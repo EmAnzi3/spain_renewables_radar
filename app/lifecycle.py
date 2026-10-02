@@ -6,6 +6,8 @@ def classify_event(text: str) -> str:
         return "DENIED"
     if any(x in t for x in ("desistimiento","se tiene por desist","renuncia")):
         return "WITHDRAWN"
+    if any(x in t for x in ("levantamiento de actas previas","actas previas a la ocupación","actas previas a la ocupacion","urgente ocupación","urgente ocupacion")):
+        return "EXPROPRIATION"
     if ("declaración" in t or "declaracion" in t) and "impacto ambiental" in t:
         return "DIA"
     if "autorización administrativa de construcción" in t or "autorizacion administrativa de construccion" in t:
@@ -24,10 +26,12 @@ def classify_event(text: str) -> str:
 def commercial_stage(event_type: str) -> str:
     if event_type in {"DENIED","WITHDRAWN"}:
         return "BLOCKED"
+    if event_type=="EXPROPRIATION":
+        return "PRECONSTRUCTION"
     if event_type in {"CONSTRUCTION_AUTH","PUBLIC_UTILITY"}:
         return "AUTHORIZED"
     if event_type in {"PRIOR_AUTH","DIA"}:
         return "PERMITTING"
     return "EARLY"
 
-STAGE_RANK={"BLOCKED":-1,"EARLY":0,"PERMITTING":1,"AUTHORIZED":2}
+STAGE_RANK={"BLOCKED":-1,"EARLY":0,"PERMITTING":1,"AUTHORIZED":2,"PRECONSTRUCTION":3}
