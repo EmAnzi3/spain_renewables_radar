@@ -113,5 +113,63 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(e.ccaa,"Aragón")
         self.assertEqual(e.event_type,"PUBLIC_INFO")
 
+    def test_boa_henar_dedicated_energy_proceeding(self):
+        row={
+            "DOCN":"007961421",
+            "Titulo":"ANUNCIO del Servicio Provincial de Zaragoza, por el que se somete a información pública la solicitud de declaración de utilidad pública, de la instalación de producción de energía eléctrica PE Henar III. Expediente: G-EO-Z-313-2020 // DUP-Z-2021-0044.",
+            "Texto":"Empresa beneficiaria: Energía Inagotable del Proyecto Henar III, SL. Dirección: calle Coso, 33, Zaragoza. Instalación: PE Henar III. Número aerogeneradores: 7. Ubicación: Cariñena y Tosos.",
+            "UrlPdf":"https://www.boa.aragon.es/henar.pdf"
+        }
+        e=BOACollector.event_from_row(__import__("datetime").date(2026,9,30),row)
+        self.assertIsNotNone(e)
+        self.assertEqual(e.technology,"WIND")
+        self.assertEqual(e.project_name,"PE Henar III")
+        self.assertEqual(e.promoter,"Energía Inagotable del Proyecto Henar III, SL")
+        self.assertEqual(e.province,"Zaragoza")
+        self.assertEqual(e.event_type,"PUBLIC_INFO")
+
+    def test_boa_excludes_co2_storage(self):
+        row={
+            "DOCN":"007961451",
+            "Titulo":"RESOLUCIÓN por la que se publica la solicitud del permiso de investigación Caspe Mayals, para el almacenamiento geológico de dióxido de carbono, en la provincia de Zaragoza.",
+            "Texto":"Proyecto de almacenamiento geológico de dióxido de carbono.",
+            "UrlPdf":"x"
+        }
+        self.assertIsNone(BOACollector.event_from_row(__import__("datetime").date(2026,10,1),row))
+
+    def test_boa_excludes_autoconsumo(self):
+        row={
+            "DOCN":"007961450",
+            "Titulo":'RESOLUCIÓN sobre la autorización administrativa previa y de construcción del proyecto de instalación de parque fotovoltaico "Autoconsumo con excedentes Frutas La Espesa" de 880 kW, en Zaidín (Huesca).',
+            "Texto":"Instalación fotovoltaica de autoconsumo.",
+            "UrlPdf":"x"
+        }
+        self.assertIsNone(BOACollector.event_from_row(__import__("datetime").date(2026,10,1),row))
+
+    def test_boa_excludes_generic_document_with_incidental_renewable_text(self):
+        row={
+            "DOCN":"007961480",
+            "Titulo":"ACUERDOS de la Comisión Técnica de Calificación de Zaragoza, adoptados en sesión de 15 de septiembre de 2026.",
+            "Texto":"Entre muchos expedientes se menciona una instalación fotovoltaica y un sistema de almacenamiento.",
+            "UrlPdf":"x"
+        }
+        self.assertIsNone(BOACollector.event_from_row(__import__("datetime").date(2026,10,2),row))
+
+    def test_boa_hybrid_storage_project_name(self):
+        row={
+            "DOCN":"007961487",
+            "Titulo":"ANUNCIO del Servicio Provincial de Zaragoza, por el que se somete a información pública, la solicitud de autorización administrativa previa y de construcción, del proyecto del módulo de almacenamiento de la instalación híbrida Elawan Villanueva I de 20 MW de la empresa Elawan Fotovoltaica Villanueva SL. (Expediente G-Z-2026/037).",
+            "Texto":"Planta almacenamiento: Módulo de almacenamiento de la instalación híbrida Elawan Villanueva I. Potencia instalada: 20,0 MW.",
+            "UrlPdf":"https://www.boa.aragon.es/villanueva.pdf"
+        }
+        e=BOACollector.event_from_row(__import__("datetime").date(2026,10,2),row)
+        self.assertIsNotNone(e)
+        self.assertEqual(e.technology,"HYBRID")
+        self.assertEqual(e.project_name,"Elawan Villanueva I")
+        self.assertAlmostEqual(e.power_mw,20.0)
+        self.assertEqual(e.promoter,"Elawan Fotovoltaica Villanueva SL")
+        self.assertEqual(e.expediente,"G-Z-2026/037")
+        self.assertEqual(e.province,"Zaragoza")
+
 if __name__=="__main__":
     unittest.main()
