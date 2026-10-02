@@ -37,7 +37,27 @@ def find_province(text: str) -> tuple[str | None, str | None]:
             if m:
                 candidates.append((m.start(),-len(province),province,ccaa))
                 break
-    if not candidates:
-        return None,None
-    _,_,province,ccaa=min(candidates)
-    return province,ccaa
+    if candidates:
+        _,_,province,ccaa=min(candidates)
+        return province,ccaa
+
+    # Single-province autonomous communities: a regional authority in the
+    # title is already sufficient geographic evidence and avoids picking
+    # a promoter's notification address from the body.
+    uniprovincial=[
+        ("Principado de Asturias","Asturias","Asturias"),
+        ("Gobierno de Cantabria","Cantabria","Cantabria"),
+        ("Comunidad de Madrid","Madrid","Madrid"),
+        ("Región de Murcia","Murcia","Murcia"),
+        ("Comunidad Foral de Navarra","Navarra","Navarra"),
+        ("Gobierno de La Rioja","La Rioja","La Rioja"),
+        ("Illes Balears","Illes Balears","Illes Balears"),
+        ("Islas Baleares","Illes Balears","Illes Balears"),
+        ("Ciudad de Ceuta","Ceuta","Ceuta"),
+        ("Ciudad de Melilla","Melilla","Melilla"),
+    ]
+    low=value.casefold()
+    for marker,province,ccaa in uniprovincial:
+        if marker.casefold() in low:
+            return province,ccaa
+    return None,None
