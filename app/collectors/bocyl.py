@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import re
 from datetime import date
 from urllib.parse import urlparse
@@ -49,7 +50,8 @@ class BOCYLCollector:
                 return m.group(1).upper()
         title=str(row.get("titulo") or "")
         edition=str(row.get("no_edicion") or "")
-        return f"BOCYL-{row.get('fecha_publicacion','')}-{edition}-{abs(hash(title))}"
+        digest=hashlib.sha1((str(row.get("fecha_publicacion") or "")+"|"+edition+"|"+title).encode("utf-8")).hexdigest()[:16]
+        return f"BOCYL-{digest}"
 
     def _day_rows(self,day:date):
         where=f"fecha_publicacion=date'{day.isoformat()}'"
