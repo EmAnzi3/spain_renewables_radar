@@ -44,6 +44,11 @@ jobs:
                           print("PATHS")
                           print("\n".join(sorted(obj.get("paths",{}).keys())))
                           print("SEARCH GET",json.dumps(obj.get("paths",{}).get("/api/v0/boja/search",{}).get("get",{}),ensure_ascii=False)[:15000])
+                          for pname in ("/api/v0/boja/get/calendar","/api/v0/boja/get/bulletin","/api/v0/boja/get/search_pagination","/api/v0/boja/all"):
+                              print("PATH",pname,json.dumps(obj.get("paths",{}).get(pname,{}).get("get",{}),ensure_ascii=False)[:12000])
+                          comps=obj.get("components",{}).get("schemas",{})
+                          for cname in ("_Enum_Title_Sec","_Enum_Organisation","_Enum_Tipo_Disposition","_Enum_Subtitle","_Enum_Version","_Enum_fields","_Enum_Mode"):
+                              print("SCHEMA",cname,json.dumps(comps.get(cname,{}),ensure_ascii=False)[:8000])
                       elif name=="BOA_CKAN":
                           result=obj.get("result",{})
                           print("TITLE",result.get("title"))
