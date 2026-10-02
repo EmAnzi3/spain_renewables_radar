@@ -6,8 +6,12 @@ def classify_event(text: str) -> str:
         return "DENIED"
     if any(x in t for x in ("desistimiento","se tiene por desist","renuncia")):
         return "WITHDRAWN"
-    if any(x in t for x in ("levantamiento de actas previas","actas previas a la ocupación","actas previas a la ocupacion","urgente ocupación","urgente ocupacion")):
+    if any(x in t for x in ("levantamiento de actas previas","actas previas a la ocupación","actas previas a la ocupacion")):
         return "EXPROPRIATION"
+    # A public-information notice can mention DIA/AAP/AAC/DUP as the object
+    # of the request. It is not the grant of those milestones.
+    if "información pública" in t or "informacion publica" in t:
+        return "PUBLIC_INFO"
     if ("declaración" in t or "declaracion" in t) and "impacto ambiental" in t:
         return "DIA"
     if "autorización administrativa de construcción" in t or "autorizacion administrativa de construccion" in t:
@@ -17,10 +21,8 @@ def classify_event(text: str) -> str:
         if any(x in t for x in ("otorga","concede","autoriza")):
             return "PRIOR_AUTH"
     if "utilidad pública" in t or "utilidad publica" in t:
-        if any(x in t for x in ("declara","otorga","concede")):
+        if any(x in t for x in ("declara","otorga","concede")) and "solicitud" not in t:
             return "PUBLIC_UTILITY"
-    if "información pública" in t or "informacion publica" in t:
-        return "PUBLIC_INFO"
     return "OTHER"
 
 def commercial_stage(event_type: str) -> str:
