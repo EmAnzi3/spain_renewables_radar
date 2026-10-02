@@ -6,7 +6,7 @@ def classify_event(text: str) -> str:
         return "DENIED"
     if any(x in t for x in ("desistimiento","se tiene por desist","renuncia")):
         return "WITHDRAWN"
-    if any(x in t for x in ("levantamiento de actas previas","actas previas a la ocupación","actas previas a la ocupacion")):
+    if any(x in t for x in ("levantamiento de actas previas","actas previas a la ocupación","actas previas a la ocupacion","actas de pago","levantamiento de actas de pago")):
         return "EXPROPRIATION"
     # A public-information notice can mention DIA/AAP/AAC/DUP as the object
     # of the request. It is not the grant of those milestones.
