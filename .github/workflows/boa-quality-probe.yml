@@ -1,0 +1,45 @@
+name: boa-quality-probe
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/boa-quality-probe.yml"
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - name: Print BOA renewable candidates
+        run: |
+          python - <<'PY'
+          import html, json, re, requests
+          from datetime import date, timedelta
+
+          api="https://www.boa.aragon.es/cgi-bin/EBOA/BRSCGI"
+          relevant=re.compile(r"fotovolta|parque\\s+e[oó]lico|instalaci[oó]n\\s+e[oó]lica|m[oó]dulo\\s+e[oó]lico|almacenamiento|bater[ií]a|hibridaci[oó]n|aerogenerador|repotenciaci[oó]n",re.I)
+
+          start=date(2026,9,30)
+          end=date(2026,10,2)
+          d=start
+          while d<=end:
+              ds=d.strftime("%Y%m%d")
+              params={"CMD":"VERLST","OUTPUTMODE":"JSON","BASE":"BOLE","DOCS":"1-500","SEC":"OPENDATABOAJSON","SORT":"-PUBL","SEPARADOR":"","@PUBL-GE":ds,"@PUBL-LE":ds}
+              r=requests.get(api,params=params,timeout=30)
+              r.raise_for_status()
+              r.encoding="iso-8859-1"
+              rows=json.loads(r.text)
+              for row in rows:
+                  title=html.unescape(str(row.get("Titulo") or ""))
+                  body=html.unescape(str(row.get("Texto") or ""))
+                  if relevant.search(title+"\n"+body):
+                      clean=re.sub(r"\\s+"," ",body).strip()
+                      print("\n===",d,row.get("DOCN"),"===")
+                      print("TITLE:",title)
+                      print("TEXT:",clean[:1200])
+              d+=timedelta(days=1)
+          PY
