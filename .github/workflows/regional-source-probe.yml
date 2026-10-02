@@ -1,0 +1,53 @@
+name: regional-source-probe
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/regional-source-probe.yml"
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests beautifulsoup4
+      - name: Inspect DOCM and DOE official search interfaces
+        run: |
+          python - <<'PY'
+          import requests, urllib.parse
+          from bs4 import BeautifulSoup
+
+          s=requests.Session()
+          s.headers["User-Agent"]="SpainRenewablesRadar/0.1"
+
+          pages={
+            "DOCM":"https://docm.jccm.es/docm/busquedaAvanzada.do",
+            "DOE":"https://doe.juntaex.es/busquedas/bus_avanzada.php",
+          }
+
+          for name,url in pages.items():
+              print("\n===== "+name+" =====")
+              try:
+                  r=s.get(url,timeout=45)
+                  print("STATUS",r.status_code,r.url,r.headers.get("content-type"))
+                  r.raise_for_status()
+                  soup=BeautifulSoup(r.text,"html.parser")
+                  for i,form in enumerate(soup.find_all("form")):
+                      print("FORM",i,"ACTION",urllib.parse.urljoin(url,form.get("action") or ""),"METHOD",form.get("method"))
+                      for el in form.find_all(["input","select","textarea","button"]):
+                          print("FIELD",el.name,"name=",el.get("name"),"value=",el.get("value"),"type=",el.get("type"))
+                          if el.name=="select":
+                              opts=[(o.get("value")," ".join(o.stripped_strings)) for o in el.find_all("option")[:12]]
+                              print("OPTIONS",opts)
+                  print("LINKS")
+                  for a in soup.find_all("a",href=True):
+                      href=urllib.parse.urljoin(url,a["href"])
+                      label=" ".join(a.stripped_strings)
+                      if any(k in (href+" "+label).lower() for k in ("xml","html","busca","diario","sumario","fecha","calend")):
+                          print("LINK",label[:120],"|",href)
+              except Exception as exc:
+                  print("ERROR",repr(exc))
+          PY
