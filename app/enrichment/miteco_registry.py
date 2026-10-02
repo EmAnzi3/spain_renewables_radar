@@ -100,20 +100,42 @@ def save_registry_snapshot(conn,snapshot_date:str,source_url:str,records:list[di
     return len(records)
 
 def exact_project_matches(conn,snapshot_date:str)->list[dict]:
-    rows=conn.execute(
-        """SELECT
-             p.project_key,p.project_name,p.ccaa,p.technology,p.power_mw,p.commercial_stage,
-             m.autoid,m.installation_id,m.regime,m.installation_name,m.ccaa AS registry_ccaa
-           FROM projects p
-           JOIN miteco_production_registry m
-             ON lower(trim(p.project_name))=m.normalized_name
-            AND (? IS NULL OR m.snapshot_date=?)
-            AND (p.ccaa IS NULL OR m.ccaa IS NULL OR p.ccaa=m.ccaa)
-           WHERE p.project_name IS NOT NULL
-           ORDER BY p.project_name""",
-        (snapshot_date,snapshot_date),
+    registry=conn.execute(
+        """SELECT autoid,installation_id,regime,installation_name,normalized_name,ccaa
+           FROM miteco_production_registry
+           WHERE snapshot_date=?""",
+        (snapshot_date,),
     ).fetchall()
-    return [dict(r) for r in rows]
+    by_name={}
+    for row in registry:
+        by_name.setdefault(row["normalized_name"],[]).append(row)
+
+    matches=[]
+    projects=conn.execute(
+        """SELECT project_key,project_name,ccaa,technology,power_mw,commercial_stage
+           FROM projects
+           WHERE project_name IS NOT NULL
+           ORDER BY project_name"""
+    ).fetchall()
+    for p in projects:
+        key=normalize_name(p["project_name"])
+        for m in by_name.get(key,[]):
+            if p["ccaa"] and m["ccaa"] and p["ccaa"]!=m["ccaa"]:
+                continue
+            matches.append({
+                "project_key":p["project_key"],
+                "project_name":p["project_name"],
+                "ccaa":p["ccaa"],
+                "technology":p["technology"],
+                "power_mw":p["power_mw"],
+                "commercial_stage":p["commercial_stage"],
+                "autoid":m["autoid"],
+                "installation_id":m["installation_id"],
+                "regime":m["regime"],
+                "installation_name":m["installation_name"],
+                "registry_ccaa":m["ccaa"],
+            })
+    return matches
 
 def write_registry_exports(records:list[dict],snapshot_date:str,source_url:str,matches:list[dict]|None=None,out_dir="reports"):
     out=Path(out_dir)
