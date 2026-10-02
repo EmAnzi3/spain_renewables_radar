@@ -4,11 +4,17 @@ import argparse
 import os
 from datetime import date,timedelta
 
-from app.collectors.boe import BOECollector
+from app.collectors import BOECollector,BOCYLCollector,BOJACollector
 from app.dashboard import write_dashboard
 from app.db import connect
-from app.reporting import export_dashboard,write_changes
+from app.reporting import export_dashboard,write_changes,write_coverage
 from app.store import save_event
+
+COLLECTOR_CLASSES={
+    "BOE":BOECollector,
+    "BOCYL":BOCYLCollector,
+    "BOJA":BOJACollector,
+}
 
 def daterange(start:date,end:date):
     d=start
@@ -21,6 +27,7 @@ def parse_args():
     p.add_argument("--days",type=int,default=7,help="giorni inclusi fino a oggi")
     p.add_argument("--since",help="YYYY-MM-DD")
     p.add_argument("--until",help="YYYY-MM-DD")
+    p.add_argument("--sources",default="BOE,BOCYL,BOJA",help="sorgenti separate da virgola")
     p.add_argument("--db",default=os.getenv("RADAR_DB","data/spain_renewables.sqlite"))
     return p.parse_args()
 
@@ -30,53 +37,77 @@ def main():
     end=date.fromisoformat(args.until) if args.until else today
     start=date.fromisoformat(args.since) if args.since else end-timedelta(days=max(args.days-1,0))
 
-    conn=connect(args.db)
-    collector=BOECollector(
-        timeout=int(os.getenv("HTTP_TIMEOUT","30")),
-        user_agent=os.getenv("USER_AGENT","SpainRenewablesRadar/0.1"),
-    )
+    wanted=[x.strip().upper() for x in args.sources.split(",") if x.strip()]
+    unknown=[x for x in wanted if x not in COLLECTOR_CLASSES]
+    if unknown:
+        raise SystemExit(f"Sorgenti non implementate: {', '.join(unknown)}")
 
+    timeout=int(os.getenv("HTTP_TIMEOUT","30"))
+    user_agent=os.getenv("USER_AGENT","SpainRenewablesRadar/0.1")
+    collectors=[COLLECTOR_CLASSES[code](timeout=timeout,user_agent=user_agent) for code in wanted]
+
+    conn=connect(args.db)
     new_events=[]
     new_projects=0
     scanned=0
     errors=0
+    coverage=[]
 
-    for day in daterange(start,end):
-        print(f"[BOE] {day.isoformat()}")
-        try:
-            events=collector.collect_day(day)
-        except Exception as exc:
-            errors+=1
-            print(f"  WARN: {exc}")
-            continue
+    for collector in collectors:
+        for day in daterange(start,end):
+            print(f"[{collector.code}] {day.isoformat()}")
+            row={
+                "source_code":collector.code,
+                "date":day.isoformat(),
+                "status":"OK",
+                "candidates":0,
+                "inserted":0,
+                "new_projects":0,
+                "error":"",
+            }
+            try:
+                events=collector.collect_day(day)
+                row["candidates"]=len(events)
+            except Exception as exc:
+                errors+=1
+                row["status"]="ERROR"
+                row["error"]=str(exc)[:500]
+                coverage.append(row)
+                print(f"  WARN: {exc}")
+                continue
 
-        scanned+=len(events)
-        for event in events:
-            inserted,new_project=save_event(conn,event)
-            if inserted:
-                new_events.append(event)
-                new_projects+=int(new_project)
+            scanned+=len(events)
+            for event in events:
+                inserted,new_project=save_event(conn,event)
+                if inserted:
+                    new_events.append(event)
+                    row["inserted"]+=1
+                    row["new_projects"]+=int(new_project)
+                    new_projects+=int(new_project)
+            coverage.append(row)
 
     if new_events:
         print("Nuovi eventi rilevati:")
         for e in new_events:
             mw=f"{e.power_mw:g} MW" if e.power_mw is not None else "MW n.d."
             print(
-                f"  + {e.publication_date} | {e.technology or '?'} | {mw} | "
+                f"  + {e.source_code} | {e.publication_date} | {e.technology or '?'} | {mw} | "
                 f"{e.project_name or 'nome n.d.'} | {e.province or 'provincia n.d.'} | "
                 f"{e.commercial_stage} | {e.external_id}"
             )
 
     write_changes(new_events)
+    write_coverage(coverage)
     rows=export_dashboard(conn)
     write_dashboard()
 
     print(f"Eventi rilevanti letti: {scanned}")
     print(
         f"Nuovi eventi: {len(new_events)} | nuovi progetti: {new_projects} | "
-        f"progetti totali: {len(rows)} | giorni errore: {errors}"
+        f"progetti totali: {len(rows)} | source/day errori: {errors}"
     )
     print("Report: reports/change_reports/changes_latest.html")
+    print("Coverage: reports/coverage_latest.html")
     print("Dashboard: docs/index.html")
 
 if __name__=="__main__":
