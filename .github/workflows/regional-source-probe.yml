@@ -50,4 +50,47 @@ jobs:
                           print("LINK",label[:120],"|",href)
               except Exception as exc:
                   print("ERROR",repr(exc))
+          print("\n===== DAILY PROBES =====")
+
+          # DOCM daily summary shortcut
+          try:
+              url="https://docm.jccm.es/docm/cambiarBoletin.do?fecha=20261002"
+              r=s.get(url,timeout=45)
+              print("\nDOCM_DAILY",r.status_code,r.url,r.headers.get("content-type"))
+              print(r.text[:25000])
+          except Exception as exc:
+              print("DOCM_DAILY_ERROR",repr(exc))
+
+          # DOCM advanced POST, date-only
+          try:
+              url="https://docm.jccm.es/docm/tratarAccionBusqueda.do"
+              data={
+                  "paginaResultados":"1","tipoBusqueda":"avanzada","campoOrdenacion":"ordenFechaPublicacion",
+                  "orden":"0","idConsejeria":"","idOrganoEmisor":"","historico":"false","rango":"",
+                  "numeroRegistroInterno":"","anyoNumeroRegistroInterno":"","numeroDocumentoIni":"",
+                  "tbnumeroDocumentoIni":"","fechaDocumentoIni":"","fechaDocumentoFin":"",
+                  "fechapublicacionIni":"02/10/2026","fechapublicacionFin":"02/10/2026",
+                  "numeroBoletinIni":"","anyoBoletinIni":"","soloSumario":"true","texto":"",
+                  "idDescriptor":"","accion":"Buscar"
+              }
+              r=s.post(url,data=data,timeout=45)
+              print("\nDOCM_POST",r.status_code,r.url,r.headers.get("content-type"))
+              print(r.text[:25000])
+          except Exception as exc:
+              print("DOCM_POST_ERROR",repr(exc))
+
+          # DOE date-only and keyword POSTs
+          for keyword in ("","fotovoltaica","eólico"):
+              try:
+                  url="https://doe.juntaex.es/busquedas/disposiciones.php"
+                  data={
+                      "fecha1":"2026-10-02","fecha2":"2026-10-02","numero":"","anio":"",
+                      "tipo":" ","orgabus":"","rango":"00","descriptor":"00","yuo":"0",
+                      "textobus":keyword,"buscardesc":""
+                  }
+                  r=s.post(url,data=data,timeout=45)
+                  print("\nDOE_POST",repr(keyword),r.status_code,r.url,r.headers.get("content-type"))
+                  print(r.text[:25000])
+              except Exception as exc:
+                  print("DOE_POST_ERROR",repr(keyword),repr(exc))
           PY
