@@ -1,0 +1,31 @@
+name: boa-historical-smoke
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/boa-historical-smoke.yml"
+
+jobs:
+  historical:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Validate BOA historical day
+        run: |
+          python - <<'PY'
+          from datetime import date
+          from app.collectors.boa import BOACollector
+
+          events=BOACollector().collect_day(date(2026,2,27))
+          print("EVENTS",len(events))
+          for e in events:
+              print(e.external_id,"|",e.technology,"|",e.power_mw,"|",e.project_name,"|",e.province,"|",e.event_type,"|",e.expediente)
+          names={e.project_name for e in events}
+          if "PE Elin" not in names:
+              raise SystemExit("Expected PE Elin not found in historical BOA validation")
+          PY
