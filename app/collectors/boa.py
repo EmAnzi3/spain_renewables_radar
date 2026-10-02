@@ -12,12 +12,19 @@ from app.parser import parse_event
 API = "https://www.boa.aragon.es/cgi-bin/EBOA/BRSCGI"
 RELEVANT = re.compile(
     r"fotovolta|parque\s+e[oó]lico|instalaci[oó]n\s+e[oó]lica|m[oó]dulo\s+e[oó]lico|"
-    r"almacenamiento|bater[ií]a|hibridaci[oó]n|aerogenerador|repotenciaci[oó]n",
+    r"m[oó]dulo\s+de\s+almacenamiento|sistema\s+de\s+almacenamiento|"
+    r"almacenamiento\s+(?:de\s+energ[ií]a|energ[eé]tico|el[eé]ctric|electroqu[ií]mic)|"
+    r"bater[ií]a|hibridaci[oó]n|aerogenerador|repotenciaci[oó]n",
+    re.I,
+)
+STRONG_TITLE = re.compile(
+    r"instalaci[oó]n\s+de\s+producci[oó]n\s+de\s+energ[ií]a\s+el[eé]ctrica|"
+    r"levantamiento\s+de\s+actas|actas\s+de\s+pago|expropiaci[oó]n",
     re.I,
 )
 EXCLUDE = re.compile(
     r"contrataci[oó]n|licitaci[oó]n|adjudicaci[oó]n|"
-    r"instalaci[oó]n\s+de\s+paneles\s+fotovoltaicos\s+en\s+(?:edificios|cubiertas)",
+    r"autoconsumo|instalaci[oó]n\s+de\s+paneles\s+fotovoltaicos\s+en\s+(?:edificios|cubiertas)",
     re.I,
 )
 URL_RE = re.compile(r"https?://[^\s]+", re.I)
@@ -83,7 +90,11 @@ class BOACollector:
         detail = cls._clean(row.get("Texto"))
         combined = title + "\n" + detail
 
-        if not RELEVANT.search(combined) or EXCLUDE.search(title):
+        if EXCLUDE.search(title):
+            return None
+        if not RELEVANT.search(combined):
+            return None
+        if not RELEVANT.search(title) and not STRONG_TITLE.search(title):
             return None
 
         external_id = cls._clean(row.get("DOCN")) or (
