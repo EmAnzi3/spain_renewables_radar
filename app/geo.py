@@ -31,6 +31,7 @@ def find_province(text: str) -> tuple[str | None, str | None]:
             rf"servicio\s+provincial\s+de\s+{esc}\b",
             rf"provincia\s+de\s+{esc}\b",
             rf"provincia\s*[:\-]\s*{esc}\b",
+            rf"(?:t[eé]rmino\s+municipal|municipio)\s+de\s+{esc}\b",
             rf"\(\s*{esc}\s*\)",
         ]
         for pattern in strong:

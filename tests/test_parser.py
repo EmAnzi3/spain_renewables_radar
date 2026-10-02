@@ -16,10 +16,25 @@ class ParserTests(unittest.TestCase):
         payload={"data":{"sumario":{"diario":[{"seccion":[{"departamento":[{"item":[
             {"identificador":"BOE-B-2026-31656","titulo":"Instalación Fotovoltaica «Eclipse Solar» de 99,935 MW","url_html":"https://www.boe.es/diario_boe/txt.php?id=BOE-B-2026-31656"},
             {"identificador":"BOE-B-2026-31827","titulo":"Anuncio de formalización de contratos. Objeto: Instalación de paneles fotovoltaicos","url_html":"x"},
+            {"identificador":"BOE-B-2026-31828","titulo":"Información pública de instalación fotovoltaica de autoconsumo denominada PS DEMO de 1 MW","url_html":"x"},
             {"identificador":"BOE-A-2026-99999","titulo":"Universidad pública","url_html":"x"}
         ]}]}]}]}}}
         got=BOECollector.parse_api_json(payload)
         self.assertEqual([x["external_id"] for x in got],["BOE-B-2026-31656"])
+
+    def test_four_decimal_mw_and_authorization(self):
+        title="Resolución por la que se otorga autorización administrativa y de construcción para la instalación fotovoltaica PSF Puerto Real, de 133,5708 MW, ubicada en la provincia de Cádiz."
+        e=parse_event(source_code="BOE",external_id="BOE-A-X",publication_date="2026-09-14",title=title,url="x",raw_text=title)
+        self.assertAlmostEqual(e.power_mw,133.5708)
+        self.assertEqual(e.project_name,"PSF Puerto Real")
+        self.assertEqual(e.province,"Cádiz")
+
+    def test_regional_source_scope_rejects_foreign_province(self):
+        title='Resolución sobre la instalación fotovoltaica "Demo", de 20 MW.'
+        raw="Promotor con domicilio social en la provincia de Madrid."
+        e=parse_event(source_code="DOE",external_id="DOE-X",publication_date="2026-10-01",title=title,url="x",raw_text=raw)
+        self.assertIsNone(e.province)
+        self.assertEqual(e.ccaa,"Extremadura")
 
     def test_pv_auth(self):
         e=parse_event(

@@ -25,6 +25,17 @@ class DOECollectorTests(unittest.TestCase):
         self.assertEqual(e.technology,"PV")
         self.assertEqual(e.project_name,"Atalaya")
         self.assertEqual(e.expediente,"IA26/0263")
+        self.assertEqual(e.province,"Badajoz")
+        self.assertEqual(e.ccaa,"Extremadura")
+        self.assertEqual(e.event_type,"MODIFICATION")
+        self.assertEqual(e.commercial_stage,"PERMITTING")
+
+    def test_full_detail_does_not_turn_modification_into_blocked(self):
+        title='Resolución sobre modificación del proyecto de instalación solar fotovoltaica "Atalaya", en el término municipal de Badajoz. Expte.: IA26/0263.'
+        raw=title+"\nAntecedente histórico: se deniega otra solicitud no relacionada."
+        e=parse_event(source_code="DOE",external_id="DOE-X2",publication_date="2026-10-01",title=title,url="x",raw_text=raw)
+        self.assertEqual(e.event_type,"MODIFICATION")
+        self.assertEqual(e.commercial_stage,"PERMITTING")
 
     def test_cabo_power_and_location(self):
         html=Path("tests/fixtures/doe_summary_sample.html").read_text(encoding="utf-8")

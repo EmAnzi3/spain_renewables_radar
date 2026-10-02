@@ -8,7 +8,7 @@ from dataclasses import dataclass, asdict
 from app.geo import find_province
 from app.lifecycle import classify_event, commercial_stage
 
-MW_RE=re.compile(r"(?<!\d)(\d{1,4}(?:[\.,]\d{1,3})?)\s*(?:MWp|MWac|MW)\b",re.I)
+MW_RE=re.compile(r"(?<!\d)(\d{1,4}(?:[\.,]\d{1,6})?)\s*(?:MWp|MWac|MW)\b",re.I)
 BOE_ID_RE=re.compile(r"BOE-[AB]-\d{4}-\d+",re.I)
 QUOTED_RE=re.compile(r"[«\"]([^»\"]{3,120})[»\"]")
 EXPEDIENTE_RE=re.compile(
@@ -32,10 +32,19 @@ PROJECT_PATTERNS=[
     re.compile(r"m[oó]dulo\s+de\s+almacenamiento\s+de\s+la\s+instalaci[oó]n\s+h[ií]brida\s+[«\"]?([^,»\"\.]{3,140})",re.I),
     re.compile(r"(?:m[oó]dulo|sistema)\s+de\s+almacenamiento\s+(?:denominado\s+)?[«\"]?([^,»\"\.]{3,140})",re.I),
 ]
+
+REGIONAL_SOURCE_SCOPE={
+    "BOA":("Aragón",{"Huesca","Teruel","Zaragoza"}),
+    "BOCYL":("Castilla y León",{"Ávila","Burgos","León","Palencia","Salamanca","Segovia","Soria","Valladolid","Zamora"}),
+    "BOJA":("Andalucía",{"Almería","Cádiz","Córdoba","Granada","Huelva","Jaén","Málaga","Sevilla"}),
+    "DOCM":("Castilla-La Mancha",{"Albacete","Ciudad Real","Cuenca","Guadalajara","Toledo"}),
+    "DOE":("Extremadura",{"Badajoz","Cáceres"}),
+}
+
 PROMOTER_PATTERNS=[
     re.compile(
         r"cuya\s+promotor[ae]\s+es\s+(?:la\s+)?(?:mercantil\s+)?"
-        r"[«\"]?(.{2,140}?)[»\"]?(?=,\s+(?:e\s+)?infraestructura|;|\n|$)",
+        r"[«\"]?(.{2,140}?)[»\"]?(?=,\s+(?:e\s+)?infraestructura|\.\s*(?:Expte|Expediente)|;|\n|$)",
         re.I,
     ),
     re.compile(r"empresa\s+beneficiaria\s*:\s*(.{2,140}?)(?=\s+(?:Direcci[oó]n|Domicilio|NIF|CIF)\s*:|;|\n|$)",re.I),
@@ -161,9 +170,20 @@ def parse_event(*,source_code,external_id,publication_date,title,url,raw_text)->
     if not province:
         province,ccaa=find_province(raw_text)
 
+    scope=REGIONAL_SOURCE_SCOPE.get((source_code or "").upper())
+    if scope:
+        scope_ccaa,allowed_provinces=scope
+        if province not in allowed_provinces:
+            province=None
+        ccaa=scope_ccaa
+
     event_type=classify_event(title)
     if event_type=="OTHER":
-        event_type=classify_event(raw_text)
+        raw_event=classify_event((raw_text or "")[:4000])
+        # Terminal states must be explicit in the disposition title. Full
+        # documents often quote historic denials or withdrawals.
+        if raw_event not in {"DENIED","WITHDRAWN"}:
+            event_type=raw_event
     stage=commercial_stage(event_type)
 
     return ParsedEvent(
