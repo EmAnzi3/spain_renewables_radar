@@ -6,6 +6,7 @@ from urllib.parse import urljoin
 
 import requests
 from bs4 import BeautifulSoup
+from xml.etree import ElementTree as ET
 
 from app.parser import BOE_ID_RE, parse_event
 
@@ -107,7 +108,12 @@ class BOECollector:
         if item.get("url_xml"):
             xml=self._get(item["url_xml"])
             if xml:
-                return BeautifulSoup(xml,"xml").get_text("\n",strip=True), item.get("url_html") or item["url_xml"]
+                try:
+                    root=ET.fromstring(xml)
+                    detail_text="\n".join(t.strip() for t in root.itertext() if t and t.strip())
+                except ET.ParseError:
+                    detail_text=BeautifulSoup(xml,"html.parser").get_text("\n",strip=True)
+                return detail_text, item.get("url_html") or item["url_xml"]
         if item.get("url_html"):
             html=self._get(item["url_html"])
             if html:
