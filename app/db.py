@@ -45,6 +45,36 @@ CREATE INDEX IF NOT EXISTS idx_events_date ON events(publication_date);
 CREATE INDEX IF NOT EXISTS idx_projects_geo ON projects(ccaa,province);
 CREATE INDEX IF NOT EXISTS idx_projects_stage ON projects(commercial_stage,technology);
 CREATE INDEX IF NOT EXISTS idx_projects_expediente ON projects(expediente);
+
+CREATE TABLE IF NOT EXISTS ree_node_capacity (
+  snapshot_date TEXT NOT NULL,
+  node_name TEXT NOT NULL,
+  substation_code TEXT,
+  ccaa TEXT,
+  positions_rdt_existing REAL,
+  positions_rdt_planned REAL,
+  positions_rdd_existing REAL,
+  positions_rdd_planned REAL,
+  granted_gen_mw REAL,
+  granted_storage_mw REAL,
+  pending_gen_mw REAL,
+  pending_storage_mw REAL,
+  margin_gen_mges_mw REAL,
+  margin_gen_mpe_mw REAL,
+  margin_storage_mges_mw REAL,
+  margin_storage_mpe_mw REAL,
+  available_gen_rdt_mges_mw REAL,
+  available_gen_rdt_mpe_mw REAL,
+  available_gen_rdd_mges_mw REAL,
+  available_gen_rdd_mpe_mw REAL,
+  available_storage_rdt_mges_mw REAL,
+  available_storage_rdt_mpe_mw REAL,
+  available_storage_rdd_mges_mw REAL,
+  available_storage_rdd_mpe_mw REAL,
+  source_url TEXT NOT NULL,
+  PRIMARY KEY(snapshot_date,node_name)
+);
+CREATE INDEX IF NOT EXISTS idx_ree_node_capacity_ccaa ON ree_node_capacity(snapshot_date,ccaa);
 """
 
 def _ensure_column(conn,table,name,definition):
