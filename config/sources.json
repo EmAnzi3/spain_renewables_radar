@@ -60,7 +60,7 @@
     "name": "Diario Oficial de Castilla-La Mancha",
     "kind": "bulletin",
     "scope": "Castilla-La Mancha",
-    "implemented": false,
+    "implemented": true,
     "url": "https://docm.jccm.es/"
   },
   {
