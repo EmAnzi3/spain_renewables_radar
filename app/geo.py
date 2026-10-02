@@ -18,11 +18,15 @@ PROVINCE_TO_CCAA = {
     "Las Palmas":"Canarias","Santa Cruz de Tenerife":"Canarias",
     "Ceuta":"Ceuta","Melilla":"Melilla",
 }
-PROVINCES = sorted(PROVINCE_TO_CCAA, key=len, reverse=True)
 
 def find_province(text: str) -> tuple[str | None, str | None]:
     low=(text or "").casefold()
-    for province in PROVINCES:
-        if province.casefold() in low:
-            return province, PROVINCE_TO_CCAA[province]
-    return None, None
+    found=[]
+    for province,ccaa in PROVINCE_TO_CCAA.items():
+        pos=low.find(province.casefold())
+        if pos>=0:
+            found.append((pos,-len(province),province,ccaa))
+    if not found:
+        return None,None
+    _,_,province,ccaa=min(found)
+    return province,ccaa
