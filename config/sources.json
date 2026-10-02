@@ -148,7 +148,7 @@
     "name": "Red Eléctrica — acceso y conexión",
     "kind": "enrichment",
     "scope": "national",
-    "implemented": false,
+    "implemented": true,
     "url": "https://www.ree.es/es/operacion/desarrollo-sistema/acceso-conexion-red"
   },
   {
