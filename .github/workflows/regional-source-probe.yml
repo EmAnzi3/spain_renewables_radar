@@ -79,6 +79,20 @@ jobs:
           except Exception as exc:
               print("DOCM_POST_ERROR",repr(exc))
 
+          # DOE direct daily summary: this is cleaner than the advanced search.
+          try:
+              url="https://doe.juntaex.es/ultimosdoe/mostrardoe.php?fecha=20261002&t=o"
+              r=s.get(url,timeout=45)
+              print("\nDOE_DAILY_ANCHORS",r.status_code,r.url,r.headers.get("content-type"))
+              soup=BeautifulSoup(r.text,"html.parser")
+              for a in soup.find_all("a",href=True):
+                  href=urllib.parse.urljoin(url,a["href"])
+                  label=" ".join(a.stripped_strings)
+                  if label or any(k in href.lower() for k in ("html.php","pdf","xml")):
+                      print("A",repr(label[:350]),"|",href)
+          except Exception as exc:
+              print("DOE_DAILY_ANCHORS_ERROR",repr(exc))
+
           # DOE date-only and keyword POSTs
           for keyword in ("","fotovoltaica","eólico"):
               try:
