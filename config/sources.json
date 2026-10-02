@@ -1,22 +1,162 @@
 [
-  {"code":"BOE","name":"Boletín Oficial del Estado","kind":"bulletin","scope":"national","implemented":true,"url":"https://www.boe.es/boe/dias/"},
-  {"code":"BOJA","name":"Boletín Oficial de la Junta de Andalucía","kind":"bulletin","scope":"Andalucía","implemented":false,"url":"https://www.juntadeandalucia.es/eboja.html"},
-  {"code":"BOA","name":"Boletín Oficial de Aragón","kind":"bulletin","scope":"Aragón","implemented":false,"url":"https://www.boa.aragon.es/"},
-  {"code":"BOPA","name":"Boletín Oficial del Principado de Asturias","kind":"bulletin","scope":"Asturias","implemented":false,"url":"https://sede.asturias.es/bopa"},
-  {"code":"BOIB","name":"Butlletí Oficial de les Illes Balears","kind":"bulletin","scope":"Illes Balears","implemented":false,"url":"https://www.caib.es/eboibfront/"},
-  {"code":"BOC-CAN","name":"Boletín Oficial de Canarias","kind":"bulletin","scope":"Canarias","implemented":false,"url":"https://www.gobiernodecanarias.org/boc/"},
-  {"code":"BOCANT","name":"Boletín Oficial de Cantabria","kind":"bulletin","scope":"Cantabria","implemented":false,"url":"https://boc.cantabria.es/"},
-  {"code":"DOCM","name":"Diario Oficial de Castilla-La Mancha","kind":"bulletin","scope":"Castilla-La Mancha","implemented":false,"url":"https://docm.jccm.es/"},
-  {"code":"BOCYL","name":"Boletín Oficial de Castilla y León","kind":"bulletin","scope":"Castilla y León","implemented":false,"url":"https://bocyl.jcyl.es/"},
-  {"code":"DOGC","name":"Diari Oficial de la Generalitat de Catalunya","kind":"bulletin","scope":"Catalunya","implemented":false,"url":"https://dogc.gencat.cat/"},
-  {"code":"DOGV","name":"Diari Oficial de la Generalitat Valenciana","kind":"bulletin","scope":"Comunitat Valenciana","implemented":false,"url":"https://dogv.gva.es/"},
-  {"code":"DOE","name":"Diario Oficial de Extremadura","kind":"bulletin","scope":"Extremadura","implemented":false,"url":"https://doe.juntaex.es/"},
-  {"code":"DOG","name":"Diario Oficial de Galicia","kind":"bulletin","scope":"Galicia","implemented":false,"url":"https://www.xunta.gal/diario-oficial-galicia"},
-  {"code":"BOCM","name":"Boletín Oficial de la Comunidad de Madrid","kind":"bulletin","scope":"Madrid","implemented":false,"url":"https://www.bocm.es/"},
-  {"code":"BORM","name":"Boletín Oficial de la Región de Murcia","kind":"bulletin","scope":"Murcia","implemented":false,"url":"https://www.borm.es/"},
-  {"code":"BON","name":"Boletín Oficial de Navarra","kind":"bulletin","scope":"Navarra","implemented":false,"url":"https://bon.navarra.es/"},
-  {"code":"BOPV","name":"Boletín Oficial del País Vasco","kind":"bulletin","scope":"País Vasco","implemented":false,"url":"https://www.euskadi.eus/bopv2/datos/Ultimo.shtml"},
-  {"code":"BOR","name":"Boletín Oficial de La Rioja","kind":"bulletin","scope":"La Rioja","implemented":false,"url":"https://web.larioja.org/bor-portada"},
-  {"code":"REE_ACCESS","name":"Red Eléctrica — acceso y conexión","kind":"enrichment","scope":"national","implemented":false,"url":"https://www.ree.es/es/operacion/desarrollo-sistema/acceso-conexion-red"},
-  {"code":"MITECO_RAIPEE","name":"Registro administrativo de instalaciones de producción","kind":"enrichment","scope":"national","implemented":false,"url":"https://www.miteco.gob.es/es/energia/energia-electrica/electricidad/energias-renovables/registro-administrativo.html"}
+  {
+    "code": "BOE",
+    "name": "Boletín Oficial del Estado",
+    "kind": "bulletin",
+    "scope": "national",
+    "implemented": true,
+    "url": "https://www.boe.es/boe/dias/"
+  },
+  {
+    "code": "BOJA",
+    "name": "Boletín Oficial de la Junta de Andalucía",
+    "kind": "bulletin",
+    "scope": "Andalucía",
+    "implemented": true,
+    "url": "https://www.juntadeandalucia.es/eboja.html"
+  },
+  {
+    "code": "BOA",
+    "name": "Boletín Oficial de Aragón",
+    "kind": "bulletin",
+    "scope": "Aragón",
+    "implemented": true,
+    "url": "https://www.boa.aragon.es/"
+  },
+  {
+    "code": "BOPA",
+    "name": "Boletín Oficial del Principado de Asturias",
+    "kind": "bulletin",
+    "scope": "Asturias",
+    "implemented": false,
+    "url": "https://sede.asturias.es/bopa"
+  },
+  {
+    "code": "BOIB",
+    "name": "Butlletí Oficial de les Illes Balears",
+    "kind": "bulletin",
+    "scope": "Illes Balears",
+    "implemented": false,
+    "url": "https://www.caib.es/eboibfront/"
+  },
+  {
+    "code": "BOC-CAN",
+    "name": "Boletín Oficial de Canarias",
+    "kind": "bulletin",
+    "scope": "Canarias",
+    "implemented": false,
+    "url": "https://www.gobiernodecanarias.org/boc/"
+  },
+  {
+    "code": "BOCANT",
+    "name": "Boletín Oficial de Cantabria",
+    "kind": "bulletin",
+    "scope": "Cantabria",
+    "implemented": false,
+    "url": "https://boc.cantabria.es/"
+  },
+  {
+    "code": "DOCM",
+    "name": "Diario Oficial de Castilla-La Mancha",
+    "kind": "bulletin",
+    "scope": "Castilla-La Mancha",
+    "implemented": false,
+    "url": "https://docm.jccm.es/"
+  },
+  {
+    "code": "BOCYL",
+    "name": "Boletín Oficial de Castilla y León",
+    "kind": "bulletin",
+    "scope": "Castilla y León",
+    "implemented": true,
+    "url": "https://bocyl.jcyl.es/"
+  },
+  {
+    "code": "DOGC",
+    "name": "Diari Oficial de la Generalitat de Catalunya",
+    "kind": "bulletin",
+    "scope": "Catalunya",
+    "implemented": false,
+    "url": "https://dogc.gencat.cat/"
+  },
+  {
+    "code": "DOGV",
+    "name": "Diari Oficial de la Generalitat Valenciana",
+    "kind": "bulletin",
+    "scope": "Comunitat Valenciana",
+    "implemented": false,
+    "url": "https://dogv.gva.es/"
+  },
+  {
+    "code": "DOE",
+    "name": "Diario Oficial de Extremadura",
+    "kind": "bulletin",
+    "scope": "Extremadura",
+    "implemented": false,
+    "url": "https://doe.juntaex.es/"
+  },
+  {
+    "code": "DOG",
+    "name": "Diario Oficial de Galicia",
+    "kind": "bulletin",
+    "scope": "Galicia",
+    "implemented": false,
+    "url": "https://www.xunta.gal/diario-oficial-galicia"
+  },
+  {
+    "code": "BOCM",
+    "name": "Boletín Oficial de la Comunidad de Madrid",
+    "kind": "bulletin",
+    "scope": "Madrid",
+    "implemented": false,
+    "url": "https://www.bocm.es/"
+  },
+  {
+    "code": "BORM",
+    "name": "Boletín Oficial de la Región de Murcia",
+    "kind": "bulletin",
+    "scope": "Murcia",
+    "implemented": false,
+    "url": "https://www.borm.es/"
+  },
+  {
+    "code": "BON",
+    "name": "Boletín Oficial de Navarra",
+    "kind": "bulletin",
+    "scope": "Navarra",
+    "implemented": false,
+    "url": "https://bon.navarra.es/"
+  },
+  {
+    "code": "BOPV",
+    "name": "Boletín Oficial del País Vasco",
+    "kind": "bulletin",
+    "scope": "País Vasco",
+    "implemented": false,
+    "url": "https://www.euskadi.eus/bopv2/datos/Ultimo.shtml"
+  },
+  {
+    "code": "BOR",
+    "name": "Boletín Oficial de La Rioja",
+    "kind": "bulletin",
+    "scope": "La Rioja",
+    "implemented": false,
+    "url": "https://web.larioja.org/bor-portada"
+  },
+  {
+    "code": "REE_ACCESS",
+    "name": "Red Eléctrica — acceso y conexión",
+    "kind": "enrichment",
+    "scope": "national",
+    "implemented": false,
+    "url": "https://www.ree.es/es/operacion/desarrollo-sistema/acceso-conexion-red"
+  },
+  {
+    "code": "MITECO_RAIPEE",
+    "name": "Registro administrativo de instalaciones de producción",
+    "kind": "enrichment",
+    "scope": "national",
+    "implemented": false,
+    "url": "https://www.miteco.gob.es/es/energia/energia-electrica/electricidad/energias-renovables/registro-administrativo.html"
+  }
 ]
