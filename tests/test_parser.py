@@ -182,6 +182,8 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(len(events),3)
         self.assertEqual([e.project_name for e in events],["Elawan Escatrón I","Elawan Escatrón II","Elawan Escatrón III"])
         self.assertEqual([e.external_id for e in events],["007961484#1","007961484#2","007961484#3"])
+        self.assertEqual([e.expediente for e in events],["TE-AT0039/20","TE-AT0040/20","TE-AT0041/20"])
+        self.assertEqual(len({e.project_key for e in events}),3)
         self.assertTrue(all(e.technology=="PV" for e in events))
         self.assertTrue(all(e.commercial_stage=="PRECONSTRUCTION" for e in events))
         self.assertTrue(all(e.province=="Teruel" for e in events))
