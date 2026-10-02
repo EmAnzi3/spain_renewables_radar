@@ -26,6 +26,7 @@ jobs:
           urls={
             "BOCYL_SCHEMA":"https://analisis.datosabiertos.jcyl.es/api/explore/v2.1/catalog/datasets/bocyl",
             "BOCYL_RECORD":"https://analisis.datosabiertos.jcyl.es/api/explore/v2.1/catalog/datasets/bocyl/records?limit=1",
+            "BOCYL_DAY":"https://analisis.datosabiertos.jcyl.es/api/explore/v2.1/catalog/datasets/bocyl/records?limit=5&where=fecha_publicacion%3D%222026-10-02%22",
             "BOJA_OPENAPI":"https://datos.juntadeandalucia.es/api/v0/boja/openapi.json",
             "BOA_CKAN":"https://opendata.aragon.es/ckan/api/3/action/package_show?id=boletin-oficial-aragon-diario",
           }
@@ -38,7 +39,7 @@ jobs:
                       obj=json.loads(body)
                       if name=="BOCYL_SCHEMA":
                           print(json.dumps(obj,ensure_ascii=False)[:12000])
-                      elif name=="BOCYL_RECORD":
+                      elif name in ("BOCYL_RECORD","BOCYL_DAY"):
                           print(json.dumps(obj,ensure_ascii=False)[:8000])
                       elif name=="BOJA_OPENAPI":
                           print("PATHS")
