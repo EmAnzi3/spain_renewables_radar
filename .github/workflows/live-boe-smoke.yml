@@ -12,6 +12,7 @@ on:
       - "app/lifecycle.py"
       - "app/geo.py"
       - "app/run_pipeline.py"
+      - "app/reporting.py"
       - "app/enrichment/*.py"
       - "app/db.py"
 
@@ -36,6 +37,8 @@ jobs:
             reports/change_reports/
             reports/coverage_latest.csv
             reports/coverage_latest.html
+            reports/quality_issues_latest.csv
+            reports/quality_issues_latest.html
             reports/ree_capacity_latest.csv
             reports/miteco_registry_latest.csv
             reports/miteco_exact_matches_latest.csv

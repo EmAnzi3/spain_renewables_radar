@@ -16,7 +16,7 @@ from app.enrichment import (
     exact_project_matches,
     write_registry_exports,
 )
-from app.reporting import export_dashboard,write_changes,write_coverage
+from app.reporting import export_dashboard,write_changes,write_coverage,write_quality_issues
 from app.store import save_event
 
 COLLECTOR_CLASSES={
@@ -176,9 +176,14 @@ def main():
 
     write_changes(new_events)
     write_coverage(coverage)
+    quality_issues,_,_=write_quality_issues(conn)
     rows=export_dashboard(conn)
     write_dashboard()
 
+    q_error=sum(1 for x in quality_issues if x["severity"]=="ERROR")
+    q_warn=sum(1 for x in quality_issues if x["severity"]=="WARN")
+    q_info=sum(1 for x in quality_issues if x["severity"]=="INFO")
+    print(f"Quality issues: ERROR={q_error} | WARN={q_warn} | INFO={q_info}")
     print(f"Eventi rilevanti letti: {scanned}")
     print(
         f"Nuovi eventi: {len(new_events)} | nuovi progetti: {new_projects} | "
@@ -186,6 +191,7 @@ def main():
     )
     print("Report: reports/change_reports/changes_latest.html")
     print("Coverage: reports/coverage_latest.html")
+    print("Quality: reports/quality_issues_latest.html")
     if not args.skip_ree:
         print("REE: reports/ree_capacity_latest.csv")
     if not args.skip_miteco:

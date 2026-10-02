@@ -1,69 +1,77 @@
 # CURRENT STATE — Spain Renewables Radar
 
-## Stato
+## Stato certificato
 
-MVP 0.1 operativo su GitHub con sorgente BOE ufficiale e gratuita.
+Il radar è operativo su **6 bollettini ufficiali** più due enrichment nazionali gratuiti.
 
-## Funzionante
+### Collector attivi
 
-- schema SQLite con progetto unico + storico eventi;
-- collector BOE basato sull'OpenData API ufficiale, con fallback HTML;
-- parsing FV / eolico / BESS / ibrido;
-- estrazione preliminare di MW, progetto, promotore, expediente e geografia;
-- lifecycle amministrativo con distinzione fra:
-  - PUBLIC_INFO
-  - DIA
-  - PRIOR_AUTH
-  - CONSTRUCTION_AUTH
-  - PUBLIC_UTILITY
-  - EXPROPRIATION
-  - WITHDRAWN
-  - DENIED
-- deduplica progetto/evento;
-- report CSV + HTML delle variazioni;
-- dashboard statica iniziale;
-- BAT Windows;
-- test offline e smoke test live GitHub Actions.
+- BOE
+- BOCYL — Castilla y León
+- BOA — Aragón
+- BOJA — Andalucía
+- DOCM — Castilla-La Mancha
+- DOE — Extremadura
 
-## Ultima validazione live
+### Enrichment attivi
 
-Run live BOE: 37066642276 — SUCCESS.
+- REE accesso/capacità per nodo;
+- MITECO registro produzione.
 
-Finestra 30/09/2026–02/10/2026:
-- 6 eventi renewable utili individuati;
-- 0 giorni in errore;
-- escluso correttamente un falso positivo di procurement FV;
-- localizzazioni corrette per Eclipse Solar, Vientos del Cid I, ALSA, PSF Ronda 3 ed Elawan Olmedo I;
-- PE Conca de Barberà I resta con provincia non attribuita: scelta fail-safe, perché il BOE coinvolge più territori e non esplicita una singola provincia nel titolo.
+Nessun aggregatore commerciale è usato.
 
-Unit test run: 37066642228 — SUCCESS.
+## Ultima validazione 30 giorni
 
-## Strategia attuale
+Run: **37072608960 — SUCCESS**
 
-Solo fonti free of charge:
-1. BOE/OpenData ufficiale;
-2. bollettini ufficiali delle 17 CCAA;
-3. REE per accesso/connessione;
-4. MITECO per registro impianti;
-5. fonti pubbliche aziendali per EPC/BoP.
+- 99 progetti;
+- 123 eventi;
+- 0 errori source/day;
+- BOE 44;
+- BOCYL 16;
+- BOA 27;
+- BOJA 7;
+- DOCM 19;
+- DOE 10;
+- MITECO: 71.727 impianti;
+- REE: 931 nodi;
+- campi mancanti prima del quality gate: nome 4, MW 25, provincia 6, expediente 26.
 
-Nessun aggregatore commerciale è usato come sorgente o dipendenza.
+Correzioni validate:
+- `PSF Puerto Real`: 133,5708 MW, non 5.708 MW;
+- `Terrapower Generación`: nome e 44,16 MW corretti;
+- `Atalaya`: Badajoz e fase PERMITTING, evitando un falso BLOCKED dovuto a riferimenti storici nel testo;
+- autoconsumo escluso dal BOE;
+- geografia dei collector regionali vincolata alla rispettiva CCAA.
+
+## Quality gate
+
+Generati automaticamente:
+- `reports/quality_issues_latest.csv`
+- `reports/quality_issues_latest.html`
+
+Flag:
+- nome progetto mancante;
+- nome sospetto/generico;
+- MW mancanti o anomali;
+- provincia mancante;
+- expediente mancante.
+
+I flag non riscrivono i dati.
 
 ## Problemi aperti
 
-- geografia multi-provincia e progetti senza provincia esplicita: serve enrichment comune→provincia;
-- potenza può cambiare tra eventi successivi: va preservato lo storico e scelta la misura più autorevole;
-- EPC/BoP non è normalmente presente nei bollettini e richiederà enrichment separato;
-- i collector regionali non sono ancora implementati.
+- alcuni nomi progetto restano estratti in modo imperfetto nei documenti più complessi;
+- geografia multi-provincia richiede enrichment comune→provincia;
+- alcune pubblicazioni non riportano MW o expediente;
+- matching MITECO è volutamente conservativo;
+- EPC/BoP richiede enrichment separato da fonti pubbliche;
+- DOGV corrente risponde 403 dal runner GitHub: non è dichiarato implementato finché non troviamo un endpoint ufficiale stabile.
 
-## Prossimo blocco tecnico
+## Prossimi passi
 
-1. BOCYL;
-2. BOA;
-3. BOJA;
-4. metriche coverage per fonte;
-5. backfill BOE storico;
-6. REE;
-7. MITECO;
-8. mappa provinciale;
-9. enrichment EPC/BoP.
+1. ridurre i record quality WARN/ERROR del backfill;
+2. aggiungere un altro collector regionale solo dopo validazione live;
+3. enrichment geografico comune→provincia;
+4. scoring commerciale e vista provinciale;
+5. enrichment EPC/BoP.

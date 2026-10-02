@@ -12,7 +12,7 @@ MW_RE=re.compile(r"(?<!\d)(\d{1,4}(?:[\.,]\d{1,6})?)\s*(?:MWp|MWac|MW)\b",re.I)
 BOE_ID_RE=re.compile(r"BOE-[AB]-\d{4}-\d+",re.I)
 QUOTED_RE=re.compile(r"[«\"]([^»\"]{3,120})[»\"]")
 EXPEDIENTE_RE=re.compile(
-    r"(?:expedientes?|expdte\.?|exp\.|c[oó]digo)"
+    r"(?:expedientes?|expdte\.?|expte\.?|exp\.|c[oó]digo)"
     r"(?:\s*(?:n[ºo°]\.?|n[uú]mero))?\s*[:\-]?\s*"
     r"(?:SIAGGE\s+)?([A-Z0-9][A-Z0-9._/\-]{2,60})",
     re.I,
