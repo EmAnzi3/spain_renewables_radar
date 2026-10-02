@@ -1,0 +1,32 @@
+name: live-boe-smoke
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 4 * * *"
+  push:
+    paths:
+      - ".github/workflows/live-boe-smoke.yml"
+
+jobs:
+  live-boe:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Scan last 3 BOE days
+        run: python -m app.run_pipeline --days 3
+      - name: Upload smoke outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: boe-smoke-output
+          path: |
+            reports/change_reports/
+            docs/data.json
+            docs/index.html
+          if-no-files-found: error
