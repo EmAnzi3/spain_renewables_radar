@@ -45,7 +45,7 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(e.promoter,"Ener Epsilon, S.L")
         self.assertEqual(e.expediente,"PEol-1024")
         self.assertEqual(e.province,"Burgos")
-        self.assertEqual(e.event_type,"DIA")
+        self.assertEqual(e.event_type,"PUBLIC_INFO")
 
     def test_title_beats_detail_noise(self):
         title="Instalación Fotovoltaica «Eclipse Solar» de 99,935 MW de potencia instalada, en la provincia de Burgos; promovida por la mercantil «SOLARIA Promoción y Desarrollo Fotovoltaico, S.L.U.». Código PFot-1229."
@@ -67,6 +67,13 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(e.ccaa,"Andalucía")
         self.assertEqual(e.promoter,"Cobra Concesiones, S.L")
         self.assertEqual(e.expediente,"CG-870")
+        self.assertEqual(e.event_type,"PUBLIC_INFO")
+        self.assertEqual(e.commercial_stage,"EARLY")
+
+    def test_ccaa_or_company_name_is_not_false_province(self):
+        title="Anuncio de la Delegación del Gobierno en Castilla y León relativo a una instalación renovable."
+        e=parse_event(source_code="BOE",external_id="BOE-X-1",publication_date="2026-10-02",title=title,url="x",raw_text='parque eólico "PE Demo" promovido por Desarrollos Eólicos Cuenca de Barberá, S.L.')
+        self.assertIsNone(e.province)
 
     def test_expropriation_is_preconstruction(self):
         title='Anuncio por el que se convoca para el levantamiento de actas previas a la ocupación de bienes y derechos afectados por la infraestructura de evacuación de la instalación fotovoltaica "Elawan Olmedo I", de 50,064 MW de potencia instalada, en la provincia de Valladolid.'
