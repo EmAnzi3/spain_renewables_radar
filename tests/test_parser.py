@@ -2,6 +2,7 @@ import unittest
 from pathlib import Path
 
 from app.collectors.boe import BOECollector
+from app.collectors.boa import BOACollector
 from app.parser import parse_event
 
 class ParserTests(unittest.TestCase):
@@ -93,6 +94,24 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(e.event_type,"EXPROPRIATION")
         self.assertEqual(e.commercial_stage,"PRECONSTRUCTION")
         self.assertEqual(e.province,"Valladolid")
+
+    def test_boa_elin_official_row(self):
+        row={
+            "DOCN":"007900001",
+            "Titulo":'ANUNCIO del Servicio Provincial de Zaragoza, por el que se somete a información pública, la solicitud de autorización administrativa previa y de construcción, del proyecto parque eólico "PE Elin" de 30,5 MW de la empresa Energía Inagotable de Elin, SL, así como su estudio de impacto ambiental. Expediente G-Z-2025/024.',
+            "Texto":"Ubicación: Plenas y Moyuela y Azuara (Zaragoza).",
+            "UrlPdf":"https://www.boa.aragon.es/test.pdf"
+        }
+        e=BOACollector.event_from_row(__import__("datetime").date(2026,2,27),row)
+        self.assertIsNotNone(e)
+        self.assertEqual(e.technology,"WIND")
+        self.assertAlmostEqual(e.power_mw,30.5)
+        self.assertEqual(e.project_name,"PE Elin")
+        self.assertEqual(e.promoter,"Energía Inagotable de Elin, SL")
+        self.assertEqual(e.expediente,"G-Z-2025/024")
+        self.assertEqual(e.province,"Zaragoza")
+        self.assertEqual(e.ccaa,"Aragón")
+        self.assertEqual(e.event_type,"PUBLIC_INFO")
 
 if __name__=="__main__":
     unittest.main()
