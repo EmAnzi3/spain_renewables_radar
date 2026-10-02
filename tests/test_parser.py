@@ -3,6 +3,7 @@ from pathlib import Path
 
 from app.collectors.boe import BOECollector
 from app.collectors.boa import BOACollector
+from app.collectors.boja import BOJACollector
 from app.parser import parse_event
 
 class ParserTests(unittest.TestCase):
@@ -187,6 +188,30 @@ class ParserTests(unittest.TestCase):
         self.assertTrue(all(e.technology=="PV" for e in events))
         self.assertTrue(all(e.commercial_stage=="PRECONSTRUCTION" for e in events))
         self.assertTrue(all(e.province=="Teruel" for e in events))
+
+    def test_boa_repairs_invalid_json_backslash(self):
+        # BOA occasionally exposes Windows/path-like raw backslashes in strings.
+        body='[{"DOCN":"1","Titulo":"Parque eólico Demo","Texto":"ruta C:\\Datos\\Proyecto"}]'
+        repaired=__import__("re").sub(r'\\(?!["\\/bfnrtu])', r'\\\\', body)
+        rows=__import__("json").loads(repaired)
+        self.assertEqual(rows[0]["DOCN"],"1")
+
+    def test_boja_empty_400_can_be_treated_as_no_publication(self):
+        class FakeResponse:
+            status_code=400
+            def raise_for_status(self):
+                raise RuntimeError("should not be called")
+            def json(self):
+                raise RuntimeError("should not be called")
+        class FakeSession:
+            def get(self,*args,**kwargs):
+                return FakeResponse()
+        collector=BOJACollector()
+        collector.session=FakeSession()
+        self.assertEqual(
+            collector._get_json("x",allow_empty_400=True),
+            {"results":[],"total_hits":0},
+        )
 
 if __name__=="__main__":
     unittest.main()
