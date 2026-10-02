@@ -1,4 +1,5 @@
 from __future__ import annotations
+import re
 
 PROVINCE_TO_CCAA = {
     "A Coruña":"Galicia","Lugo":"Galicia","Ourense":"Galicia","Pontevedra":"Galicia",
@@ -20,13 +21,23 @@ PROVINCE_TO_CCAA = {
 }
 
 def find_province(text: str) -> tuple[str | None, str | None]:
-    low=(text or "").casefold()
-    found=[]
+    value=text or ""
+    # Prefer explicit administrative location over incidental mentions in
+    # company names, addresses or CCAA names such as "Castilla y León".
+    candidates=[]
     for province,ccaa in PROVINCE_TO_CCAA.items():
-        pos=low.find(province.casefold())
-        if pos>=0:
-            found.append((pos,-len(province),province,ccaa))
-    if not found:
+        esc=re.escape(province)
+        strong=[
+            rf"provincia\s+de\s+{esc}\b",
+            rf"provincia\s*[:\-]\s*{esc}\b",
+            rf"\(\s*{esc}\s*\)",
+        ]
+        for pattern in strong:
+            m=re.search(pattern,value,re.I)
+            if m:
+                candidates.append((m.start(),-len(province),province,ccaa))
+                break
+    if not candidates:
         return None,None
-    _,_,province,ccaa=min(found)
+    _,_,province,ccaa=min(candidates)
     return province,ccaa
