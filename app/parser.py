@@ -11,16 +11,22 @@ from app.lifecycle import classify_event, commercial_stage
 MW_RE=re.compile(r"(?<!\d)(\d{1,4}(?:[\.,]\d{1,3})?)\s*(?:MWp|MWac|MW)\b",re.I)
 BOE_ID_RE=re.compile(r"BOE-[AB]-\d{4}-\d+",re.I)
 QUOTED_RE=re.compile(r"[«\"]([^»\"]{3,120})[»\"]")
-EXPEDIENTE_RE=re.compile(r"(?:expediente(?:\s+n[uú]mero)?|expdte\.?|c[oó]digo)\s*[:\-]?\s*([A-Z][A-Z0-9._/\-]{2,50})",re.I)
+EXPEDIENTE_RE=re.compile(
+    r"(?:expediente|expdte\.?|exp\.?|c[oó]digo)"
+    r"(?:\s*(?:n[ºo°]\.?|n[uú]mero))?\s*[:\-]?\s*"
+    r"([A-Z0-9][A-Z0-9._/\-]{2,60})",
+    re.I,
+)
 PROJECT_PATTERNS=[
-    re.compile(r"(?:instalaci[oó]n|planta)\s+(?:solar\s+)?fotovoltaica\s+(?:denominada\s+)?[«\"]?([^,»\"\.]{3,100})",re.I),
-    re.compile(r"parque\s+e[oó]lico\s+(?:denominado\s+)?[«\"]?([^,»\"\.]{3,100})",re.I),
-    re.compile(r"(?:m[oó]dulo|sistema)\s+de\s+almacenamiento\s+(?:denominado\s+)?[«\"]?([^,»\"\.]{3,100})",re.I),
+    re.compile(r"(?:instalaci[oó]n|planta)\s+(?:solar\s+)?fotovoltaica\s+(?:denominada\s+)?[«\"]?([^,»\"\.]{3,140})",re.I),
+    re.compile(r"parque\s+e[oó]lico\s+(?:denominado\s+)?[«\"]?([^,»\"\.]{3,140})",re.I),
+    re.compile(r"(?:m[oó]dulo|sistema)\s+de\s+almacenamiento\s+(?:denominado\s+)?[«\"]?([^,»\"\.]{3,140})",re.I),
 ]
 PROMOTER_PATTERNS=[
-    re.compile(r"promovid[ao]\s+por\s+(?:la\s+)?(?:mercantil|sociedad|entidad)\s+[«\"]([^»\"]{2,140})[»\"]",re.I),
-    re.compile(r"(?:peticionario|titular\s+de\s+la\s+solicitud)\s*:\s*([^\n\r]{2,140})",re.I),
-    re.compile(r"promovid[ao]\s+por\s+(?:la\s+)?(?:mercantil|sociedad|entidad)\s+([^\n\r;]{2,140}?)(?:\.|;|\n|$)",re.I),
+    re.compile(r"(?:promovid[ao]|formulad[ao])\s+por\s+(?:la\s+)?(?:mercantil|sociedad|entidad)?\s*[«\"]([^»\"]{2,140})[»\"]",re.I),
+    re.compile(r"(?:peticionario|titular(?:\s+de\s+la\s+solicitud)?)\s*:\s*([^\n\r]{2,140})",re.I),
+    re.compile(r"cuyo\s+peticionario\s+es\s+(?:la\s+)?mercantil\s+([^\n\r;]{2,140}?)(?:,\s+con\s+NIF|\.|;|\n|$)",re.I),
+    re.compile(r"(?:promovid[ao]|formulad[ao])\s+por\s+(?:la\s+)?(?:mercantil|sociedad|entidad)?\s+([^\n\r;]{2,140}?)(?:\.|;|\n|$)",re.I),
 ]
 
 @dataclass
@@ -70,16 +76,29 @@ def extract_power_mw(text:str)->float|None:
             values.append(value)
         except ValueError:
             pass
-    return max(values) if values else None
+    return values[0] if values else None
+
+def _clean_project_name(value:str)->str:
+    value=value.strip(" '“”«»")
+    cuts=[
+        r"\s+y\s+las?\s+infraestructuras?\b",
+        r"\s+y\s+su\s+infraestructura\b",
+        r"\s+de\s+\d{1,4}(?:[\.,]\d+)?\s*MW\b",
+        r"\s+ubicad[ao]\b",
+        r"\s+situad[ao]\b",
+    ]
+    for pat in cuts:
+        value=re.split(pat,value,maxsplit=1,flags=re.I)[0]
+    return value.strip(" ,.;:-")
 
 def extract_project_name(text:str)->str|None:
     for p in PROJECT_PATTERNS:
         m=p.search(text or "")
         if m:
-            value=m.group(1).strip(" '“”«»")
-            if 3<=len(value)<=100:return value
+            value=_clean_project_name(m.group(1))
+            if 3<=len(value)<=120:return value
     for m in QUOTED_RE.finditer(text or ""):
-        value=m.group(1).strip()
+        value=_clean_project_name(m.group(1))
         low=normalize_text(value)
         if any(k in low for k in ("fotovolta","eolic","solar","hibrid")) or len(value.split())<=8:
             return value
@@ -87,7 +106,7 @@ def extract_project_name(text:str)->str|None:
 
 def extract_expediente(text:str)->str|None:
     m=EXPEDIENTE_RE.search(text or "")
-    return m.group(1).strip(" .;,") if m else None
+    return m.group(1).strip(" .;,)") if m else None
 
 def extract_promoter(text:str)->str|None:
     for p in PROMOTER_PATTERNS:
@@ -108,14 +127,23 @@ def build_project_key(name,technology,province,external_id,expediente=None)->str
 
 def parse_event(*,source_code,external_id,publication_date,title,url,raw_text)->ParsedEvent:
     combined=f"{title}\n{raw_text}"
-    technology=detect_technology(combined)
-    power_mw=extract_power_mw(combined)
-    project_name=extract_project_name(combined)
-    promoter=extract_promoter(combined)
-    expediente=extract_expediente(combined)
-    province,ccaa=find_province(combined)
+
+    technology=detect_technology(title) or detect_technology(raw_text)
+    power_mw=extract_power_mw(title)
+    if power_mw is None:
+        power_mw=extract_power_mw(raw_text)
+
+    project_name=extract_project_name(title) or extract_project_name(raw_text)
+    promoter=extract_promoter(title) or extract_promoter(raw_text)
+    expediente=extract_expediente(title) or extract_expediente(raw_text)
+
+    province,ccaa=find_province(title)
+    if not province:
+        province,ccaa=find_province(raw_text)
+
     event_type=classify_event(combined)
     stage=commercial_stage(event_type)
+
     return ParsedEvent(
         source_code=source_code,external_id=external_id,publication_date=publication_date,
         title=title.strip(),url=url,raw_text=raw_text.strip(),technology=technology,
