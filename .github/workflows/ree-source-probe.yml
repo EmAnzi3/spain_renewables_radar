@@ -79,4 +79,17 @@ jobs:
               text=rr.content.decode("utf-8-sig","replace")
               print("CSV_HEAD")
               print("\n".join(text.splitlines()[:25]))
+              import csv, io
+              parsed=list(csv.reader(io.StringIO(text),delimiter=";"))
+              print("CSV_ROWS",len(parsed),"COLS",max(len(x) for x in parsed))
+              print("HEADER_INDEX")
+              header_rows=parsed[:4]
+              width=max(len(x) for x in header_rows)
+              for i in range(width):
+                  vals=[row[i].replace("\n"," ").strip() if i<len(row) else "" for row in header_rows]
+                  if any(vals):
+                      print(i," | ".join(vals))
+              print("FIRST_DATA_ROWS")
+              for row in parsed[4:9]:
+                  print("ROW",[(i,v) for i,v in enumerate(row) if v.strip()][:45])
           PY
