@@ -65,7 +65,13 @@ class BOACollector:
                 return []
             raise RuntimeError("BOA OpenData did not return JSON")
 
-        rows = json.loads(body)
+        try:
+            rows = json.loads(body)
+        except json.JSONDecodeError:
+            # BOA occasionally emits raw backslashes inside JSON strings.
+            # Escape only backslashes that are not valid JSON escape starters.
+            repaired = re.sub(r'\\(?!["\\/bfnrtu])', r'\\\\', body)
+            rows = json.loads(repaired)
         return rows if isinstance(rows, list) else []
 
     @staticmethod
