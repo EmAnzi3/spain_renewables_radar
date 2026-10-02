@@ -7,6 +7,7 @@ from datetime import date,timedelta
 from app.collectors import BOECollector,BOCYLCollector,BOACollector,BOJACollector
 from app.dashboard import write_dashboard
 from app.db import connect
+from app.enrichment import fetch_capacity_snapshot,save_capacity_snapshot,write_capacity_exports
 from app.reporting import export_dashboard,write_changes,write_coverage
 from app.store import save_event
 
@@ -30,6 +31,7 @@ def parse_args():
     p.add_argument("--until",help="YYYY-MM-DD")
     p.add_argument("--sources",default="BOE,BOCYL,BOA,BOJA",help="sorgenti separate da virgola")
     p.add_argument("--db",default=os.getenv("RADAR_DB","data/spain_renewables.sqlite"))
+    p.add_argument("--skip-ree",action="store_true",help="salta lo snapshot REE accesso/connessione")
     return p.parse_args()
 
 def main():
@@ -87,6 +89,35 @@ def main():
                     new_projects+=int(new_project)
             coverage.append(row)
 
+    if not args.skip_ree:
+        print("[REE_ACCESS] latest node-capacity snapshot")
+        ree_row={
+            "source_code":"REE_ACCESS",
+            "date":"",
+            "status":"OK",
+            "candidates":0,
+            "inserted":0,
+            "new_projects":0,
+            "error":"",
+        }
+        try:
+            snapshot_date,source_url,ree_records=fetch_capacity_snapshot(
+                timeout=timeout,user_agent=user_agent
+            )
+            saved=save_capacity_snapshot(conn,snapshot_date,source_url,ree_records)
+            write_capacity_exports(ree_records,snapshot_date,source_url)
+            ree_row["date"]=snapshot_date
+            ree_row["candidates"]=len(ree_records)
+            ree_row["inserted"]=saved
+            print(f"  REE snapshot {snapshot_date}: {len(ree_records)} nodi")
+        except Exception as exc:
+            errors+=1
+            ree_row["status"]="ERROR"
+            ree_row["date"]=end.isoformat()
+            ree_row["error"]=str(exc)[:500]
+            print(f"  WARN REE_ACCESS: {exc}")
+        coverage.append(ree_row)
+
     if new_events:
         print("Nuovi eventi rilevati:")
         for e in new_events:
@@ -109,6 +140,8 @@ def main():
     )
     print("Report: reports/change_reports/changes_latest.html")
     print("Coverage: reports/coverage_latest.html")
+    if not args.skip_ree:
+        print("REE: reports/ree_capacity_latest.csv")
     print("Dashboard: docs/index.html")
 
 if __name__=="__main__":
