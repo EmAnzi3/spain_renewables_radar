@@ -26,8 +26,9 @@ jobs:
           urls={
             "BOCYL_SCHEMA":"https://analisis.datosabiertos.jcyl.es/api/explore/v2.1/catalog/datasets/bocyl",
             "BOCYL_RECORD":"https://analisis.datosabiertos.jcyl.es/api/explore/v2.1/catalog/datasets/bocyl/records?limit=1",
-            "BOCYL_DAY":"https://analisis.datosabiertos.jcyl.es/api/explore/v2.1/catalog/datasets/bocyl/records?limit=5&where=fecha_publicacion%3D%222026-10-02%22",
+            "BOCYL_DAY":"https://analisis.datosabiertos.jcyl.es/api/explore/v2.1/catalog/datasets/bocyl/records?limit=5&where=fecha_publicacion%3Ddate%272026-10-02%27",
             "BOJA_OPENAPI":"https://datos.juntadeandalucia.es/api/v0/boja/openapi.json",
+            "BOJA_DAY":"https://datos.juntadeandalucia.es/api/v0/boja/get/search_pagination?order_by=dateUTC&mode=DESC&size=10&page=0&date_from=2026-10-02&date_to=2026-10-02",
             "BOA_CKAN":"https://opendata.aragon.es/ckan/api/3/action/package_show?id=boletin-oficial-aragon-diario",
           }
           for name,url in urls.items():
@@ -41,6 +42,8 @@ jobs:
                           print(json.dumps(obj,ensure_ascii=False)[:12000])
                       elif name in ("BOCYL_RECORD","BOCYL_DAY"):
                           print(json.dumps(obj,ensure_ascii=False)[:8000])
+                      elif name=="BOJA_DAY":
+                          print(json.dumps(obj,ensure_ascii=False)[:16000])
                       elif name=="BOJA_OPENAPI":
                           print("PATHS")
                           print("\n".join(sorted(obj.get("paths",{}).keys())))
