@@ -23,8 +23,8 @@ PROJECT_PATTERNS=[
     re.compile(r"(?:m[oó]dulo|sistema)\s+de\s+almacenamiento\s+(?:denominado\s+)?[«\"]?([^,»\"\.]{3,140})",re.I),
 ]
 PROMOTER_PATTERNS=[
-    re.compile(r"(?:promovid[ao]|formulad[ao])\s+por\s+(?:la\s+)?(?:mercantil|sociedad|entidad)?\s*[«\"]([^»\"]{2,140})[»\"]",re.I),
-    re.compile(r"(?:promovid[ao]|formulad[ao])\s+por\s+(?:la\s+)?(?:mercantil|sociedad|entidad)?\s+(.{2,140}?)(?=\s*\(\s*expediente|,\s*con\s+NIF|;|\n|$)",re.I),
+    re.compile(r"(?:promovid[ao]|formulad[ao])\s+por\s+(?:la\s+)?(?:(?:mercantil|sociedad|entidad)\s+)?[«\"]([^»\"]{2,140})[»\"]",re.I),
+    re.compile(r"(?:promovid[ao]|formulad[ao])\s+por\s+(?:la\s+)?(?:(?:mercantil|sociedad|entidad)\s+)?(.{2,140}?)(?=\s*\(\s*expediente|,\s*con\s+NIF|;|\n|$)",re.I),
     re.compile(r"cuyo\s+peticionario\s+es\s+(?:la\s+)?mercantil\s+(.{2,140}?)(?=,\s*con\s+NIF|;|\n|$)",re.I),
     re.compile(r"(?:peticionario|titular(?:\s+de\s+la\s+solicitud)?)\s*:\s*(.{2,140}?)(?=\s+(?:Domicilio|NIF|CIF)\s*:|;|\n|$)",re.I),
 ]
