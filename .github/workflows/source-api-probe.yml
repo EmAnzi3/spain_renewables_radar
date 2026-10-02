@@ -1,0 +1,56 @@
+name: source-api-probe
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/source-api-probe.yml"
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Probe official free APIs
+        run: |
+          python - <<'PY'
+          import json, urllib.request
+
+          def get(url):
+              req=urllib.request.Request(url,headers={"User-Agent":"SpainRenewablesRadar/0.1","Accept":"application/json"})
+              with urllib.request.urlopen(req,timeout=30) as r:
+                  return r.status,r.headers.get("content-type"),r.read().decode("utf-8","replace")
+
+          urls={
+            "BOCYL_SCHEMA":"https://analisis.datosabiertos.jcyl.es/api/explore/v2.1/catalog/datasets/bocyl",
+            "BOCYL_RECORD":"https://analisis.datosabiertos.jcyl.es/api/explore/v2.1/catalog/datasets/bocyl/records?limit=1",
+            "BOJA_OPENAPI":"https://datos.juntadeandalucia.es/api/v0/boja/openapi.json",
+            "BOA_CKAN":"https://opendata.aragon.es/ckan/api/3/action/package_show?id=boletin-oficial-aragon-diario",
+          }
+          for name,url in urls.items():
+              print("\n===== "+name+" =====")
+              try:
+                  status,ct,body=get(url)
+                  print("STATUS",status,"CT",ct)
+                  try:
+                      obj=json.loads(body)
+                      if name=="BOCYL_SCHEMA":
+                          print(json.dumps(obj,ensure_ascii=False)[:12000])
+                      elif name=="BOCYL_RECORD":
+                          print(json.dumps(obj,ensure_ascii=False)[:8000])
+                      elif name=="BOJA_OPENAPI":
+                          print("PATHS")
+                          print("\n".join(sorted(obj.get("paths",{}).keys())))
+                          print("SEARCH GET",json.dumps(obj.get("paths",{}).get("/api/v0/boja/search",{}).get("get",{}),ensure_ascii=False)[:15000])
+                      elif name=="BOA_CKAN":
+                          result=obj.get("result",{})
+                          print("TITLE",result.get("title"))
+                          for x in result.get("resources",[]):
+                              print(json.dumps({k:x.get(k) for k in ("name","format","url","description")},ensure_ascii=False))
+                  except Exception:
+                      print(body[:12000])
+              except Exception as exc:
+                  print("ERROR",repr(exc))
+          PY
