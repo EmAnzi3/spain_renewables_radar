@@ -139,7 +139,13 @@ class BOACollector:
                     next_start = unique[idx][0].start() if idx < len(unique) else len(detail)
                     segment = detail[match.start():next_start]
                     kind = match.group(1)
-                    synthetic_title = f'{title} | {kind} "{name}"'
+                    base_title = re.sub(
+                        r"expedientes?\s+(?:n[uú]mero\s*)?[^.]*\.?",
+                        "",
+                        title,
+                        flags=re.I,
+                    )
+                    synthetic_title = f'{base_title} | {kind} "{name}"'
                     external_id = cls._clean(row.get("DOCN")) or f"BOA-{day.isoformat()}"
                     event = parse_event(
                         source_code=cls.code,
