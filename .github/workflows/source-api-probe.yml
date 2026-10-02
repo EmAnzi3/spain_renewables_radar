@@ -30,6 +30,7 @@ jobs:
             "BOJA_OPENAPI":"https://datos.juntadeandalucia.es/api/v0/boja/openapi.json",
             "BOJA_DAY":"https://datos.juntadeandalucia.es/api/v0/boja/get/search_pagination?order_by=dateUTC&mode=DESC&size=10&page=0&date_from=2026-10-02&date_to=2026-10-02",
             "BOA_CKAN":"https://opendata.aragon.es/ckan/api/3/action/package_show?id=boletin-oficial-aragon-diario",
+            "BOA_CURRENT_JSON":"https://www.boa.aragon.es/cgi-bin/EBOA/BRSCGI?CMD=VERLST&OUTPUTMODE=JSON&BASE=BOLE&DOCS=1-100&SEC=OPENDATABOAJSON&SORT=-PUBL&SEPARADOR=&%40PUBL-GE=20261002&%40PUBL-LE=20261002",
             "BOA_XML_TEST":"https://www.boa.aragon.es/cgi-bin/EBOA/BRSCGI?CMD=VERLST&BASE=BZHT&DOCS=1-20&SEC=OPENDATABOAXML&OUTPUTMODE=XML&SORT=-PUBL&SEPARADOR=&%40PUBL-GE=20261002&%40PUBL-LE=20261002&NUMB=&RANG=&TITU-C=&FDIS-C=&TITU=&ORGA-C=&TEXT-C=fotovolta&SECC-C=BOA%2Bo%2BDisposiciones%2Bo%2BPersonal%2Bo%2BAcuerdos%2Bo%2BJusticia%2Bo%2BAnuncios&SECC=&SUBS-C=&MATE-C=",
             "BOA_JSON_TEST":"https://www.boa.aragon.es/cgi-bin/EBOA/BRSCGI?CMD=VERLST&BASE=BZHT&DOCS=1-20&SEC=OPENDATABOAJSON&OUTPUTMODE=XML&SORT=-PUBL&SEPARADOR=&%40PUBL-GE=20261002&%40PUBL-LE=20261002&NUMB=&RANG=&TITU-C=&FDIS-C=&TITU=&ORGA-C=&TEXT-C=e%C3%B3lico&SECC-C=BOA%2Bo%2BDisposiciones%2Bo%2BPersonal%2Bo%2BAcuerdos%2Bo%2BJusticia%2Bo%2BAnuncios&SECC=&SUBS-C=&MATE-C=",
           }
@@ -55,7 +56,7 @@ jobs:
                           comps=obj.get("components",{}).get("schemas",{})
                           for cname in ("_Enum_Title_Sec","_Enum_Organisation","_Enum_Tipo_Disposition","_Enum_Subtitle","_Enum_Version","_Enum_fields","_Enum_Mode"):
                               print("SCHEMA",cname,json.dumps(comps.get(cname,{}),ensure_ascii=False)[:8000])
-                      elif name in ("BOA_XML_TEST","BOA_JSON_TEST"):
+                      elif name in ("BOA_XML_TEST","BOA_JSON_TEST","BOA_CURRENT_JSON"):
                           print(body[:16000])
                       elif name=="BOA_CKAN":
                           result=obj.get("result",{})
