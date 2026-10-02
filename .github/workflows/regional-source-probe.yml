@@ -52,6 +52,31 @@ jobs:
                   print("ERROR",repr(exc))
           print("\n===== DAILY PROBES =====")
 
+          try:
+              url="https://dogv.gva.es/datos/2026/10/02/PortalCAS.html"
+              r=s.get(url,timeout=45)
+              print("\nDOGV_DAILY",r.status_code,r.url,r.headers.get("content-type"))
+              if r.ok:
+                  soup=BeautifulSoup(r.text,"html.parser")
+                  print("TITLE",soup.title.get_text(" ",strip=True) if soup.title else "")
+                  for a in soup.find_all("a",href=True):
+                      href=urllib.parse.urljoin(url,a["href"])
+                      label=" ".join(a.stripped_strings)
+                      if any(k in (href+" "+label).lower() for k in ("fotovolta","eólic","eolic","almacen","html","pdf")):
+                          print("DOGV_A",repr(label[:700]),"|",href)
+                          if any(k in href.lower() for k in (".html","html/")):
+                              node=a
+                              for level in range(1,4):
+                                  node=node.parent
+                                  if node is None:
+                                      break
+                                  tx=" ".join(node.stripped_strings)
+                                  print("DOGV_LEVEL",level,node.name,node.get("class"),repr(tx[:1200]))
+              else:
+                  print(r.text[:4000])
+          except Exception as exc:
+              print("DOGV_DAILY_ERROR",repr(exc))
+
           # DOCM daily summary shortcut
           try:
               url="https://docm.jccm.es/docm/cambiarBoletin.do?fecha=20261002"
