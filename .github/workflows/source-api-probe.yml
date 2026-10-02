@@ -66,4 +66,24 @@ jobs:
                       print(body[:12000])
               except Exception as exc:
                   print("ERROR",repr(exc))
+          print("\n===== BOA_SCRIPTS =====")
+          try:
+              status,ct,body=get("https://www.boa.aragon.es/")
+              import re, urllib.parse
+              scripts=re.findall(r'<script[^>]+src=["\\\']([^"\\\']+)["\\\']',body,re.I)
+              scripts=[urllib.parse.urljoin("https://www.boa.aragon.es/",s) for s in scripts]
+              print("SCRIPTS",scripts)
+              for s in scripts:
+                  if "google" in s or "readspeaker" in s:
+                      continue
+                  try:
+                      st,ct2,js=get(s)
+                      hits=[line for line in js.splitlines() if any(k in line.lower() for k in ("opendata","brscgi","verl","bzht","busquedafecha"))]
+                      if hits:
+                          print("SCRIPT",s)
+                          print("\n".join(hits[:200])[:20000])
+                  except Exception as exc:
+                      print("SCRIPT_ERROR",s,repr(exc))
+          except Exception as exc:
+              print("BOA_SCRIPTS_ERROR",repr(exc))
           PY
