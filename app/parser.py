@@ -18,6 +18,14 @@ EXPEDIENTE_RE=re.compile(
     re.I,
 )
 PROJECT_PATTERNS=[
+    # Put the power-terminated form first so decimal commas do not truncate the
+    # project name (e.g. "... fotovoltaica de Terrapower Generación de 44,16 MWp").
+    re.compile(
+        r"(?:instalaci[oó]n|planta)\s+(?:solar\s+)?fotovoltaica\s+"
+        r"(?:(?:denominada|denominado|de)\s+)?[«\"]?(.{3,120}?)[»\"]?,?\s+"
+        r"de\s+\d{1,4}(?:[\.,]\d+)?\s*(?:MWp|MWac|MW)\b",
+        re.I,
+    ),
     re.compile(r"(?:instalaci[oó]n|planta)\s+(?:solar\s+)?fotovoltaica\s+(?:denominada\s+)?[«\"]?([^,»\"\.]{3,140})",re.I),
     re.compile(r"parque\s+e[oó]lico\s+(?:denominado\s+)?[«\"]?([^,»\"\.]{3,140})",re.I),
     re.compile(r"instalaci[oó]n\s+de\s+producci[oó]n\s+de\s+energ[ií]a\s+el[eé]ctrica\s+[«\"]?([^,»\"\.]{3,140})",re.I),
@@ -25,6 +33,11 @@ PROJECT_PATTERNS=[
     re.compile(r"(?:m[oó]dulo|sistema)\s+de\s+almacenamiento\s+(?:denominado\s+)?[«\"]?([^,»\"\.]{3,140})",re.I),
 ]
 PROMOTER_PATTERNS=[
+    re.compile(
+        r"cuya\s+promotor[ae]\s+es\s+(?:la\s+)?(?:mercantil\s+)?"
+        r"[«\"]?(.{2,140}?)[»\"]?(?=,\s+(?:e\s+)?infraestructura|;|\n|$)",
+        re.I,
+    ),
     re.compile(r"empresa\s+beneficiaria\s*:\s*(.{2,140}?)(?=\s+(?:Direcci[oó]n|Domicilio|NIF|CIF)\s*:|;|\n|$)",re.I),
     re.compile(r"(?:de\s+la\s+empresa|empresa)\s+[«\"]?(.{2,140}?)[»\"]?(?=,?\s+as[ií]\s+como|\s*\.?\s*\(\s*Expediente|\s*\.?\s*Expediente|;|\n|$)",re.I),
     re.compile(r"(?:promovid[ao]|formulad[ao])\s+por\s+(?:la\s+)?(?:(?:mercantil|sociedad|entidad)\s+)?[«\"]([^»\"]{2,140})[»\"]",re.I),

@@ -16,6 +16,25 @@ class DOCMCollectorTests(unittest.TestCase):
             "verArchivoHtml.do?ruta=2026%2F10%2F02%2Fhtml%2F2026_9991.html&tipo=rutaDocm"
         ))
 
+    def test_terrpower_decimal_comma_name(self):
+        from app.parser import parse_event
+        title=(
+            "Medio Ambiente. Resolución de 22/09/2026, por la que se modifican las condiciones "
+            "de la declaración de impacto ambiental del proyecto denominado: Planta solar "
+            "fotovoltaica de Terrapower Generación de 44,16 MWp, cuya promotora es la mercantil "
+            "Terrapower Generación Híbrida, SL, e infraestructura de evacuación compartida, "
+            "en Brazatortas (Ciudad Real), expediente PRO-CR-19-1331."
+        )
+        e=parse_event(
+            source_code="DOCM",external_id="DOCM-2026-6949",publication_date="2026-09-30",
+            title=title,url="x",raw_text=title
+        )
+        self.assertEqual(e.project_name,"Terrapower Generación")
+        self.assertAlmostEqual(e.power_mw,44.16)
+        self.assertEqual(e.promoter,"Terrapower Generación Híbrida, SL")
+        self.assertEqual(e.province,"Ciudad Real")
+        self.assertEqual(e.expediente,"PRO-CR-19-1331")
+
     def test_realistic_event_fields(self):
         html=Path("tests/fixtures/docm_summary_sample.html").read_text(encoding="utf-8")
         row=DOCMCollector.parse_summary_html(html)[0]

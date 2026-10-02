@@ -92,7 +92,7 @@
     "name": "Diario Oficial de Extremadura",
     "kind": "bulletin",
     "scope": "Extremadura",
-    "implemented": false,
+    "implemented": true,
     "url": "https://doe.juntaex.es/"
   },
   {
