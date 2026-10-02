@@ -62,6 +62,24 @@ jobs:
                               print("SNIP",key,js[max(0,pos-500):min(len(js),pos+1200)].replace("\n"," ")[:1800])
                               pos+=len(key);shown+=1
 
+          print("\n===== REQUESTS EMBEDS =====")
+          r=s.get(pages["requests"],timeout=30)
+          soup=BeautifulSoup(r.text,"html.parser")
+          for iframe in soup.find_all("iframe"):
+              print("IFRAME",dict(iframe.attrs))
+          for tag in soup.find_all(True):
+              attrs={k:v for k,v in tag.attrs.items() if any(z in k.lower() for z in ("data","src","url"))}
+              blob=(str(attrs)+" "+tag.get_text(" ",strip=True)[:400]).lower()
+              if any(k in blob for k in ("fotovolta","eólica","eolica","solicitud","comunidad autónoma","comunidad autonoma","powerbi","tableau")):
+                  print("TAG",tag.name,attrs,tag.get_text(" ",strip=True)[:800])
+          for script in soup.find_all("script"):
+              if script.get("src"):
+                  continue
+              txt=script.get_text("\n")
+              low=txt.lower()
+              if any(k in low for k in ("fotovolta","eolica","solicitudes","powerbi","iframe","comunidad")):
+                  print("INLINE_SCRIPT",txt[:20000])
+
           # Fetch first discovered GRT generation CSV from capacity page.
           r=s.get(pages["capacity"],timeout=30)
           soup=BeautifulSoup(r.text,"html.parser")
