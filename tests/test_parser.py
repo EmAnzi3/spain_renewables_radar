@@ -171,5 +171,20 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(e.expediente,"G-Z-2026/037")
         self.assertEqual(e.province,"Zaragoza")
 
+    def test_boa_multi_project_expropriation_notice(self):
+        row={
+            "DOCN":"007961484",
+            "Titulo":"RESOLUCIÓN de 23 de septiembre de 2026, de la Directora del Servicio Provincial de Teruel, por la que se convoca al levantamiento de actas de pago de bienes y derechos afectados por varios expedientes.",
+            "Texto":'Resoluciones relativas a la instalación "Planta fotovoltaica Elawan Escatrón I" ubicada en La Puebla de Híjar (Teruel). Expediente SIAGGE TE-AT0039/20. Resoluciones relativas a la instalación "Planta fotovoltaica Elawan Escatrón II" ubicada en La Puebla de Híjar (Teruel). Expediente SIAGGE TE-AT0040/20. Resoluciones relativas a la instalación "Planta fotovoltaica Elawan Escatrón III" ubicada en La Puebla de Híjar (Teruel). Expediente SIAGGE TE-AT0041/20.',
+            "UrlPdf":"https://www.boa.aragon.es/elawan.pdf"
+        }
+        events=BOACollector.events_from_row(__import__("datetime").date(2026,10,2),row)
+        self.assertEqual(len(events),3)
+        self.assertEqual([e.project_name for e in events],["Elawan Escatrón I","Elawan Escatrón II","Elawan Escatrón III"])
+        self.assertEqual([e.external_id for e in events],["007961484#1","007961484#2","007961484#3"])
+        self.assertTrue(all(e.technology=="PV" for e in events))
+        self.assertTrue(all(e.commercial_stage=="PRECONSTRUCTION" for e in events))
+        self.assertTrue(all(e.province=="Teruel" for e in events))
+
 if __name__=="__main__":
     unittest.main()
