@@ -4,7 +4,7 @@ import argparse
 import os
 from datetime import date,timedelta
 
-from app.collectors import BOECollector,BOCYLCollector,BOJACollector
+from app.collectors import BOECollector,BOCYLCollector,BOACollector,BOJACollector
 from app.dashboard import write_dashboard
 from app.db import connect
 from app.reporting import export_dashboard,write_changes,write_coverage
@@ -13,6 +13,7 @@ from app.store import save_event
 COLLECTOR_CLASSES={
     "BOE":BOECollector,
     "BOCYL":BOCYLCollector,
+    "BOA":BOACollector,
     "BOJA":BOJACollector,
 }
 
@@ -27,7 +28,7 @@ def parse_args():
     p.add_argument("--days",type=int,default=7,help="giorni inclusi fino a oggi")
     p.add_argument("--since",help="YYYY-MM-DD")
     p.add_argument("--until",help="YYYY-MM-DD")
-    p.add_argument("--sources",default="BOE,BOCYL,BOJA",help="sorgenti separate da virgola")
+    p.add_argument("--sources",default="BOE,BOCYL,BOA,BOJA",help="sorgenti separate da virgola")
     p.add_argument("--db",default=os.getenv("RADAR_DB","data/spain_renewables.sqlite"))
     return p.parse_args()
 
