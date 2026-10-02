@@ -156,7 +156,7 @@
     "name": "Registro administrativo de instalaciones de producción",
     "kind": "enrichment",
     "scope": "national",
-    "implemented": false,
+    "implemented": true,
     "url": "https://www.miteco.gob.es/es/energia/energia-electrica/electricidad/energias-renovables/registro-administrativo.html"
   }
 ]
