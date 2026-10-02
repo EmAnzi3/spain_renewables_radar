@@ -10,6 +10,7 @@ on:
       - "app/collectors/boe.py"
       - "app/parser.py"
       - "app/lifecycle.py"
+      - "app/geo.py"
       - "app/run_pipeline.py"
 
 jobs:
