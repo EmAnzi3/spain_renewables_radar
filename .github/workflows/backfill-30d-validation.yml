@@ -5,6 +5,10 @@ on:
   push:
     paths:
       - ".github/workflows/backfill-30d-validation.yml"
+      - "app/collectors/*.py"
+      - "app/parser.py"
+      - "app/lifecycle.py"
+      - "app/geo.py"
 
 jobs:
   backfill:
