@@ -7,7 +7,15 @@ from datetime import date,timedelta
 from app.collectors import BOECollector,BOCYLCollector,BOACollector,BOJACollector
 from app.dashboard import write_dashboard
 from app.db import connect
-from app.enrichment import fetch_capacity_snapshot,save_capacity_snapshot,write_capacity_exports
+from app.enrichment import (
+    fetch_capacity_snapshot,
+    save_capacity_snapshot,
+    write_capacity_exports,
+    fetch_registry_snapshot,
+    save_registry_snapshot,
+    exact_project_matches,
+    write_registry_exports,
+)
 from app.reporting import export_dashboard,write_changes,write_coverage
 from app.store import save_event
 
@@ -32,6 +40,7 @@ def parse_args():
     p.add_argument("--sources",default="BOE,BOCYL,BOA,BOJA",help="sorgenti separate da virgola")
     p.add_argument("--db",default=os.getenv("RADAR_DB","data/spain_renewables.sqlite"))
     p.add_argument("--skip-ree",action="store_true",help="salta lo snapshot REE accesso/connessione")
+    p.add_argument("--skip-miteco",action="store_true",help="salta lo snapshot MITECO registro produzione")
     return p.parse_args()
 
 def main():
@@ -118,6 +127,41 @@ def main():
             print(f"  WARN REE_ACCESS: {exc}")
         coverage.append(ree_row)
 
+    if not args.skip_miteco:
+        print("[MITECO_RAIPEE] production registry snapshot")
+        miteco_row={
+            "source_code":"MITECO_RAIPEE",
+            "date":"",
+            "status":"OK",
+            "candidates":0,
+            "inserted":0,
+            "new_projects":0,
+            "error":"",
+        }
+        try:
+            snapshot_date,source_url,miteco_records=fetch_registry_snapshot(
+                timeout=max(timeout,240),user_agent=user_agent
+            )
+            saved=save_registry_snapshot(conn,snapshot_date,source_url,miteco_records)
+            matches=exact_project_matches(conn,snapshot_date)
+            write_registry_exports(
+                miteco_records,snapshot_date,source_url,matches=matches
+            )
+            miteco_row["date"]=snapshot_date
+            miteco_row["candidates"]=len(miteco_records)
+            miteco_row["inserted"]=saved
+            print(
+                f"  MITECO snapshot {snapshot_date}: {len(miteco_records)} impianti | "
+                f"exact project matches: {len(matches)}"
+            )
+        except Exception as exc:
+            errors+=1
+            miteco_row["status"]="ERROR"
+            miteco_row["date"]=end.isoformat()
+            miteco_row["error"]=str(exc)[:500]
+            print(f"  WARN MITECO_RAIPEE: {exc}")
+        coverage.append(miteco_row)
+
     if new_events:
         print("Nuovi eventi rilevati:")
         for e in new_events:
@@ -142,6 +186,9 @@ def main():
     print("Coverage: reports/coverage_latest.html")
     if not args.skip_ree:
         print("REE: reports/ree_capacity_latest.csv")
+    if not args.skip_miteco:
+        print("MITECO: reports/miteco_registry_latest.csv")
+        print("MITECO exact matches: reports/miteco_exact_matches_latest.csv")
     print("Dashboard: docs/index.html")
 
 if __name__=="__main__":
