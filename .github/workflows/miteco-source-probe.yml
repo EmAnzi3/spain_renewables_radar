@@ -45,12 +45,21 @@ jobs:
           print("\n===== DIRECT CSV =====")
           direct="https://energia.serviciosmin.gob.es/Electra/descargarCSVProduccion.aspx"
           try:
-              r=requests.get(direct,timeout=60,headers={"User-Agent":"SpainRenewablesRadar/0.1"})
+              r=requests.get(direct,timeout=(30,240),headers={"User-Agent":"SpainRenewablesRadar/0.1"})
               print("STATUS",r.status_code,r.headers.get("content-type"),"BYTES",len(r.content))
               print("DISPOSITION",r.headers.get("content-disposition"))
               r.raise_for_status()
-              text=r.content.decode("utf-8-sig","replace")
-              print("\n".join(text.splitlines()[:35]))
+              raw=r.content
+              for enc in ("utf-8-sig","cp1252","latin-1"):
+                  try:
+                      text=raw.decode(enc)
+                      print("ENCODING",enc)
+                      break
+                  except UnicodeDecodeError:
+                      pass
+              lines=text.splitlines()
+              print("LINES",len(lines))
+              print("\n".join(lines[:35]))
           except Exception as exc:
               print("DIRECT_ERROR",repr(exc))
           PY
