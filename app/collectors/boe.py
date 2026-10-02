@@ -12,6 +12,7 @@ from app.parser import BOE_ID_RE, parse_event
 BASE="https://www.boe.es"
 API_BASE=f"{BASE}/datosabiertos/api/boe/sumario"
 RELEVANT=re.compile(r"fotovolta|parque\s+e[oó]lico|instalaci[oó]n\s+e[oó]lica|almacenamiento|bater[ií]a|hibridaci[oó]n|aerogenerador",re.I)
+EXCLUDE=re.compile(r"formalizaci[oó]n\s+de\s+contratos|anuncio\s+de\s+licitaci[oó]n|adjudicaci[oó]n\s+de\s+contrat|objeto:\s*instalaci[oó]n\s+de\s+paneles",re.I)
 
 class BOECollector:
     code="BOE"
@@ -52,19 +53,20 @@ class BOECollector:
         results={}
         for item in BOECollector._iter_api_items(payload):
             title=str(item.get("titulo") or "")
-            if not RELEVANT.search(title):
+            if not RELEVANT.search(title) or EXCLUDE.search(title):
                 continue
             boe_id=str(item.get("identificador") or "").upper()
-            url_html=item.get("url_html")
-            if isinstance(url_html,dict):
-                url_html=url_html.get("texto")
-            url_pdf=item.get("url_pdf")
-            if isinstance(url_pdf,dict):
-                url_pdf=url_pdf.get("texto")
+
+            def text_url(v):
+                if isinstance(v,dict):return v.get("texto")
+                return v
+
             results[boe_id]={
                 "external_id":boe_id,
                 "title":title[:4000],
-                "href":url_html or url_pdf or f"{BASE}/buscar/doc.php?id={boe_id}",
+                "url_html":text_url(item.get("url_html")),
+                "url_xml":text_url(item.get("url_xml")),
+                "url_pdf":text_url(item.get("url_pdf")),
             }
         return list(results.values())
 
@@ -74,7 +76,7 @@ class BOECollector:
         results={}
         for node in soup.find_all(["li","p","div"]):
             text=" ".join(node.stripped_strings)
-            if not text or not RELEVANT.search(text):continue
+            if not text or not RELEVANT.search(text) or EXCLUDE.search(text):continue
             boe_id=None;href=None
             for a in node.find_all("a",href=True):
                 candidate=a.get_text(" ",strip=True)+" "+a["href"]
@@ -87,7 +89,7 @@ class BOECollector:
                 m=BOE_ID_RE.search(text)
                 if m:boe_id=m.group(0).upper()
             if not boe_id:continue
-            results[boe_id]={"external_id":boe_id,"title":text[:4000],"href":href}
+            results[boe_id]={"external_id":boe_id,"title":text[:4000],"url_html":href,"url_xml":None,"url_pdf":href}
         return list(results.values())
 
     def _summary_items(self,day:date)->list[dict]:
@@ -101,22 +103,29 @@ class BOECollector:
         html=self._get(f"{BASE}/boe/dias/{day:%Y/%m/%d}/")
         return self.parse_summary_html(html) if html else []
 
+    def _detail_text(self,item:dict)->tuple[str,str]:
+        if item.get("url_xml"):
+            xml=self._get(item["url_xml"])
+            if xml:
+                return BeautifulSoup(xml,"xml").get_text("\n",strip=True), item.get("url_html") or item["url_xml"]
+        if item.get("url_html"):
+            html=self._get(item["url_html"])
+            if html:
+                soup=BeautifulSoup(html,"html.parser")
+                main=soup.find("div",id="texto") or soup.find("div",class_="texto") or soup.find("main")
+                return (main or soup).get_text("\n",strip=True), item["url_html"]
+        return item["title"], item.get("url_pdf") or f"{BASE}/buscar/doc.php?id={item['external_id']}"
+
     def collect_day(self,day:date):
         out=[]
         for item in self._summary_items(day):
-            boe_id=item["external_id"]
-            text_url=f"{BASE}/diario_boe/txt.php?id={boe_id}"
-            detail_html=self._get(text_url)
-            if detail_html:
-                detail_text=BeautifulSoup(detail_html,"html.parser").get_text("\n",strip=True)
-            else:
-                detail_text=item["title"]
-                text_url=item["href"]
+            detail_text,source_url=self._detail_text(item)
             combined=item["title"]+"\n"+detail_text
-            if not RELEVANT.search(combined):continue
+            if not RELEVANT.search(combined) or EXCLUDE.search(item["title"]):
+                continue
             event=parse_event(
-                source_code=self.code,external_id=boe_id,publication_date=day.isoformat(),
-                title=item["title"],url=text_url,raw_text=detail_text
+                source_code=self.code,external_id=item["external_id"],publication_date=day.isoformat(),
+                title=item["title"],url=source_url,raw_text=detail_text
             )
             if event.technology:out.append(event)
         return out
