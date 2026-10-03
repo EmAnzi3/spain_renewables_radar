@@ -46,6 +46,15 @@ jobs:
             sum(case when province is null then 1 else 0 end) no_province,
             sum(case when expediente is null then 1 else 0 end) no_expediente
             from projects""").fetchone()))
+          print("QUALITY_COUNTS")
+          try:
+              import csv
+              from collections import Counter
+              with open("reports/quality_issues_latest.csv",encoding="utf-8-sig") as f:
+                  counts=Counter(r.get("severity") for r in csv.DictReader(f))
+              print(dict(counts))
+          except FileNotFoundError:
+              print({})
           PY
       - uses: actions/upload-artifact@v4
         with:
