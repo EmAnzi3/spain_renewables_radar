@@ -18,9 +18,11 @@ RELEVANT=re.compile(
 )
 EXCLUDE=re.compile(
     r"contrataci[oó]n|licitaci[oó]n|adjudicaci[oó]n|autoconsumo|"
-    r"instalaci[oó]n\s+de\s+paneles\s+fotovoltaicos\s+en\s+(?:edificios|cubiertas)",
+    r"instalaci[oó]n\s+de\s+paneles\s+fotovoltaicos\s+en\s+(?:edificios|cubiertas)|"
+    r"almacenamiento\s+de\s+(?:productos\s+cosm[eé]ticos|productos\s+qu[ií]micos|residuos|chatarra)",
     re.I,
 )
+
 NID_RE=re.compile(r"\[\s*NID\s+(\d{4})/(\d+)\s*\]",re.I)
 PDF_RUTA_RE=re.compile(r"^(\d{4}/\d{2}/\d{2})/pdf/(.+)\.pdf$",re.I)
 
