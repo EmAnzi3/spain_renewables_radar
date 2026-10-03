@@ -144,6 +144,14 @@
     "url": "https://web.larioja.org/bor-portada"
   },
   {
+    "code": "INE_MUNICIPALITIES",
+    "name": "Instituto Nacional de Estadística — municipios",
+    "kind": "enrichment",
+    "scope": "national",
+    "implemented": true,
+    "url": "https://servicios.ine.es/wstempus/js/ES/VALORES_VARIABLE/19?clasif=121&det=2"
+  },
+  {
     "code": "REE_ACCESS",
     "name": "Red Eléctrica — acceso y conexión",
     "kind": "enrichment",
