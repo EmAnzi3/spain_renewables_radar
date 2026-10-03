@@ -32,9 +32,9 @@ PROVINCE_CODE_TO_NAME = {
 }
 
 LOCATION_ANCHOR_RE = re.compile(
-    r"(?:t[eé]rminos?\\s+municipales?\\s+de|municipios?\\s+de|ubicaci[oó]n\\s*:|"
-    r"emplazamiento\\s*:|situad[oa]s?\\s+en|ubicad[oa]s?\\s+en)\\s+"
-    r"([^.;:\\n]{2,260})",
+    r"(?:t[eé]rminos?\s+municipales?\s+de|municipios?\s+de|ubicaci[oó]n\s*:|"
+    r"emplazamiento\s*:|situad[oa]s?\s+en|ubicad[oa]s?\s+en)\s+"
+    r"([^.;:\n]{2,260})",
     re.I,
 )
 
@@ -43,7 +43,7 @@ def _norm(value: str) -> str:
     value = unicodedata.normalize("NFKD", value or "")
     value = "".join(ch for ch in value if not unicodedata.combining(ch))
     value = re.sub(r"[^a-zA-Z0-9]+", " ", value).strip().casefold()
-    return re.sub(r"\\s+", " ", value)
+    return re.sub(r"\s+", " ", value)
 
 
 def _field(row: dict, *names: str):
@@ -76,7 +76,7 @@ def parse_ine_municipalities(payload) -> list[Municipality]:
         code = _field(row, "Codigo", "Código", "code", "cod")
         if isinstance(code, (int, float)):
             code = str(int(code))
-        code = re.sub(r"\\D", "", str(code or ""))
+        code = re.sub(r"\D", "", str(code or ""))
         if not name or len(code) < 5:
             continue
         code = code.zfill(5)
@@ -160,7 +160,7 @@ def enrich_missing_project_geography(conn, catalog: list[Municipality], source_u
         ).fetchall()
         found = {}
         for event in events:
-            text_value = f"{event['title'] or ''}\\n{event['raw_text'] or ''}"
+            text_value = f"{event['title'] or ''}\n{event['raw_text'] or ''}"
             for municipality in municipalities_in_text(text_value, catalog, project["ccaa"]):
                 found[municipality.code] = municipality
 
