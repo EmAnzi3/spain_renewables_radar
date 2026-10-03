@@ -5,6 +5,8 @@ import html
 import json
 from pathlib import Path
 
+from app.scoring import score_project
+
 def write_changes(events,out_dir="reports/change_reports"):
     out=Path(out_dir);out.mkdir(parents=True,exist_ok=True)
     csv_path=out/"changes_latest.csv";html_path=out/"changes_latest.html"
@@ -23,10 +25,127 @@ def write_changes(events,out_dir="reports/change_reports"):
 <table><thead><tr>{''.join(f'<th>{k}</th>' for k in fields)}</tr></thead><tbody>{rows}</tbody></table></body></html>""",encoding="utf-8")
     return csv_path,html_path
 
+def build_commercial_rows(conn):
+    projects=[dict(r) for r in conn.execute("SELECT * FROM projects").fetchall()]
+    ree_ccaas={r["ccaa"] for r in conn.execute(
+        "SELECT DISTINCT ccaa FROM ree_node_capacity WHERE ccaa IS NOT NULL"
+    ).fetchall()}
+    geo_rows={r["project_key"]:dict(r) for r in conn.execute(
+        "SELECT project_key,municipalities_json,provinces_json,status FROM project_geo_enrichment"
+    ).fetchall()}
+    rows=[]
+    for project in projects:
+        event_types={r["event_type"] for r in conn.execute(
+            "SELECT event_type FROM events WHERE project_key=?",(project["project_key"],)
+        ).fetchall()}
+        scored=score_project(
+            project,
+            event_types=event_types,
+            ree_context_available=bool(project.get("ccaa") and project.get("ccaa") in ree_ccaas),
+            epc_status="EPC_UNKNOWN",
+        )
+        row=dict(project)
+        row["commercial_score"]=scored["score"]
+        row["commercial_priority"]=scored["priority"]
+        row["epc_status"]=scored["epc_status"]
+        row["score_components"]=scored["components"]
+        row["age_days"]=scored["age_days"]
+        geo=geo_rows.get(project["project_key"])
+        if geo:
+            row["municipalities"]=json.loads(geo.get("municipalities_json") or "[]")
+            row["geo_enrichment_status"]=geo.get("status")
+        else:
+            row["municipalities"]=[]
+            row["geo_enrichment_status"]=None
+        rows.append(row)
+    rows.sort(
+        key=lambda x:(x["commercial_score"],x.get("last_seen") or "",x.get("power_mw") or -1),
+        reverse=True,
+    )
+    return rows
+
+
+def build_province_view_from_rows(rows):
+    provinces={}
+    for row in rows:
+        province=row.get("province")
+        if not province:
+            continue
+        item=provinces.setdefault(province,{
+            "province":province,
+            "projects":0,
+            "known_mw":0.0,
+            "projects_without_mw":0,
+            "pv":0,
+            "wind":0,
+            "bess_hybrid":0,
+            "early":0,
+            "permitting":0,
+            "authorized":0,
+            "preconstruction":0,
+            "blocked":0,
+        })
+        item["projects"]+=1
+        if row.get("power_mw") is None:
+            item["projects_without_mw"]+=1
+        else:
+            item["known_mw"]+=float(row["power_mw"])
+        tech=row.get("technology")
+        if tech=="PV":
+            item["pv"]+=1
+        elif tech=="WIND":
+            item["wind"]+=1
+        elif tech in {"BESS","HYBRID"}:
+            item["bess_hybrid"]+=1
+        stage=(row.get("commercial_stage") or "").casefold()
+        if stage in item:
+            item[stage]+=1
+    out=list(provinces.values())
+    for item in out:
+        item["known_mw"]=round(item["known_mw"],6)
+    out.sort(key=lambda x:(-x["known_mw"],-x["projects"],x["province"]))
+    return out
+
+
+def write_province_view(conn,out_dir="reports"):
+    out=Path(out_dir);out.mkdir(parents=True,exist_ok=True)
+    rows=build_commercial_rows(conn)
+    provinces=build_province_view_from_rows(rows)
+    fields=[
+        "province","projects","known_mw","projects_without_mw","pv","wind","bess_hybrid",
+        "early","permitting","authorized","preconstruction","blocked",
+    ]
+    csv_path=out/"province_view_latest.csv"
+    html_path=out/"province_view_latest.html"
+    with csv_path.open("w",newline="",encoding="utf-8-sig") as f:
+        w=csv.DictWriter(f,fieldnames=fields);w.writeheader();w.writerows(provinces)
+    body="".join(
+        "<tr>"+"".join(f"<td>{html.escape(str(row.get(k,'')))}</td>" for k in fields)+"</tr>"
+        for row in provinces
+    )
+    html_path.write_text(
+        "<!doctype html><html><head><meta charset='utf-8'><title>Vista provinciale</title>"
+        "<style>body{font-family:Arial,sans-serif;margin:28px;color:#172033}"
+        "table{border-collapse:collapse;width:100%;font-size:13px}"
+        "th,td{border-bottom:1px solid #ddd;padding:8px;text-align:left}"
+        "th{background:#f3f6fa;position:sticky;top:0}</style></head><body>"
+        "<h1>Spain Renewables Radar — vista provinciale</h1>"
+        "<p>I MW riportati sono esclusivamente quelli identificati. I progetti senza MW sono conteggiati a parte.</p>"
+        "<table><thead><tr>"+''.join(f"<th>{k}</th>" for k in fields)+"</tr></thead>"
+        "<tbody>"+body+"</tbody></table></body></html>",
+        encoding="utf-8",
+    )
+    return provinces,csv_path,html_path
+
+
 def export_dashboard(conn,docs_dir="docs"):
     docs=Path(docs_dir);docs.mkdir(parents=True,exist_ok=True)
-    rows=[dict(r) for r in conn.execute("SELECT * FROM projects ORDER BY last_seen DESC,power_mw DESC").fetchall()]
-    (docs/"data.json").write_text(json.dumps({"records":rows},ensure_ascii=False,indent=2),encoding="utf-8")
+    rows=build_commercial_rows(conn)
+    provinces=build_province_view_from_rows(rows)
+    (docs/"data.json").write_text(
+        json.dumps({"records":rows,"provinces":provinces},ensure_ascii=False,indent=2),
+        encoding="utf-8",
+    )
     return rows
 
 
