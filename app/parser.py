@@ -9,6 +9,7 @@ from app.geo import find_province
 from app.lifecycle import classify_event, commercial_stage
 
 MW_RE=re.compile(r"(?<!\d)(\d{1,4}(?:[\.,]\d{1,6})?)\s*(?:MWp|MWac|MW)\b",re.I)
+KW_RE=re.compile(r"(?<!\d)(\d{1,7}(?:[\.,]\d{1,3})?)\s*kW\b",re.I)
 BOE_ID_RE=re.compile(r"BOE-[AB]-\d{4}-\d+",re.I)
 QUOTED_RE=re.compile(r"[«\"]([^»\"]{3,120})[»\"]")
 EXPEDIENTE_RE=re.compile(
@@ -18,6 +19,30 @@ EXPEDIENTE_RE=re.compile(
     re.I,
 )
 PROJECT_PATTERNS=[
+    # Storage/hybrid names are often more explicit than the generation plant
+    # later mentioned in the same title.
+    re.compile(
+        r"(?:m[oó]dulo|planta|sistema)\s+de\s+almacenamiento"
+        r"(?:\s+de\s+energ[ií]a)?(?:\s+electroqu[ií]mico)?"
+        r"(?:\s+por\s+bater[ií]as?)?(?:\s+h[ií]brid[oa])?\s+"
+        r"[«“\"]([^»”\"]{2,120})[»”\"]",
+        re.I,
+    ),
+    re.compile(
+        r"(?:m[oó]dulo|planta|sistema)\s+de\s+almacenamiento"
+        r"(?:\s+de\s+energ[ií]a)?(?:\s+electroqu[ií]mico)?"
+        r"(?:\s+por\s+bater[ií]as?)?(?:\s+h[ií]brid[oa])?\s+"
+        r"(.{3,120}?)\s*,?\s+de\s+\d{1,4}(?:[\.,]\d+)?\s*(?:MWp|MWac|MW)\b",
+        re.I,
+    ),
+    re.compile(r"proyecto\s+de\s+hibridaci[oó]n\s+[«“\"]([^»”\"]{3,120})[»”\"]",re.I),
+    re.compile(r"parque\s+(?:solar\s+)?fotovoltaico\s+(?:denominado\s+)?[«“\"]?([^,»”\"]{3,120})",re.I),
+    re.compile(
+        r"(?:instalaci[oó]n|planta)\s+(?:solar\s+)?fotovoltaica\s+"
+        r"de\s+\d{1,7}(?:[\.,]\d+)?\s*(?:kW|MWp|MWac|MW)\s+"
+        r"denominada\s+[«“\"]?([^,»”\"]{3,120})",
+        re.I,
+    ),
     # Put the power-terminated form first so decimal commas do not truncate the
     # project name (e.g. "... fotovoltaica de Terrapower Generación de 44,16 MWp").
     re.compile(
@@ -96,16 +121,26 @@ def detect_technology(text:str)->str|None:
     if has_storage:return "BESS"
     return None
 
+def _parse_spanish_number(raw:str)->float:
+    return float(raw.replace(".","").replace(",", ".")) if "," in raw else float(raw)
+
 def extract_power_mw(text:str)->float|None:
     values=[]
     for m in MW_RE.finditer(text or ""):
-        raw=m.group(1)
         try:
-            value=float(raw.replace(".","").replace(",",".")) if "," in raw else float(raw)
-            values.append(value)
+            values.append(_parse_spanish_number(m.group(1)))
         except ValueError:
             pass
-    return values[0] if values else None
+    if values:
+        return values[0]
+
+    # Municipal notices often publish sub-MW plants only in kW.
+    for m in KW_RE.finditer(text or ""):
+        try:
+            return _parse_spanish_number(m.group(1))/1000.0
+        except ValueError:
+            pass
+    return None
 
 def _clean_project_name(value:str)->str:
     value=value.strip(" '“”«»")
@@ -120,16 +155,30 @@ def _clean_project_name(value:str)->str:
         value=re.split(pat,value,maxsplit=1,flags=re.I)[0]
     return value.strip(" ,.;:-")
 
+SUSPICIOUS_PROJECT_NAME_RE=re.compile(
+    r"^(?:bolet[ií]n oficial|existente\b|por bater[ií]as\b|estar[aá] sometida\b|"
+    r"a instancia de\b|de autoconsumo\b|fase\s+\d|y\s+\d|\(csfv\)$)",
+    re.I,
+)
+
+def _acceptable_project_name(value:str)->bool:
+    value=(value or "").strip()
+    return 3<=len(value)<=120 and not SUSPICIOUS_PROJECT_NAME_RE.search(value)
+
 def extract_project_name(text:str)->str|None:
     for p in PROJECT_PATTERNS:
         m=p.search(text or "")
         if m:
             value=_clean_project_name(m.group(1))
-            if 3<=len(value)<=120:return value
+            if _acceptable_project_name(value):
+                return value
     for m in QUOTED_RE.finditer(text or ""):
         value=_clean_project_name(m.group(1))
         low=normalize_text(value)
-        if any(k in low for k in ("fotovolta","eolic","solar","hibrid")) or len(value.split())<=8:
+        if _acceptable_project_name(value) and (
+            any(k in low for k in ("fotovolta","eolic","solar","hibrid","bess"))
+            or len(value.split())<=8
+        ):
             return value
     return None
 
