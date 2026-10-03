@@ -12,6 +12,19 @@ class ParserTests(unittest.TestCase):
         got=BOECollector.parse_summary_html(html)
         self.assertEqual({x["external_id"] for x in got},{"BOE-A-2026-12701","BOE-B-2026-20000"})
 
+    def test_boe_excludes_sabateria_false_battery_match(self):
+        payload={"data":{"sumario":{"diario":[{"seccion":[{"departamento":[{"item":[
+            {"identificador":"BOE-A-2026-18966","titulo":"Resolución por la que se inscribe en el Registro de Fundaciones la Fundación La Sabateria.","url_html":"x"},
+            {"identificador":"BOE-B-2026-99999","titulo":"Información pública de sistema de baterías BESS Demo de 20 MW","url_html":"x"}
+        ]}]}]}]}}}
+        got=BOECollector.parse_api_json(payload)
+        self.assertEqual([x["external_id"] for x in got],["BOE-B-2026-99999"])
+        false=parse_event(
+            source_code="BOE",external_id="X-SAB",publication_date="2026-09-10",
+            title="Fundación La Sabateria",url="x",raw_text="Fundación cultural en Lleida.",
+        )
+        self.assertIsNone(false.technology)
+
     def test_boe_api_parser_filters_procurement(self):
         payload={"data":{"sumario":{"diario":[{"seccion":[{"departamento":[{"item":[
             {"identificador":"BOE-B-2026-31656","titulo":"Instalación Fotovoltaica «Eclipse Solar» de 99,935 MW","url_html":"https://www.boe.es/diario_boe/txt.php?id=BOE-B-2026-31656"},
