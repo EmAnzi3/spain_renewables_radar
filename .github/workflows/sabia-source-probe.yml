@@ -133,6 +133,13 @@ jobs:
                   if pos>=0:
                       print(" POST_FIELD",code,label,"=>",body[pos:pos+500])
               print(" POST_HAS_MUEL",code,"MUEL" in body.upper())
+              print(" POST_BODY",code,body[:3500])
+              for tag in ds.find_all(["a","input","button","form"]):
+                  attrs=" ".join(str(v) for v in tag.attrs.values())
+                  txt=" ".join(tag.stripped_strings)
+                  low=(attrs+" "+txt).casefold()
+                  if any(k in low for k in ("proy_detalle","ea_detalle","document","expediente","tramita")):
+                      print(" POST_CONTROL",code,tag.name,tag.attrs,repr(txt[:300]))
           for text,href in detail[:3]:
               d=s.get(href,timeout=60)
               print("DETAIL_STATUS",d.status_code,href)
