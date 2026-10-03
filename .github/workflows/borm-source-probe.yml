@@ -91,6 +91,28 @@ jobs:
                           dr=s.get(res.get("url"),timeout=90)
                           print("DOWNLOAD",res.get("format"),dr.status_code,dr.url,dr.headers.get("content-type"),len(dr.content))
                           print(dr.text[:12000])
+                          if str(res.get("format") or "").upper()=="JSON" and dr.ok:
+                              import datetime as dt, json, re
+                              rows=dr.json()
+                              print("JSON_ROWS",len(rows))
+                              relevant=re.compile(
+                                  r"fotovolta|parque\\s+e[oó]lico|instalaci[oó]n\\s+e[oó]lica|"
+                                  r"almacenamiento|bater[ií]a|hibridaci[oó]n|aerogenerador",
+                                  re.I,
+                              )
+                              exclude=re.compile(
+                                  r"contrataci[oó]n|licitaci[oó]n|adjudicaci[oó]n|autoconsumo|"
+                                  r"reciclaje|residuos|veh[ií]culos|curso|subvenci[oó]n",
+                                  re.I,
+                              )
+                              print("RECENT_RENEWABLE_ROWS")
+                              for row in rows:
+                                  if not isinstance(row,list) or len(row)<20:
+                                      continue
+                                  date_txt=str(row[4] or "")[:10]
+                                  summary=str(row[5] or "")
+                                  if date_txt >= "2026-09-03" and relevant.search(summary) and not exclude.search(summary):
+                                      print("ROW",json.dumps(row[:20],ensure_ascii=False))
                       except Exception as exc:
                           print("DOWNLOAD_ERROR",res.get("url"),repr(exc))
           except Exception as exc:
