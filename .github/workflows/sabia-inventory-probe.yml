@@ -1,0 +1,102 @@
+name: sabia-inventory-probe
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/sabia-inventory-probe.yml'
+permissions:
+  contents: read
+concurrency:
+  group: sabia-inventory-probe-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Probe all renewable types and preserve evidence
+        run: |
+          python - <<'PY'
+          import json, re, time
+          from pathlib import Path
+          from collections import Counter
+          import requests
+          from bs4 import BeautifulSoup
+          from app.collectors.sabia import parse_detail_html
+          url='https://sede.miteco.gob.es/portal/site/seMITECO/navServicioContenido'
+          out=Path('reports/sabia_inventory_probe'); out.mkdir(parents=True,exist_ok=True)
+          report={'queries':[], 'details':[], 'coverage':'PROBE_ONLY_NOT_CERTIFIED'}
+          for kind in ('FTV','EOL','EOM','HIB','ALM'):
+              started=time.monotonic()
+              q={'type':kind, 'state_filter':None}
+              try:
+                  with requests.Session() as s:
+                      s.headers['User-Agent']='SpainRenewablesRadar/0.2 official-source coverage audit'
+                      form_response=s.get(url,timeout=(10,45)); form_response.raise_for_status()
+                      soup=BeautifulSoup(form_response.text,'html.parser')
+                      form=soup.find('form',id='formulario')
+                      if form is None: raise ValueError('Search form missing')
+                      payload={i['name']:i.get('value','') for i in form.select('input[name]') if i.get('type')=='hidden'}
+                      payload.update(accion='proy_resultados',select_tipo=kind,select_estado_tramitacion='',select_comunidades='',codigo='',titulo='',select_organo_sustantivo='',select_promotor='')
+                      r=s.post(url,data=payload,timeout=(10,60)); r.raise_for_status()
+                      (out/(kind+'.html')).write_text(r.text,encoding='utf-8')
+                      rs=BeautifulSoup(r.text,'html.parser')
+                      table=rs.find('table',id='tablaResultados')
+                      text=' '.join(rs.stripped_strings)
+                      q['http_status']=r.status_code
+                      q['bytes']=len(r.content)
+                      q['text_prefix']=text[:650]
+                      q['text_suffix']=text[-1200:]
+                      controls=[]
+                      for el in rs.find_all(['a','input','button']):
+                          attrs=el.attrs
+                          label=' '.join(el.stripped_strings)
+                          if any(x in (str(attrs)+' '+label).casefold() for x in ('siguiente','anterior','pagina','página','pagin','next')):
+                              controls.append({'tag':el.name,'attrs':attrs,'text':label[:100]})
+                      q['pagination_controls']=controls[:15]
+                      if table is None: raise ValueError('Missing result table; NOT accepted as zero results: '+text[-500:])
+                      rows=[]
+                      for tr in table.find_all('tr'):
+                          cells=[' '.join(td.stripped_strings) for td in tr.find_all('td')]
+                          if len(cells)>=3 and re.fullmatch(r'20\d{6}',cells[0]):
+                              rows.append({'code':cells[0],'title':cells[1],'state':cells[2]})
+                      q['rows']=len(rows)
+                      q['states']=dict(Counter(x['state'] for x in rows))
+                      q['samples']=rows[:2]+rows[-2:]
+                      (out/(kind+'.json')).write_text(json.dumps(rows,ensure_ascii=False,indent=2),encoding='utf-8')
+                      q['status']='PARSED_NOT_CERTIFIED'
+              except Exception as exc:
+                  q['status']='ERROR'; q['error']=str(exc)
+              q['seconds']=round(time.monotonic()-started,2)
+              report['queries'].append(q)
+              print('INVENTORY',json.dumps(q,ensure_ascii=False),flush=True)
+              (out/'summary.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+          # Read known official detail pages in independent sessions. No invented dates.
+          for code in ('20260236','20260181','20260211'):
+              try:
+                  r=requests.get(url,params={'accion':'proy_detalle','codigo_seleccionado':code,'id_pagina_cargada':'RESULTADOS'},timeout=(10,45))
+                  r.raise_for_status(); detail=parse_detail_html(r.text)
+                  if detail['environmental_code']!=code: raise ValueError('Detail identity mismatch')
+                  (out/(code+'.html')).write_text(r.text,encoding='utf-8')
+                  detail.pop('raw_text',None)
+                  report['details'].append(detail)
+                  print('DETAIL',json.dumps(detail,ensure_ascii=False),flush=True)
+              except Exception as exc:
+                  report['details'].append({'code':code,'error':str(exc)})
+          (out/'summary.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+          if any(x['status']=='ERROR' for x in report['queries']):
+              raise SystemExit('SABIA inventory incomplete; inspect saved source evidence')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sabia-inventory-probe
+          path: reports/sabia_inventory_probe/
+          if-no-files-found: error
