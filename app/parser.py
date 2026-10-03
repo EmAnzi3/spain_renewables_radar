@@ -19,6 +19,9 @@ EXPEDIENTE_RE=re.compile(
     re.I,
 )
 PROJECT_PATTERNS=[
+    # Explicit umbrella hybrid names must beat component descriptions that
+    # follow later in the same title (e.g. HÍBRIDO “CLAVELLINAS”, compuesto...).
+    re.compile(r"h[ií]brid[oa]\s+[«“\"]([^»”\"]{2,120})[»”\"]",re.I),
     # Storage/hybrid names are often more explicit than the generation plant
     # later mentioned in the same title.
     re.compile(
