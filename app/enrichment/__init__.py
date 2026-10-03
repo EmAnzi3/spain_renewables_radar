@@ -1,4 +1,5 @@
 from .ree_capacity import fetch_capacity_snapshot, save_capacity_snapshot, write_capacity_exports
+from .ine_municipalities import fetch_ine_municipalities, enrich_missing_project_geography
 from .miteco_registry import (
     fetch_registry_snapshot,
     save_registry_snapshot,
@@ -7,6 +8,8 @@ from .miteco_registry import (
 )
 
 __all__=[
+    "fetch_ine_municipalities",
+    "enrich_missing_project_geography",
     "fetch_capacity_snapshot",
     "save_capacity_snapshot",
     "write_capacity_exports",
