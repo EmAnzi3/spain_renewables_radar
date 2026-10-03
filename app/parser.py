@@ -24,14 +24,14 @@ PROJECT_PATTERNS=[
     re.compile(
         r"(?:m[oó]dulo|planta|sistema)\s+de\s+almacenamiento"
         r"(?:\s+de\s+energ[ií]a)?(?:\s+electroqu[ií]mico)?"
-        r"(?:\s+por\s+bater[ií]as?)?(?:\s+h[ií]brid[oa])?\s+"
+        r"(?:\s+por\s+bater[ií]as?)?(?:\s+h[ií]brid[oa])?(?:\s+de\s+la\s+instalaci[oó]n\s+h[ií]brida)?\s+"
         r"[«“\"]([^»”\"]{2,120})[»”\"]",
         re.I,
     ),
     re.compile(
         r"(?:m[oó]dulo|planta|sistema)\s+de\s+almacenamiento"
         r"(?:\s+de\s+energ[ií]a)?(?:\s+electroqu[ií]mico)?"
-        r"(?:\s+por\s+bater[ií]as?)?(?:\s+h[ií]brid[oa])?\s+"
+        r"(?:\s+por\s+bater[ií]as?)?(?:\s+h[ií]brid[oa])?(?:\s+de\s+la\s+instalaci[oó]n\s+h[ií]brida)?\s+"
         r"(.{3,120}?)\s*,?\s+de\s+\d{1,4}(?:[\.,]\d+)?\s*(?:MWp|MWac|MW)\b",
         re.I,
     ),
@@ -40,7 +40,7 @@ PROJECT_PATTERNS=[
     re.compile(
         r"(?:instalaci[oó]n|planta)\s+(?:solar\s+)?fotovoltaica\s+"
         r"de\s+\d{1,7}(?:[\.,]\d+)?\s*(?:kW|MWp|MWac|MW)\s+"
-        r"denominada\s+[«“\"]?([^,»”\"]{3,120})",
+        r"denominada\s+[«“\"]?(.{3,120}?)(?=[»”\"]?(?:\s+que\b|\s+en\b|,|\.|$))",
         re.I,
     ),
     # Put the power-terminated form first so decimal commas do not truncate the
