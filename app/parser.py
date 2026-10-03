@@ -11,7 +11,7 @@ from app.lifecycle import classify_event, commercial_stage
 MW_RE=re.compile(r"(?<!\d)(\d{1,4}(?:[\.,]\d{1,6})?)\s*(?:MWp|MWac|MW)\b",re.I)
 KW_RE=re.compile(r"(?<!\d)(\d{1,7}(?:[\.,]\d{1,3})?)\s*kW\b",re.I)
 BOE_ID_RE=re.compile(r"BOE-[AB]-\d{4}-\d+",re.I)
-QUOTED_RE=re.compile(r"[«\"]([^»\"]{3,120})[»\"]")
+QUOTED_RE=re.compile(r"[«“\"]([^»”\"]{3,120})[»”\"]")
 EXPEDIENTE_RE=re.compile(
     r"(?:expedientes?|expdte\.?|expte\.?|exp\.|c[oó]digo)"
     r"(?:\s*(?:n[ºo°]\.?|n[uú]mero))?\s*[:\-]?\s*"
@@ -51,11 +51,11 @@ PROJECT_PATTERNS=[
         r"de\s+\d{1,4}(?:[\.,]\d+)?\s*(?:MWp|MWac|MW)\b",
         re.I,
     ),
-    re.compile(r"(?:instalaci[oó]n|planta)\s+(?:solar\s+)?fotovoltaica\s+(?:denominada\s+)?[«\"]?([^,»\"\.]{3,140})",re.I),
-    re.compile(r"parque\s+e[oó]lico\s+(?:denominado\s+)?[«\"]?([^,»\"\.]{3,140})",re.I),
-    re.compile(r"instalaci[oó]n\s+de\s+producci[oó]n\s+de\s+energ[ií]a\s+el[eé]ctrica\s+[«\"]?([^,»\"\.]{3,140})",re.I),
-    re.compile(r"m[oó]dulo\s+de\s+almacenamiento\s+de\s+la\s+instalaci[oó]n\s+h[ií]brida\s+[«\"]?([^,»\"\.]{3,140})",re.I),
-    re.compile(r"(?:m[oó]dulo|sistema)\s+de\s+almacenamiento\s+(?:denominado\s+)?[«\"]?([^,»\"\.]{3,140})",re.I),
+    re.compile(r"(?:instalaci[oó]n|planta)\s+(?:solar\s+)?fotovoltaica\s+(?:denominada\s+)?[«“\"]?([^,»”\"\.]{3,140})",re.I),
+    re.compile(r"parque\s+e[oó]lico\s+(?:denominado\s+)?[«“\"]?([^,»”\"\.]{3,140})",re.I),
+    re.compile(r"instalaci[oó]n\s+de\s+producci[oó]n\s+de\s+energ[ií]a\s+el[eé]ctrica\s+[«“\"]?([^,»”\"\.]{3,140})",re.I),
+    re.compile(r"m[oó]dulo\s+de\s+almacenamiento\s+de\s+la\s+instalaci[oó]n\s+h[ií]brida\s+[«“\"]?([^,»”\"\.]{3,140})",re.I),
+    re.compile(r"(?:m[oó]dulo|sistema)\s+de\s+almacenamiento\s+(?:denominado\s+)?[«“\"]?([^,»”\"\.]{3,140})",re.I),
 ]
 
 REGIONAL_SOURCE_SCOPE={
