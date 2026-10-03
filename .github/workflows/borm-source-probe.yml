@@ -69,6 +69,33 @@ jobs:
               except Exception as exc:
                   print("TARGET_ERROR",url,repr(exc))
 
+          print("\n===== REGION MURCIA OPEN DATA / CKAN =====")
+          api="https://datosabiertos.regiondemurcia.es/api/3/action/package_show"
+          try:
+              rr=s.get(
+                  api,
+                  params={"id":"362e44bc-fb49-46ad-8cda-4061f6d48333"},
+                  timeout=45,
+              )
+              print("CKAN_PACKAGE",rr.status_code,rr.url,rr.headers.get("content-type"),len(rr.content))
+              rr.raise_for_status()
+              pkg=rr.json()["result"]
+              print("PACKAGE_TITLE",pkg.get("title"))
+              for res in pkg.get("resources",[]):
+                  print(
+                      "RESOURCE",res.get("id"),res.get("format"),repr(res.get("name")),
+                      "|",res.get("url")
+                  )
+                  if str(res.get("format") or "").upper() in {"CSV","JSON"}:
+                      try:
+                          dr=s.get(res.get("url"),timeout=90)
+                          print("DOWNLOAD",res.get("format"),dr.status_code,dr.url,dr.headers.get("content-type"),len(dr.content))
+                          print(dr.text[:12000])
+                      except Exception as exc:
+                          print("DOWNLOAD_ERROR",res.get("url"),repr(exc))
+          except Exception as exc:
+              print("CKAN_ERROR",repr(exc))
+
           # Known current-ish bulletin service shape to verify runner access.
           print("\n===== SERVICE SHAPE =====")
           samples=[
