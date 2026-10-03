@@ -5,6 +5,14 @@ from app.collectors.bocm import BOCMCollector
 from app.parser import parse_event
 
 class BOCMCollectorTests(unittest.TestCase):
+    def test_session_retries_transient_get_and_post_failures(self):
+        collector=BOCMCollector()
+        retry=collector.session.get_adapter("https://").max_retries
+        self.assertGreaterEqual(retry.total,4)
+        self.assertIn(500,retry.status_forcelist)
+        self.assertIn("GET",retry.allowed_methods)
+        self.assertIn("POST",retry.allowed_methods)
+
     def test_summary_xml_filters_procurement_and_deduplicates(self):
         xml=Path("tests/fixtures/bocm_summary_sample.xml").read_text(encoding="utf-8")
         rows=BOCMCollector.parse_summary_xml(xml)
