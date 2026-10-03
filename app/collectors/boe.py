@@ -13,7 +13,14 @@ from app.parser import BOE_ID_RE, parse_event
 BASE="https://www.boe.es"
 API_BASE=f"{BASE}/datosabiertos/api/boe/sumario"
 RELEVANT=re.compile(r"fotovolta|parque\s+e[oó]lico|instalaci[oó]n\s+e[oó]lica|almacenamiento|bater[ií]a|hibridaci[oó]n|aerogenerador",re.I)
-EXCLUDE=re.compile(r"formalizaci[oó]n\s+de\s+contratos|anuncio\s+de\s+licitaci[oó]n|adjudicaci[oó]n\s+de\s+contrat|autoconsumo|objeto:\s*instalaci[oó]n\s+de\s+paneles",re.I)
+EXCLUDE=re.compile(
+    r"formalizaci[oó]n\s+de\s+contratos|anuncio\s+de\s+licitaci[oó]n|"
+    r"adjudicaci[oó]n\s+de\s+contrat|autoconsumo|objeto:\s*instalaci[oó]n\s+de\s+paneles|"
+    r"direcci[oó]n general del catastro|ponencia de valores|"
+    r"se declaran instalaciones energ[eé]ticas estrat[eé]gicas los proyectos",
+    re.I,
+)
+
 
 class BOECollector:
     code="BOE"
