@@ -1,0 +1,59 @@
+name: bocm-source-probe
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/bocm-source-probe.yml"
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests beautifulsoup4
+      - name: Inspect BOCM official XML and RSS
+        run: |
+          python - <<'PY'
+          import urllib.parse, requests
+          from bs4 import BeautifulSoup
+
+          s=requests.Session()
+          s.headers["User-Agent"]="SpainRenewablesRadar/0.1"
+          pages=[
+              "https://www.bocm.es/",
+              "https://www.bocm.es/boletin/bocm-20261002-235?language=es",
+              "https://www.bocm.es/rss",
+          ]
+          found=[]
+          for url in pages:
+              print("\n===== PAGE",url,"=====")
+              try:
+                  r=s.get(url,timeout=45)
+                  print("STATUS",r.status_code,r.url,r.headers.get("content-type"),len(r.content))
+                  r.raise_for_status()
+                  soup=BeautifulSoup(r.text,"html.parser")
+                  print("TITLE",soup.title.get_text(" ",strip=True) if soup.title else "")
+                  for a in soup.find_all("a",href=True):
+                      href=urllib.parse.urljoin(r.url,a["href"])
+                      label=" ".join(a.stripped_strings)
+                      blob=(href+" "+label).lower()
+                      if any(k in blob for k in (".xml","rss","sumario","cm_sumario","cm_orden_bocm")):
+                          print("LINK",repr(label[:180]),"|",href)
+                          found.append(href)
+              except Exception as exc:
+                  print("PAGE_ERROR",repr(exc))
+
+          print("\n===== FETCH XML/RSS TARGETS =====")
+          for url in list(dict.fromkeys(found)):
+              if not any(k in url.lower() for k in (".xml","rss")):
+                  continue
+              try:
+                  r=s.get(url,timeout=45)
+                  print("\nTARGET",url,r.status_code,r.url,r.headers.get("content-type"),len(r.content))
+                  print(r.text[:20000])
+              except Exception as exc:
+                  print("TARGET_ERROR",url,repr(exc))
+          PY
