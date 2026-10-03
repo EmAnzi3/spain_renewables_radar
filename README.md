@@ -18,7 +18,8 @@ Collector ufficiali attualmente implementati:
 - **BOJA** — Andalucía;
 - **DOCM** — Castilla-La Mancha;
 - **DOE** — Extremadura;
-- **BORM** — Región de Murcia, acquisito dal dataset ufficiale Open Data degli indici BORM.
+- **BORM** — Región de Murcia, acquisito dal dataset ufficiale Open Data degli indici BORM;
+- **BOCM** — Comunidad de Madrid, acquisito dalla fonte ufficiale per data/XML.
 
 Enrichment gratuito implementato:
 
@@ -29,12 +30,11 @@ Il registry `config/sources.json` contiene anche gli altri bollettini autonomici
 
 ## Stato validato
 
-Backfill ufficiale di 30 giorni, run GitHub Actions **37108715840**:
+Backfill ufficiale di 30 giorni, run GitHub Actions **37114835344**:
 
-- **102 progetti**;
-- **124 eventi amministrativi**;
-- **0 errori source/day**;
-- quality gate: **0 ERROR, 1 WARN, 41 INFO**;
+- **107 progetti**;
+- **129 eventi amministrativi**;
+- quality gate: **0 ERROR, 1 WARN, 44 INFO**;
 - BOE 42 eventi;
 - BOCYL 15;
 - BOA 24;
@@ -42,8 +42,10 @@ Backfill ufficiale di 30 giorni, run GitHub Actions **37108715840**:
 - DOCM 17;
 - DOE 8;
 - BORM 11;
+- BOCM 5;
 - REE: **931 nodi** nello snapshot 2026-10-01;
-- MITECO: **71.727 impianti** nello snapshot 2026-10-03, con **8 matching esatti** conservativi.
+- MITECO: **71.727 impianti** nello snapshot 2026-10-03, con **8 matching esatti** conservativi;
+- 2 warning source/day BOA dovuti a errori di rete transitori; il workflow resta verde e il collector ha retry.
 
 Il radar conserva un progetto come entità unica e accumula eventi successivi. Non crea un nuovo progetto a ogni pubblicazione.
 
