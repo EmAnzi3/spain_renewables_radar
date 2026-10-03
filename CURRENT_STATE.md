@@ -25,13 +25,15 @@ Nessun aggregatore commerciale è usato.
 
 ## Ultima certificazione completa
 
-Codice certificato:
+Pipeline certificata dopo introduzione del layer EPC/BoP:
 
-- head: **dcece22a899cdc607a539fdc973f2d256e21c9da**
-- tests: **37134192242 — SUCCESS**
-- smoke live: **37134192262 — SUCCESS**
-- backfill 30 giorni rigoroso: **37134192228 — SUCCESS**
+- head funzionale: **196b859997f391c506ae2880262c5c5e81085b0f**
+- tests: **37135377012 — SUCCESS**
+- smoke live: **37135376978 — SUCCESS**
+- backfill 30 giorni rigoroso: **37135377028 — SUCCESS**
 - source/day errors: **0**
+- head dashboard corrente: **7027cd7e671e8ea6b282e442b9f97bcb890d0ade**
+- test dashboard: **37135801613 — SUCCESS**
 
 ### Dataset 30 giorni certificato
 
@@ -103,6 +105,39 @@ Output disponibili nel dashboard JSON:
 - epc_status
 - age_days
 
+## EPC / BoP evidence layer
+
+Layer conservativo implementato e certificato.
+
+Stati gestiti:
+
+- EPC_CONFIRMED
+- EPC_CANDIDATE
+- EPC_UNKNOWN
+
+Regole:
+
+- developer/promotore non viene mai assunto come EPC;
+- EPC_CONFIRMED richiede una formula esplicita EPC/BoP nel testo della fonte;
+- EPC_CANDIDATE richiede almeno un ruolo costruttivo esplicito;
+- le evidenze sono salvate in una tabella separata project_epc_evidence;
+- lo scoring usa lo stato EPC derivato senza modificare lifecycle o dati sorgente.
+
+Sul backfill certificato di 30 giorni:
+
+- evidenze EPC/BoP nei documenti amministrativi attuali: **0**;
+- progetti EPC_CONFIRMED: **0**;
+- progetti EPC_CANDIDATE: **0**;
+- progetti EPC_UNKNOWN: **106**.
+
+Questo risultato non significa che i progetti non abbiano un EPC: significa solo che i bollettini amministrativi raccolti non lo dichiarano con sufficiente evidenza.
+
+Generati:
+
+- reports/epc_bop_evidence_latest.csv
+- reports/epc_bop_evidence_latest.html
+- stato EPC/BoP visibile nella dashboard.
+
 ## Vista provinciale
 
 Blocco v1 chiuso e certificato.
@@ -161,13 +196,13 @@ Correzioni consolidate:
 - 14 progetti non riportano expediente;
 - 1 progetto è multi-provincia e resta correttamente senza provincia singola;
 - matching MITECO resta volutamente conservativo;
-- EPC/BoP non è ancora implementato;
+- il layer EPC/BoP su documenti ufficiali è implementato, ma servono fonti esterne gratuite e verificabili per trovare contractor reali;
 - finestra lavori non è ancora un enrichment strutturato;
 - DOGV risponde 403 dal runner GitHub e non va dichiarato implementato finché non si trova un endpoint ufficiale stabile.
 
 ## Prossimi passi
 
-1. **enrichment EPC/BoP** da fonti pubbliche gratuite, mantenendo separati developer/promotore ed EPC;
+1. estendere **EPC/BoP** a comunicati EPC/developer/supplier, gare e documenti pubblici; stampa specialistica solo come lead da confermare;
 2. aggiungere eventuale **work-window enrichment** solo quando supportato da fonti affidabili;
 3. valutare il prossimo collector regionale con probe ufficiale, test, smoke live e backfill 30 giorni;
 4. candidati prioritari: DOGC, BOPV, BON, DOG, BOPA, BOCANT, BOC Canarias, BOIB, BOR;
