@@ -45,6 +45,7 @@ def parse_args():
     p.add_argument("--db",default=os.getenv("RADAR_DB","data/spain_renewables.sqlite"))
     p.add_argument("--skip-ree",action="store_true",help="salta lo snapshot REE accesso/connessione")
     p.add_argument("--skip-miteco",action="store_true",help="salta lo snapshot MITECO registro produzione")
+    p.add_argument("--strict-coverage",action="store_true",help="termina con errore se una sorgente/giorno fallisce")
     return p.parse_args()
 
 def main():
@@ -200,6 +201,8 @@ def main():
         print("MITECO: reports/miteco_registry_latest.csv")
         print("MITECO exact matches: reports/miteco_exact_matches_latest.csv")
     print("Dashboard: docs/index.html")
+    if args.strict_coverage and errors:
+        raise SystemExit(f"Coverage gate failed: {errors} source/day errors")
 
 if __name__=="__main__":
     main()
