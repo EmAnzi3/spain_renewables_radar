@@ -152,6 +152,19 @@ jobs:
               if cells and any(re.fullmatch(r"20[0-9]{6}",x) for x in cells):
                   cp_rows.append(cells)
           print("SEARCH_CP_ROWS",len(cp_rows),cp_rows[:20])
+          direct="https://sede.miteco.gob.es/portal/site/seMITECO/navServicioContenido"
+          dg=s.get(direct,params={
+              "accion":"proy_detalle",
+              "codigo_seleccionado":"20260236",
+              "id_pagina_cargada":"RESULTADOS",
+          },timeout=60)
+          print("DIRECT_DETAIL_GET",dg.status_code,dg.url,len(dg.content))
+          dgs=BeautifulSoup(dg.text,"html.parser")
+          dgbody=" ".join(dgs.stripped_strings)
+          print("DIRECT_DETAIL_HAS_MUEL","MUEL" in dgbody.upper(),"PFOT-150" in dgbody)
+          print("DIRECT_DETAIL_BODY",dgbody[:2500])
+          rr_fn=rr.text.find("function enviar(")
+          print("RESULT_ENVIAR_BLOCK",rr.text[rr_fn:rr_fn+3500].replace("\n"," ") if rr_fn>=0 else "NOT_FOUND")
           for tag in rs.find_all(["a","input","button"]):
               attrs=" ".join(str(v) for v in tag.attrs.values())
               txt=" ".join(tag.stripped_strings)
