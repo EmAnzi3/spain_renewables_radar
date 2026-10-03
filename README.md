@@ -73,6 +73,25 @@ Il dashboard esporta:
 - recency;
 - stato EPC, oggi EPC_UNKNOWN finché l'enrichment EPC non viene implementato.
 
+## EPC / BoP
+
+È implementato un layer conservativo di evidenze EPC/BoP sui documenti ufficiali già raccolti.
+
+Stati:
+
+- EPC_CONFIRMED
+- EPC_CANDIDATE
+- EPC_UNKNOWN
+
+Il promotore non viene mai assunto come EPC. Sul backfill certificato corrente le fonti amministrative non contengono evidenze EPC/BoP sufficientemente esplicite: i 106 progetti restano quindi EPC_UNKNOWN.
+
+Output dedicati:
+
+- reports/epc_bop_evidence_latest.csv
+- reports/epc_bop_evidence_latest.html
+
+La prossima estensione userà comunicati EPC/developer/supplier, gare e documenti pubblici; eventuale stampa specializzata resterà un lead da confermare.
+
 ## Vista provinciale
 
 La vista provinciale separa sempre:
@@ -103,6 +122,7 @@ Backfill manuale:
 - variazioni: reports/change_reports/changes_latest.html
 - coverage sorgenti: reports/coverage_latest.html
 - quality gate: reports/quality_issues_latest.html
+- EPC/BoP: reports/epc_bop_evidence_latest.html
 - vista provinciale: reports/province_view_latest.html
 - vista provinciale CSV: reports/province_view_latest.csv
 - REE: reports/ree_capacity_latest.csv
