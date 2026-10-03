@@ -50,6 +50,10 @@ jobs:
               if any(k in low for k in ("sabia","proy_","codigo_seleccionado","evaluacion","localizacion","documentacion")):
                   interesting.append((text,href))
           print("INTERESTING_LINKS",len(interesting))
+          for a in soup.find_all("a"):
+              txt=" ".join(a.stripped_strings)
+              if "consulta de proyectos" in txt.casefold():
+                  print("PROJECT_SEARCH_LINK",a.attrs,repr(txt))
           for text,href in interesting[:80]:
               print("LINK",repr(text[:160]),href)
 
