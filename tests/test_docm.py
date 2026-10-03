@@ -16,6 +16,11 @@ class DOCMCollectorTests(unittest.TestCase):
             "verArchivoHtml.do?ruta=2026%2F10%2F02%2Fhtml%2F2026_9991.html&tipo=rutaDocm"
         ))
 
+    def test_excludes_non_energy_chemical_storage(self):
+        html='''<div><a href="./descargarArchivo.do?ruta=2026/09/23/pdf/2026_6759.pdf&amp;tipo=rutaDocm">Medio Ambiente</a>,
+        Resolución sobre Almacenamiento de productos cosméticos en Toledo. [NID 2026/6759]</div>'''
+        self.assertEqual(DOCMCollector.parse_summary_html(html),[])
+
     def test_terrpower_decimal_comma_name(self):
         from app.parser import parse_event
         title=(
