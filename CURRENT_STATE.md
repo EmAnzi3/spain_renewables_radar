@@ -22,9 +22,23 @@ Il radar è operativo su **8 bollettini ufficiali** più due enrichment nazional
 
 Nessun aggregatore commerciale è usato.
 
-## Ultima validazione 30 giorni
+## Validazione 30 giorni
 
-Run: **37114835344 — SUCCESS**
+Baseline precedente: **37114835344 — workflow SUCCESS**, ma con **2 source/day error BOA**. Dopo l'introduzione del gate rigoroso questo run NON va più considerato una certificazione completa di coverage.
+
+Nuova validazione rigorosa in corso:
+- **run 37115752500**
+- head: **eb3dd110762c65d290a61d911f288540e301fe41**
+- regola: il workflow fallisce se anche una sola sorgente/giorno non viene acquisita.
+
+Smoke test rigoroso già certificato:
+- **run 37115696021 — SUCCESS**
+- ultimi 3 giorni
+- **0 source/day errors**
+- REE: 931 nodi
+- MITECO: 71.727 impianti
+
+### Baseline quantitativa precedente (37114835344)
 
 - **107 progetti**
 - **129 eventi amministrativi**
@@ -41,7 +55,7 @@ Run: **37114835344 — SUCCESS**
 - matching MITECO esatti conservativi: **8**
 - campi mancanti: nome 1, MW 26, provincia 4, expediente 14
 
-Il workflow è verde. Nel backfill sono rimasti **2 source/day warning transitori di rete BOA** (timeout/remote disconnect) non trasformati in dati inventati; il collector dispone già di retry. Lo smoke test più recente sullo stesso head è verde e senza errori.
+Questi numeri restano il riferimento quantitativo finché il run rigoroso 37115752500 non termina. Il gate ora impedisce di definire "verde" un backfill con coverage incompleta.
 
 ## Quality gate
 
@@ -83,16 +97,17 @@ Correzioni consolidate:
 - matching MITECO resta volutamente conservativo;
 - EPC/BoP richiede enrichment separato da fonti pubbliche;
 - DOGV corrente risponde 403 dal runner GitHub: non dichiararlo implementato senza endpoint ufficiale stabile;
-- il backfill BOA può ancora produrre sporadici warning di rete su singoli giorni, pur con retry.
+- BOA può ancora produrre errori transitori di rete su singoli giorni; ora vengono trattati come **failure del validation gate**, non come semplice warning verde.
 
 ## Prossimi passi
 
-1. **enrichment geografico comune → provincia** per ridurre i 4 missing senza euristiche rischiose;
-2. **scoring commerciale** separato dal lifecycle amministrativo;
-3. **vista/mappa provinciale** con MW per tecnologia e maturità;
-4. **enrichment EPC/BoP** da fonti pubbliche gratuite;
-5. aggiungere il prossimo collector regionale solo dopo probe + test + validazione 30 giorni;
-6. continuare a ridurre gli INFO senza inventare dati mancanti.
+1. **attendere/verificare il run rigoroso 37115752500**: deve chiudere con 0 source/day errors; in caso contrario correggere la sorgente che fallisce e rilanciare;
+2. **enrichment geografico comune → provincia** per ridurre i 4 missing senza euristiche rischiose;
+3. **scoring commerciale** separato dal lifecycle amministrativo;
+4. **vista/mappa provinciale** con MW per tecnologia e maturità;
+5. **enrichment EPC/BoP** da fonti pubbliche gratuite;
+6. prossimo collector regionale consigliato: **DOG Galicia** (alto valore eolico), solo dopo probe + test + validazione 30 giorni;
+7. continuare a ridurre gli INFO e i nomi sospetti senza inventare dati mancanti.
 
 ## Vincoli
 
