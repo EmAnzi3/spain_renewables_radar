@@ -1,0 +1,46 @@
+name: andalucia-archive-audit
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/andalucia-archive-audit.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 37158489385
+          name: regional-energy-probe
+          path: probe-input
+      - name: Inspect original source records and date coverage
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from collections import Counter
+          from app.collectors.andalucia_public import relevant_record,publication_date
+          records=json.loads(Path('probe-input/AND_ALL.raw').read_text(encoding='utf-8'))
+          invalid=[r for r in records if not isinstance(r,dict) or not str(r.get('id','')).isdigit() or not r.get('title')]
+          print('INVALID_SOURCE_ROWS',len(invalid))
+          for record in invalid:print('INVALID_SOURCE_ROW',json.dumps(record,ensure_ascii=False))
+          ids=Counter(str(r.get('id')) for r in records if isinstance(r,dict))
+          print('DUPLICATE_IDS',{k:v for k,v in ids.items() if v>1})
+          eligible=[r for r in records if isinstance(r,dict) and relevant_record(r)]
+          dates_invalid=[r for r in eligible if publication_date(r.get('publication_date')) is None]
+          print('RELEVANT',len(eligible),'INVALID_DATES',len(dates_invalid))
+          for record in dates_invalid:print('INVALID_DATE_ROW',json.dumps(record,ensure_ascii=False))
+          recent=[r for r in eligible if (publication_date(r.get('publication_date')) or '')>='2026-09-04']
+          print('RECENT',len(recent))
+          for record in recent:print('RECENT_RECORD',json.dumps(record,ensure_ascii=False))
+          PY
