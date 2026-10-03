@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - 'app/collectors/andalucia_public.py'
-      - 'tests/test_andalucia_public.py'
+      - 'tests/test_andalucia*.py'
       - 'scripts/validate_andalucia_public.py'
       - '.github/workflows/andalucia-public-validation.yml'
 permissions:
@@ -26,7 +26,7 @@ jobs:
       - run: pip install -r requirements.txt
       - name: Full unit suite
         run: python -m unittest discover -s tests -v
-      - name: Validate snapshot completeness, 30-day backfill, 3-day smoke and idempotency
+      - name: Validate dated backfill, snapshot accounting, source gaps and idempotency
         run: python scripts/validate_andalucia_public.py
       - uses: actions/upload-artifact@v4
         if: always()
@@ -35,4 +35,9 @@ jobs:
           path: |
             reports/andalucia_public/
             data/andalucia_public_validation.sqlite
+            app/
+            tests/
+            scripts/
+            config/
+            requirements.txt
           if-no-files-found: error

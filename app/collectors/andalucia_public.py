@@ -1,7 +1,9 @@
-"""Official Andalucia public-information archive; bulletin collectors stay independent."""
+"""Official Andalucia public-information archive with explicit source-data gaps."""
 from __future__ import annotations
 
+import csv
 import hashlib
+import html
 import json
 import re
 from datetime import date, datetime, timezone
@@ -30,7 +32,7 @@ PUBLIC_INFO = re.compile(r'informaci[oó]n\s+p[uú]blica|tr[aá]mite\s+de\s+aleg
 
 
 def publication_date(value) -> str | None:
-    """Accept observed source formats, never substitute update or consultation dates."""
+    """Never replace missing publication dates with update or allegation dates."""
     if not isinstance(value, str):
         return None
     for fmt in ('%Y-%m-%d', '%d/%m/%Y'):
@@ -47,14 +49,20 @@ def validate_archive(payload, expected_count: int) -> list[dict]:
     if len(payload) != expected_count:
         raise ValueError(f'Andalucia archive count mismatch: {len(payload)} != {expected_count}')
     identifiers = set()
-    for record in payload:
-        if not isinstance(record, dict) or not str(record.get('id', '')).isdigit() or not record.get('title'):
-            raise ValueError('Andalucia archive has a malformed record')
+    for index, record in enumerate(payload):
+        if not isinstance(record, dict) or not str(record.get('id', '')).isdigit():
+            raise ValueError(f'Andalucia archive malformed identity at row {index}: {record!r}')
         identifier = str(record['id'])
         if identifier in identifiers:
             raise ValueError('Duplicate Andalucia document id: ' + identifier)
+        if record.get('title') is not None and not isinstance(record['title'], str):
+            raise ValueError('Invalid Andalucia title type: ' + identifier)
         identifiers.add(identifier)
     return payload
+
+
+def public_url(identifier) -> str:
+    return PUBLIC_BASE + 'servicios/participacion/todos-documentos/detalle/' + str(identifier) + '.html'
 
 
 def document_links(record: dict) -> list[dict]:
@@ -63,18 +71,51 @@ def document_links(record: dict) -> list[dict]:
         for document in attachment.get('field_documento_p') or []:
             for media in document.get('field_media_file') or []:
                 uri = media.get('uri')
-                if not uri:
-                    continue
-                url = urljoin(PUBLIC_BASE, uri)
-                # Only documented official attachments. No fetching external links here.
-                if url.startswith(PUBLIC_BASE):
-                    result.append({'title': attachment.get('field_titulo'), 'url': url})
+                if uri:
+                    url = urljoin(PUBLIC_BASE, uri)
+                    if url.startswith(PUBLIC_BASE):
+                        result.append({'title': attachment.get('field_titulo'), 'url': url})
     return result
 
 
 def relevant_record(record: dict) -> bool:
     title = record.get('title') or ''
     return bool(RELEVANT.search(title) and not EXCLUDE.search(title))
+
+
+def partition_archive(records: list[dict]) -> dict:
+    """Account for EVERY source identity. Missing source metadata is never fabricated."""
+    result = {'dated': [], 'undated': [], 'missing_title': [], 'non_target': []}
+    for record in records:
+        if not (record.get('title') or '').strip():
+            result['missing_title'].append(record)
+        elif not relevant_record(record):
+            result['non_target'].append(record)
+        elif publication_date(record.get('publication_date')) is None:
+            result['undated'].append(record)
+        else:
+            result['dated'].append(record)
+    assert sum(len(rows) for rows in result.values()) == len(records)
+    return result
+
+
+def write_source_gaps(parts: dict, output: Path) -> list[dict]:
+    gaps = []
+    for bucket, reason in (('missing_title','SOURCE_MISSING_TITLE'), ('undated','SOURCE_MISSING_PUBLICATION_DATE')):
+        for record in parts[bucket]:
+            gaps.append({'source_code':'AND_PUBLIC', 'external_id':str(record['id']),
+                         'reason':reason, 'url':public_url(record['id']), 'raw_record':record})
+    (output/'source_gaps.json').write_text(json.dumps(gaps,ensure_ascii=False,indent=2),encoding='utf-8')
+    body = ''.join('<tr><td>'+html.escape(gap['external_id'])+'</td><td>'+html.escape(gap['reason'])
+                   +'</td><td>'+html.escape(gap['raw_record'].get('title') or 'Titolo non pubblicato')
+                   +'</td><td><a href="'+html.escape(gap['url'],quote=True)+'">Fonte ufficiale</a></td></tr>' for gap in gaps)
+    (output/'source_gaps.html').write_text(
+        '<!doctype html><html lang="it"><meta charset="utf-8"><title>Andalucía — dati mancanti alla fonte</title>'
+        '<style>body{font:15px system-ui;margin:30px}table{border-collapse:collapse;width:100%}td,th{border-bottom:1px solid #ddd;padding:10px;text-align:left}</style>'
+        '<h1>Andalucía — schede da verificare</h1><p>Le schede senza data non sono presentate come nuove pubblicazioni. '
+        'I record originali sono conservati integralmente: nessuna data o denominazione è ricostruita.</p>'
+        '<table><tr><th>ID fonte</th><th>Problema</th><th>Titolo fonte</th><th>Documento</th></tr>'+body+'</table></html>',encoding='utf-8')
+    return gaps
 
 
 def event_from_record(record: dict):
@@ -84,14 +125,11 @@ def event_from_record(record: dict):
     if pub is None:
         raise ValueError('Relevant Andalucia document has no valid publication date: ' + str(record.get('id')))
     title = record['title'].strip()
-    # Typography such as CG- 870 is a spacing variant, not a different expediente.
     extraction_title = re.sub(r'(?<=[A-Za-z0-9])\s*([-\/])\s*(?=[0-9])', r'\1', title)
-    url = PUBLIC_BASE + 'servicios/participacion/todos-documentos/detalle/' + str(record['id']) + '.html'
     event = parse_event(source_code='AND_PUBLIC', external_id=str(record['id']), publication_date=pub,
-                        title=extraction_title, url=url, raw_text=extraction_title)
+                        title=extraction_title, url=public_url(record['id']), raw_text=extraction_title)
     if event.technology not in {'PV', 'WIND', 'BESS', 'HYBRID'}:
         return None
-    # An attached AAC is evidence to read, not a new grant inferred from its filename.
     if PUBLIC_INFO.search(title) or PUBLIC_INFO.search(record.get('document_type') or ''):
         event.event_type = 'PUBLIC_INFO'
         event.commercial_stage = 'EARLY'
@@ -114,7 +152,8 @@ class AndaluciaPublicCollector:
         self._records = None
         self._fatal_error = None
         self.audit = {'source_code':self.code, 'complete':False, 'archive_records':0,
-                      'expected_records':None, 'relevant_records':0, 'relevant_invalid_dates':[]}
+                      'expected_records':None, 'relevant_records':0, 'relevant_invalid_dates':[],
+                      'dated_coverage_complete':False, 'scope':'DATED_PUBLICATIONS_WITH_UNDATED_INVENTORY'}
 
     def _get_count(self):
         response = self.session.get(COUNT_URL, timeout=self.timeout)
@@ -134,31 +173,37 @@ class AndaluciaPublicCollector:
             expected = self._get_count()
             response = self.session.get(ARCHIVE_URL, timeout=self.timeout)
             response.raise_for_status()
+            # Preserve the source even when schema or count validation fails.
+            (output/'archive_raw.json').write_bytes(response.content)
             payload = response.json()
             after = self._get_count()
             if expected != after:
                 raise ValueError('Andalucia catalogue changed during snapshot; retry a fresh run')
             records = validate_archive(payload, expected)
+            parts = partition_archive(records)
             self.audit.update(archive_records=len(records), expected_records=expected,
                               retrieved_at=datetime.now(timezone.utc).isoformat(), source_url=ARCHIVE_URL,
-                              download_url=response.url, sha256=hashlib.sha256(response.content).hexdigest())
-            selected = [record for record in records if relevant_record(record)]
-            self.audit['relevant_records'] = len(selected)
-            invalid = [str(r['id']) for r in selected if publication_date(r.get('publication_date')) is None]
-            self.audit['relevant_invalid_dates'] = invalid
-            (output/'source_records.json').write_text(json.dumps(selected, ensure_ascii=False, indent=2), encoding='utf-8')
+                              download_url=response.url, sha256=hashlib.sha256(response.content).hexdigest(),
+                              partitions={key:len(value) for key,value in parts.items()})
+            selected = parts['dated'] + parts['undated']
+            gaps = write_source_gaps(parts, output)
+            self.audit.update(relevant_records=len(selected), source_gaps=len(gaps),
+                              relevant_invalid_dates=[str(r['id']) for r in parts['undated']],
+                              source_missing_titles=[str(r['id']) for r in parts['missing_title']],
+                              dated_coverage_complete=not gaps)
+            (output/'source_records.json').write_text(json.dumps(selected,ensure_ascii=False,indent=2),encoding='utf-8')
             (output/'documents.json').write_text(json.dumps([
                 {'external_id':str(r['id']), 'documents':document_links(r)} for r in selected
-            ], ensure_ascii=False, indent=2), encoding='utf-8')
-            if invalid:
-                raise ValueError(f'Andalucia relevant documents with missing publication dates: {invalid}')
+            ],ensure_ascii=False,indent=2),encoding='utf-8')
+            # complete means source snapshot acquired/reconciled, NOT complete source metadata.
             self.audit['complete'] = True
-            self._records = selected
+            self._records = parts['dated']
+            print(f"AND_PUBLIC snapshot={len(records)}; dated={len(parts['dated'])}; source gaps={len(gaps)}",flush=True)
         except Exception as exc:
             self._fatal_error = str(exc)
             raise
         finally:
-            (output/'coverage.json').write_text(json.dumps(self.audit, ensure_ascii=False, indent=2), encoding='utf-8')
+            (output/'coverage.json').write_text(json.dumps(self.audit,ensure_ascii=False,indent=2),encoding='utf-8')
 
     def collect_day(self, day: date):
         self._load()
