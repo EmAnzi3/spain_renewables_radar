@@ -1,0 +1,93 @@
+name: SABIA source probe
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/sabia-source-probe.yml"
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Probe official MITECO SABIA
+        run: |
+          python - <<'PY'
+          import re
+          import requests
+          from bs4 import BeautifulSoup
+          from urllib.parse import urljoin
+
+          url="https://sede.miteco.gob.es/portal/site/seMITECO/template.PAGE/navSabiaDestacados/navServicioContenido"
+          s=requests.Session()
+          s.headers.update({"User-Agent":"SpainRenewablesRadar/0.1 (+GitHub Actions source probe)"})
+          r=s.get(url,timeout=60)
+          print("STATUS",r.status_code)
+          print("FINAL_URL",r.url)
+          print("CONTENT_TYPE",r.headers.get("content-type"))
+          print("BYTES",len(r.content))
+          r.raise_for_status()
+
+          soup=BeautifulSoup(r.text,"html.parser")
+          print("TITLE",soup.title.get_text(" ",strip=True) if soup.title else "")
+          forms=soup.find_all("form")
+          print("FORMS",len(forms))
+          for i,f in enumerate(forms[:10],1):
+              print("FORM",i,"METHOD",f.get("method"),"ACTION",urljoin(r.url,f.get("action") or ""))
+              for inp in f.find_all(["input","select"],limit=20):
+                  print(" FIELD",inp.name,inp.get("name"),inp.get("value"),inp.get("id"))
+
+          interesting=[]
+          for a in soup.find_all("a",href=True):
+              href=urljoin(r.url,a["href"])
+              text=" ".join(a.stripped_strings)
+              low=(href+" "+text).casefold()
+              if any(k in low for k in ("sabia","proy_","codigo_seleccionado","evaluacion","localizacion","documentacion")):
+                  interesting.append((text,href))
+          print("INTERESTING_LINKS",len(interesting))
+          for text,href in interesting[:80]:
+              print("LINK",repr(text[:160]),href)
+
+          detail=[x for x in interesting if "codigo_seleccionado=" in x[1]]
+          print("DETAIL_LINKS",len(detail))
+          if not detail:
+              # SABIA pages sometimes keep navigation in onclick attributes.
+              raw=[]
+              for tag in soup.find_all(True):
+                  for attr in ("onclick","href"):
+                      v=tag.get(attr)
+                      if v and "codigo_seleccionado" in v:
+                          raw.append(v)
+              print("RAW_CODE_ATTRS",len(raw))
+              for v in raw[:50]:
+                  print("RAW",v)
+
+          for text,href in detail[:3]:
+              d=s.get(href,timeout=60)
+              print("DETAIL_STATUS",d.status_code,href)
+              print("DETAIL_BYTES",len(d.content))
+              if d.ok:
+                  ds=BeautifulSoup(d.text,"html.parser")
+                  body=" ".join(ds.stripped_strings)
+                  for label in (
+                      "Código de Evaluación Ambiental",
+                      "Código para el Órgano Sustantivo",
+                      "Título del proyecto",
+                      "Promotor",
+                      "Tipo de proyecto",
+                      "Provincia",
+                      "Municipio",
+                      "Estado de tramitación",
+                      "Fecha de entrada",
+                      "Fecha inicio de consultas",
+                      "Fecha de resolución",
+                  ):
+                      m=re.search(re.escape(label)+r"\s*:?\s*(.{0,220})",body,re.I)
+                      if m:
+                          print(" DETAIL_FIELD",label,"=>",m.group(1)[:220])
+          PY
