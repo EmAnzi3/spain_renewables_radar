@@ -123,6 +123,35 @@ jobs:
                   if m:
                       result_codes.append(m.group(0))
           print("SEARCH_RESULT_CODES",len(result_codes),result_codes[:50])
+          rform=rs.find("form")
+          if rform:
+              print("RESULT_FORM",rform.get("method"),rform.get("action"))
+              for inp in rform.find_all("input"):
+                  name=inp.get("name")
+                  value=inp.get("value")
+                  typ=inp.get("type")
+                  if name in ("codigo_seleccionado","accion","id_pagina_cargada","pagina","num_pagina") or typ in ("radio","checkbox"):
+                      print(" RESULT_INPUT",name,typ,value,inp.get("id"),inp.get("onclick"))
+          tables=rs.find_all("table")
+          print("RESULT_TABLES",len(tables))
+          for ti,table in enumerate(tables[-3:],start=max(0,len(tables)-3)):
+              rows=table.find_all("tr")
+              print(" RESULT_TABLE",ti,"ROWS",len(rows))
+              for row in rows[:6]:
+                  print(" RESULT_ROW",[" ".join(td.stripped_strings) for td in row.find_all(["th","td"])],str(row)[:2500].replace("\n"," "))
+
+          # Same source, but only CONSULTAS PREVIAS to estimate a practical historical slice.
+          cp_payload=dict(search_payload)
+          cp_payload["select_estado_tramitacion"]="30"
+          cp=s.post(search_url,data=cp_payload,timeout=120)
+          print("SEARCH_CP_POST",cp.status_code,len(cp.content))
+          cps=BeautifulSoup(cp.text,"html.parser")
+          cp_rows=[]
+          for tr in cps.find_all("tr"):
+              cells=[" ".join(td.stripped_strings) for td in tr.find_all("td")]
+              if cells and any(re.fullmatch(r"20[0-9]{6}",x) for x in cells):
+                  cp_rows.append(cells)
+          print("SEARCH_CP_ROWS",len(cp_rows),cp_rows[:20])
           for tag in rs.find_all(["a","input","button"]):
               attrs=" ".join(str(v) for v in tag.attrs.values())
               txt=" ".join(tag.stripped_strings)
