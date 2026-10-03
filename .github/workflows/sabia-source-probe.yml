@@ -163,6 +163,17 @@ jobs:
           dgbody=" ".join(dgs.stripped_strings)
           print("DIRECT_DETAIL_HAS_MUEL","MUEL" in dgbody.upper(),"PFOT-150" in dgbody)
           print("DIRECT_DETAIL_BODY",dgbody[:2500])
+          prefix_payload=dict(search_payload)
+          prefix_payload["codigo"]="2026"
+          prefix_payload["select_estado_tramitacion"]=""
+          prefix=s.post(search_url,data=prefix_payload,timeout=120)
+          ps=BeautifulSoup(prefix.text,"html.parser")
+          prefix_rows=[]
+          for tr in ps.find_all("tr"):
+              cells=[" ".join(td.stripped_strings) for td in tr.find_all("td")]
+              if len(cells)>=3 and re.fullmatch(r"20[0-9]{6}",cells[0] or ""):
+                  prefix_rows.append(cells)
+          print("SEARCH_PREFIX_2026",prefix.status_code,len(prefix.content),len(prefix_rows),prefix_rows[:15])
           rr_fn=rr.text.find("function enviar(")
           print("RESULT_ENVIAR_BLOCK",rr.text[rr_fn:rr_fn+3500].replace("\n"," ") if rr_fn>=0 else "NOT_FOUND")
           for tag in rs.find_all(["a","input","button"]):
