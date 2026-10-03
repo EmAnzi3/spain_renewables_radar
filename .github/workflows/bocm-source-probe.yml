@@ -46,6 +46,24 @@ jobs:
               except Exception as exc:
                   print("PAGE_ERROR",repr(exc))
 
+          print("\n===== HOME FORMS =====")
+          r=s.get("https://www.bocm.es/",timeout=45)
+          soup=BeautifulSoup(r.text,"html.parser")
+          for i,form in enumerate(soup.find_all("form")):
+              print("FORM",i,"ACTION",urllib.parse.urljoin(r.url,form.get("action") or ""),"METHOD",form.get("method"))
+              for el in form.find_all(["input","select","button"]):
+                  print("FIELD",el.name,"name=",el.get("name"),"value=",el.get("value"),"type=",el.get("type"))
+
+          print("\n===== RSS ITEMS =====")
+          for rss_url in ("https://www.bocm.es/sumarios.rss","https://www.bocm.es/boletines.rss"):
+              rr=s.get(rss_url,timeout=45)
+              print("RSS",rss_url,rr.status_code,rr.headers.get("content-type"),len(rr.content))
+              ss=BeautifulSoup(rr.text,"xml")
+              for item in ss.find_all("item")[:25]:
+                  print("ITEM",item.title.get_text(" ",strip=True) if item.title else "",
+                        "|",item.link.get_text(" ",strip=True) if item.link else "",
+                        "|",item.pubDate.get_text(" ",strip=True) if item.pubDate else "")
+
           print("\n===== FETCH XML/RSS TARGETS =====")
           for url in list(dict.fromkeys(found)):
               if not any(k in url.lower() for k in (".xml","rss")):
