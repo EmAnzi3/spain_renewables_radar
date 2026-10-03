@@ -111,8 +111,8 @@ def detect_technology(text:str)->str|None:
     t=normalize_text(text)
     has_pv=any(k in t for k in ("fotovolta","solar pv"))
     has_wind=any(k in t for k in ("eolic","aerogenerador"))
-    has_storage=any(k in t for k in (
-        "bateria","bess","modulo de almacenamiento","sistema de almacenamiento",
+    has_storage=bool(re.search(r"\bbaterias?\b|\bbess\b",t)) or any(k in t for k in (
+        "modulo de almacenamiento","sistema de almacenamiento",
         "almacenamiento de energia","almacenamiento energet","almacenamiento electr"
     ))
     has_hybrid="hibrid" in t or sum((has_pv,has_wind,has_storage))>=2
