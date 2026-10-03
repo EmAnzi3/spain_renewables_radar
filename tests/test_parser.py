@@ -36,6 +36,27 @@ class ParserTests(unittest.TestCase):
         self.assertIsNone(e.province)
         self.assertEqual(e.ccaa,"Extremadura")
 
+    def test_project_name_priority_storage_and_hybrid(self):
+        cases=[
+            ('módulo de almacenamiento hibrido Castillo Garcimuñoz, de 19,5 MW',"Castillo Garcimuñoz",19.5),
+            ('módulo de almacenamiento Bañuela, de 21,69 MW',"Bañuela",21.69),
+            ('Módulo de Almacenamiento de Energía por baterías "BESS Rey III Solar" de 35,12 MW',"BESS Rey III Solar",35.12),
+            ('proyecto de hibridación «PSFV Hibridación Cuéllar de la Sierra» de 5,7 MW',"PSFV Hibridación Cuéllar de la Sierra",5.7),
+        ]
+        for i,(title,name,mw) in enumerate(cases):
+            e=parse_event(source_code="BOE",external_id=f"X{i}",publication_date="2026-10-03",title=title,url="x",raw_text=title)
+            self.assertEqual(e.project_name,name)
+            self.assertAlmostEqual(e.power_mw,mw)
+
+    def test_kw_and_parque_solar_name(self):
+        title='parque solar fotovoltaico “Umiko”, de 46,5 MW, en Tauste (Zaragoza).'
+        e=parse_event(source_code="BOE",external_id="U",publication_date="2026-10-03",title=title,url="x",raw_text=title)
+        self.assertEqual(e.project_name,"Umiko")
+        raw='instalación solar fotovoltaica de 499 kW denominada Nuevos Coloraos en Pozuelo (Albacete).'
+        e=parse_event(source_code="DOCM",external_id="N",publication_date="2026-10-03",title="Corrección de errores",url="x",raw_text=raw)
+        self.assertEqual(e.project_name,"Nuevos Coloraos")
+        self.assertAlmostEqual(e.power_mw,0.499)
+
     def test_pv_auth(self):
         e=parse_event(
             source_code="BOE",external_id="BOE-A-2026-12701",publication_date="2026-06-11",
