@@ -86,6 +86,8 @@ jobs:
           sbody=" ".join(ss.stripped_strings)
           print("SEARCH_BODY",sbody[:5000])
           # Inspect search JavaScript and perform a narrow official FTV search.
+          fn_start=sr.text.find("function enviar()")
+          print("SEARCH_ENVIAR_BLOCK",sr.text[fn_start:fn_start+5000].replace("\n"," ") if fn_start>=0 else "NOT_FOUND")
           for line in sr.text.splitlines():
               if "enviar(" in line or "select_tipo" in line or "id_pagina_cargada" in line:
                   clean=" ".join(line.split())
