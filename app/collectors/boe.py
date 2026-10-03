@@ -12,7 +12,7 @@ from app.parser import BOE_ID_RE, parse_event
 
 BASE="https://www.boe.es"
 API_BASE=f"{BASE}/datosabiertos/api/boe/sumario"
-RELEVANT=re.compile(r"fotovolta|parque\s+e[oó]lico|instalaci[oó]n\s+e[oó]lica|almacenamiento|bater[ií]a|hibridaci[oó]n|aerogenerador",re.I)
+RELEVANT=re.compile(r"fotovolta|parque\s+e[oó]lico|instalaci[oó]n\s+e[oó]lica|almacenamiento|\bbater[ií]as?\b|hibridaci[oó]n|aerogenerador",re.I)
 EXCLUDE=re.compile(
     r"formalizaci[oó]n\s+de\s+contratos|anuncio\s+de\s+licitaci[oó]n|"
     r"adjudicaci[oó]n\s+de\s+contrat|autoconsumo|objeto:\s*instalaci[oó]n\s+de\s+paneles|"
