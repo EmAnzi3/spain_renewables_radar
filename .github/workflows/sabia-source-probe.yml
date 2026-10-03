@@ -133,6 +133,40 @@ jobs:
                   if pos>=0:
                       print(" POST_FIELD",code,label,"=>",body[pos:pos+500])
               print(" POST_HAS_MUEL",code,"MUEL" in body.upper())
+              detail_form=ds.find("form")
+              detail_payload={}
+              if detail_form:
+                  for inp in detail_form.find_all("input"):
+                      name=inp.get("name")
+                      if name:
+                          detail_payload[name]=inp.get("value") or ""
+              print(" DETAIL_BASE_PAYLOAD",code,detail_payload)
+              full_payload=dict(detail_payload)
+              full_payload["accion"]="proy_detalle"
+              full_payload["codigo_seleccionado"]=code
+              full=s.post(url,data=full_payload,timeout=60)
+              print(" FULL_DETAIL",code,full.status_code,full.url,len(full.content))
+              fs=BeautifulSoup(full.text,"html.parser")
+              fbody=" ".join(fs.stripped_strings)
+              print(" FULL_BODY",code,fbody[:6500])
+              for label in (
+                  "Código de Evaluación Ambiental",
+                  "Código para el Órgano Sustantivo",
+                  "Título del proyecto",
+                  "Promotor",
+                  "Tipo de proyecto",
+                  "Comunidad autónoma",
+                  "Provincia",
+                  "Municipio",
+                  "Estado de tramitación",
+                  "Fecha de entrada",
+                  "Fecha inicio de consultas",
+                  "Fecha de resolución",
+                  "Sentido de la resolución",
+              ):
+                  pos=fbody.casefold().find(label.casefold())
+                  if pos>=0:
+                      print(" FULL_FIELD",code,label,"=>",fbody[pos:pos+650])
               print(" POST_BODY",code,body[:3500])
               for tag in ds.find_all(["a","input","button","form"]):
                   attrs=" ".join(str(v) for v in tag.attrs.values())
