@@ -67,6 +67,33 @@ jobs:
               for v in raw[:50]:
                   print("RAW",v)
 
+          # Inspect the actual controls surrounding known current projects.
+          for keyword in ("MUEL","CIUDAD RODRIGO","CLAVELLINAS","MALAGATO"):
+              node=soup.find(string=re.compile(keyword,re.I))
+              print("KEYWORD",keyword,"FOUND",bool(node))
+              if node:
+                  tag=node.parent
+                  for depth in range(6):
+                      if tag is None:
+                          break
+                      attrs={k:v for k,v in tag.attrs.items() if k in ("id","class","onclick","href","value","name","action","method")}
+                      print(" CONTEXT",depth,tag.name,attrs)
+                      if depth <= 2:
+                          print(" HTML",str(tag)[:5000].replace("\n"," "))
+                      tag=tag.parent
+
+          # Dump controls carrying SABIA action/codes even when they are not anchors.
+          controls=[]
+          for tag in soup.find_all(["input","button","a"]):
+              attrs=" ".join(str(v) for v in tag.attrs.values())
+              txt=" ".join(tag.stripped_strings)
+              low=(attrs+" "+txt).casefold()
+              if any(k in low for k in ("proy_","codigo","documentacion","localizacion","detalle")):
+                  controls.append((tag.name,tag.attrs,txt))
+          print("INTERESTING_CONTROLS",len(controls))
+          for name,attrs,txt in controls[:120]:
+              print("CONTROL",name,attrs,repr(txt[:240]))
+
           for text,href in detail[:3]:
               d=s.get(href,timeout=60)
               print("DETAIL_STATUS",d.status_code,href)
