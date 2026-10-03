@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 
 from app.scoring import score_project
+from app.enrichment.epc_bop import project_epc_summary
 
 def write_changes(events,out_dir="reports/change_reports"):
     out=Path(out_dir);out.mkdir(parents=True,exist_ok=True)
@@ -38,16 +39,20 @@ def build_commercial_rows(conn):
         event_types={r["event_type"] for r in conn.execute(
             "SELECT event_type FROM events WHERE project_key=?",(project["project_key"],)
         ).fetchall()}
+        epc=project_epc_summary(conn,project["project_key"])
         scored=score_project(
             project,
             event_types=event_types,
             ree_context_available=bool(project.get("ccaa") and project.get("ccaa") in ree_ccaas),
-            epc_status="EPC_UNKNOWN",
+            epc_status=epc["status"],
         )
         row=dict(project)
         row["commercial_score"]=scored["score"]
         row["commercial_priority"]=scored["priority"]
         row["epc_status"]=scored["epc_status"]
+        row["epc_name"]="; ".join(epc["contractors"]) if epc["contractors"] else None
+        row["epc_roles"]=epc["roles"]
+        row["epc_evidence_count"]=epc["evidence_count"]
         row["score_components"]=scored["components"]
         row["age_days"]=scored["age_days"]
         geo=geo_rows.get(project["project_key"])

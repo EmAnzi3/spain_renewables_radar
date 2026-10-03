@@ -61,6 +61,22 @@ CREATE TABLE IF NOT EXISTS project_geo_enrichment (
 );
 CREATE INDEX IF NOT EXISTS idx_project_geo_status ON project_geo_enrichment(status,province);
 
+CREATE TABLE IF NOT EXISTS project_epc_evidence (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_key TEXT NOT NULL,
+  contractor_name TEXT NOT NULL,
+  role TEXT NOT NULL,
+  status TEXT NOT NULL,
+  source_code TEXT NOT NULL,
+  source_url TEXT NOT NULL,
+  publication_date TEXT,
+  evidence_text TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(project_key,contractor_name,role,status,source_url,publication_date,evidence_text),
+  FOREIGN KEY(project_key) REFERENCES projects(project_key)
+);
+CREATE INDEX IF NOT EXISTS idx_project_epc_status ON project_epc_evidence(project_key,status);
+
 CREATE TABLE IF NOT EXISTS ree_node_capacity (
   snapshot_date TEXT NOT NULL,
   node_name TEXT NOT NULL,

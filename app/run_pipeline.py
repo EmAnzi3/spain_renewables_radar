@@ -17,6 +17,8 @@ from app.enrichment import (
     write_registry_exports,
     fetch_ine_municipalities,
     enrich_missing_project_geography,
+    refresh_epc_evidence_from_events,
+    write_epc_evidence_exports,
 )
 from app.reporting import export_dashboard,write_changes,write_coverage,write_quality_issues,write_province_view
 from app.store import save_event
@@ -132,6 +134,13 @@ def main():
             print(f"  WARN INE_MUNICIPALITIES: {exc}")
         coverage.append(geo_row)
 
+    epc_result=refresh_epc_evidence_from_events(conn)
+    epc_rows,_,_=write_epc_evidence_exports(conn)
+    print(
+        f"[EPC_BOP] evidence={len(epc_rows)} | projects={epc_result['projects_with_evidence']} | "
+        f"confirmed={epc_result['confirmed_evidence']} | candidate={epc_result['candidate_evidence']}"
+    )
+
     if not args.skip_ree:
         print("[REE_ACCESS] latest node-capacity snapshot")
         ree_row={
@@ -225,6 +234,7 @@ def main():
     print("Report: reports/change_reports/changes_latest.html")
     print("Coverage: reports/coverage_latest.html")
     print("Quality: reports/quality_issues_latest.html")
+    print("EPC/BoP: reports/epc_bop_evidence_latest.html")
     print(f"Province view: reports/province_view_latest.html ({len(provinces)} province)")
     if not args.skip_ree:
         print("REE: reports/ree_capacity_latest.csv")
