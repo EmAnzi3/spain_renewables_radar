@@ -163,6 +163,21 @@ jobs:
           dgbody=" ".join(dgs.stripped_strings)
           print("DIRECT_DETAIL_HAS_MUEL","MUEL" in dgbody.upper(),"PFOT-150" in dgbody)
           print("DIRECT_DETAIL_BODY",dgbody[:2500])
+          matrix_types={"FTV":"FOTOVOLTAICOS","EOL":"PARQUES EÓLICOS","EOM":"EÓLICOS MARINOS","HIB":"HIBRIDOS","ALM":"ALMACENAMIENTO"}
+          matrix_states={"05":"INICIO TELEMATICO","20":"INICIO","30":"CONSULTAS PREVIAS","40":"TRASLADO CONSULTAS","45":"FIN FASE POTESTATIVA","50":"RECEPCION EXPEDIENTE"}
+          for tcode,tname in matrix_types.items():
+              for scode,sname in matrix_states.items():
+                  mp=dict(search_payload)
+                  mp["select_tipo"]=tcode
+                  mp["select_estado_tramitacion"]=scode
+                  mr=s.post(search_url,data=mp,timeout=120)
+                  ms=BeautifulSoup(mr.text,"html.parser")
+                  count=0
+                  for tr in ms.find_all("tr"):
+                      cells=[" ".join(td.stripped_strings) for td in tr.find_all("td")]
+                      if len(cells)>=3 and re.fullmatch(r"20[0-9]{6}",cells[0] or ""):
+                          count+=1
+                  print("SEARCH_MATRIX",tcode,scode,count,tname,sname)
           prefix_payload=dict(search_payload)
           prefix_payload["codigo"]="2026"
           prefix_payload["select_estado_tramitacion"]=""
