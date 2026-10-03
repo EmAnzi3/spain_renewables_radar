@@ -1,0 +1,103 @@
+name: regional-energy-probe
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/regional-energy-probe.yml'
+permissions:
+  contents: read
+concurrency:
+  group: regional-energy-probe-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Probe official public endpoints and retain source evidence
+        run: |
+          python - <<'PY'
+          import hashlib,json,re,time
+          from pathlib import Path
+          from urllib.parse import urljoin
+          import requests
+          from bs4 import BeautifulSoup
+          targets=[
+              ('AND_ALL','https://datos.juntadeandalucia.es/api/v0/public-documents/all?format=json'),
+              ('AND_COUNT','https://datos.juntadeandalucia.es/api/v0/public-documents/count'),
+              ('AND_SAMPLE','https://datos.juntadeandalucia.es/api/v0/public-documents/686479'),
+              ('AND_LIST','https://www.juntadeandalucia.es/servicios/participacion/todos-documentos.html'),
+              ('GVA_ENERGY','https://cindi.gva.es/es/web/energia/informacion-publica'),
+              ('GAL_ENERGY','https://economia.xunta.gal/es/transparencia/documentos-sometidos-a-informacion-publica'),
+          ]
+          out=Path('reports/regional_probe'); out.mkdir(parents=True,exist_ok=True)
+          summary=[]
+          def json_lists(value,path='$'):
+              if isinstance(value,list):
+                  yield path,value
+              elif isinstance(value,dict):
+                  for key,child in value.items():
+                      yield from json_lists(child,path+'.'+key)
+          renewable=re.compile(r'fotovolta|e[oó]lic|bess|bater[ií]a|almacenamiento|hibrid',re.I)
+          for code,url in targets:
+              started=time.monotonic(); item={'source_code':code,'requested_url':url,'status':'PROBE_ONLY'}
+              try:
+                  response=requests.get(url,timeout=(12,60),headers={'User-Agent':'SpainRenewablesRadar/0.2 public-source probe'})
+                  item.update(http_status=response.status_code,final_url=response.url,bytes=len(response.content),
+                              content_type=response.headers.get('content-type'),sha256=hashlib.sha256(response.content).hexdigest())
+                  (out/(code+'.raw')).write_bytes(response.content)
+                  response.raise_for_status()
+                  try:
+                      data=response.json()
+                      item['json_type']=type(data).__name__
+                      if isinstance(data,dict): item['top_keys']=list(data)[:30]
+                      if code in ('AND_COUNT','AND_SAMPLE'):
+                          item['sample']=data
+                      else:
+                          lists=list(json_lists(data))
+                          item['lists']=[{'path':p,'length':len(v)} for p,v in lists[:20]]
+                          if lists:
+                              path,records=max(lists,key=lambda x:len(x[1]))
+                              item['records_path']=path
+                              item['records_count']=len(records)
+                              relevant=[r for r in records if renewable.search(json.dumps(r,ensure_ascii=False))]
+                              item['renewable_text_candidates']=len(relevant)
+                              item['sample_records']=relevant[:3]
+                  except ValueError:
+                      soup=BeautifulSoup(response.text,'html.parser')
+                      main=soup.find('main') or soup.find(id='content') or soup
+                      text=' '.join(main.stripped_strings)
+                      item['text_prefix']=text[:2500]
+                      item['text_suffix']=text[-1500:]
+                      item['renewable_text_found']=bool(renewable.search(text))
+                      links=[]
+                      for a in main.find_all('a',href=True):
+                          label=' '.join(a.stripped_strings); href=urljoin(response.url,a['href'])
+                          if renewable.search(label) or any(x in (label+' '+href).casefold() for x in ('siguiente','expediente','documento','pagin','page=')):
+                              links.append({'label':label[:250],'url':href})
+                      item['links']=links[:25]
+                      item['forms']=[{'action':f.get('action'),'method':f.get('method'),
+                                      'fields':[{'name':x.get('name'),'value':x.get('value')} for x in f.find_all(['input','select'])[:20]]}
+                                     for f in main.find_all('form')[:3]]
+              except Exception as exc:
+                  item['status']='ERROR'; item['error']=str(exc)[:600]
+              item['seconds']=round(time.monotonic()-started,2)
+              summary.append(item)
+              print('REGIONAL_PROBE',json.dumps(item,ensure_ascii=False),flush=True)
+              (out/'summary.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding='utf-8')
+          if all(x['status']=='ERROR' for x in summary):
+              raise SystemExit('No regional source accessible; no collector was activated')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: regional-energy-probe
+          path: reports/regional_probe/
+          if-no-files-found: error
