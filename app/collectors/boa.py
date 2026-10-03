@@ -24,9 +24,11 @@ STRONG_TITLE = re.compile(
 )
 EXCLUDE = re.compile(
     r"contrataci[oó]n|licitaci[oó]n|adjudicaci[oó]n|"
-    r"autoconsumo|instalaci[oó]n\s+de\s+paneles\s+fotovoltaicos\s+en\s+(?:edificios|cubiertas)",
+    r"autoconsumo|instalaci[oó]n\s+de\s+paneles\s+fotovoltaicos\s+en\s+(?:edificios|cubiertas)|"
+    r"gigafactor[ií]a\s+de\s+bater[ií]as\s+para\s+veh[ií]culos|fabricaci[oó]n\s+de\s+veh[ií]culos",
     re.I,
 )
+
 URL_RE = re.compile(r"https?://[^\s\x60]+", re.I)
 MULTI_QUOTED_PROJECT = re.compile(
     r'["«](Planta\s+(?:solar\s+)?fotovoltaica|Parque\s+e[oó]lico)\s+([^"»]{3,120})["»]',
