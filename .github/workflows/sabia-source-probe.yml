@@ -85,6 +85,46 @@ jobs:
                       print(" SEARCH_FIELD",tag.name,attrs,repr(txt[:180]))
           sbody=" ".join(ss.stripped_strings)
           print("SEARCH_BODY",sbody[:5000])
+          # Inspect search JavaScript and perform a narrow official FTV search.
+          for line in sr.text.splitlines():
+              if "enviar(" in line or "select_tipo" in line or "id_pagina_cargada" in line:
+                  clean=" ".join(line.split())
+                  if clean:
+                      print(" SEARCH_JS",clean[:2500])
+          sf=ss.find("form")
+          search_payload={}
+          if sf:
+              for inp in sf.find_all("input"):
+                  name=inp.get("name")
+                  if name:
+                      search_payload[name]=inp.get("value") or ""
+          search_payload.update({
+              "accion":"buscar",
+              "select_comunidades":"",
+              "codigo":"",
+              "titulo":"",
+              "select_estado_tramitacion":"",
+              "select_tipo":"FTV",
+              "select_organo_sustantivo":"",
+              "select_promotor":"",
+          })
+          rr=s.post(search_url,data=search_payload,timeout=120)
+          print("SEARCH_POST",rr.status_code,rr.url,len(rr.content))
+          rs=BeautifulSoup(rr.text,"html.parser")
+          rbody=" ".join(rs.stripped_strings)
+          print("SEARCH_RESULT_BODY",rbody[:7000])
+          result_codes=[]
+          for tag in rs.find_all(True):
+              onclick=tag.get("onclick") or ""
+              for m in re.finditer(r"enviar\\(\\s*['\"](?:proy_detalle|ea_detalle)['\"]\\s*,?\\s*['\"]?(\\d{6,10})",onclick,re.I):
+                  result_codes.append(m.group(1))
+          print("SEARCH_RESULT_CODES",len(result_codes),result_codes[:50])
+          for tag in rs.find_all(["a","input","button"]):
+              attrs=" ".join(str(v) for v in tag.attrs.values())
+              txt=" ".join(tag.stripped_strings)
+              low=(attrs+" "+txt).casefold()
+              if any(k in low for k in ("siguiente","anterior","pagina","página","proy_detalle")):
+                  print(" SEARCH_RESULT_CONTROL",tag.name,tag.attrs,repr(txt[:180]))
 
           # Inspect the actual controls surrounding known current projects.
           for keyword in ("MUEL","CIUDAD RODRIGO","CLAVELLINAS","MALAGATO"):
