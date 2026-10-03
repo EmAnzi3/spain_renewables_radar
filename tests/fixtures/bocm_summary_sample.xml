@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sumario>
+  <diario numero="210">
+    <secciones>
+      <seccion nombre="I. COMUNIDAD DE MADRID">
+        <apartado nombre="D) Anuncios">
+          <organismo nombre="CONSEJERÍA DE MEDIO AMBIENTE, AGRICULTURA E INTERIOR">
+            <disposicion numero="42">
+              <identificador>BOCM-20260903-42</identificador>
+              <titulo>Información pública – Anuncio por el que se somete a información pública la solicitud de autorización administrativa previa y de construcción de la planta solar fotovoltaica «FV Madrid Sur», de 49,8 MW, en la Comunidad de Madrid</titulo>
+              <url_html>https://www.bocm.es/bocm-20260903-42</url_html>
+              <url_xml>https://www.bocm.es/boletin/CM_Orden_BOCM/2026/09/03/BOCM-20260903-42.xml</url_xml>
+              <url_pdf>https://www.bocm.es/boletin/CM_Orden_BOCM/2026/09/03/BOCM-20260903-42.PDF</url_pdf>
+            </disposicion>
+            <disposicion numero="43">
+              <identificador>BOCM-20260903-43</identificador>
+              <titulo>Contratación – Licitación para instalación de paneles fotovoltaicos en cubiertas de edificios públicos</titulo>
+              <url_html>https://www.bocm.es/bocm-20260903-43</url_html>
+              <url_xml>https://www.bocm.es/x.xml</url_xml>
+            </disposicion>
+          </organismo>
+        </apartado>
+      </seccion>
+    </secciones>
+  </diario>
+</sumario>

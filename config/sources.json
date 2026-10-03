@@ -108,7 +108,7 @@
     "name": "Boletín Oficial de la Comunidad de Madrid",
     "kind": "bulletin",
     "scope": "Madrid",
-    "implemented": false,
+    "implemented": true,
     "url": "https://www.bocm.es/"
   },
   {

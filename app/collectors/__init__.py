@@ -5,5 +5,6 @@ from .boja import BOJACollector
 from .docm import DOCMCollector
 from .doe import DOECollector
 from .borm import BORMCollector
+from .bocm import BOCMCollector
 
-__all__ = ["BOECollector","BOCYLCollector","BOACollector","BOJACollector","DOCMCollector","DOECollector","BORMCollector"]
+__all__ = ["BOECollector","BOCYLCollector","BOACollector","BOJACollector","DOCMCollector","DOECollector","BORMCollector","BOCMCollector"]
