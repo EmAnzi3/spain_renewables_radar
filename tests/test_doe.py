@@ -15,6 +15,15 @@ class DOECollectorTests(unittest.TestCase):
         self.assertIn("Atalaya",rows[0]["title"])
         self.assertTrue(rows[0]["detail_url"].startswith("https://doe.juntaex.es/otrosFormatos/html.php"))
 
+    def test_excludes_waste_and_panel_recycling(self):
+        html='''<html><body>
+        <p>Información pública del proyecto de centro autorizado de tratamiento de vehículos al final de su vida útil y almacenamiento de residuos sólidos no peligrosos.
+        <a href="/otrosFormatos/html.php?xml=2026080693&amp;anio=2026&amp;doe=1720o"></a></p>
+        <p>Información pública del proyecto para centro de reciclaje de paneles fotovoltaicos.
+        <a href="/otrosFormatos/html.php?xml=2026081484&amp;anio=2026&amp;doe=1720o"></a></p>
+        </body></html>'''
+        self.assertEqual(DOECollector.parse_summary_html(html),[])
+
     def test_atalaya_fields(self):
         html=Path("tests/fixtures/doe_summary_sample.html").read_text(encoding="utf-8")
         row=DOECollector.parse_summary_html(html)[0]
