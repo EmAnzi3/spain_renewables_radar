@@ -94,6 +94,45 @@ jobs:
           for name,attrs,txt in controls[:120]:
               print("CONTROL",name,attrs,repr(txt[:240]))
 
+          # Reproduce SABIA's form POST used by enviar('ea_detalle', code).
+          js=re.search(r"function\\s+enviar\\s*\\([^)]*\\)\\s*\\{(.{0,2500}?)\\}",r.text,re.I|re.S)
+          print("ENVIAR_JS",js.group(0)[:2500].replace("\n"," ") if js else "NOT_FOUND")
+          form=forms[0] if forms else None
+          base_payload={}
+          if form:
+              for inp in form.find_all("input"):
+                  name=inp.get("name")
+                  if name:
+                      base_payload[name]=inp.get("value") or ""
+          print("BASE_PAYLOAD",base_payload)
+          for code in ("20260236","20260181","20260211"):
+              payload=dict(base_payload)
+              payload["accion"]="ea_detalle"
+              payload["codigo_seleccionado"]=code
+              payload["id_pagina_cargada"]="DESTACADOS"
+              d=s.post(url,data=payload,timeout=60)
+              print("POST_DETAIL",code,d.status_code,d.url,len(d.content))
+              ds=BeautifulSoup(d.text,"html.parser")
+              body=" ".join(ds.stripped_strings)
+              for label in (
+                  "Código de Evaluación Ambiental",
+                  "Código para el Órgano Sustantivo",
+                  "Título del proyecto",
+                  "Promotor",
+                  "Tipo de proyecto",
+                  "Comunidad autónoma",
+                  "Provincia",
+                  "Municipio",
+                  "Estado de tramitación",
+                  "Fecha de entrada",
+                  "Fecha inicio de consultas",
+                  "Fecha de resolución",
+                  "Sentido de la resolución",
+              ):
+                  pos=body.casefold().find(label.casefold())
+                  if pos>=0:
+                      print(" POST_FIELD",code,label,"=>",body[pos:pos+500])
+              print(" POST_HAS_MUEL",code,"MUEL" in body.upper())
           for text,href in detail[:3]:
               d=s.get(href,timeout=60)
               print("DETAIL_STATUS",d.status_code,href)
