@@ -46,6 +46,21 @@ CREATE INDEX IF NOT EXISTS idx_projects_geo ON projects(ccaa,province);
 CREATE INDEX IF NOT EXISTS idx_projects_stage ON projects(commercial_stage,technology);
 CREATE INDEX IF NOT EXISTS idx_projects_expediente ON projects(expediente);
 
+CREATE TABLE IF NOT EXISTS project_geo_enrichment (
+  project_key TEXT PRIMARY KEY,
+  municipalities_json TEXT NOT NULL DEFAULT '[]',
+  provinces_json TEXT NOT NULL DEFAULT '[]',
+  province TEXT,
+  ccaa TEXT,
+  status TEXT NOT NULL,
+  source_code TEXT NOT NULL,
+  source_url TEXT NOT NULL,
+  reference_date TEXT,
+  enriched_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(project_key) REFERENCES projects(project_key)
+);
+CREATE INDEX IF NOT EXISTS idx_project_geo_status ON project_geo_enrichment(status,province);
+
 CREATE TABLE IF NOT EXISTS ree_node_capacity (
   snapshot_date TEXT NOT NULL,
   node_name TEXT NOT NULL,
