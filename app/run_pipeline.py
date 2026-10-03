@@ -15,8 +15,10 @@ from app.enrichment import (
     save_registry_snapshot,
     exact_project_matches,
     write_registry_exports,
+    fetch_ine_municipalities,
+    enrich_missing_project_geography,
 )
-from app.reporting import export_dashboard,write_changes,write_coverage,write_quality_issues
+from app.reporting import export_dashboard,write_changes,write_coverage,write_quality_issues,write_province_view
 from app.store import save_event
 
 COLLECTOR_CLASSES={
@@ -103,6 +105,33 @@ def main():
                     new_projects+=int(new_project)
             coverage.append(row)
 
+    missing_geo=conn.execute("SELECT count(*) FROM projects WHERE province IS NULL").fetchone()[0]
+    if missing_geo:
+        print(f"[INE_MUNICIPALITIES] enriching {missing_geo} projects without province")
+        geo_row={
+            "source_code":"INE_MUNICIPALITIES",
+            "date":end.isoformat(),
+            "status":"OK",
+            "candidates":0,
+            "inserted":0,
+            "new_projects":0,
+            "error":"",
+        }
+        try:
+            municipalities=fetch_ine_municipalities(timeout=timeout,user_agent=user_agent)
+            geo_result=enrich_missing_project_geography(conn,municipalities)
+            geo_row["candidates"]=len(municipalities)
+            geo_row["inserted"]=geo_result["resolved"]
+            print(
+                f"  INE geography: resolved={geo_result['resolved']} | "
+                f"multi-province={geo_result['multi_province']} | unresolved={geo_result['unresolved']}"
+            )
+        except Exception as exc:
+            geo_row["status"]="WARN"
+            geo_row["error"]=str(exc)[:500]
+            print(f"  WARN INE_MUNICIPALITIES: {exc}")
+        coverage.append(geo_row)
+
     if not args.skip_ree:
         print("[REE_ACCESS] latest node-capacity snapshot")
         ree_row={
@@ -180,6 +209,7 @@ def main():
     write_changes(new_events)
     write_coverage(coverage)
     quality_issues,_,_=write_quality_issues(conn)
+    provinces,_,_=write_province_view(conn)
     rows=export_dashboard(conn)
     write_dashboard()
 
@@ -195,6 +225,7 @@ def main():
     print("Report: reports/change_reports/changes_latest.html")
     print("Coverage: reports/coverage_latest.html")
     print("Quality: reports/quality_issues_latest.html")
+    print(f"Province view: reports/province_view_latest.html ({len(provinces)} province)")
     if not args.skip_ree:
         print("REE: reports/ree_capacity_latest.csv")
     if not args.skip_miteco:
