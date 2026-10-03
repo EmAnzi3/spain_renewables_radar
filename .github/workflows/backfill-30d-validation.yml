@@ -24,7 +24,7 @@ jobs:
           python-version: "3.12"
       - run: pip install -r requirements.txt
       - name: Run 30-day official-source backfill
-        run: python -m app.run_pipeline --days 30
+        run: python -m app.run_pipeline --days 3 --strict-coverage0 --strict-coverage
       - name: Print backfill metrics
         run: |
           python - <<'PY'
