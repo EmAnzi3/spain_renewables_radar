@@ -4,7 +4,7 @@ import argparse
 import os
 from datetime import date,timedelta
 
-from app.collectors import BOECollector,BOCYLCollector,BOACollector,BOJACollector,DOCMCollector,DOECollector
+from app.collectors import BOECollector,BOCYLCollector,BOACollector,BOJACollector,DOCMCollector,DOECollector,BORMCollector
 from app.dashboard import write_dashboard
 from app.db import connect
 from app.enrichment import (
@@ -26,6 +26,7 @@ COLLECTOR_CLASSES={
     "BOJA":BOJACollector,
     "DOCM":DOCMCollector,
     "DOE":DOECollector,
+    "BORM":BORMCollector,
 }
 
 def daterange(start:date,end:date):
@@ -39,7 +40,7 @@ def parse_args():
     p.add_argument("--days",type=int,default=7,help="giorni inclusi fino a oggi")
     p.add_argument("--since",help="YYYY-MM-DD")
     p.add_argument("--until",help="YYYY-MM-DD")
-    p.add_argument("--sources",default="BOE,BOCYL,BOA,BOJA,DOCM,DOE",help="sorgenti separate da virgola")
+    p.add_argument("--sources",default="BOE,BOCYL,BOA,BOJA,DOCM,DOE,BORM",help="sorgenti separate da virgola")
     p.add_argument("--db",default=os.getenv("RADAR_DB","data/spain_renewables.sqlite"))
     p.add_argument("--skip-ree",action="store_true",help="salta lo snapshot REE accesso/connessione")
     p.add_argument("--skip-miteco",action="store_true",help="salta lo snapshot MITECO registro produzione")

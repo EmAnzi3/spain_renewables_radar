@@ -64,6 +64,7 @@ REGIONAL_SOURCE_SCOPE={
     "BOJA":("Andalucía",{"Almería","Cádiz","Córdoba","Granada","Huelva","Jaén","Málaga","Sevilla"}),
     "DOCM":("Castilla-La Mancha",{"Albacete","Ciudad Real","Cuenca","Guadalajara","Toledo"}),
     "DOE":("Extremadura",{"Badajoz","Cáceres"}),
+    "BORM":("Murcia",{"Murcia"}),
 }
 
 PROMOTER_PATTERNS=[
@@ -224,6 +225,8 @@ def parse_event(*,source_code,external_id,publication_date,title,url,raw_text)->
         scope_ccaa,allowed_provinces=scope
         if province not in allowed_provinces:
             province=None
+        if province is None and len(allowed_provinces)==1:
+            province=next(iter(allowed_provinces))
         ccaa=scope_ccaa
 
     event_type=classify_event(title)

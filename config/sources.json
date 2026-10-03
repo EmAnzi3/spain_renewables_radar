@@ -116,8 +116,8 @@
     "name": "Boletín Oficial de la Región de Murcia",
     "kind": "bulletin",
     "scope": "Murcia",
-    "implemented": false,
-    "url": "https://www.borm.es/"
+    "implemented": true,
+    "url": "https://datosabiertos.regiondemurcia.es/carm/catalogo/sector-publico/indices-del-boletin-oficial-de-la-region-de-murcia-ano-actual"
   },
   {
     "code": "BON",
