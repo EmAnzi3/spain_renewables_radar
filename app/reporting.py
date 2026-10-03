@@ -75,14 +75,27 @@ def write_quality_issues(conn,out_dir="reports"):
     html_path=out/"quality_issues_latest.html"
 
     projects=[dict(r) for r in conn.execute(
-        """SELECT project_key,project_name,technology,power_mw,promoter,expediente,
-                  province,ccaa,commercial_stage,last_seen,latest_source_code,latest_source_url
-           FROM projects ORDER BY last_seen DESC,project_name"""
+        """SELECT p.project_key,p.project_name,p.technology,p.power_mw,p.promoter,p.expediente,
+                  p.province,p.ccaa,p.commercial_stage,p.last_seen,p.latest_source_code,p.latest_source_url,
+                  (
+                    SELECT e.title
+                    FROM events e
+                    WHERE e.project_key=p.project_key
+                    ORDER BY e.publication_date DESC,e.id DESC
+                    LIMIT 1
+                  ) AS latest_title
+           FROM projects p ORDER BY p.last_seen DESC,p.project_name"""
     ).fetchall()]
 
     suspicious_name=re.compile(
         r"^(?:bolet[ií]n oficial|existente\b|por bater[ií]as\b|estar[aá] sometida\b|"
         r"a instancia de\b|de autoconsumo\b|fase\s+\d|y\s+\d|\(csfv\)$)",
+        re.I,
+    )
+    unnamed_multi_project=re.compile(
+        r"\b(?:dos|varios|varias|m[uú]ltiples?)\s+"
+        r"(?:parques?|plantas?|instalaciones?|m[oó]dulos?)\s+"
+        r"(?:solares?\s+)?(?:fotovoltaic[oa]s?|e[oó]lic[oa]s?|de\s+almacenamiento)\b",
         re.I,
     )
 
@@ -108,7 +121,16 @@ def write_quality_issues(conn,out_dir="reports"):
         mw=p.get("power_mw")
 
         if not name:
-            add(p,"ERROR","MISSING_PROJECT_NAME","Nome progetto non estratto.")
+            latest_title=(p.get("latest_title") or "").strip()
+            if unnamed_multi_project.search(latest_title):
+                add(
+                    p,
+                    "WARN",
+                    "SOURCE_UNNAMED_MULTI_PROJECT",
+                    "La fonte raggruppa più progetti senza una denominazione individuale; il nome resta volutamente vuoto.",
+                )
+            else:
+                add(p,"ERROR","MISSING_PROJECT_NAME","Nome progetto non estratto.")
         elif suspicious_name.search(name):
             add(p,"WARN","SUSPICIOUS_PROJECT_NAME","Nome probabilmente estratto da testo generico e da verificare.")
 
