@@ -1,0 +1,84 @@
+name: borm-source-probe
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/borm-source-probe.yml"
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests beautifulsoup4
+      - name: Inspect BORM official services
+        run: |
+          python - <<'PY'
+          import re, urllib.parse, requests
+          from bs4 import BeautifulSoup
+
+          s=requests.Session()
+          s.headers["User-Agent"]="SpainRenewablesRadar/0.1"
+          home="https://www.borm.es/"
+
+          r=s.get(home,timeout=45)
+          print("HOME",r.status_code,r.url,r.headers.get("content-type"),len(r.content))
+          r.raise_for_status()
+          soup=BeautifulSoup(r.text,"html.parser")
+
+          print("\n===== HOME RELEVANT LINKS =====")
+          links=[]
+          for a in soup.find_all("a",href=True):
+              href=urllib.parse.urljoin(home,a["href"])
+              label=" ".join(a.stripped_strings)
+              blob=(label+" "+href).lower()
+              if any(k in blob for k in ("rss","dato","boletin","publicacion","services","abierto")):
+                  print("LINK",repr(label[:180]),"|",href)
+                  links.append((label,href))
+
+          print("\n===== FORMS =====")
+          for i,form in enumerate(soup.find_all("form")):
+              print("FORM",i,"ACTION",urllib.parse.urljoin(home,form.get("action") or ""),"METHOD",form.get("method"))
+              for el in form.find_all(["input","select","button"]):
+                  print("FIELD",el.name,el.get("name"),el.get("value"),el.get("type"))
+
+          print("\n===== DISCOVERED TARGETS =====")
+          targets=[]
+          for label,href in links:
+              low=(label+" "+href).lower()
+              if any(k in low for k in ("rss","dato","publicacion","boletin")):
+                  targets.append(href)
+          for url in list(dict.fromkeys(targets))[:20]:
+              try:
+                  rr=s.get(url,timeout=45,allow_redirects=True)
+                  print("\nTARGET",url,"=>",rr.status_code,rr.url,rr.headers.get("content-type"),len(rr.content))
+                  ctype=(rr.headers.get("content-type") or "").lower()
+                  if "html" in ctype:
+                      ss=BeautifulSoup(rr.text,"html.parser")
+                      print("TITLE",ss.title.get_text(" ",strip=True) if ss.title else "")
+                      for a in ss.find_all("a",href=True)[:250]:
+                          href=urllib.parse.urljoin(rr.url,a["href"])
+                          label=" ".join(a.stripped_strings)
+                          if any(k in (href+" "+label).lower() for k in ("services/anuncio","services/boletin","rss","xml","csv","json","txt","texto","html")):
+                              print("  A",repr(label[:180]),"|",href)
+                  else:
+                      print(rr.text[:6000] if "text" in ctype or "xml" in ctype else "BINARY")
+              except Exception as exc:
+                  print("TARGET_ERROR",url,repr(exc))
+
+          # Known current-ish bulletin service shape to verify runner access.
+          print("\n===== SERVICE SHAPE =====")
+          samples=[
+              "https://www.borm.es/services/boletin/ano/2026/numero/56/pdf",
+              "https://www.borm.es/services/anuncio/ano/2026/numero/1982/pdf?id=842664",
+          ]
+          for url in samples:
+              try:
+                  rr=s.get(url,timeout=45,allow_redirects=True)
+                  print("SAMPLE",url,rr.status_code,rr.url,rr.headers.get("content-type"),len(rr.content))
+              except Exception as exc:
+                  print("SAMPLE_ERROR",url,repr(exc))
+          PY
