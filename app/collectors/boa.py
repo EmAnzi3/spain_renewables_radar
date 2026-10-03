@@ -6,6 +6,8 @@ import re
 from datetime import date
 
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 from app.parser import parse_event
 
@@ -43,6 +45,19 @@ class BOACollector:
         self.timeout = timeout
         self.session = requests.Session()
         self.session.headers.update({"User-Agent": user_agent})
+        retry=Retry(
+            total=4,
+            connect=4,
+            read=2,
+            status=3,
+            backoff_factor=0.8,
+            status_forcelist=(429,500,502,503,504),
+            allowed_methods=frozenset({"GET"}),
+            raise_on_status=False,
+        )
+        adapter=HTTPAdapter(max_retries=retry)
+        self.session.mount("https://",adapter)
+        self.session.mount("http://",adapter)
 
     def _day_rows(self, day: date) -> list[dict]:
         d = day.strftime("%Y%m%d")
