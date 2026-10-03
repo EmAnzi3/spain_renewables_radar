@@ -1,0 +1,38 @@
+name: andalucia-public-validation
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'app/collectors/andalucia_public.py'
+      - 'tests/test_andalucia_public.py'
+      - 'scripts/validate_andalucia_public.py'
+      - '.github/workflows/andalucia-public-validation.yml'
+permissions:
+  contents: read
+concurrency:
+  group: andalucia-public-validation-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Full unit suite
+        run: python -m unittest discover -s tests -v
+      - name: Validate snapshot completeness, 30-day backfill, 3-day smoke and idempotency
+        run: python scripts/validate_andalucia_public.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: andalucia-public-validation
+          path: |
+            reports/andalucia_public/
+            data/andalucia_public_validation.sqlite
+          if-no-files-found: error
