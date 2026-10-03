@@ -71,6 +71,21 @@ jobs:
               for v in raw[:50]:
                   print("RAW",v)
 
+          search_url="https://sede.miteco.gob.es/portal/site/seMITECO/navServicioContenido"
+          sr=s.get(search_url,timeout=60)
+          print("SEARCH_PAGE",sr.status_code,sr.url,len(sr.content))
+          ss=BeautifulSoup(sr.text,"html.parser")
+          print("SEARCH_TITLE",ss.title.get_text(" ",strip=True) if ss.title else "")
+          for i,sf in enumerate(ss.find_all("form"),1):
+              print("SEARCH_FORM",i,sf.get("method"),sf.get("action"))
+              for tag in sf.find_all(["input","select","option","button"]):
+                  attrs={k:v for k,v in tag.attrs.items() if k in ("name","id","value","type","selected","onclick")}
+                  txt=" ".join(tag.stripped_strings)
+                  if attrs or txt:
+                      print(" SEARCH_FIELD",tag.name,attrs,repr(txt[:180]))
+          sbody=" ".join(ss.stripped_strings)
+          print("SEARCH_BODY",sbody[:5000])
+
           # Inspect the actual controls surrounding known current projects.
           for keyword in ("MUEL","CIUDAD RODRIGO","CLAVELLINAS","MALAGATO"):
               node=soup.find(string=re.compile(keyword,re.I))
