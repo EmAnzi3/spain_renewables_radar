@@ -2,7 +2,7 @@
 
 ## Stato certificato
 
-Il radar è operativo su **6 bollettini ufficiali** più due enrichment nazionali gratuiti.
+Il radar è operativo su **7 bollettini ufficiali** più due enrichment nazionali gratuiti.
 
 ### Collector attivi
 
@@ -12,6 +12,7 @@ Il radar è operativo su **6 bollettini ufficiali** più due enrichment nazional
 - BOJA — Andalucía
 - DOCM — Castilla-La Mancha
 - DOE — Extremadura
+- BORM — Región de Murcia, tramite il dataset ufficiale Open Data degli indici del bollettino
 
 ### Enrichment attivi
 
@@ -22,56 +23,61 @@ Nessun aggregatore commerciale è usato.
 
 ## Ultima validazione 30 giorni
 
-Run: **37072608960 — SUCCESS**
+Run: **37108715840 — SUCCESS**
 
-- 99 progetti;
-- 123 eventi;
+- 102 progetti;
+- 124 eventi;
 - 0 errori source/day;
-- BOE 44;
-- BOCYL 16;
-- BOA 27;
+- BOE 42;
+- BOCYL 15;
+- BOA 24;
 - BOJA 7;
-- DOCM 19;
-- DOE 10;
-- MITECO: 71.727 impianti;
-- REE: 931 nodi;
-- campi mancanti prima del quality gate: nome 4, MW 25, provincia 6, expediente 26.
-
-Correzioni validate:
-- `PSF Puerto Real`: 133,5708 MW, non 5.708 MW;
-- `Terrapower Generación`: nome e 44,16 MW corretti;
-- `Atalaya`: Badajoz e fase PERMITTING, evitando un falso BLOCKED dovuto a riferimenti storici nel testo;
-- autoconsumo escluso dal BOE;
-- geografia dei collector regionali vincolata alla rispettiva CCAA.
+- DOCM 17;
+- DOE 8;
+- BORM 11;
+- REE: 931 nodi, snapshot 2026-10-01;
+- MITECO: 71.727 impianti, snapshot 2026-10-03;
+- matching MITECO esatti conservativi: 8;
+- campi mancanti: nome 1, MW 23, provincia 4, expediente 14.
 
 ## Quality gate
+
+Ultimo esito certificato:
+
+- **ERROR: 0**
+- **WARN: 1**
+- **INFO: 41**
+
+Il solo WARN sul nome è una pubblicazione BOCYL che raggruppa **due parchi fotovoltaici senza fornire denominazioni individuali**. Il radar conserva correttamente il nome vuoto invece di inventarlo.
 
 Generati automaticamente:
 - `reports/quality_issues_latest.csv`
 - `reports/quality_issues_latest.html`
 
-Flag:
-- nome progetto mancante;
-- nome sospetto/generico;
-- MW mancanti o anomali;
-- provincia mancante;
-- expediente mancante.
-
-I flag non riscrivono i dati.
+Correzioni consolidate:
+- falsi positivi Catasto/policy generiche BOE esclusi;
+- gigafactory batterie per veicoli BOA esclusa;
+- storage non energetico DOCM escluso;
+- centri rifiuti/riciclo pannelli DOE esclusi;
+- nomi BESS/ibridi prioritari rispetto agli impianti preesistenti;
+- virgolette tipografiche spagnole gestite;
+- potenze in kW convertite in MW;
+- fonti regionali vincolate alla propria CCAA;
+- BORM acquisito da JSON ufficiale Open Data, evitando il blocco anti-bot del sito documentale.
 
 ## Problemi aperti
 
-- alcuni nomi progetto restano estratti in modo imperfetto nei documenti più complessi;
-- geografia multi-provincia richiede enrichment comune→provincia;
-- alcune pubblicazioni non riportano MW o expediente;
-- matching MITECO è volutamente conservativo;
+- 23 progetti non riportano MW nella fonte disponibile;
+- 4 progetti non hanno provincia estraibile;
+- 14 progetti non riportano expediente;
+- matching MITECO resta volutamente conservativo;
 - EPC/BoP richiede enrichment separato da fonti pubbliche;
-- DOGV corrente risponde 403 dal runner GitHub: non è dichiarato implementato finché non troviamo un endpoint ufficiale stabile.
+- DOGV corrente risponde 403 dal runner GitHub: non viene dichiarato implementato senza endpoint ufficiale stabile.
 
 ## Prossimi passi
 
-1. ridurre i record quality WARN/ERROR del backfill;
-2. aggiungere un altro collector regionale solo dopo validazione live;
-3. enrichment geografico comune→provincia;
-4. scoring commerciale e vista provinciale;
-5. enrichment EPC/BoP.
+1. aggiungere il prossimo collector regionale solo dopo validazione live, con BOCM come candidato prioritario per la disponibilità di sumari XML/RSS;
+2. enrichment geografico comune→provincia;
+3. scoring commerciale e vista provinciale;
+4. enrichment EPC/BoP;
+5. continuare a ridurre gli INFO senza inventare dati mancanti.

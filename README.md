@@ -17,7 +17,8 @@ Collector ufficiali attualmente implementati:
 - **BOA** — Aragón;
 - **BOJA** — Andalucía;
 - **DOCM** — Castilla-La Mancha;
-- **DOE** — Extremadura.
+- **DOE** — Extremadura;
+- **BORM** — Región de Murcia, acquisito dal dataset ufficiale Open Data degli indici BORM.
 
 Enrichment gratuito implementato:
 
@@ -28,19 +29,21 @@ Il registry `config/sources.json` contiene anche gli altri bollettini autonomici
 
 ## Stato validato
 
-Backfill ufficiale di 30 giorni, run GitHub Actions **37072608960**:
+Backfill ufficiale di 30 giorni, run GitHub Actions **37108715840**:
 
-- **99 progetti**;
-- **123 eventi amministrativi**;
+- **102 progetti**;
+- **124 eventi amministrativi**;
 - **0 errori source/day**;
-- BOE 44 eventi;
-- BOCYL 16;
-- BOA 27;
+- quality gate: **0 ERROR, 1 WARN, 41 INFO**;
+- BOE 42 eventi;
+- BOCYL 15;
+- BOA 24;
 - BOJA 7;
-- DOCM 19;
-- DOE 10;
+- DOCM 17;
+- DOE 8;
+- BORM 11;
 - REE: **931 nodi** nello snapshot 2026-10-01;
-- MITECO: **71.727 impianti** nello snapshot.
+- MITECO: **71.727 impianti** nello snapshot 2026-10-03, con **8 matching esatti** conservativi.
 
 Il radar conserva un progetto come entità unica e accumula eventi successivi. Non crea un nuovo progetto a ogni pubblicazione.
 
@@ -86,4 +89,5 @@ Backfill manuale:
 - meglio un campo vuoto che un dato inventato;
 - owner/promotore ed EPC sono entità diverse;
 - dati REE aggregati per nodo/CCAA non equivalgono automaticamente alla conferma di un progetto;
-- i flag qualità **non correggono automaticamente** i dati: isolano i record da verificare.
+- i flag qualità **non correggono automaticamente** i dati: isolano i record da verificare;
+- una pubblicazione che raggruppa più progetti senza nomi individuali resta senza nome e viene classificata come WARN, non viene inventata una denominazione.
