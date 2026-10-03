@@ -4,7 +4,7 @@ import argparse
 import os
 from datetime import date,timedelta
 
-from app.collectors import BOECollector,BOCYLCollector,BOACollector,BOJACollector,DOCMCollector,DOECollector,BORMCollector,BOCMCollector
+from app.collectors import BOECollector,BOCYLCollector,BOACollector,BOJACollector,DOCMCollector,DOECollector,BORMCollector,BOCMCollector,SABIACollector
 from app.dashboard import write_dashboard
 from app.db import connect
 from app.enrichment import (
@@ -32,6 +32,7 @@ COLLECTOR_CLASSES={
     "DOE":DOECollector,
     "BORM":BORMCollector,
     "BOCM":BOCMCollector,
+    "MITECO_SABIA":SABIACollector,
 }
 
 def daterange(start:date,end:date):

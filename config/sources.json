@@ -144,6 +144,14 @@
     "url": "https://web.larioja.org/bor-portada"
   },
   {
+    "code": "MITECO_SABIA",
+    "name": "MITECO SABIA — evaluación ambiental de proyectos",
+    "kind": "project_discovery",
+    "scope": "national",
+    "implemented": false,
+    "url": "https://sede.miteco.gob.es/portal/site/seMITECO/navServicioContenido"
+  },
+  {
     "code": "INE_MUNICIPALITIES",
     "name": "Instituto Nacional de Estadística — municipios",
     "kind": "enrichment",

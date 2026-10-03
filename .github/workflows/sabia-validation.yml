@@ -1,0 +1,90 @@
+name: sabia-validation
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/sabia-validation.yml"
+      - "app/collectors/sabia.py"
+      - "tests/test_sabia.py"
+      - "app/parser.py"
+      - "app/run_pipeline.py"
+      - "app/collectors/__init__.py"
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: SABIA live 3-day smoke
+        run: python -m app.run_pipeline --days 3 --sources MITECO_SABIA --skip-ree --skip-miteco --strict-coverage
+      - name: Print SABIA smoke metrics
+        run: |
+          python - <<'PY'
+          import sqlite3
+          con=sqlite3.connect("data/spain_renewables.sqlite")
+          con.row_factory=sqlite3.Row
+          print("PROJECTS",con.execute("select count(*) from projects").fetchone()[0])
+          print("EVENTS",con.execute("select count(*) from events").fetchone()[0])
+          for r in con.execute("select source_code,count(*) n from events group by source_code order by source_code"):
+              print("SOURCE",r["source_code"],r["n"])
+          for r in con.execute("""select publication_date,external_id,project_name,technology,power_mw,
+                                         promoter,expediente,province,ccaa,event_type
+                                  from events order by publication_date,external_id limit 100"""):
+              print(dict(r))
+          PY
+
+  backfill:
+    needs: smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: SABIA 30-day backfill
+        run: python -m app.run_pipeline --days 30 --sources MITECO_SABIA --skip-ree --skip-miteco --strict-coverage
+      - name: Print SABIA backfill metrics
+        run: |
+          python - <<'PY'
+          import csv
+          import sqlite3
+          from collections import Counter
+          con=sqlite3.connect("data/spain_renewables.sqlite")
+          con.row_factory=sqlite3.Row
+          print("PROJECTS",con.execute("select count(*) from projects").fetchone()[0])
+          print("EVENTS",con.execute("select count(*) from events").fetchone()[0])
+          print("BY_EVENT_TYPE")
+          for r in con.execute("select event_type,count(*) n from events group by event_type order by event_type"):
+              print(r["event_type"],r["n"])
+          print("BY_TECH")
+          for r in con.execute("select technology,count(*) n from projects group by technology order by technology"):
+              print(r["technology"],r["n"])
+          print("MISSING")
+          print(dict(con.execute("""select
+              sum(case when project_name is null then 1 else 0 end) no_name,
+              sum(case when power_mw is null then 1 else 0 end) no_mw,
+              sum(case when province is null then 1 else 0 end) no_province,
+              sum(case when expediente is null then 1 else 0 end) no_expediente
+              from projects""").fetchone()))
+          try:
+              with open("reports/quality_issues_latest.csv",encoding="utf-8-sig") as f:
+                  print("QUALITY",dict(Counter(r["severity"] for r in csv.DictReader(f))))
+          except FileNotFoundError:
+              print("QUALITY",{})
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sabia-30d-output
+          path: |
+            data/spain_renewables.sqlite
+            reports/
+            docs/
+          if-no-files-found: error

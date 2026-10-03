@@ -8,7 +8,7 @@ from dataclasses import dataclass, asdict
 from app.geo import find_province
 from app.lifecycle import classify_event, commercial_stage
 
-MW_RE=re.compile(r"(?<!\d)(\d{1,4}(?:[\.,]\d{1,6})?)\s*(?:MWp|MWac|MW)\b",re.I)
+MW_RE=re.compile(r"(?<!\d)(\d{1,4}(?:[\.,]\d{1,6})?)\s*(?:MWp|MWac|MWn|MW)\b",re.I)
 KW_RE=re.compile(r"(?<!\d)(\d{1,7}(?:[\.,]\d{1,3})?)\s*kW\b",re.I)
 BOE_ID_RE=re.compile(r"BOE-[AB]-\d{4}-\d+",re.I)
 QUOTED_RE=re.compile(r"[«“\"]([^»”\"]{3,120})[»”\"]")
@@ -32,14 +32,14 @@ PROJECT_PATTERNS=[
         r"(?:m[oó]dulo|planta|sistema)\s+de\s+almacenamiento"
         r"(?:\s+de\s+energ[ií]a)?(?:\s+electroqu[ií]mico)?"
         r"(?:\s+por\s+bater[ií]as?)?(?:\s+h[ií]brid[oa])?(?:\s+de\s+la\s+instalaci[oó]n\s+h[ií]brida)?\s+"
-        r"(.{3,120}?)\s*,?\s+de\s+\d{1,4}(?:[\.,]\d+)?\s*(?:MWp|MWac|MW)\b",
+        r"(.{3,120}?)\s*,?\s+de\s+\d{1,4}(?:[\.,]\d+)?\s*(?:MWp|MWac|MWn|MW)\b",
         re.I,
     ),
     re.compile(r"proyecto\s+de\s+hibridaci[oó]n\s+[«“\"]([^»”\"]{3,120})[»”\"]",re.I),
     re.compile(r"parque\s+(?:solar\s+)?fotovoltaico\s+(?:denominado\s+)?[«“\"]?([^,»”\"]{3,120})",re.I),
     re.compile(
         r"(?:instalaci[oó]n|planta)\s+(?:solar\s+)?fotovoltaica\s+"
-        r"de\s+\d{1,7}(?:[\.,]\d+)?\s*(?:kW|MWp|MWac|MW)\s+"
+        r"de\s+\d{1,7}(?:[\.,]\d+)?\s*(?:kW|MWp|MWac|MWn|MW)\s+"
         r"denominada\s+[«“\"]?(.{3,120}?)(?=[»”\"]?(?:\s+que\b|\s+en\b|,|\.|$))",
         re.I,
     ),
@@ -48,7 +48,7 @@ PROJECT_PATTERNS=[
     re.compile(
         r"(?:instalaci[oó]n|planta)\s+(?:solar\s+)?fotovoltaica\s+"
         r"(?:(?:denominada|denominado|de)\s+)?[«\"]?(.{3,120}?)[»\"]?,?\s+"
-        r"de\s+\d{1,4}(?:[\.,]\d+)?\s*(?:MWp|MWac|MW)\b",
+        r"de\s+\d{1,4}(?:[\.,]\d+)?\s*(?:MWp|MWac|MWn|MW)\b",
         re.I,
     ),
     re.compile(r"(?:instalaci[oó]n|planta)\s+(?:solar\s+)?fotovoltaica\s+(?:denominada\s+)?[«“\"]?([^,»”\"\.]{3,140})",re.I),
@@ -148,7 +148,7 @@ def _clean_project_name(value:str)->str:
     cuts=[
         r"\s+y\s+las?\s+infraestructuras?\b",
         r"\s+y\s+su\s+infraestructura\b",
-        r"\s+de\s+\d{1,4}(?:[\.,]\d+)?\s*MW\b",
+        r"\s+de\s+\d{1,4}(?:[\.,]\d+)?\s*(?:MWp|MWac|MWn|MW)\b",
         r"\s+ubicad[ao]\b",
         r"\s+situad[ao]\b",
     ]
