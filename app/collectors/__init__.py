@@ -7,5 +7,6 @@ from .doe import DOECollector
 from .borm import BORMCollector
 from .bocm import BOCMCollector
 from .sabia import SABIACollector
+from .andalucia_public import AndaluciaPublicCollector
 
-__all__ = ["BOECollector","BOCYLCollector","BOACollector","BOJACollector","DOCMCollector","DOECollector","BORMCollector","BOCMCollector","SABIACollector"]
+__all__ = ["BOECollector","BOCYLCollector","BOACollector","BOJACollector","DOCMCollector","DOECollector","BORMCollector","BOCMCollector","SABIACollector","AndaluciaPublicCollector"]

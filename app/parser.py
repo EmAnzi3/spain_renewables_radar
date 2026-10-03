@@ -5,6 +5,7 @@ import re
 import unicodedata
 from dataclasses import dataclass, asdict
 
+from app.identifiers import extract_identifier, valid_expediente
 from app.geo import find_province
 from app.lifecycle import classify_event, commercial_stage
 
@@ -19,40 +20,33 @@ EXPEDIENTE_RE=re.compile(
     re.I,
 )
 PROJECT_PATTERNS=[
-    # Explicit umbrella hybrid names must beat component descriptions that
-    # follow later in the same title (e.g. HÍBRIDO “CLAVELLINAS”, compuesto...).
+    re.compile(r"parque\s+e[oó]lico\s+(?:denominado\s+)?[«“\"]?(.{3,120}?)[»”\"]?\s+de\s+\d+(?:[.,]\d+)?\s*(?:MW|MWn|MWp)\b",re.I),
+    # Explicit umbrella hybrid names precede component descriptions.
     re.compile(r"h[ií]brid[oa]\s+[«“\"]([^»”\"]{2,120})[»”\"]",re.I),
-    # Storage/hybrid names are often more explicit than the generation plant
-    # later mentioned in the same title.
     re.compile(
         r"(?:m[oó]dulo|planta|sistema)\s+de\s+almacenamiento"
         r"(?:\s+de\s+energ[ií]a)?(?:\s+electroqu[ií]mico)?"
         r"(?:\s+por\s+bater[ií]as?)?(?:\s+h[ií]brid[oa])?(?:\s+de\s+la\s+instalaci[oó]n\s+h[ií]brida)?\s+"
-        r"[«“\"]([^»”\"]{2,120})[»”\"]",
-        re.I,
+        r"[«“\"]([^»”\"]{2,120})[»”\"]", re.I,
     ),
     re.compile(
         r"(?:m[oó]dulo|planta|sistema)\s+de\s+almacenamiento"
         r"(?:\s+de\s+energ[ií]a)?(?:\s+electroqu[ií]mico)?"
         r"(?:\s+por\s+bater[ií]as?)?(?:\s+h[ií]brid[oa])?(?:\s+de\s+la\s+instalaci[oó]n\s+h[ií]brida)?\s+"
-        r"(.{3,120}?)\s*,?\s+de\s+\d{1,4}(?:[\.,]\d+)?\s*(?:MWp|MWac|MWn|MW)\b",
-        re.I,
+        r"(.{3,120}?)\s*,?\s+de\s+\d{1,4}(?:[\.,]\d+)?\s*(?:MWp|MWac|MWn|MW)\b", re.I,
     ),
     re.compile(r"proyecto\s+de\s+hibridaci[oó]n\s+[«“\"]([^»”\"]{3,120})[»”\"]",re.I),
+    re.compile(r"fotovoltaic[ao]\s+denominad[oa]\s+[«“\"]([^»”\"]{3,120})[»”\"]",re.I),
     re.compile(r"parque\s+(?:solar\s+)?fotovoltaico\s+(?:denominado\s+)?[«“\"]?([^,»”\"]{3,120})",re.I),
     re.compile(
         r"(?:instalaci[oó]n|planta)\s+(?:solar\s+)?fotovoltaica\s+"
         r"de\s+\d{1,7}(?:[\.,]\d+)?\s*(?:kW|MWp|MWac|MWn|MW)\s+"
-        r"denominada\s+[«“\"]?(.{3,120}?)(?=[»”\"]?(?:\s+que\b|\s+en\b|,|\.|$))",
-        re.I,
+        r"denominada\s+[«“\"]?(.{3,120}?)(?=[»”\"]?(?:\s+que\b|\s+en\b|,|\.|$))", re.I,
     ),
-    # Put the power-terminated form first so decimal commas do not truncate the
-    # project name (e.g. "... fotovoltaica de Terrapower Generación de 44,16 MWp").
     re.compile(
         r"(?:instalaci[oó]n|planta)\s+(?:solar\s+)?fotovoltaica\s+"
         r"(?:(?:denominada|denominado|de)\s+)?[«\"]?(.{3,120}?)[»\"]?,?\s+"
-        r"de\s+\d{1,4}(?:[\.,]\d+)?\s*(?:MWp|MWac|MWn|MW)\b",
-        re.I,
+        r"de\s+\d{1,4}(?:[\.,]\d+)?\s*(?:MWp|MWac|MWn|MW)\b", re.I,
     ),
     re.compile(r"(?:instalaci[oó]n|planta)\s+(?:solar\s+)?fotovoltaica\s+(?:denominada\s+)?[«“\"]?([^,»”\"\.]{3,140})",re.I),
     re.compile(r"parque\s+e[oó]lico\s+(?:denominado\s+)?[«“\"]?([^,»”\"\.]{3,140})",re.I),
@@ -73,8 +67,7 @@ REGIONAL_SOURCE_SCOPE={
 PROMOTER_PATTERNS=[
     re.compile(
         r"cuya\s+promotor[ae]\s+es\s+(?:la\s+)?(?:mercantil\s+)?"
-        r"[«\"]?(.{2,140}?)[»\"]?(?=,\s+(?:e\s+)?infraestructura|\.\s*(?:Expte|Expediente)|;|\n|$)",
-        re.I,
+        r"[«\"]?(.{2,140}?)[»\"]?(?=,\s+(?:e\s+)?infraestructura|\.\s*(?:Expte|Expediente)|;|\n|$)",re.I,
     ),
     re.compile(r"empresa\s+beneficiaria\s*:\s*(.{2,140}?)(?=\s+(?:Direcci[oó]n|Domicilio|NIF|CIF)\s*:|;|\n|$)",re.I),
     re.compile(r"(?:de\s+la\s+empresa|empresa)\s+[«\"]?(.{2,140}?)[»\"]?(?=,?\s+as[ií]\s+como|\s*\.?\s*\(\s*Expediente|\s*\.?\s*Expediente|;|\n|$)",re.I),
@@ -112,13 +105,13 @@ def normalize_text(s:str)->str:
 
 def detect_technology(text:str)->str|None:
     t=normalize_text(text)
-    has_pv=any(k in t for k in ("fotovolta","solar pv"))
+    has_pv=any(k in t for k in ("fotovolta","solar pv")) or bool(re.search(r"\b(?:psfv|pfv|fv)\b",t))
     has_wind=any(k in t for k in ("eolic","aerogenerador"))
     has_storage=bool(re.search(r"\bbaterias?\b|\bbess\b",t)) or any(k in t for k in (
         "modulo de almacenamiento","sistema de almacenamiento",
         "almacenamiento de energia","almacenamiento energet","almacenamiento electr"
     ))
-    has_hybrid="hibrid" in t or sum((has_pv,has_wind,has_storage))>=2
+    has_hybrid=("hibrid" in t and any((has_pv,has_wind,has_storage))) or sum((has_pv,has_wind,has_storage))>=2
     if has_hybrid:return "HYBRID"
     if has_pv:return "PV"
     if has_wind:return "WIND"
@@ -137,8 +130,6 @@ def extract_power_mw(text:str)->float|None:
             pass
     if values:
         return values[0]
-
-    # Municipal notices often publish sub-MW plants only in kW.
     for m in KW_RE.finditer(text or ""):
         try:
             return _parse_spanish_number(m.group(1))/1000.0
@@ -161,8 +152,7 @@ def _clean_project_name(value:str)->str:
 
 SUSPICIOUS_PROJECT_NAME_RE=re.compile(
     r"^(?:bolet[ií]n oficial|existente\b|por bater[ií]as\b|estar[aá] sometida\b|"
-    r"a instancia de\b|de autoconsumo\b|fase\s+\d|y\s+\d|\(csfv\)$)",
-    re.I,
+    r"a instancia de\b|de autoconsumo\b|fase\s+\d|y\s+\d|\(csfv\)$)", re.I,
 )
 
 def _acceptable_project_name(value:str)->bool:
@@ -174,21 +164,15 @@ def extract_project_name(text:str)->str|None:
         m=p.search(text or "")
         if m:
             value=_clean_project_name(m.group(1))
-            if _acceptable_project_name(value):
-                return value
+            if _acceptable_project_name(value):return value
     for m in QUOTED_RE.finditer(text or ""):
-        value=_clean_project_name(m.group(1))
-        low=normalize_text(value)
-        if _acceptable_project_name(value) and (
-            any(k in low for k in ("fotovolta","eolic","solar","hibrid","bess"))
-            or len(value.split())<=8
-        ):
+        value=_clean_project_name(m.group(1));low=normalize_text(value)
+        if _acceptable_project_name(value) and (any(k in low for k in ("fotovolta","eolic","solar","hibrid","bess")) or len(value.split())<=8):
             return value
     return None
 
-def extract_expediente(text:str)->str|None:
-    m=EXPEDIENTE_RE.search(text or "")
-    return m.group(1).strip(" .;,)") if m else None
+def extract_expediente(text:str, *, body:bool=False)->str|None:
+    return extract_identifier(text, body=body)
 
 def extract_promoter(text:str)->str|None:
     for p in PROMOTER_PATTERNS:
@@ -199,48 +183,31 @@ def extract_promoter(text:str)->str|None:
     return None
 
 def build_project_key(name,technology,province,external_id,expediente=None)->str:
-    if expediente:
-        base="expediente|"+normalize_text(expediente)
-    elif name:
-        base="|".join([normalize_text(name),technology or "UNK",normalize_text(province or "")])
-    else:
-        base="external|"+external_id
+    if valid_expediente(expediente):base="expediente|"+normalize_text(expediente)
+    elif name:base="|".join([normalize_text(name),technology or "UNK",normalize_text(province or "")])
+    else:base="external|"+external_id
     return hashlib.sha1(base.encode("utf-8")).hexdigest()[:20]
 
 def parse_event(*,source_code,external_id,publication_date,title,url,raw_text)->ParsedEvent:
-    combined=f"{title}\n{raw_text}"
-
     technology=detect_technology(title) or detect_technology(raw_text)
     power_mw=extract_power_mw(title)
-    if power_mw is None:
-        power_mw=extract_power_mw(raw_text)
-
+    if power_mw is None:power_mw=extract_power_mw(raw_text)
     project_name=extract_project_name(title) or extract_project_name(raw_text)
     promoter=extract_promoter(title) or extract_promoter(raw_text)
-    expediente=extract_expediente(title) or extract_expediente(raw_text)
-
+    expediente=extract_expediente(title) or extract_expediente(raw_text,body=True)
     province,ccaa=find_province(title)
-    if not province:
-        province,ccaa=find_province(raw_text)
-
+    if not province:province,ccaa=find_province(raw_text)
     scope=REGIONAL_SOURCE_SCOPE.get((source_code or "").upper())
     if scope:
         scope_ccaa,allowed_provinces=scope
-        if province not in allowed_provinces:
-            province=None
-        if province is None and len(allowed_provinces)==1:
-            province=next(iter(allowed_provinces))
+        if province not in allowed_provinces:province=None
+        if province is None and len(allowed_provinces)==1:province=next(iter(allowed_provinces))
         ccaa=scope_ccaa
-
     event_type=classify_event(title)
     if event_type=="OTHER":
         raw_event=classify_event((raw_text or "")[:4000])
-        # Terminal states must be explicit in the disposition title. Full
-        # documents often quote historic denials or withdrawals.
-        if raw_event not in {"DENIED","WITHDRAWN"}:
-            event_type=raw_event
+        if raw_event not in {"DENIED","WITHDRAWN"}:event_type=raw_event
     stage=commercial_stage(event_type)
-
     return ParsedEvent(
         source_code=source_code,external_id=external_id,publication_date=publication_date,
         title=title.strip(),url=url,raw_text=raw_text.strip(),technology=technology,

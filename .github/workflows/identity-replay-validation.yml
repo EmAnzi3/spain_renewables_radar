@@ -1,0 +1,50 @@
+name: identity-replay-validation
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/identity-replay-validation.yml'
+      - 'scripts/validate_identity_replay.py'
+      - 'app/identifiers.py'
+      - 'app/identity_migration.py'
+      - 'app/store.py'
+      - 'app/parser.py'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: identity-replay-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - run: python -m unittest discover -s tests -v
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 37158247411
+          name: backfill-30d-output
+          path: replay-input/baseline
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 37159334281
+          name: andalucia-public-validation
+          path: replay-input/andalucia
+      - run: python scripts/validate_identity_replay.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: identity-replay-validation
+          path: |
+            reports/identity_replay/
+            data/identity_replay.sqlite
+            data/migrations/
+          if-no-files-found: error
