@@ -1,0 +1,67 @@
+name: dogc-pagination-contract-audit
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/dogc-pagination-contract-audit.yml'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: dogc-pagination-contract-audit
+  cancel-in-progress: true
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 37242571670
+          name: dogc-dated-index-output
+          path: previous-index-evidence
+      - name: Inspect original search responses and linked public pagination code
+        run: |
+          python -u - <<'PY'
+          import json,re,hashlib
+          from datetime import datetime,timezone
+          from pathlib import Path
+          import requests
+          out=Path('reports/dogc_pagination_contract');out.mkdir(parents=True,exist_ok=True)
+          roots=list(Path('previous-index-evidence').rglob('acquisitions.json'))
+          if len(roots)!=1:raise ValueError('Ambiguous original source manifest')
+          root=roots[0].parent;seen=set();observations=[]
+          for item in json.loads(roots[0].read_text()):
+              if not re.fullmatch(r'search:\d+',item['label']):continue
+              raw=(root/(item['sha256']+'.bin')).read_bytes()
+              if hashlib.sha256(raw).hexdigest()!=item['sha256']:raise ValueError('Original source hash mismatch')
+              data=json.loads(raw);rows=data.get('resultSearch',[]);ids=[r.get('idDocument') for r in rows]
+              observation={'label':item['label'],'parameters':item['parameters'],
+                  'metadata':{k:v for k,v in data.items() if k!='resultSearch' and not isinstance(v,(dict,list))},
+                  'rows':len(rows),'first_ids':ids[:5],'last_ids':ids[-5:],'overlap_with_earlier_pages':sorted(set(ids)&seen)}
+              seen.update(ids);observations.append(observation)
+              print('ORIGINAL_PAGINATION',json.dumps(observation,ensure_ascii=False))
+          url='https://dogc.gencat.cat/web/system/modules/cat.gencat.wcmResponsive.formatters.httpFetch/resources/fpca_cerca_resultats_dogc/js/fpca_cerca_resultats_dogc.js'
+          r=requests.get(url,timeout=(8,30),allow_redirects=False);r.raise_for_status()
+          if r.status_code!=200 or len(r.content)>500000:raise ValueError('Unexpected public script response')
+          text=r.content.decode('utf-8');lines=text.splitlines();selected=set()
+          for i,line in enumerate(lines):
+              if any(x in line for x in ('JSON.stringify','searchId','pageNumber','numPage','inputParameters.page','changePage','page:','pagination')):
+                  selected.update(range(max(0,i-5),min(len(lines),i+9)))
+          filtered=[{'line':i+1,'text':lines[i]} for i in sorted(selected) if not re.search(r'(apikey|api_key|token|password|authorization|secret)',lines[i],re.I)]
+          print('PUBLIC_PAGINATION_CONTRACT',json.dumps(filtered,ensure_ascii=False))
+          (out/'source-script.js').write_bytes(r.content)
+          (out/'evidence.json').write_text(json.dumps({'original_run':37242571670,'search_pages':observations,'script_url':url,'script_sha256':hashlib.sha256(r.content).hexdigest(),'script_acquired_at':datetime.now(timezone.utc).isoformat(),'script_lines':filtered,'index_certified':False},ensure_ascii=False,indent=2),encoding='utf-8')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dogc-pagination-contract-output
+          path: reports/dogc_pagination_contract/
+          if-no-files-found: error
