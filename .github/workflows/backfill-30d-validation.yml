@@ -41,8 +41,11 @@ jobs:
           path: sabia-recovery-input
       - name: Preserve original cache retrieval dates and re-fetch all discovery indexes
         run: python scripts/recover_sabia_snapshot.py
-      - name: Freeze complete Spanish calendar day
-        run: echo "VALIDATION_UNTIL=$(TZ=Europe/Madrid date -d yesterday +%F)" >> "$GITHUB_ENV"
+      - name: Freeze complete Spanish calendar day and same-run snapshot scope
+        run: |
+          echo "VALIDATION_UNTIL=$(TZ=Europe/Madrid date -d yesterday +%F)" >> "$GITHUB_ENV"
+          echo "BORM_RUN_SNAPSHOT_DIR=data/run_snapshots" >> "$GITHUB_ENV"
+          echo "BORM_RUN_SNAPSHOT_SCOPE=${GITHUB_RUN_ID}:${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_ENV"
       - name: Ten-source live smoke before full backfill
         timeout-minutes: 25
         run: |
@@ -53,7 +56,24 @@ jobs:
         timeout-minutes: 25
         run: python -m app.run_pipeline --days 30 --until "$VALIDATION_UNTIL" --strict-coverage
       - name: Certify source coverage, identities, provenance, missing data and idempotency
-        run: python scripts/validate_complete_pipeline.py
+        run: |
+          python scripts/validate_complete_pipeline.py
+          python - <<'PY'
+          import json, os, hashlib
+          from pathlib import Path
+          smoke=json.loads(Path('smoke_output/reports/borm/index_acquisition.json').read_text())
+          backfill=json.loads(Path('reports/borm/index_acquisition.json').read_text())
+          assert smoke['acquisition_mode']=='LIVE', 'BORM discovery must be live in this run'
+          assert backfill['acquisition_mode']=='RUN_SNAPSHOT_REUSE'
+          assert smoke['sha256']==backfill['sha256']
+          assert smoke['retrieved_at']==backfill['retrieved_at'], 'Do not redate source evidence'
+          assert backfill['run_snapshot_scope']==os.environ['BORM_RUN_SNAPSHOT_SCOPE']
+          assert hashlib.sha256(Path('reports/borm/index_raw.json').read_bytes()).hexdigest()==backfill['sha256']
+          p=Path('reports/validation_metrics.json');data=json.loads(p.read_text())
+          data.update(borm_acquisition_mode=backfill['acquisition_mode'],borm_same_run_scope=backfill['run_snapshot_scope'],borm_original_acquisition_preserved=True)
+          p.write_text(json.dumps(data,ensure_ascii=False,indent=2),encoding='utf-8')
+          print('BORM_SAME_RUN_AUDIT',json.dumps({k:v for k,v in data.items() if k.startswith('borm_')},ensure_ascii=False))
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -62,6 +82,7 @@ jobs:
             data/spain_renewables.sqlite
             data/full_smoke.sqlite
             data/sabia_cache/
+            data/run_snapshots/
             data/migrations/
             smoke_output/
             reports/

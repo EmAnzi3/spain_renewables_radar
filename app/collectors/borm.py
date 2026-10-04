@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 import hashlib
 import json
+import os
 import time
 from pathlib import Path
 from datetime import date, datetime, timezone
@@ -10,6 +11,7 @@ from datetime import date, datetime, timezone
 import requests
 
 from app.parser import parse_event
+from app.run_snapshot import load_run_snapshot, save_run_snapshot
 
 INDEX_JSON="https://transparencia.carm.es/rest-services/services/restFile/BORMIndice.json"
 
@@ -58,6 +60,8 @@ class BORMCollector:
         self._rows_cache=None
         self._index_error=None
         self.audit={"source_url":INDEX_JSON,"attempts":[],"complete":False}
+        self._snapshot_dir=os.getenv("BORM_RUN_SNAPSHOT_DIR")
+        self._snapshot_scope=os.getenv("BORM_RUN_SNAPSHOT_SCOPE")
 
     @staticmethod
     def validate_index(payload):
@@ -84,11 +88,33 @@ class BORMCollector:
         out=Path("reports/borm");out.mkdir(parents=True,exist_ok=True)
         (out/"index_acquisition.json").write_text(json.dumps(self.audit,ensure_ascii=False,indent=2),encoding="utf-8")
 
+    def _reuse_run_snapshot(self):
+        if not self._snapshot_dir or not self._snapshot_scope:
+            return None
+        cached=load_run_snapshot(self._snapshot_dir,self._snapshot_scope,INDEX_JSON)
+        if cached is None:
+            return None
+        raw,audit=cached
+        payload=json.loads(raw)
+        summary=self.validate_index(payload)
+        self.audit=dict(audit,**summary)
+        self.audit.update(acquisition_mode="RUN_SNAPSHOT_REUSE",
+                          reused_at=datetime.now(timezone.utc).isoformat())
+        self._rows_cache=payload
+        out=Path("reports/borm");out.mkdir(parents=True,exist_ok=True)
+        (out/"index_raw.json").write_bytes(raw)
+        self._write_audit()
+        print(f"BORM same-run snapshot: rows={len(payload)}, original retrieval={audit['retrieved_at']}",flush=True)
+        return payload
+
     def _rows(self):
         if self._rows_cache is not None:
             return self._rows_cache
         if self._index_error:
             raise RuntimeError(self._index_error)
+        cached=self._reuse_run_snapshot()
+        if cached is not None:
+            return cached
         # One bounded retry cycle for the annual index, not 30 independent downloads
         # when a temporarily unavailable endpoint responds with HTML and HTTP 200.
         # JSON is decoded from bytes so a valid UTF BOM is not a spurious failure.
@@ -122,11 +148,14 @@ class BORMCollector:
                 break
             self.audit["attempts"].append(item)
             self.audit.update(summary,complete=True,retrieved_at=datetime.now(timezone.utc).isoformat(),
-                              sha256=item["sha256"],recovered_after_retry=attempt>1)
+                              sha256=item["sha256"],recovered_after_retry=attempt>1,
+                              acquisition_mode="LIVE",run_snapshot_scope=self._snapshot_scope)
             self._rows_cache=payload
             out=Path("reports/borm");out.mkdir(parents=True,exist_ok=True)
             (out/"index_raw.json").write_bytes(response.content)
             self._write_audit()
+            if self._snapshot_dir and self._snapshot_scope:
+                save_run_snapshot(self._snapshot_dir,self._snapshot_scope,INDEX_JSON,response.content,self.audit)
             return self._rows_cache
         self._index_error="BORM annual index unavailable after bounded recovery: "+str(last_error)
         self.audit["failure"]=self._index_error;self._write_audit()
