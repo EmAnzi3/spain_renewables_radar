@@ -136,7 +136,6 @@ def explicit_name(text):
 
 def classify_current_title(title):
     low=fold(title)
-    # Current requests stay requests even if their title quotes a past grant.
     if re.search(r'informacion\s+publica|\bip\s+solicitudes',low):return 'PUBLIC_INFO','EARLY'
     if not re.search(r'resolucion|\bres\.',low):return 'OTHER','EARLY'
     if re.search(r'acepta(?:r)?(?:\s+de\s+plano)?\s+el\s+desistimiento|acepta\s+desistimiento',low):return 'WITHDRAWN','BLOCKED'
@@ -155,10 +154,14 @@ def record_fields(record):
     title=flatten(record['title']);documents=record.get('legal_documents',[])
     texts=[d.get('text','') for d in documents if d.get('text')];headers=[act_header(t) for t in texts]
     flags=[{'code':'LEGAL_ACT_IMAGE_ONLY','severity':'INFO','source_url':d['url']} for d in documents if d.get('text_status')=='IMAGE_OR_NO_TEXT']
-    generation=bool(re.search(r'(?:central|planta|parque|instalaci[oó]n)(?:\s+solar)?\s+(?:fotovoltaic|e[oó]lic|fv)|\bcf\s+(?:denominada|hibridada)|\bbess\b|hibridaci[oó]n\s+con',title,re.I))
+    cf_scope=bool(REFERENCE.search(title) and re.search(r'(?:para|de)\s+(?:una\s+)?CF\b',title,re.I))
+    generation=cf_scope or bool(re.search(r'(?:central|planta|parque|instalaci[oó]n)(?:\s+solar)?\s+(?:fotovoltaic|e[oó]lic|fv)|\bcf\s+(?:denominada|hibridada)|\bbess\b|hibridaci[oó]n\s+con',title,re.I))
     if not generation and re.search(r'subestaci[oó]n|l[ií]nea.*tensi[oó]n',title,re.I):return {'disposition':'GRID_CONTEXT_ONLY'},flags
     if re.search(r'gas\s+natural|\bglp\b|hidrocarburos|autoconsumo',title,re.I):return {'disposition':'NON_TARGET'},flags
     technology=detect_technology(title+'\n'+'\n'.join(headers)+'\n'+'\n'.join(t[:6000] for t in texts))
+    # CF is the explicit abbreviation for central fotovoltaica in these GVA
+    # generation proceedings. A company name or bare acronym is not sufficient.
+    if technology is None and cf_scope:technology='PV'
     if technology not in {'PV','WIND','BESS','HYBRID'}:return {'disposition':'NON_TARGET'},flags
     if re.search(r'hibridaci[oó]n|hibridada',title,re.I):technology='HYBRID'
     name=explicit_name(title);name_origin='publication_title'
@@ -205,7 +208,7 @@ def record_fields(record):
             'expediente':reference,'province':province,'ccaa':CCAA,'event_type':event_type,'commercial_stage':stage,
             'evidence':{'name_origin':name_origin if name else None,'reference_original':refs,
                         'power_basis':basis if power is not None else None,'power_assertions':main_power+header_power,
-                        'lifecycle_origin':'current_publication_title'}}
+                        'lifecycle_origin':'current_publication_title','explicit_cf_scope':cf_scope}}
     fields['project_key']=build_project_key(name,technology,province,record['external_id'],reference)
     return fields,flags
 
