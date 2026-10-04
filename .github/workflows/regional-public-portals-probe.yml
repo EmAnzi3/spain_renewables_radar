@@ -1,0 +1,81 @@
+name: regional-public-portals-probe
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/regional-public-portals-probe.yml'
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Probe actual official listing, pagination and detail metadata
+        run: |
+          python -u - <<'PY'
+          import json,re,hashlib
+          from pathlib import Path
+          from urllib.parse import urljoin,urlparse
+          from datetime import datetime,timezone
+          import requests
+          from bs4 import BeautifulSoup
+          out=Path('reports/regional_portals_probe');out.mkdir(parents=True,exist_ok=True)
+          targets={
+            'GVA_PUBLIC':'https://cindi.gva.es/es/web/energia/informacion-publica',
+            'GAL_PUBLIC':'https://economia.xunta.gal/es/transparencia/informacion-publica/en-tramitacion/instalacions-de-xeracion',
+            'GAL_AUTH':'https://economia.xunta.gal/es/transparencia/informacion-publica/autorizacions-administrativas/instalacions-de-xeracion',
+            'GAL_ENV':'https://economia.xunta.gal/es/transparencia/informacion-publica/documentacion-ambiental/impacto-ambiental/instalacions-xeracion',
+          }
+          s=requests.Session();s.headers['User-Agent']='SpainRenewablesRadar/0.3 official-source-probe'
+          results=[]
+          for code,url in targets.items():
+              item={'code':code,'url':url,'retrieved_at':datetime.now(timezone.utc).isoformat(),'implemented':False}
+              try:
+                  response=s.get(url,timeout=(8,25));item.update(http_status=response.status_code,final_url=response.url,bytes=len(response.content))
+                  (out/(code+'.html')).write_bytes(response.content)
+                  response.raise_for_status();soup=BeautifulSoup(response.text,'html.parser')
+                  item['sha256']=hashlib.sha256(response.content).hexdigest()
+                  text=' '.join(soup.stripped_strings)
+                  item['headings']=[x.get_text(' ',strip=True) for x in soup.find_all(['h1','h2','h3'])][:25]
+                  total=re.search(r'(\d+)\s+expedientes',text,re.I)
+                  item['declared_records']=int(total[1]) if total else None
+                  item['forms']=[{'action':f.get('action'),'method':f.get('method'),'fields':[
+                    {'name':x.get('name'),'value':x.get('value'),'type':x.get('type')} for x in f.find_all(['input','select'])][:25]}
+                    for f in soup.find_all('form')][:8]
+                  detail=[];pagination=[]
+                  for a in soup.find_all('a',href=True):
+                      label=a.get_text(' ',strip=True);link=urljoin(response.url,a['href'])
+                      if urlparse(link).hostname!=urlparse(response.url).hostname:continue
+                      if re.search(r'siguiente|anterior|next|previous|[?&](?:page|cur|start|_.*_cur)=',label+' '+link,re.I):
+                          pagination.append({'label':label,'url':link,'onclick':a.get('onclick')})
+                      if len(label)>65 and re.search(r'e[oó]lic|fotovolta|almacenamiento|bater[ií]a',label,re.I):
+                          if link not in [x['url'] for x in detail]:detail.append({'title':label,'url':link})
+                  item['pagination']=pagination[:25];item['detail_links']=detail
+                  for i,d in enumerate(detail[:2]):
+                      r=s.get(d['url'],timeout=(8,25));d['http_status']=r.status_code
+                      (out/(code+'-detail-'+str(i)+'.html')).write_bytes(r.content)
+                      ds=BeautifulSoup(r.text,'html.parser');body=' '.join(ds.stripped_strings)
+                      d['structured_dates']=[dict(t.attrs,text=t.get_text(' ',strip=True)) for t in ds.find_all('time')]
+                      d['metadata']=[m.attrs for m in ds.find_all('meta') if re.search(r'date|published|modified|article',str(m.attrs),re.I)]
+                      d['date_snippets']=[body[max(0,m.start()-60):m.end()+100] for m in re.finditer(r'\b(?:[0-3]?\d[/-][01]?\d[/-]20\d\d|20\d\d-\d\d-\d\d)\b',body)][:10]
+                      d['body_excerpt']=body[:9000]
+                      d['document_links']=[{'text':a.get_text(' ',strip=True),'url':urljoin(r.url,a['href'])} for a in ds.find_all('a',href=True) if re.search(r'pdf|document|download|descarg',a['href'],re.I)][:15]
+              except requests.RequestException as exc:
+                  item['error']=type(exc).__name__+': '+str(exc)[:400]
+              results.append(item)
+              print('PROBE',json.dumps(item,ensure_ascii=False),flush=True)
+          (out/'probe.json').write_text(json.dumps(results,ensure_ascii=False,indent=2),encoding='utf-8')
+          # Probe completion is not collector certification. HTTP errors remain explicit.
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: regional-public-portals-probe
+          path: reports/regional_portals_probe/
+          if-no-files-found: error
