@@ -33,7 +33,7 @@ def _source_fingerprint(row: dict) -> str:
 
 def repair_legacy_identities(conn, *, report_dir='reports/identity_repair', backup_dir=None):
     rows=[dict(r) for r in conn.execute('SELECT * FROM events ORDER BY publication_date,id')]
-    invalid_keys={r['project_key'] for r in rows if r['expediente'] and not valid_expediente(r['expediente'])}
+    invalid_keys={r['project_key'] for r in rows if r['source_code'] in {'BOE','BOCYL','BOA','BOJA','DOCM','DOE','BORM','BOCM'} and r['expediente'] and not valid_expediente(r['expediente'])}
     excluded={r['id']:excluded_reason(r) for r in rows if excluded_reason(r)}
     if not invalid_keys and not excluded:return {'status':'NOT_NEEDED','events':len(rows)}
     if conn.in_transaction:raise RuntimeError('Identity repair requires a clean transaction boundary')

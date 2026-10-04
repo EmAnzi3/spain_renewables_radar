@@ -14,6 +14,7 @@ from app.enrichment import (
 from app.reporting import export_dashboard,write_changes,write_coverage,write_quality_issues,write_province_view
 from app.store import save_event
 from app.identity_migration import repair_legacy_identities
+from app.bocyl_identity import repair_bocyl_external_ids
 
 COLLECTOR_CLASSES={
     "BOE":BOECollector,"BOCYL":BOCYLCollector,"BOA":BOACollector,"BOJA":BOJACollector,
@@ -49,6 +50,8 @@ def main():
     timeout=int(os.getenv("HTTP_TIMEOUT","30"));user_agent=os.getenv("USER_AGENT","SpainRenewablesRadar/0.1")
     collectors=[COLLECTOR_CLASSES[code](timeout=timeout,user_agent=user_agent) for code in wanted]
     conn=connect(args.db)
+    source_repair=repair_bocyl_external_ids(conn)
+    if source_repair["changed"]:print("BOCYL source-id repair:",source_repair,flush=True)
     repair=repair_legacy_identities(conn)
     if repair["status"]=="REPAIRED":
         print(f"Identity repair: {repair['projects_before']} -> {repair['projects_after']} projects; backup {repair['backup_path']}")
@@ -69,6 +72,8 @@ def main():
                 if inserted:
                     new_events.append(event);row["inserted"]+=1;row["new_projects"]+=int(new_project);new_projects+=int(new_project)
             coverage.append(row)
+        if hasattr(collector, "persist_metadata"):
+            collector.persist_metadata(conn)
     missing_geo=conn.execute("SELECT count(*) FROM projects WHERE province IS NULL").fetchone()[0]
     if missing_geo:
         print(f"[INE_MUNICIPALITIES] enriching {missing_geo} projects without province")

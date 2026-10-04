@@ -11,19 +11,26 @@ from app.enrichment.epc_bop import project_epc_summary
 def write_changes(events,out_dir="reports/change_reports"):
     out=Path(out_dir);out.mkdir(parents=True,exist_ok=True)
     csv_path=out/"changes_latest.csv";html_path=out/"changes_latest.html"
-    fields=["publication_date","source_code","external_id","technology","power_mw","project_name","promoter","expediente","province","ccaa","event_type","commercial_stage","url"]
-    with csv_path.open("w",newline="",encoding="utf-8-sig") as f:
-        w=csv.DictWriter(f,fieldnames=fields);w.writeheader()
-        for e in events:
-            d=e.asdict();w.writerow({k:d.get(k) for k in fields})
-    rows="".join(
-        "<tr>"+"".join(f"<td>{html.escape(str(e.asdict().get(k) or ''))}</td>" for k in fields[:-1])+
-        f"<td><a href='{html.escape(e.url)}' target='_blank'>fonte</a></td></tr>" for e in events
-    )
-    html_path.write_text(f"""<!doctype html><html><head><meta charset='utf-8'><title>Spain Radar changes</title>
-<style>body{{font-family:Arial,sans-serif;margin:28px;color:#172033}}table{{border-collapse:collapse;width:100%;font-size:13px}}th,td{{border-bottom:1px solid #ddd;padding:8px;text-align:left}}th{{background:#f3f6fa;position:sticky;top:0}}</style></head><body>
-<h1>Spain Renewables Radar — variazioni ultimo run</h1><p>Nuovi eventi rilevati: <b>{len(events)}</b></p>
-<table><thead><tr>{''.join(f'<th>{k}</th>' for k in fields)}</tr></thead><tbody>{rows}</tbody></table></body></html>""",encoding="utf-8")
+    fields=["publication_date","event_date","date_basis","source_code","external_id","technology","power_mw","project_name","promoter","expediente","province","ccaa","event_type","commercial_stage","url"]
+    records=[]
+    for event in events:
+        row=event.asdict();row['event_date']=event.publication_date
+        row['date_basis']='SOURCE_PUBLICATION'
+        if event.source_code=='MITECO_SABIA':
+            row['publication_date']=None
+            row['date_basis']='ENTRY_DATE' if ':ENTRY' in event.external_id else 'CONSULTATION_START'
+        records.append(row)
+    with csv_path.open("w",newline="",encoding="utf-8-sig") as stream:
+        writer=csv.DictWriter(stream,fieldnames=fields);writer.writeheader()
+        writer.writerows({k:row.get(k) for k in fields} for row in records)
+    body="".join("<tr>"+"".join(f"<td>{html.escape(str(row.get(k) if row.get(k) is not None else ''))}</td>" for k in fields[:-1])+
+                 f"<td><a href='{html.escape(row['url'])}' target='_blank' rel='noopener'>fonte</a></td></tr>" for row in records)
+    html_path.write_text("<!doctype html><html lang='it'><head><meta charset='utf-8'><title>Spain Radar changes</title>"
+        "<style>body{font-family:Arial;margin:28px;color:#172033}table{border-collapse:collapse;width:100%;font-size:13px}"
+        "th,td{border-bottom:1px solid #ddd;padding:8px;text-align:left}th{background:#f3f6fa}</style></head><body>"
+        "<h1>Spain Renewables Radar — variazioni ultimo run</h1>"
+        f"<p>Nuovi eventi: <b>{len(events)}</b>. SABIA: data amministrativa distinta dalla pubblicazione web, non disponibile.</p>"
+        "<table><thead><tr>"+''.join(f'<th>{k}</th>' for k in fields)+"</tr></thead><tbody>"+body+"</tbody></table></body></html>",encoding='utf-8')
     return csv_path,html_path
 
 def build_commercial_rows(conn):
@@ -34,6 +41,10 @@ def build_commercial_rows(conn):
     geo_rows={r["project_key"]:dict(r) for r in conn.execute(
         "SELECT project_key,municipalities_json,provinces_json,status FROM project_geo_enrichment"
     ).fetchall()}
+    meta_by_key={}
+    if conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='event_source_metadata'").fetchone():
+        for meta in conn.execute("SELECT m.* FROM event_source_metadata m JOIN events e USING(source_code,external_id) ORDER BY e.publication_date,e.id"):
+            meta_by_key[meta['project_key']]=dict(meta)
     rows=[]
     for project in projects:
         event_types={r["event_type"] for r in conn.execute(
@@ -58,10 +69,21 @@ def build_commercial_rows(conn):
         geo=geo_rows.get(project["project_key"])
         if geo:
             row["municipalities"]=json.loads(geo.get("municipalities_json") or "[]")
+            row["provinces"]=json.loads(geo.get("provinces_json") or "[]")
             row["geo_enrichment_status"]=geo.get("status")
         else:
             row["municipalities"]=[]
+            row["provinces"]=[project["province"]] if project.get("province") else []
             row["geo_enrichment_status"]=None
+        meta=meta_by_key.get(project['project_key'])
+        if meta:
+            evidence=json.loads(meta['evidence_json'])
+            row['source_group_id']=evidence.get('source_group_id')
+            row['group_unallocated_power_mw']=evidence['asset'].get('group_power_mw')
+            row['name_basis']=evidence['asset'].get('rule')
+            row['date_basis']=meta['date_basis'] if project.get('latest_source_code')=='MITECO_SABIA' else 'SOURCE_PUBLICATION'
+            row['source_current_state']=meta['source_current_state']
+            row['environmental_code']=meta['environmental_code']
         rows.append(row)
     rows.sort(
         key=lambda x:(x["commercial_score"],x.get("last_seen") or "",x.get("power_mw") or -1),
@@ -74,6 +96,7 @@ def build_province_view_from_rows(rows):
     provinces={}
     for row in rows:
         province=row.get("province")
+        if len(row.get("provinces",[]))>1:province=None
         if not province:
             continue
         item=provinces.setdefault(province,{
@@ -143,12 +166,26 @@ def write_province_view(conn,out_dir="reports"):
     return provinces,csv_path,html_path
 
 
+def geography_accounting(rows):
+    multi=[r for r in rows if len(r.get('provinces',[]))>1]
+    unknown=[r for r in rows if not r.get('province') and len(r.get('provinces',[]))<=1]
+    groups={r['source_group_id']:r['group_unallocated_power_mw'] for r in rows
+            if r.get('source_group_id') and r.get('group_unallocated_power_mw') is not None}
+    return {'multi_province_projects':len(multi),
+            'multi_province_known_mw':round(sum(r['power_mw'] for r in multi if r.get('power_mw') is not None),6),
+            'multi_province_without_mw':sum(r.get('power_mw') is None for r in multi),
+            'unknown_province_projects':len(unknown),
+            'unknown_province_known_mw':round(sum(r['power_mw'] for r in unknown if r.get('power_mw') is not None),6),
+            'source_group_unallocated_mw':groups,
+            'note':'Multi-provincia: potenza di progetto non ripartita né duplicata nelle province. Potenze di gruppo escluse dai totali dei singoli impianti.'}
+
+
 def export_dashboard(conn,docs_dir="docs"):
     docs=Path(docs_dir);docs.mkdir(parents=True,exist_ok=True)
     rows=build_commercial_rows(conn)
     provinces=build_province_view_from_rows(rows)
     (docs/"data.json").write_text(
-        json.dumps({"records":rows,"provinces":provinces},ensure_ascii=False,indent=2),
+        json.dumps({"records":rows,"provinces":provinces,"geography_accounting":geography_accounting(rows)},ensure_ascii=False,indent=2),
         encoding="utf-8",
     )
     return rows
@@ -240,13 +277,23 @@ def write_quality_issues(conn,out_dir="reports"):
             "detail":detail,
         })
 
+    multi_geo={r['project_key'] for r in conn.execute("SELECT project_key FROM project_geo_enrichment WHERE status='MULTI_PROVINCE'")}
+    unnamed_components=set()
+    if conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='event_source_metadata'").fetchone():
+        for meta in conn.execute("SELECT project_key,evidence_json FROM event_source_metadata WHERE source_code='MITECO_SABIA'"):
+            evidence=json.loads(meta['evidence_json'])
+            if evidence.get('asset',{}).get('reason')=='UNNAMED_RENEWABLE_COMPONENT_OF_HYDROGEN_PROJECT':
+                unnamed_components.add(meta['project_key'])
     for p in projects:
         name=(p.get("project_name") or "").strip()
         mw=p.get("power_mw")
 
         if not name:
             latest_title=(p.get("latest_title") or "").strip()
-            if unnamed_multi_project.search(latest_title):
+            if p['project_key'] in unnamed_components:
+                add(p,"WARN","SOURCE_UNNAMED_RENEWABLE_COMPONENT",
+                    "La fonte nomina l'impianto a idrogeno, non la componente rinnovabile: nome FV volutamente vuoto.")
+            elif unnamed_multi_project.search(latest_title):
                 add(
                     p,
                     "WARN",
@@ -266,7 +313,10 @@ def write_quality_issues(conn,out_dir="reports"):
             add(p,"WARN","POWER_OUTLIER_GT_1000_MW",f"Potenza molto elevata ({mw} MW): verificare unità/decimali e progetto.")
 
         if not p.get("province"):
-            add(p,"INFO","MISSING_PROVINCE","Provincia non attribuita con sufficiente confidenza.")
+            if p['project_key'] in multi_geo:
+                add(p,"INFO","MULTI_PROVINCE","La fonte dichiara più province; potenza non ripartita arbitrariamente.")
+            else:
+                add(p,"INFO","MISSING_PROVINCE","Provincia non attribuita con sufficiente confidenza.")
         if not p.get("expediente"):
             add(p,"INFO","MISSING_EXPEDIENTE","Numero expediente non estratto.")
 

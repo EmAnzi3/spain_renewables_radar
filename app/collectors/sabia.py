@@ -15,6 +15,7 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 from app.geo import PROVINCE_TO_CCAA, find_province
+from app.collectors.sabia_assets import parse_assets, source_provinces, component_key, write_event_metadata
 from app.lifecycle import commercial_stage
 from app.parser import ParsedEvent, build_project_key, detect_technology, extract_power_mw, extract_project_name
 
@@ -26,7 +27,7 @@ TYPE_TEXT_TO_TECH = {
     'FOTOVOLTAICOS': 'PV', 'PARQUES EOLICOS': 'WIND', 'EOLICOS MARINOS': 'WIND',
     'HIBRIDOS ENERGIAS RENOVABLES': 'HYBRID', 'ALMACENAMIENTO DE ENERGIA': 'BESS',
 }
-PARSER_VERSION = 'sabia-2'
+PARSER_VERSION = 'sabia-3'
 FIELD_LABELS = (
     'Código de Evaluación Ambiental', 'Código para el Órgano Sustantivo', 'Título del proyecto',
     'Órgano Sustantivo', 'Promotor', 'NIF', 'CIF', 'Tipo de proyecto', 'Legislación aplicable',
@@ -88,7 +89,7 @@ def parse_detail_html(html_text: str) -> dict:
     matches = list(FIELD_RE.finditer(text))
     for i, match in enumerate(matches):
         key = _norm(match[0].rstrip(':').strip())
-        value = text[match.end():matches[i + 1].start() if i + 1 < len(matches) else len(text)].strip()
+        value = ' '.join(text[match.end():matches[i + 1].start() if i + 1 < len(matches) else len(text)].split())
         fields.setdefault(key, value or None)
     def field(label):
         return fields.get(_norm(label))
@@ -130,28 +131,30 @@ def events_from_detail(detail: dict, source_type: str | None, url: str) -> list[
     tech = _technology(detail, source_type)
     if tech not in {'PV', 'WIND', 'BESS', 'HYBRID'}:
         return []
-    name = extract_project_name(title)
-    expediente = detail.get('substantive_code') or detail['environmental_code']
-    province = (detail.get('province') or '').strip() or None
-    ccaa = (detail.get('ccaa') or '').strip() or None
-    if _explicit_multi_province(title):
-        province = None
-    elif not province:
-        province, fallback_ccaa = find_province(title)
-        ccaa = ccaa or fallback_ccaa
-    ccaa = ccaa or PROVINCE_TO_CCAA.get(province)
-    common = dict(source_code='MITECO_SABIA', title=title, url=url, raw_text=detail.get('raw_text') or title,
-                  technology=tech, power_mw=extract_power_mw(title), project_name=name,
-                  promoter=detail.get('promoter'), expediente=expediente, province=province, ccaa=ccaa,
-                  project_key=build_project_key(name, tech, province, detail['environmental_code'], expediente))
+    assets = parse_assets(title)
+    reference = detail.get('substantive_code') or detail['environmental_code']
+    provinces = source_provinces(detail)
+    province = provinces[0] if len(provinces) == 1 else None
+    communities = {PROVINCE_TO_CCAA[p] for p in provinces}
+    ccaa = next(iter(communities)) if len(communities) == 1 else None
+    if not provinces:
+        province, ccaa = find_province(title)
     result = []
-    # These are SOURCE milestone dates, not dates of web publication. The export records their basis.
-    # A resolution mentioned in a project title is NOT evidence that it was granted.
-    for field, suffix, kind in (('entry_date', 'ENTRY', 'OTHER'), ('consultation_start', 'CONSULT', 'PUBLIC_INFO')):
-        if detail.get(field):
-            result.append(ParsedEvent(external_id=f"{detail['environmental_code']}:{suffix}",
-                                      publication_date=detail[field], event_type=kind,
-                                      commercial_stage=commercial_stage(kind), **common))
+    for asset in assets:
+        key = (component_key(reference, asset) if len(assets) > 1 else
+               build_project_key(asset.name, tech, province, detail['environmental_code'], reference))
+        component_suffix = ':' + component_key(reference, asset) if len(assets) > 1 else ''
+        common = dict(source_code='MITECO_SABIA', title=title, url=url,
+                      raw_text=detail.get('raw_text') or title, technology=tech,
+                      power_mw=asset.power_mw, project_name=asset.name,
+                      promoter=detail.get('promoter'), expediente=reference,
+                      province=province, ccaa=ccaa, project_key=key)
+        # Dates are source milestones, never invented web publication dates.
+        for field, suffix, kind in (('entry_date', 'ENTRY', 'OTHER'), ('consultation_start', 'CONSULT', 'PUBLIC_INFO')):
+            if detail.get(field):
+                result.append(ParsedEvent(external_id=f"{detail['environmental_code']}:{suffix}{component_suffix}",
+                                          publication_date=detail[field], event_type=kind,
+                                          commercial_stage=commercial_stage(kind), **common))
     return result
 
 
@@ -165,6 +168,7 @@ class SABIACollector:
         self._details = {}
         self._events_by_date = None
         self._fatal_error = None
+        self._force_codes = set()
         self.snapshot_day = datetime.now(timezone.utc).date().isoformat()
         self.cache_dir = Path(os.getenv('SABIA_CACHE_DIR', 'data/sabia_cache')) / self.snapshot_day / PARSER_VERSION
         self.cache_dir.mkdir(parents=True, exist_ok=True)
@@ -222,23 +226,66 @@ class SABIACollector:
 
     def _detail(self, code: str) -> tuple[dict, str]:
         cached = self.cache_dir / (code + '.json')
-        if cached.exists():
+        raw_path = self.cache_dir / (code + '.html')
+        force_codes = self._force_codes | set(os.getenv('SABIA_FORCE_DETAIL_CODES', '').split(','))
+        if cached.exists() and raw_path.exists() and code not in force_codes:
             value = json.loads(cached.read_text(encoding='utf-8'))
-            if value['detail']['environmental_code'] != code:
-                raise RuntimeError('Invalid cached SABIA identity: ' + code)
-            return value['detail'], value['url']
+            retrieved = datetime.fromisoformat(value['retrieved_at'])
+            age = (datetime.now(timezone.utc) - retrieved).total_seconds()
+            raw_html = raw_path.read_text(encoding='utf-8')
+            digest_ok = hashlib.sha256(raw_path.read_bytes()).hexdigest() == value.get('sha256')
+            detail = parse_detail_html(raw_html)
+            candidate = (self._candidate_rows or {}).get(code, {})
+            compatible = (not candidate or (_norm(candidate['title']) == _norm(detail['title'])
+                           and _norm(candidate['state']) == _norm(detail.get('state'))))
+            if detail['environmental_code'] == code and compatible and digest_ok and 0 <= age < 86400:
+                detail['retrieved_at'] = value['retrieved_at']
+                detail['cache_reused'] = True
+                return detail, value['url']
         with self._session() as session:
-            r = session.get(DETAIL_URL, params={'accion':'proy_detalle', 'codigo_seleccionado':code,
-                                                'id_pagina_cargada':'RESULTADOS'}, timeout=self.timeout)
-            r.raise_for_status()
-            detail = parse_detail_html(r.text)
+            params = {'accion':'proy_detalle', 'codigo_seleccionado':code, 'id_pagina_cargada':'RESULTADOS'}
+            method = 'OFFICIAL_GET'
+            try:
+                r = session.get(DETAIL_URL, params=params, timeout=self.timeout)
+                r.raise_for_status()
+                detail = parse_detail_html(r.text)
+                if detail['environmental_code'] != code:
+                    raise ValueError('SABIA identity mismatch: ' + code)
+            except (requests.RequestException, ValueError):
+                # Some records require SABIA's session/form navigation, not a direct link.
+                featured = 'https://sede.miteco.gob.es/portal/site/seMITECO/template.PAGE/navSabiaDestacados/navServicioContenido'
+                def payload(response):
+                    response.raise_for_status()
+                    form = BeautifulSoup(response.text, 'html.parser').find('form', id='formulario')
+                    if form is None:
+                        raise ValueError('SABIA navigation form missing')
+                    return {i['name']: i.get('value','') for i in form.select('input[name]') if i.get('type') == 'hidden'}
+                data = payload(session.get(featured, timeout=self.timeout))
+                data.update(accion='ea_detalle', codigo_seleccionado=code, id_pagina_cargada='DESTACADOS')
+                data = payload(session.post(featured, data=data, timeout=self.timeout))
+                if data.get('codigo_seleccionado') != code:
+                    raise ValueError('SABIA intermediate identity mismatch: ' + code)
+                data.update(accion='proy_detalle', codigo_seleccionado=code)
+                r = session.post(featured, data=data, timeout=self.timeout)
+                r.raise_for_status()
+                detail = parse_detail_html(r.text)
+                method = 'OFFICIAL_FORM_POST'
             if detail['environmental_code'] != code:
                 raise RuntimeError('SABIA identity mismatch: ' + code)
-            (self.cache_dir / (code + '.html')).write_text(r.text, encoding='utf-8')
-            self._write_json(cached, {'detail': detail, 'url': r.url,
-                                     'retrieved_at': datetime.now(timezone.utc).isoformat(),
+            from urllib.parse import urlencode
+            url = DETAIL_URL + '?' + urlencode(params)
+            retrieved = datetime.now(timezone.utc).isoformat()
+            detail['retrieved_at'] = retrieved
+            detail['cache_reused'] = False
+            raw_path.write_text(r.text, encoding='utf-8')
+            self._write_json(cached, {'detail': detail, 'url': url, 'retrieved_at': retrieved,
+                                     'retrieval_method': method, 'request_endpoint': r.url,
                                      'sha256': hashlib.sha256(r.content).hexdigest()})
-            return detail, r.url
+            return detail, url
+
+    def persist_metadata(self, conn):
+        if self._details and self._candidate_rows:
+            write_event_metadata(conn, self._details, self._candidate_rows, events_from_detail)
 
     def _build_cache(self):
         if self._events_by_date is not None:
@@ -248,6 +295,10 @@ class SABIACollector:
         report = Path('reports/sabia'); report.mkdir(parents=True, exist_ok=True)
         try:
             candidates = self._load_candidates()
+            if os.getenv('SABIA_FORCE_LIVE_SAMPLE') == '1':
+                for kind in TYPE_CODES:
+                    codes=[code for code,row in candidates.items() if row['source_type']==kind]
+                    if codes:self._force_codes.add(max(codes))
             errors = {}
             workers = min(4, max(1, int(os.getenv('SABIA_WORKERS', '4'))))
             with ThreadPoolExecutor(max_workers=workers) as pool:
@@ -268,7 +319,12 @@ class SABIACollector:
                     del errors[code]
                 except Exception as exc:
                     errors[code] = str(exc)[:500]
-            self.audit.update(details_ok=len(self._details), detail_errors=errors)
+            dates = sorted(d[0].get('retrieved_at','') for d in self._details.values())
+            self.audit.update(details_ok=len(self._details), detail_errors=errors,
+                              detail_cache_reused=sum(bool(d[0].get('cache_reused')) for d in self._details.values()),
+                              detail_retrieval_oldest=dates[0] if dates else None,
+                              detail_retrieval_newest=dates[-1] if dates else None,
+                              detail_cache_max_age_seconds=86400)
             if errors:
                 raise RuntimeError(f'SABIA incomplete detail coverage: {len(errors)}/{len(candidates)}')
             events_by_date = {}
@@ -278,7 +334,7 @@ class SABIACollector:
                 for event in events_from_detail(detail, candidates[code]['source_type'], url):
                     events_by_date.setdefault(event.publication_date, []).append(event)
                     date_basis.append({'external_id':event.external_id, 'project_key':event.project_key,
-                                       'event_date':event.publication_date, 'date_basis': 'ENTRY_DATE' if event.external_id.endswith(':ENTRY') else 'CONSULTATION_START',
+                                       'event_date':event.publication_date, 'date_basis': 'ENTRY_DATE' if ':ENTRY' in event.external_id else 'CONSULTATION_START',
                                        'source_current_state':detail.get('state'), 'environmental_code':code,
                                        'source_url':url, 'web_publication_date':None})
             self._write_json(report / 'date_basis.json', date_basis)

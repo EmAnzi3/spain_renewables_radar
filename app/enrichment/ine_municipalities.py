@@ -146,7 +146,9 @@ def municipalities_in_text(text: str, catalog: list[Municipality], ccaa: str | N
 
 def enrich_missing_project_geography(conn, catalog: list[Municipality], source_url=INE_MUNICIPALITIES_URL):
     projects = conn.execute(
-        "SELECT project_key,province,ccaa FROM projects WHERE province IS NULL"
+        """SELECT project_key,province,ccaa FROM projects WHERE province IS NULL
+           AND project_key NOT IN (SELECT project_key FROM project_geo_enrichment
+               WHERE status='MULTI_PROVINCE' AND source_code='MITECO_SABIA')"""
     ).fetchall()
     enriched = 0
     multi = 0

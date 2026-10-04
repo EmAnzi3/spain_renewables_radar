@@ -22,6 +22,12 @@ def main():
         'detail_errors': len(coverage['detail_errors']),
         'projects': projects,
         'events': events,
+        'administrative_files': con.execute("SELECT COUNT(DISTINCT environmental_code) FROM event_source_metadata").fetchone()[0],
+        'multi_province_projects': con.execute("SELECT COUNT(*) FROM project_geo_enrichment WHERE status='MULTI_PROVINCE'").fetchone()[0],
+        'event_metadata_rows': con.execute('SELECT COUNT(*) FROM event_source_metadata').fetchone()[0],
+        'detail_cache_reused': coverage.get('detail_cache_reused',0),
+        'detail_retrieval_oldest': coverage.get('detail_retrieval_oldest'),
+        'detail_retrieval_newest': coverage.get('detail_retrieval_newest'),
         'by_technology': dict(con.execute('SELECT technology, COUNT(*) FROM projects GROUP BY technology').fetchall()),
         'quality': dict(Counter(i['severity'] for i in issues)),
         'source_day_errors': sum(x['status'] in ('ERROR', 'WARN') for x in source_days),
@@ -38,6 +44,12 @@ def main():
         if issue['severity'] in ('ERROR','WARN'):
             print('SABIA_QUALITY', json.dumps(issue, ensure_ascii=False), flush=True)
     Path('reports/sabia/certification.json').write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding='utf-8')
+    if metrics['event_metadata_rows'] != events:
+        raise SystemExit('Missing per-event source metadata')
+    if con.execute('SELECT COUNT(*) FROM event_source_metadata WHERE web_publication_date IS NOT NULL').fetchone()[0]:
+        raise SystemExit('SABIA web publication dates must not be invented')
+    if con.execute('PRAGMA foreign_key_check').fetchall():
+        raise SystemExit('Invalid project references')
     con.close()
     if not coverage['complete'] or coverage['details_ok'] != coverage['candidates'] or coverage['detail_errors']:
         raise SystemExit('Incomplete SABIA source snapshot')

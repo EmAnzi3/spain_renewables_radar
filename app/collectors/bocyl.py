@@ -6,6 +6,8 @@ from datetime import date
 from urllib.parse import urlparse
 
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 from bs4 import BeautifulSoup
 from xml.etree import ElementTree as ET
 
@@ -14,15 +16,18 @@ from app.parser import parse_event
 API="https://analisis.datosabiertos.jcyl.es/api/explore/v2.1/catalog/datasets/bocyl/records"
 RELEVANT=re.compile(r"fotovolta|parque\s+e[oó]lico|instalaci[oó]n\s+e[oó]lica|almacenamiento|bater[ií]a|hibridaci[oó]n|aerogenerador",re.I)
 EXCLUDE=re.compile(r"contrataci[oó]n|licitaci[oó]n|adjudicaci[oó]n|autoconsumo|instalaci[oó]n\s+de\s+paneles\s+fotovoltaicos\s+en\s+(?:edificios|cubiertas)",re.I)
-ID_RE=re.compile(r"(BOCYL-D-\d{8}-\d+)",re.I)
+ID_RE=re.compile(r"(BOCYL-D-\d{8}-\d+-\d+)(?![\d-])",re.I)
 
 class BOCYLCollector:
     code="BOCYL"
 
     def __init__(self,timeout:int=30,user_agent:str="SpainRenewablesRadar/0.1"):
-        self.timeout=timeout
+        self.timeout=(8, timeout)
         self.session=requests.Session()
-        self.session.headers.update({"User-Agent":user_agent,"Accept":"application/json"})
+        self.session.headers.update({"User-Agent":user_agent})
+        retry=Retry(total=2,connect=2,read=1,status=2,backoff_factor=0.8,
+                    status_forcelist=(429,500,502,503,504),allowed_methods=frozenset({"GET"}))
+        self.session.mount("https://",HTTPAdapter(max_retries=retry))
 
     def _get_json(self,url,params=None):
         r=self.session.get(url,params=params,timeout=self.timeout)
@@ -38,7 +43,8 @@ class BOCYLCollector:
         if r.status_code==404:
             return None
         r.raise_for_status()
-        r.encoding=r.apparent_encoding or "utf-8"
+        declaration=re.search(br'encoding=[\'"]([^\'"]+)',r.content[:150])
+        r.encoding=declaration[1].decode('ascii') if declaration else (r.apparent_encoding or "utf-8")
         return r.text
 
     @staticmethod
@@ -58,7 +64,11 @@ class BOCYLCollector:
         offset=0
         while True:
             payload=self._get_json(API,params={"where":where,"limit":100,"offset":offset})
-            rows=payload.get("results") or []
+            if not isinstance(payload,dict) or not isinstance(payload.get("results"),list) or "total_count" not in payload:
+                raise RuntimeError("BOCYL index schema invalid, not empty coverage")
+            rows=payload["results"]
+            if not rows and offset<int(payload["total_count"]):
+                raise RuntimeError("BOCYL index pagination truncated")
             for row in rows:
                 yield row
             offset += len(rows)
@@ -66,23 +76,29 @@ class BOCYLCollector:
                 break
 
     def _detail_text(self,row:dict)->tuple[str,str]:
-        xml_url=row.get("enlace_fichero_xml")
-        html_url=row.get("enlace_fichero_html")
-        pdf_url=row.get("enlace_fichero_pdf")
-        if xml_url:
-            raw=self._get_text(xml_url)
-            if raw:
-                try:
+        errors=[]
+        for field in ("enlace_fichero_xml","enlace_fichero_html"):
+            url=row.get(field)
+            if not url:continue
+            try:
+                raw=self._get_text(url)
+                if not raw:raise RuntimeError("Published BOCYL document missing: "+url)
+                if field.endswith("xml"):
                     root=ET.fromstring(raw)
+                    if root.tag!="disposicion":raise ValueError("Unexpected BOCYL XML root")
                     text="\n".join(t.strip() for t in root.itertext() if t and t.strip())
-                except ET.ParseError:
-                    text=BeautifulSoup(raw,"html.parser").get_text("\n",strip=True)
-                return text,(html_url or xml_url or pdf_url)
-        if html_url:
-            raw=self._get_text(html_url)
-            if raw:
-                return BeautifulSoup(raw,"html.parser").get_text("\n",strip=True),html_url
-        return str(row.get("titulo") or ""),(pdf_url or html_url or xml_url or API)
+                else:
+                    soup=BeautifulSoup(raw,"html.parser")
+                    for tag in soup.select("script,style,nav,header,footer"):tag.decompose()
+                    text=soup.get_text("\n",strip=True)
+                    if len(text)<100:raise ValueError("BOCYL HTML document too short")
+                return text,(row.get("enlace_fichero_html") or url).replace("http://","https://",1)
+            except (requests.RequestException,ValueError,ET.ParseError,RuntimeError) as exc:
+                errors.append(f"{field}: {exc}")
+        if errors:
+            raise RuntimeError("BOCYL published detail unavailable; "+"; ".join(errors))
+        # An index-only source without document links is not fabricated full text.
+        return str(row.get("titulo") or ""),row.get("enlace_fichero_pdf") or API
 
     def collect_day(self,day:date):
         out=[]

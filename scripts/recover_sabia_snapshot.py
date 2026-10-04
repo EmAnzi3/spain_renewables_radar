@@ -1,72 +1,44 @@
-"""Resume the observed SABIA snapshot without changing source dates or fabricating detail pages."""
-import hashlib
-import json
-import shutil
-import sys
-from concurrent.futures import ThreadPoolExecutor,as_completed
+"""Seed reusable official HTML; dates/provenance remain unchanged and indexes are fetched live."""
+from __future__ import annotations
+import hashlib,json,shutil,sys
 from datetime import datetime,timezone
 from pathlib import Path
-from urllib.parse import urlencode
-import requests
-from bs4 import BeautifulSoup
-
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-from app.collectors.sabia import SEARCH_URL,parse_detail_html,PARSER_VERSION
-
-FEATURED='https://sede.miteco.gob.es/portal/site/seMITECO/template.PAGE/navSabiaDestacados/navServicioContenido'
+from app.collectors.sabia import PARSER_VERSION
 
 
-def form_payload(html):
-    soup=BeautifulSoup(html,'html.parser')
-    form=soup.find('form',id='formulario')
-    if form is None:raise ValueError('Official SABIA navigation form missing')
-    return {i['name']:i.get('value','') for i in form.select('input[name]') if i.get('type')=='hidden'}
-
-
-def recover(code,destination):
-    with requests.Session() as session:
-        session.headers['User-Agent']='SpainRenewablesRadar/0.2 official-form recovery'
-        page=session.get(FEATURED,timeout=(10,30));page.raise_for_status()
-        payload=form_payload(page.text)
-        payload.update(accion='ea_detalle',codigo_seleccionado=code,id_pagina_cargada='DESTACADOS')
-        state=session.post(FEATURED,data=payload,timeout=(10,60));state.raise_for_status()
-        payload=form_payload(state.text)
-        if payload.get('codigo_seleccionado')!=code:raise ValueError('SABIA intermediate identity mismatch')
-        payload.update(accion='proy_detalle',codigo_seleccionado=code)
-        full=session.post(FEATURED,data=payload,timeout=(10,90));full.raise_for_status()
-        detail=parse_detail_html(full.text)
-        if detail['environmental_code']!=code:raise ValueError('SABIA detail identity mismatch')
-        url=SEARCH_URL+'?'+urlencode({'accion':'proy_detalle','codigo_seleccionado':code,'id_pagina_cargada':'RESULTADOS'})
-        (destination/(code+'.html')).write_text(full.text,encoding='utf-8')
-        record={'detail':detail,'url':url,'retrieved_at':datetime.now(timezone.utc).isoformat(),
-                'retrieval_method':'OFFICIAL_FORM_POST','request_endpoint':FEATURED,
-                'sha256':hashlib.sha256(full.content).hexdigest()}
-        (destination/(code+'.json')).write_text(json.dumps(record,ensure_ascii=False,indent=2),encoding='utf-8')
-        return code
+def seed_details(source:Path,destination:Path,now=None):
+    now=now or datetime.now(timezone.utc)
+    destination.mkdir(parents=True,exist_ok=True)
+    result={"seeded":0,"expired_or_invalid":0,"index_files_copied":0,"original_retrieval_dates_preserved":True}
+    for path in sorted(source.glob("**/*.json")):
+        if not path.stem.isdigit() or len(path.stem)!=8:continue
+        try:
+            record=json.loads(path.read_text(encoding="utf-8"));raw=path.with_suffix(".html")
+            at=datetime.fromisoformat(record["retrieved_at"])
+            age=(now-at).total_seconds()
+            if not raw.exists() or not 0<=age<86400:raise ValueError("expired detail")
+            if record["detail"]["environmental_code"]!=path.stem:raise ValueError("identity mismatch")
+            if hashlib.sha256(raw.read_bytes()).hexdigest()!=record["sha256"]:raise ValueError("raw digest mismatch")
+            existing=destination/path.name
+            if existing.exists():
+                old=json.loads(existing.read_text())
+                if old["retrieved_at"]>=record["retrieved_at"]:continue
+            shutil.copyfile(path,existing);shutil.copyfile(raw,destination/raw.name)
+            result["seeded"]+=1
+        except (KeyError,ValueError,TypeError):result["expired_or_invalid"]+=1
+    return result
 
 
 def main():
     today=datetime.now(timezone.utc).date().isoformat()
-    source=Path('sabia-recovery-input/data/sabia_cache')/today/PARSER_VERSION
-    if not source.exists():
-        print('No same-day partial snapshot: live collector must acquire a new snapshot; old data not relabelled.')
-        return
-    destination=Path('data/sabia_cache')/today/PARSER_VERSION
-    shutil.copytree(source,destination,dirs_exist_ok=True)
-    inventory=json.loads((destination/'inventory.json').read_text(encoding='utf-8'))
-    missing=[r['code'] for r in inventory if not (destination/(r['code']+'.json')).exists()]
-    audit={'origin_run':37158247454,'snapshot_date':today,'inventory_count':len(inventory),
-           'cached_details':len(inventory)-len(missing),'requested_missing':missing,'recovered':[],'errors':{}}
-    out=Path('reports/sabia');out.mkdir(parents=True,exist_ok=True)
-    with ThreadPoolExecutor(max_workers=2) as executor:
-        pending={executor.submit(recover,code,destination):code for code in missing}
-        for task in as_completed(pending):
-            code=pending[task]
-            try:task.result();audit['recovered'].append(code);print('SABIA_RECOVERED',code,flush=True)
-            except Exception as exc:audit['errors'][code]=str(exc);print('SABIA_RECOVERY_ERROR',code,str(exc),flush=True)
-            (out/'recovery.json').write_text(json.dumps(audit,ensure_ascii=False,indent=2),encoding='utf-8')
-    (out/'recovery.json').write_text(json.dumps(audit,ensure_ascii=False,indent=2),encoding='utf-8')
-    print('SABIA_RECOVERY',json.dumps(audit,ensure_ascii=False),flush=True)
-    if audit['errors']:raise SystemExit('SABIA recovery incomplete; source stays unimplemented')
+    source=Path("sabia-recovery-input/data/sabia_cache")
+    result=seed_details(source,Path("data/sabia_cache")/today/PARSER_VERSION)
+    result["origin_run"]=37160816843
+    result["cache_check_date"]=today
+    result["note"]="Original detail retrieval times are unchanged. All five discovery indexes must be acquired live."
+    out=Path("reports/sabia");out.mkdir(parents=True,exist_ok=True)
+    (out/"cache_seed.json").write_text(json.dumps(result,indent=2),encoding="utf-8")
+    print("SABIA_CACHE_SEED",json.dumps(result),flush=True)
 
-if __name__=='__main__':main()
+if __name__=="__main__":main()

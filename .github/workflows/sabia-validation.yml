@@ -4,12 +4,14 @@ on:
   push:
     paths:
       - '.github/workflows/sabia-validation.yml'
-      - 'app/collectors/sabia.py'
+      - 'app/collectors/sabia*.py'
       - 'tests/test_sabia*.py'
+      - 'tests/fixtures/sabia*.json'
       - 'scripts/validate_sabia_output.py'
       - 'scripts/recover_sabia_snapshot.py'
       - 'app/parser.py'
       - 'app/run_pipeline.py'
+      - 'app/reporting.py'
       - 'app/collectors/__init__.py'
 permissions:
   contents: read
@@ -24,6 +26,7 @@ jobs:
     env:
       PYTHONUNBUFFERED: '1'
       SABIA_WORKERS: '4'
+      SABIA_FORCE_LIVE_SAMPLE: '1'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -32,25 +35,25 @@ jobs:
       - run: pip install -r requirements.txt
       - name: Unit and regression tests before network work
         run: python -m unittest discover -s tests -v
-      - name: Restore validated partial acquisition for same-day recovery
+      - name: Optional existing official HTML cache (not a source-coverage waiver)
         uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           github-token: ${{ github.token }}
-          run-id: 37158247454
+          run-id: 37160816843
           name: sabia-30d-output
           path: sabia-recovery-input
-      - name: Recover only missing official details using the source navigation form
-        timeout-minutes: 12
+      - name: Reuse only recent raw details with original retrieval dates and hashes
         run: python scripts/recover_sabia_snapshot.py
       - name: Freeze last complete Spanish calendar day
         run: echo "VALIDATION_UNTIL=$(TZ=Europe/Madrid date -d yesterday +%F)" >> "$GITHUB_ENV"
-      - name: Acquire full inventory and run 3-day smoke
-        timeout-minutes: 15
+      - name: Fetch all five live indexes, refresh changed records and a live sample; smoke
+        timeout-minutes: 25
         run: python -m app.run_pipeline --days 3 --until "$VALIDATION_UNTIL" --db data/sabia_smoke.sqlite --sources MITECO_SABIA --skip-ree --skip-miteco --strict-coverage
-      - name: Backfill 30 days from the same acquired snapshot
-        timeout-minutes: 6
+      - name: Backfill 30 days using original administrative dates
+        timeout-minutes: 8
         run: python -m app.run_pipeline --days 30 --until "$VALIDATION_UNTIL" --db data/sabia_backfill.sqlite --sources MITECO_SABIA --skip-ree --skip-miteco --strict-coverage
-      - name: Verify coverage quality and nonempty backfill
+      - name: Verify coverage, component identities, quality and date semantics
         run: python scripts/validate_sabia_output.py
       - uses: actions/upload-artifact@v4
         if: always()
