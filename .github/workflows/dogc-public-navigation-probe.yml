@@ -1,0 +1,93 @@
+name: dogc-public-navigation-probe
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/dogc-public-navigation-probe.yml'
+permissions:
+  contents: read
+concurrency:
+  group: dogc-public-navigation-probe
+  cancel-in-progress: true
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests beautifulsoup4
+      - name: Inspect public navigation assets and date controls
+        run: |
+          python - <<'PY'
+          import hashlib,json,re
+          from datetime import datetime,timezone
+          from pathlib import Path
+          from urllib.parse import urljoin,urlsplit
+          import requests
+          from bs4 import BeautifulSoup
+          root=Path('reports/dogc_navigation_probe');root.mkdir(parents=True,exist_ok=True)
+          s=requests.Session();s.headers['User-Agent']='SpainRenewablesRadar/0.5 (official public navigation probe)'
+          audits=[]
+          def get(url):
+              for _ in range(4):
+                  p=urlsplit(url)
+                  if p.scheme!='https' or p.hostname!='dogc.gencat.cat' or p.username or p.password or p.port not in (None,443):raise ValueError('Unapproved public DOGC destination')
+                  r=s.get(url,timeout=(8,30),allow_redirects=False,stream=True)
+                  if r.status_code in (301,302,303,307,308):
+                      url=urljoin(url,r.headers.get('Location',''));r.close();continue
+                  try:
+                      data=bytearray()
+                      for part in r.iter_content(65536):
+                          data.extend(part)
+                          if len(data)>3_000_000:raise ValueError('Navigation probe size limit')
+                      raw=bytes(data);digest=hashlib.sha256(raw).hexdigest()
+                      (root/(digest+'.bin')).write_bytes(raw)
+                      audits.append(dict(url=url,status=r.status_code,bytes=len(raw),sha256=digest,retrieved_at=datetime.now(timezone.utc).isoformat()))
+                      print('ACQUISITION',json.dumps(audits[-1]),flush=True)
+                      r.raise_for_status();return raw
+                  finally:r.close()
+              raise ValueError('Excessive DOGC redirects')
+          try:
+              home='https://dogc.gencat.cat/ca/inici/'
+              raw=get(home);soup=BeautifulSoup(raw,'html.parser')
+              controls=[]
+              for f in soup.find_all('form'):
+                  fields=[dict(tag=t.name,name=t.get('name'),id=t.get('id'),type=t.get('type')) for t in f.find_all(['input','select'])]
+                  controls.append(dict(action=f.get('action'),method=f.get('method'),fields=fields))
+              print('PUBLIC_FORMS',json.dumps(controls,ensure_ascii=False),flush=True)
+              links=[dict(text=a.get_text(' ',strip=True),url=urljoin(home,a['href'])) for a in soup.select('a[href]') if any(k in (a.get_text(' ',strip=True)+' '+a['href']).casefold() for k in ('informaci','resultats','sumari','data','consulta'))]
+              scripts=[urljoin(home,t['src']) for t in soup.select('script[src]') if urlsplit(urljoin(home,t['src'])).hostname=='dogc.gencat.cat']
+              print('PUBLIC_LINKS',json.dumps(links,ensure_ascii=False),flush=True)
+              print('SCRIPT_URLS',json.dumps(scripts),flush=True)
+              selected=[u for u in scripts if not any(k in u.casefold() for k in ('jquery','bootstrap','cookie','analytics','responsive','slick','font','chart','moment','calendar'))][:10]
+              observations=[]
+              for url in selected:
+                  text=get(url).decode('utf-8',errors='replace')
+                  # Save public source bytes but print only route snippets, not authentication values.
+                  relevant=[]
+                  for line in text.splitlines():
+                      if any(k in line.casefold() for k in ('apikey','api_key','token','password','authorization','secret')):continue
+                      if any(k in line.casefold() for k in ('url:', 'url =', '/api/', '/rest/', 'publicationdate', 'searchdocument', 'sumari', 'calendar', 'fetch(')):
+                          relevant.append(line.strip()[:350])
+                  observations.append(dict(script_url=url,relevant_lines=relevant[:50]))
+                  print('PUBLIC_SCRIPT_ROUTES',json.dumps(observations[-1],ensure_ascii=False),flush=True)
+              inline=[]
+              for tag in soup.find_all('script',src=False):
+                  for line in tag.get_text().splitlines():
+                      if any(k in line.casefold() for k in ('apikey','api_key','token','password','authorization','secret')):continue
+                      if any(k in line.casefold() for k in ('url', 'publicationdate','calendar','sumari')):inline.append(line.strip()[:350])
+              result=dict(homepage_reachable=True,forms=controls,links=links,scripts=observations,inline_navigation=inline[:50],collector_implemented=False,dated_events_created=0,note='Public-navigation probe only; no search results, permits or thirty-day coverage certified.')
+              (root/'summary.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
+              print('INLINE_NAVIGATION',json.dumps(inline[:50],ensure_ascii=False),flush=True)
+          finally:
+              (root/'acquisition.json').write_text(json.dumps(audits,ensure_ascii=False,indent=2),encoding='utf-8')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dogc-public-navigation-probe-output
+          path: reports/dogc_navigation_probe/
+          if-no-files-found: error
