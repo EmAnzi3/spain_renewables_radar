@@ -1,0 +1,56 @@
+name: borm-transport-probe
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/borm-transport-probe.yml'
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Inspect official source bytes and schema without treating bad responses as empty days
+        run: |
+          python -u - <<'PY'
+          import hashlib,json,time
+          from pathlib import Path
+          import requests
+          from app.collectors.borm import INDEX_JSON
+          out=Path('reports/borm_probe');out.mkdir(parents=True,exist_ok=True)
+          report=[]
+          for i in range(3):
+              entry={'attempt':i+1,'source_url':INDEX_JSON}
+              try:
+                  r=requests.get(INDEX_JSON,headers={'User-Agent':'SpainRenewablesRadar/0.3','Accept':'application/json'},timeout=(8,50))
+                  entry.update(status=r.status_code,url=r.url,headers={k:r.headers.get(k) for k in ('content-type','content-length','content-encoding','last-modified','etag')},bytes=len(r.content),sha256=hashlib.sha256(r.content).hexdigest(),prefix_hex=r.content[:60].hex(),prefix_text=r.content[:300].decode('utf-8',errors='replace'))
+                  (out/f'response_{i+1}.bin').write_bytes(r.content)
+                  r.raise_for_status()
+                  try:
+                      payload=r.json();entry['json_rows']=len(payload) if isinstance(payload,list) else None
+                      if isinstance(payload,list):entry['row_sample']=payload[0] if payload else None
+                  except ValueError as exc:
+                      entry['json_error']=str(exc)
+                      for encoding in ('utf-8-sig','utf-16'):
+                          try:
+                              p=json.loads(r.content.decode(encoding));entry['decoded_encoding']=encoding;entry['decoded_rows']=len(p);break
+                          except (ValueError,UnicodeError):pass
+              except requests.RequestException as exc:entry['error']=str(exc)
+              report.append(entry);print('BORM_RESPONSE',json.dumps(entry,ensure_ascii=False),flush=True)
+              if entry.get('json_rows') or entry.get('decoded_rows'):break
+              time.sleep(2*(i+1))
+          (out/'audit.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+          if not any(x.get('json_rows') or x.get('decoded_rows') for x in report):raise SystemExit('No valid official JSON source response')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: borm-transport-probe
+          path: reports/borm_probe/
+          if-no-files-found: error
