@@ -23,10 +23,10 @@ jobs:
           run-id: 37186210816
           name: gva-public-inventory-probe
           path: gva-source-input
-      - name: Read the explicit PDF links from each current official document directory
+      - name: Inspect distinct official legal acts; inventory other linked technical documents separately
         run: |
           python -u - <<'PY'
-          import hashlib,json,time
+          import hashlib,json,re,time
           from pathlib import Path
           from urllib.parse import urljoin,urlparse,unquote
           import requests
@@ -38,7 +38,7 @@ jobs:
           s=requests.Session();s.headers['User-Agent']='SpainRenewablesRadar/0.3 official-document-audit'
           s.mount('https://',HTTPAdapter(max_retries=Retry(total=2,backoff_factor=0.8,status_forcelist=(429,500,502,503,504))))
           for record in records:
-              record['pdf_documents']=[]
+              record['pdf_documents']=[];record['technical_document_links']=[];seen=set()
               for directory in record['documents']:
                   raw=(src/directory['file']).read_bytes()
                   if not raw.startswith(b'<!') and b'<html' not in raw[:1000].lower():continue
@@ -46,19 +46,33 @@ jobs:
                   for a in soup.select('a[href]'):
                       url=urljoin(directory['final_url'],a['href'])
                       if not (urlparse(url).hostname or '').endswith('.gva.es'):continue
-                      if not urlparse(url).path.lower().endswith('.pdf'):continue
-                      # The probe deliberately follows only top-level official linked acts, not all technical subfolders.
-                      if len(record['pdf_documents'])>=6:raise ValueError('Unexpected document count; inspect directory before continuing')
-                      r=s.get(url,timeout=(8,35));r.raise_for_status()
-                      if r.content[:5]!=b'%PDF-':raise ValueError('Official linked PDF returned non-PDF bytes')
-                      name=record['external_id']+'-'+str(len(record['pdf_documents']))+'.pdf'
-                      (out/name).write_bytes(r.content)
-                      record['pdf_documents'].append({'url':url,'final_url':r.url,'label':a.get_text(' ',strip=True),'file':name,
-                          'bytes':len(r.content),'sha256':hashlib.sha256(r.content).hexdigest()})
-                      print('OFFICIAL_PDF',record['external_id'],a.get_text(' ',strip=True),len(r.content),flush=True)
+                      if not urlparse(url).path.lower().endswith('.pdf') or url in seen:continue
+                      seen.add(url)
+                      label=a.get_text(' ',strip=True) or unquote(urlparse(url).path.rsplit('/',1)[-1])
+                      if not re.search(r'resol|publica|anunci|desist|infopub',label,re.I):
+                          record['technical_document_links'].append({'url':url,'label':label});continue
+                      with s.get(url,timeout=(8,35),stream=True) as response:
+                          response.raise_for_status()
+                          chunks=[];size=0
+                          for block in response.iter_content(65536):
+                              size+=len(block)
+                              if size>12_000_000:raise ValueError('Legal act exceeds probe size bound: '+url)
+                              chunks.append(block)
+                          content=b''.join(chunks)
+                          if content[:5]!=b'%PDF-':raise ValueError('Official linked PDF returned non-PDF bytes')
+                          name=record['external_id']+'-'+str(len(record['pdf_documents']))+'.pdf'
+                          (out/name).write_bytes(content)
+                          record['pdf_documents'].append({'url':url,'final_url':response.url,'label':label,'file':name,
+                              'bytes':len(content),'sha256':hashlib.sha256(content).hexdigest()})
+                          print('OFFICIAL_ACT',record['external_id'],label,len(content),flush=True)
                       time.sleep(0.1)
-          (out/'records.json').write_text(json.dumps(records,ensure_ascii=False,indent=2),encoding='utf-8')
-          print('PROBE_ONLY',len(records),'PUBLICATIONS',sum(len(r['pdf_documents']) for r in records),'TOP_LEVEL_PDF_DOCUMENTS',flush=True)
+              (out/'records.json').write_text(json.dumps(records,ensure_ascii=False,indent=2),encoding='utf-8')
+          audit={'publications':len(records),'distinct_legal_act_pdfs':sum(len(r['pdf_documents']) for r in records),
+                 'technical_pdf_links_not_downloaded':sum(len(r['technical_document_links']) for r in records),
+                 'document_scope':'top-level explicitly linked legal acts only; technical subfolders not crawled',
+                 'collector_implemented':False}
+          (out/'audit.json').write_text(json.dumps(audit,ensure_ascii=False,indent=2),encoding='utf-8')
+          print('PROBE_ONLY',json.dumps(audit),flush=True)
           PY
       - uses: actions/upload-artifact@v4
         if: always()
