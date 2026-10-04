@@ -1,0 +1,39 @@
+name: gva-public-validation
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'app/collectors/gva_public.py'
+      - 'tests/test_gva_public.py'
+      - 'scripts/validate_gva_public.py'
+      - '.github/workflows/gva-public-validation.yml'
+permissions:
+  contents: read
+concurrency:
+  group: gva-public-validation-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    env:
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: All unit and regression tests before live collection
+        run: python -m unittest discover -s tests -v
+      - name: Official live smoke, positive publication and reconciled 30-day backfill
+        run: python -m scripts.validate_gva_public
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gva-public-validation
+          path: |
+            data/gva_validation.sqlite
+            reports/
+            docs/
+          if-no-files-found: error
