@@ -1,0 +1,108 @@
+name: gva-public-inventory-probe
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/gva-public-inventory-probe.yml'
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Traverse official paginated archive and inspect current document links
+        run: |
+          python -u - <<'PY'
+          import hashlib,json,math,re,time
+          from datetime import datetime,timedelta
+          from zoneinfo import ZoneInfo
+          from pathlib import Path
+          from urllib.parse import parse_qsl,urljoin,urlparse,urlsplit,urlunsplit,urlencode
+          import requests
+          from requests.adapters import HTTPAdapter
+          from urllib3.util.retry import Retry
+          from bs4 import BeautifulSoup
+          base='https://mediambient.gva.es/es/web/energia/informacion-publica'
+          out=Path('reports/gva_inventory_probe');out.mkdir(parents=True,exist_ok=True)
+          s=requests.Session();s.headers['User-Agent']='SpainRenewablesRadar/0.3 official-source-audit'
+          s.mount('https://',HTTPAdapter(max_retries=Retry(total=2,backoff_factor=0.8,status_forcelist=(429,500,502,503,504))))
+          def get(url):
+              if not (urlparse(url).hostname or '').endswith('.gva.es'):raise ValueError('Non-official document URL')
+              r=s.get(url,timeout=(8,30));r.raise_for_status()
+              if not (urlparse(r.url).hostname or '').endswith('.gva.es'):raise ValueError('Redirect outside official source')
+              return r
+          def listing(response,page):
+              soup=BeautifulSoup(response.text,'html.parser')
+              iterator=soup.select_one('.taglib-page-iterator')
+              if iterator is None:raise ValueError('GVA pagination missing')
+              text=iterator.get_text(' ',strip=True)
+              count=re.search(r'Mostrando\s+(\d+)\s*-\s*(\d+)\s+de\s+(\d+)\s+resultados',text,re.I)
+              if not count:raise ValueError('GVA result accounting missing')
+              bounds=tuple(map(int,count.groups()))
+              result=[]
+              for box in soup.select('.asset-abstract'):
+                  a=box.select_one('.asset-title a');published=box.select_one('.metadata-publish-date')
+                  if not a or not published:raise ValueError('GVA title/date missing')
+                  url=urljoin(response.url,a['href']);params=dict(parse_qsl(urlsplit(url).query))
+                  ids=[value for key,value in params.items() if key.endswith('_assetEntryId')]
+                  if len(ids)!=1 or not ids[0].isdigit():raise ValueError('GVA stable identity missing')
+                  result.append({'external_id':ids[0],'title':a.get_text(' ',strip=True),'url':url,
+                    'publication_date':datetime.strptime(published.get_text(' ',strip=True),'%d/%m/%Y').date().isoformat(),
+                    'categories':[c.get_text(' ',strip=True) for c in box.select('.metadata-categories strong')],
+                    'summary':box.select_one('.asset-summary').get_text(' ',strip=True) if box.select_one('.asset-summary') else '',
+                    'page':page})
+              if len(result)!=bounds[1]-bounds[0]+1:raise ValueError('GVA page row count mismatch')
+              links=[urljoin(response.url,a['href']) for a in iterator.select('a[href]') if any(k.endswith('_cur') for k,v in parse_qsl(urlsplit(a['href']).query))]
+              if not links:raise ValueError('GVA paging route missing')
+              return result,bounds,links[0]
+          first=get(base);first_rows,bounds,paging=listing(first,1)
+          (out/'page_001.html').write_bytes(first.content)
+          inventory=list(first_rows);total=bounds[2];pages=math.ceil(total/20)
+          print('GVA_DECLARED',total,'PAGES',pages,flush=True)
+          for page in range(2,pages+1):
+              parts=urlsplit(paging);args=[(k,str(page) if k.endswith('_cur') else v) for k,v in parse_qsl(parts.query)]
+              response=get(urlunsplit((parts.scheme,parts.netloc,parts.path,urlencode(args),'')))
+              (out/f'page_{page:03}.html').write_bytes(response.content)
+              found,current,_=listing(response,page)
+              if current[2]!=total or current[0]!=(page-1)*20+1:raise ValueError('GVA archive shifted or pagination ignored')
+              inventory.extend(found);print('GVA_PAGE',page,len(found),flush=True);time.sleep(0.2)
+          if len(inventory)!=total or len({r['external_id'] for r in inventory})!=total:raise ValueError('GVA inventory incomplete or duplicate identities')
+          today=datetime.now(ZoneInfo('Europe/Madrid')).date();end=today-timedelta(days=1);start=end-timedelta(days=29)
+          recent=[r for r in inventory if start.isoformat()<=r['publication_date']<=end.isoformat()]
+          for row in recent:
+              code=row['external_id'];response=get(row['url']);(out/(code+'.html')).write_bytes(response.content)
+              soup=BeautifulSoup(response.text,'html.parser');article=soup.select_one('.asset-full-content')
+              if not article:raise ValueError('GVA detail content missing: '+code)
+              dates=[t.get_text(' ',strip=True) for t in article.select('.date-info')]
+              row['detail_dates']=dates
+              for tag in article.select('script,style'):tag.decompose()
+              row['raw_text']=article.get_text('\n',strip=True)
+              row['documents']=[]
+              for a in article.select('.iframe-error-protocol a[href]'):
+                  link=urljoin(response.url,a['href'])
+                  document=get(link);ctype=document.headers.get('content-type','')
+                  ext='.pdf' if document.content[:5]==b'%PDF-' else '.document'
+                  target=out/(code+'-'+str(len(row['documents']))+ext)
+                  target.write_bytes(document.content)
+                  row['documents'].append({'url':link,'final_url':document.url,'content_type':ctype,'bytes':len(document.content),'sha256':hashlib.sha256(document.content).hexdigest(),'file':target.name})
+              print('GVA_CURRENT',code,row['publication_date'],row['title'],[(d['content_type'],d['bytes']) for d in row['documents']],flush=True)
+          result={'source_url':base,'declared_records':total,'pages':pages,'retrieved_records':len(inventory),
+            'distinct_ids':len({r['external_id'] for r in inventory}),'window_start':start.isoformat(),'window_end':end.isoformat(),
+            'window_records':len(recent),'archive_complete':True,'collector_implemented':False}
+          (out/'inventory.json').write_text(json.dumps(inventory,ensure_ascii=False,indent=2),encoding='utf-8')
+          (out/'window_records.json').write_text(json.dumps(recent,ensure_ascii=False,indent=2),encoding='utf-8')
+          (out/'audit.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
+          print('GVA_AUDIT',json.dumps(result,ensure_ascii=False),flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gva-public-inventory-probe
+          path: reports/gva_inventory_probe/
+          if-no-files-found: error
