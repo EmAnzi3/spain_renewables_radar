@@ -46,13 +46,13 @@ jobs:
           echo "VALIDATION_UNTIL=$(TZ=Europe/Madrid date -d yesterday +%F)" >> "$GITHUB_ENV"
           echo "BORM_RUN_SNAPSHOT_DIR=data/run_snapshots" >> "$GITHUB_ENV"
           echo "BORM_RUN_SNAPSHOT_SCOPE=${GITHUB_RUN_ID}:${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_ENV"
-      - name: Ten-source live smoke before full backfill
+      - name: Eleven-source live smoke before full backfill
         timeout-minutes: 25
         run: |
           python -m app.run_pipeline --days 3 --until "$VALIDATION_UNTIL" --db data/full_smoke.sqlite --skip-ree --skip-miteco --strict-coverage
           mkdir -p smoke_output
           cp -r reports docs smoke_output/
-      - name: Ten-source 30-day backfill with national enrichment
+      - name: Eleven-source 30-day backfill with national enrichment
         timeout-minutes: 25
         run: python -m app.run_pipeline --days 30 --until "$VALIDATION_UNTIL" --strict-coverage
       - name: Certify source coverage, identities, provenance, missing data and idempotency

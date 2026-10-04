@@ -33,7 +33,7 @@ def classify_event(text: str) -> str:
     return "OTHER"
 
 def commercial_stage(event_type: str) -> str:
-    if event_type in {"DENIED","WITHDRAWN"}:
+    if event_type in {"DENIED","WITHDRAWN","PROCEDURE_ENDED"}:
         return "BLOCKED"
     if event_type=="EXPROPRIATION":
         return "PRECONSTRUCTION"

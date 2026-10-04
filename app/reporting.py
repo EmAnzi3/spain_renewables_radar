@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 
 from app.scoring import score_project
+from app.source_quality import regional_evidence_by_project,regional_quality_issues
 from app.enrichment.epc_bop import project_epc_summary
 
 def write_changes(events,out_dir="reports/change_reports"):
@@ -34,6 +35,7 @@ def write_changes(events,out_dir="reports/change_reports"):
     return csv_path,html_path
 
 def build_commercial_rows(conn):
+    regional_metadata=regional_evidence_by_project(conn)
     projects=[dict(r) for r in conn.execute("SELECT * FROM projects").fetchall()]
     ree_ccaas={r["ccaa"] for r in conn.execute(
         "SELECT DISTINCT ccaa FROM ree_node_capacity WHERE ccaa IS NOT NULL"
@@ -84,6 +86,8 @@ def build_commercial_rows(conn):
             row['date_basis']=meta['date_basis'] if project.get('latest_source_code')=='MITECO_SABIA' else 'SOURCE_PUBLICATION'
             row['source_current_state']=meta['source_current_state']
             row['environmental_code']=meta['environmental_code']
+        if project['project_key'] in regional_metadata:
+            row['regional_source_evidence']=regional_metadata[project['project_key']]
         rows.append(row)
     rows.sort(
         key=lambda x:(x["commercial_score"],x.get("last_seen") or "",x.get("power_mw") or -1),
@@ -320,6 +324,7 @@ def write_quality_issues(conn,out_dir="reports"):
         if not p.get("expediente"):
             add(p,"INFO","MISSING_EXPEDIENTE","Numero expediente non estratto.")
 
+    issues.extend(regional_quality_issues(conn))
     fields=[
         "severity","code","project_key","project_name","technology","power_mw",
         "province","ccaa","commercial_stage","source_code","source_url","detail",
