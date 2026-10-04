@@ -12,20 +12,22 @@ concurrency:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt
-      - name: Inspect official archive identities, pagination and source date semantics
+      - name: Reconcile every official archive page and preserve source-date distinctions
         run: |
           python -u - <<'PY'
-          import hashlib,json,re,time
-          from datetime import datetime,timezone
+          import hashlib,json,re,time,unicodedata
+          from collections import Counter
+          from datetime import date,datetime,timedelta,timezone
           from pathlib import Path
-          from urllib.parse import urljoin,urlsplit,parse_qsl
+          from urllib.parse import urljoin,urlsplit,parse_qsl,urlencode,urlunsplit
+          from zoneinfo import ZoneInfo
           import requests
           from bs4 import BeautifulSoup
           from requests.adapters import HTTPAdapter
@@ -38,50 +40,96 @@ jobs:
           out=Path('reports/galicia_probe');out.mkdir(parents=True,exist_ok=True)
           session=requests.Session();session.headers['User-Agent']='SpainRenewablesRadar/0.4 (official-source audit)'
           session.mount('https://',HTTPAdapter(max_retries=Retry(total=2,connect=1,read=1,backoff_factor=1,status_forcelist=(429,500,502,503,504))))
-          audit={'source':'XUNTA_PUBLIC','implemented':False,'scope':'first archive pages and small detail sample; not a complete collector','archives':{},'acquisitions':[]}
+          end=datetime.now(ZoneInfo('Europe/Madrid')).date()-timedelta(days=1);start=end-timedelta(days=29)
+          audit={'source':'XUNTA_PUBLIC','implemented':False,'scope':'complete archive indexes plus small detail sample; not a certified collector',
+                 'window_start':start.isoformat(),'window_end':end.isoformat(),'archives':{},'acquisitions':[],'complete':False}
+          def save():
+              (out/'probe.json').write_text(json.dumps(audit,ensure_ascii=False,indent=2),encoding='utf-8')
+          def official(url):
+              parsed=urlsplit(url);host=parsed.hostname or ''
+              if parsed.scheme!='https' or not (host=='economia.xunta.gal' or host.endswith('.xunta.gal')):raise ValueError('Non-official HTTPS source')
+              return url
           def get(url,label):
-              response=session.get(url,timeout=(8,40));response.raise_for_status()
-              host=urlsplit(response.url).hostname or ''
-              assert host=='economia.xunta.gal' or host.endswith('.xunta.gal'),'Non-official redirect'
-              raw=response.content;digest=hashlib.sha256(raw).hexdigest()
-              file=label+'.html';(out/file).write_bytes(raw)
+              response=session.get(official(url),timeout=(8,40));response.raise_for_status();official(response.url)
+              raw=response.content
+              if len(raw)>4000000:raise ValueError('Unexpected archive response size')
+              digest=hashlib.sha256(raw).hexdigest();file=label+'.html';(out/file).write_bytes(raw)
               audit['acquisitions'].append({'url':response.url,'requested_url':url,'file':file,'bytes':len(raw),'sha256':digest,'retrieved_at':datetime.now(timezone.utc).isoformat()})
-              return BeautifulSoup(raw,'html.parser'),response.url
-          for category,url in roots.items():
-              soup,final=get(url,category+'-index');body=soup.get_text(' ',strip=True)
+              save();return BeautifulSoup(raw,'html.parser'),response.url
+          def folded(text):
+              return ''.join(c for c in unicodedata.normalize('NFKD',text) if not unicodedata.combining(c)).casefold()
+          months={'enero':1,'xaneiro':1,'febrero':2,'febreiro':2,'marzo':3,'abril':4,'mayo':5,'maio':5,'junio':6,'xuno':6,
+                  'julio':7,'xullo':7,'agosto':8,'septiembre':9,'setembro':9,'octubre':10,'outubro':10,'noviembre':11,'novembro':11,'diciembre':12,'decembro':12}
+          def act_date(title):
+              m=re.match(r'^(?:acuerdo|acordo|resolucion|anuncio)\s+(?:de|do)\s+(\d{1,2})\s+de\s+([a-z]+)\s+de\s+(20\d\d)',folded(title))
+              if not m or m[2] not in months:return None
+              return date(int(m[3]),months[m[2]],int(m[1])).isoformat()
+          def listing(soup,url,category):
+              body=soup.get_text(' ',strip=True)
               declared=re.search(r'(?:consulta|disponibles?)\s+(\d+)\s+expedientes',body,re.I)
-              details={};paging={}
+              if not declared:raise ValueError('Archive total missing')
+              details=[];paging={}
+              for a in soup.select('a.contedor__env__resultado[href]'):
+                  link=official(urljoin(url,a['href']));args=dict(parse_qsl(urlsplit(link).query));identity=args.get('content','')
+                  if not identity.startswith('expediente_'):raise ValueError('Official source identity missing')
+                  title=a.get_text(' ',strip=True)
+                  if not title:raise ValueError('Empty official disposition title')
+                  box=a.find_parent(class_='contedor__ext__resultado')
+                  details.append({'external_id':identity,'source_namespace':category,'url':link,'title':title,
+                                  'current_consultation_label':box.get_text(' ',strip=True).split(title)[0].strip() if box else None,
+                                  'act_date':act_date(title),'web_publication_date':None,
+                                  'date_semantics':'act_date extracted from current title; not a web publication timestamp'})
               for a in soup.select('a[href]'):
-                  link=urljoin(final,a['href']);args=dict(parse_qsl(urlsplit(link).query))
-                  text=' '.join(a.stripped_strings)
-                  if 'content' in args and 'expediente' in args['content'] and text:
-                      details[args['content']]={'url':link,'title':text,'html':str(a.parent)[:6000]}
-                  if 'page' in args:paging[args['page']]=link
-              item={'declared_records':int(declared[1]) if declared else None,'sample_records':details,'pagination':paging,'detail_samples':[]}
-              audit['archives'][category]=item
-              print('INDEX',category,'DECLARED',item['declared_records'],'LINKS',len(details),'PAGINATION',json.dumps(paging,ensure_ascii=False),flush=True)
-              for key,record in list(details.items())[:2]:
-                  print('ROW',category,key,record['title'],'CONTEXT',record['html'][:2500],flush=True)
-                  ds,detail_url=get(record['url'],category+'-'+key.replace('.html',''));main=ds.find('main') or ds.find(id='content') or ds
-                  for tag in main.select('script,style,nav,header,footer'):tag.decompose()
-                  text=main.get_text('\n',strip=True);(out/(category+'-'+key+'.txt')).write_text(text,encoding='utf-8')
-                  dates=[]
-                  for t in main.select('time,[datetime],.date,.fecha,.data'):
-                      dates.append({'tag':str(t)[:900],'text':t.get_text(' ',strip=True)})
-                  docs=[]
-                  for a in main.select('a[href]'):
-                      target=urljoin(detail_url,a['href']);label=a.get_text(' ',strip=True)
-                      if '.pdf' in target.lower() or '/dog/' in target.lower():docs.append({'url':target,'label':label})
-                  item['detail_samples'].append({'external_id':key,'url':detail_url,'text':text,'date_elements':dates,'documents':docs})
-                  print('DETAIL',category,key,'DATE_ELEMENTS',json.dumps(dates,ensure_ascii=False),'DOCS',json.dumps(docs[:15],ensure_ascii=False),flush=True)
-                  anchors=[]
-                  for pattern in [r'data de publicaci',r'fecha de publicaci',r'prazo',r'plazo',r'\d{1,2}/\d{1,2}/20\d\d']:
-                      for m in list(re.finditer(pattern,text,re.I))[:3]:anchors.append(text[max(0,m.start()-80):m.end()+200])
-                  print('DATE_CONTEXT',category,key,json.dumps(anchors,ensure_ascii=False),flush=True)
-                  time.sleep(.2)
-              if not details or not declared:raise ValueError('Official source shape must be inspected before implementation')
-          (out/'probe.json').write_text(json.dumps(audit,ensure_ascii=False,indent=2),encoding='utf-8')
-          print('PROBE_COMPLETE',json.dumps({k:{'declared':v['declared_records'],'first_page_records':len(v['sample_records'])} for k,v in audit['archives'].items()},ensure_ascii=False),flush=True)
+                  link=urljoin(url,a['href']);args=dict(parse_qsl(urlsplit(link).query))
+                  if 'page' in args:paging[args['page']]=official(link)
+              if not details or len({r['external_id'] for r in details})!=len(details):raise ValueError('Empty or duplicate index page')
+              return int(declared[1]),details,paging
+          try:
+              for category,url in roots.items():
+                  soup,final=get(url,category+'-page-1');total,first,paging=listing(soup,final,category)
+                  size=len(first);pages=(total+size-1)//size
+                  if pages>120 or (pages>1 and '2' not in paging):raise ValueError('Pagination cannot be reconciled')
+                  records=list(first)
+                  for page in range(2,pages+1):
+                      parsed=urlsplit(paging['2']);pairs=[(k,str(page) if k=='page' else v) for k,v in parse_qsl(parsed.query)]
+                      next_url=urlunsplit((parsed.scheme,parsed.netloc,parsed.path,urlencode(pairs),''))
+                      ps,purl=get(next_url,category+'-page-'+str(page));count,found,_=listing(ps,purl,category)
+                      if count!=total or len(found)!=min(size,total-(page-1)*size):raise ValueError('Declared page accounting changed')
+                      records.extend(found);time.sleep(.2)
+                  if len(records)!=total or len({r['external_id'] for r in records})!=total:raise ValueError('Archive unique ID accounting differs')
+                  ps,purl=get(url,category+'-recheck');count,last,_=listing(ps,purl,category)
+                  if count!=total or [(r['external_id'],r['title']) for r in last]!=[(r['external_id'],r['title']) for r in first]:raise ValueError('Archive changed during acquisition')
+                  dates=[r['act_date'] for r in records if r['act_date']]
+                  item={'declared_records':total,'reconciled_records':len(records),'pages':pages,'records':records,'complete_index':True,
+                        'act_date_min':min(dates) if dates else None,'act_date_max':max(dates) if dates else None,
+                        'titles_without_recognized_act_date':len(records)-len(dates),
+                        'act_dates_in_30d_window':sum(start.isoformat()<=d<=end.isoformat() for d in dates),
+                        'web_publication_dates_known':0,'detail_samples':[]}
+                  audit['archives'][category]=item;save()
+                  print('INDEX',category,json.dumps({k:v for k,v in item.items() if k not in ('records','detail_samples')},ensure_ascii=False),flush=True)
+                  for row in records[:2]:
+                      ds,detail_url=get(row['url'],category+'-'+row['external_id'].replace('.html','').replace('.xml',''))
+                      main=ds.find('main') or ds.find(id='content') or ds
+                      for tag in main.select('script,style,nav,header,footer'):tag.decompose()
+                      text=main.get_text('\n',strip=True);docs=[]
+                      for a in main.select('a[href]'):
+                          target=urljoin(detail_url,a['href']);label=a.get_text(' ',strip=True)
+                          if '.pdf' in target.lower() or '/dog/' in target.lower():docs.append({'url':target,'label':label})
+                      # Do not label act dates or consultation deadlines as page-publication dates.
+                      item['detail_samples'].append({'external_id':row['external_id'],'url':detail_url,'text':text,
+                          'date_elements':[{'tag':str(t)[:900],'text':t.get_text(' ',strip=True)} for t in main.select('time,[datetime],.date,.fecha,.data')],
+                          'documents':docs})
+                      save();time.sleep(.2)
+              all_rows=[r for item in audit['archives'].values() for r in item['records']]
+              names=Counter(folded(' '.join(r['title'].split())) for r in all_rows)
+              audit.update(complete=True,source_records=len(all_rows),distinct_namespaced_records=len({(r['source_namespace'],r['external_id']) for r in all_rows}),
+                           identical_title_groups=sum(count>1 for count in names.values()),
+                           date_caveat='Act dates and consultation periods are not website publication timestamps; duplicate titles across archives are not extra projects',
+                           collector_activation='NOT_IMPLEMENTED; inventory and detail probes only')
+              print('PROBE_COMPLETE',json.dumps({k:v for k,v in audit.items() if k not in ('archives','acquisitions')},ensure_ascii=False),flush=True)
+          except Exception as exc:
+              audit['error']=str(exc);raise
+          finally:save()
           PY
       - uses: actions/upload-artifact@v4
         if: always()
