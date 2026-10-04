@@ -1,0 +1,72 @@
+name: catalunya-transport-contract-audit
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/catalunya-transport-contract-audit.yml'
+permissions:
+  contents: read
+concurrency:
+  group: catalunya-transport-contract-audit
+  cancel-in-progress: true
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Read source error contracts and test standard verified TLS clients
+        run: |
+          python -u - <<'PY'
+          import hashlib,json,ssl,subprocess
+          from pathlib import Path
+          from datetime import datetime,timezone
+          import requests
+          from requests.adapters import HTTPAdapter
+          out=Path('reports/catalunya_transport_audit');out.mkdir(parents=True,exist_ok=True)
+          records=[]
+          def save(label,response):
+              raw=response.content
+              if len(raw)>1000000:raise ValueError('Unexpected diagnostic size')
+              (out/(label+'.bin')).write_bytes(raw)
+              record={'label':label,'url':response.url,'status':response.status_code,'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest(),'retrieved_at':datetime.now(timezone.utc).isoformat(),'sample':response.text[:7000]}
+              records.append(record);print('CONTRACT_DIAGNOSTIC',json.dumps(record,ensure_ascii=False))
+          base='https://analisi.transparenciacatalunya.cat'
+          metadata=requests.get(base+'/api/views/dh5g-4nit.json',timeout=30).json()
+          if metadata.get('id')!='dh5g-4nit':raise ValueError('Unexpected metadata identity')
+          fields=[c['fieldName'] for c in metadata['columns'] if not c['fieldName'].startswith(':')]
+          for label,query in [('original',':id as socrata_row_id, *'),('explicit',':id AS socrata_row_id, '+', '.join(fields))]:
+              response=requests.get(base+'/resource/dh5g-4nit.json',params={'$select':query,'$order':':id','$limit':2},timeout=30,allow_redirects=False)
+              save(label,response)
+              if response.status_code in (401,403,429):break
+          url='https://portaldogc.gencat.cat/eadop-rest/api/dogc/calendarDOGC'
+          curl=subprocess.run(['curl','--silent','--show-error','--proto','=https','--connect-timeout','8','--max-time','40','--data','month=9&year=2026&language=ca','--output',str(out/'curl-calendar.bin'),'--write-out','%{http_code} %{ssl_verify_result}',url],capture_output=True,text=True,timeout=45)
+          print('SYSTEM_CURL_TLS',json.dumps({'returncode':curl.returncode,'status_and_verify':curl.stdout,'stderr':curl.stderr}))
+          if (out/'curl-calendar.bin').exists():print('SYSTEM_CURL_SAMPLE',(out/'curl-calendar.bin').read_text(errors='replace')[:7000])
+          if curl.returncode==0 and curl.stdout.startswith(('401','403','429')):
+              print('TLS_FOLLOWUP_SKIPPED_ACCESS_RESTRICTION')
+          else:
+              class TLSAdapter(HTTPAdapter):
+                  def init_poolmanager(self,*args,**kwargs):
+                      context=ssl.create_default_context();context.minimum_version=ssl.TLSVersion.TLSv1_2
+                      context.set_ciphers('DEFAULT:!aNULL:!eNULL:!EXPORT:!RC4:!3DES:@SECLEVEL=2')
+                      kwargs['ssl_context']=context
+                      return super().init_poolmanager(*args,**kwargs)
+              session=requests.Session();session.mount('https://portaldogc.gencat.cat/',TLSAdapter())
+              try:
+                  response=session.post(url,data={'month':9,'year':2026,'language':'ca'},timeout=(8,40),allow_redirects=False)
+                  save('standard-tls12-calendar',response)
+              except requests.RequestException as exc:
+                  print('VERIFIED_TLS_RESULT',json.dumps({'error_class':type(exc).__name__,'error':str(exc),'certificate_verification_disabled':False}))
+          (out/'audit.json').write_text(json.dumps({'observations':records,'curl_returncode':curl.returncode,'certificate_verification_disabled':False,'collector_enabled':False,'coverage_certified':False},ensure_ascii=False,indent=2),encoding='utf-8')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: catalunya-transport-contract-output
+          path: reports/catalunya_transport_audit/
+          if-no-files-found: error
