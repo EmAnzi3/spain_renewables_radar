@@ -203,6 +203,15 @@ def reconcile(previous, current):
             'not_seen': sorted(old.keys() - new.keys()), 'new_commercial_opportunities': 0, 'dated_events_created': 0}
 
 
+def source_selection(metadata):
+    """Explicit source columns avoid SoQL wildcard-position ambiguity."""
+    fields = [column.get('fieldName') for column in metadata.get('columns', [])]
+    if (not fields or len(fields) != len(set(fields)) or 'socrata_row_id' in fields
+            or any(not isinstance(field, str) or not re.fullmatch(r'[a-z_][a-z0-9_]*', field) for field in fields)):
+        raise ValueError('Invalid or colliding official column identifiers')
+    return ':id AS socrata_row_id, ' + ', '.join(fields)
+
+
 class InventoryClient:
     def __init__(self, evidence_dir, *, session=None, page_size=500, pause=.15, timeout=40):
         if not 1 <= page_size <= 1000:
@@ -290,8 +299,9 @@ class InventoryClient:
         for technology, dataset in DATASETS.items():
             meta, count = self.metadata(dataset), self.count(dataset)
             rows, seen = [], set()
+            selection = source_selection(meta)
             for offset in range(0, count, self.page_size):
-                page = self.query(dataset, **{'$select': ':id as socrata_row_id, *', '$order': ':id',
+                page = self.query(dataset, **{'$select': selection, '$order': ':id',
                                               '$limit': self.page_size, '$offset': offset})
                 if not isinstance(page, list) or len(page) != min(self.page_size, count - offset):
                     raise ValueError('Truncated or inconsistent inventory page')
@@ -325,6 +335,7 @@ def verify_evidence(snapshot, raw_dir):
     counts = defaultdict(list)
     versions = defaultdict(list)
     offsets = defaultdict(list)
+    selections = {data['dataset_id']: source_selection(data['metadata']) for data in snapshot['datasets'].values()}
     for acquisition in acquisitions:
         if acquisition.get('error'):
             continue
@@ -351,7 +362,7 @@ def verify_evidence(snapshot, raw_dir):
             query = parse_qs(parts.query)
             if query.get('$select') == ['count(*)']:
                 counts[dataset].append(int(payload[0]['count']))
-            elif query.get('$select') == [':id as socrata_row_id, *'] and query.get('$order') == [':id']:
+            elif query.get('$select') == [selections[dataset]] and query.get('$order') == [':id']:
                 offsets[dataset].append((int(query['$offset'][0]), len(payload)))
                 reconstructed[dataset].extend(payload)
             else:

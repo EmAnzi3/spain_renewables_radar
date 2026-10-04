@@ -7,17 +7,29 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import ssl
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import urljoin, urlsplit
 from zoneinfo import ZoneInfo
 import requests
+from requests.adapters import HTTPAdapter
 from bs4 import BeautifulSoup
 
 OUT = Path('reports/dogc_contract_probe')
 WEB = 'https://dogc.gencat.cat'
 SERVICE = 'https://portaldogc.gencat.cat'
 ROUTES = {'calendarDOGC', 'summaryDOGC', 'summaryLastPublishedDOGC', 'searchDOGC'}
+
+
+class VerifiedDOGCTLSAdapter(HTTPAdapter):
+    """Observed server cipher compatibility; hostname and CA checks stay enabled."""
+    def init_poolmanager(self, *args, **kwargs):
+        context = ssl.create_default_context()
+        context.minimum_version = ssl.TLSVersion.TLSv1_2
+        context.set_ciphers('DEFAULT:!aNULL:!eNULL:!EXPORT:!RC4:!3DES:@SECLEVEL=2')
+        kwargs['ssl_context'] = context
+        return super().init_poolmanager(*args, **kwargs)
 
 
 def compact(value):
@@ -31,6 +43,7 @@ def compact(value):
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     session = requests.Session()
+    session.mount(SERVICE + '/', VerifiedDOGCTLSAdapter())
     session.headers['User-Agent'] = 'SpainRenewablesRadar/0.6 (public read-only source verification)'
     acquisitions, failures = [], []
 
