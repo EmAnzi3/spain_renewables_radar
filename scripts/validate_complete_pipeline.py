@@ -1,6 +1,6 @@
 """Evidence-based certification of the ten implemented source adapters."""
 from __future__ import annotations
-import csv,json,os,sys
+import csv,json,os,sys,hashlib
 from collections import Counter
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
@@ -17,7 +17,12 @@ def rows(path):
     with Path(path).open(encoding='utf-8-sig',newline='') as stream:return list(csv.DictReader(stream))
 
 
-def metrics(conn,coverage,quality,sabia,and_public):
+def metrics(conn,coverage,quality,sabia,and_public,borm):
+    if not borm.get("complete") or borm.get("rows",0)!=borm.get("distinct_ids"):
+        raise ValueError("BORM annual index acquisition incomplete")
+    raw_index=Path("reports/borm/index_raw.json").read_bytes()
+    if hashlib.sha256(raw_index).hexdigest()!=borm.get("sha256"):
+        raise ValueError("BORM original source hash mismatch")
     invalid=[]
     for p in conn.execute('SELECT * FROM projects WHERE expediente IS NOT NULL'):
         if valid_expediente(p['expediente']):continue
@@ -42,12 +47,12 @@ def metrics(conn,coverage,quality,sabia,and_public):
     if event_meta!=sabia_events:raise ValueError('SABIA event provenance incomplete')
     if conn.execute('SELECT COUNT(*) FROM event_source_metadata WHERE web_publication_date IS NOT NULL').fetchone()[0]:
         raise ValueError('Invented SABIA publication date')
-    source_errors=[r for r in coverage if r['status']!='OK']
     if not sabia.get('complete') or sabia['details_ok']!=sabia['candidates'] or sabia['detail_errors']:
         raise ValueError('SABIA inventory/detail acquisition incomplete')
     if not and_public.get('complete') or sum(and_public['partitions'].values())!=and_public['archive_records']:
         raise ValueError('Andalucia archive accounting incomplete')
     if conn.execute('PRAGMA foreign_key_check').fetchall():raise ValueError('Foreign key integrity error')
+    source_errors=[r for r in coverage if r['status']!='OK']
     result={
         'head_sha':os.getenv('GITHUB_SHA'),'run_id':os.getenv('GITHUB_RUN_ID'),
         'window_start':min(r['date'] for r in coverage if r['source_code'] in SOURCES),
@@ -55,6 +60,8 @@ def metrics(conn,coverage,quality,sabia,and_public):
         'projects':before_projects,'events':before_events,
         'by_source':dict(conn.execute('SELECT source_code,COUNT(*) FROM events GROUP BY source_code')),
         'source_days_per_collector':counts,'source_day_errors':len(source_errors),
+        'borm_index_rows':borm['rows'],'borm_index_retrieved_at':borm['retrieved_at'],
+        'borm_fetch_attempts':len(borm['attempts']),'borm_recovered_after_retry':borm['recovered_after_retry'],
         'quality':{s:issues.get(s,0) for s in ('ERROR','WARN','INFO')},
         'invalid_project_identifiers':invalid,'missing_source_days':missing_days,
         'missing':dict(conn.execute('SELECT SUM(project_name IS NULL) no_name,SUM(power_mw IS NULL) no_mw,SUM(province IS NULL) no_province,SUM(expediente IS NULL) no_expediente FROM projects').fetchone()),
@@ -81,7 +88,8 @@ def main():
     conn=connect('data/spain_renewables.sqlite')
     result=metrics(conn,rows('reports/coverage_latest.csv'),rows('reports/quality_issues_latest.csv'),
                    json.loads(Path('reports/sabia/coverage.json').read_text()),
-                   json.loads(Path('reports/andalucia_public/coverage.json').read_text()))
+                   json.loads(Path('reports/andalucia_public/coverage.json').read_text()),
+                   json.loads(Path('reports/borm/index_acquisition.json').read_text()))
     Path('reports/validation_metrics.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
     print('CERTIFICATION',json.dumps(result,ensure_ascii=False),flush=True)
     conn.close()
