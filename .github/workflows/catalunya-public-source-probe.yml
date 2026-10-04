@@ -1,0 +1,91 @@
+name: catalunya-public-source-probe
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/catalunya-public-source-probe.yml'
+permissions:
+  contents: read
+concurrency:
+  group: catalunya-public-source-probe
+  cancel-in-progress: true
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests beautifulsoup4
+      - name: Verify officially linked dataset metadata and bounded live samples
+        run: |
+          python - <<'PY'
+          import hashlib,json,re
+          from datetime import datetime,timezone
+          from pathlib import Path
+          from urllib.parse import urlsplit,urljoin
+          import requests
+          from bs4 import BeautifulSoup
+          root=Path('reports/catalunya_probe');root.mkdir(parents=True,exist_ok=True)
+          s=requests.Session();s.headers['User-Agent']='SpainRenewablesRadar/0.5 (official source probe)'
+          allowed={'mediambient.gencat.cat','analisi.transparenciacatalunya.cat','dogc.gencat.cat'}
+          audit=[]
+          def get(url):
+              for _ in range(5):
+                  p=urlsplit(url)
+                  if p.scheme!='https' or p.hostname not in allowed or p.username or p.password:raise ValueError('Unexpected probe destination')
+                  r=s.get(url,timeout=(10,45),allow_redirects=False,stream=True)
+                  if r.status_code in (301,302,303,307,308):
+                      target=urljoin(url,r.headers.get('Location',''));r.close();url=target;continue
+                  try:
+                      parts=[];size=0
+                      for part in r.iter_content(65536):
+                          size+=len(part)
+                          if size>8_000_000:raise ValueError('Probe sample response unexpectedly large')
+                          parts.append(part)
+                      raw=b''.join(parts);sha=hashlib.sha256(raw).hexdigest()
+                      (root/(sha+'.bin')).write_bytes(raw)
+                      audit.append(dict(url=url,status=r.status_code,content_type=r.headers.get('Content-Type'),sha256=sha,bytes=len(raw),retrieved_at=datetime.now(timezone.utc).isoformat()))
+                      print('PROBE_RESPONSE',json.dumps(audit[-1],ensure_ascii=False),flush=True)
+                      r.raise_for_status();return raw
+                  finally:r.close()
+              raise ValueError('Too many redirects')
+          origin='https://mediambient.gencat.cat/es/05_ambits_dactuacio/avaluacio_ambiental/energies_renovables/visor/index.html'
+          results=[];failures=[]
+          try:
+              raw=get(origin);soup=BeautifulSoup(raw,'html.parser')
+              links=[urljoin(origin,a['href']) for a in soup.select('a[href]') if 'analisi.transparenciacatalunya.cat' in a['href']]
+              print('OFFICIAL_DATASET_LINKS',json.dumps(links,ensure_ascii=False),flush=True)
+              datasets={'WIND':'dh5g-4nit','PV':'ggx8-jkp4'}
+              for kind,dataset in datasets.items():
+                  try:
+                      if not any('/'+dataset in link for link in links):raise ValueError('Dataset no longer linked from official environmental portal')
+                      base='https://analisi.transparenciacatalunya.cat'
+                      meta=json.loads(get(base+'/api/views/'+dataset+'.json'))
+                      columns=[dict(name=c.get('name'),field=c.get('fieldName'),type=c.get('dataTypeName'),description=c.get('description')) for c in meta.get('columns',[]) if not str(c.get('fieldName','')).startswith(':')]
+                      count=json.loads(get(base+'/resource/'+dataset+'.json?$select=count(*)'))
+                      sample=json.loads(get(base+'/resource/'+dataset+'.json?$limit=5'))
+                      if not isinstance(sample,list) or not columns or not isinstance(count,list):raise ValueError('Unexpected official dataset structure')
+                      result=dict(kind=kind,dataset=dataset,title=meta.get('name'),description=meta.get('description'),attribution=meta.get('attribution'),metadata=meta.get('metadata'),rowsUpdatedAt=meta.get('rowsUpdatedAt'),count=count,columns=columns,sample=sample,source_implemented=False,scope='Probe only. Dataset update timestamps are not project publication or authorization dates.')
+                      results.append(result)
+                      (root/(dataset+'.json')).write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
+                      print('CATALUNYA_DATASET',json.dumps(result,ensure_ascii=False),flush=True)
+                  except Exception as exc:
+                      failures.append(dict(dataset=dataset,error_class=type(exc).__name__,error=str(exc)))
+                      print('DATASET_FAILURE',json.dumps(failures[-1]),flush=True)
+          except Exception as exc:
+              failures.append(dict(source=origin,error_class=type(exc).__name__,error=str(exc)))
+          finally:
+              (root/'acquisition.json').write_text(json.dumps(audit,ensure_ascii=False,indent=2))
+              (root/'summary.json').write_text(json.dumps(dict(results=len(results),failures=failures,collectors_enabled=0),ensure_ascii=False,indent=2))
+          if failures:raise SystemExit('Official source probe incomplete: '+json.dumps(failures))
+          if len(results)!=2:raise SystemExit('Expected two officially linked energy datasets')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: catalunya-public-probe-output
+          path: reports/catalunya_probe/
+          if-no-files-found: error
