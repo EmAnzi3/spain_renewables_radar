@@ -1,0 +1,91 @@
+name: galicia-public-source-probe
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/galicia-public-source-probe.yml'
+permissions:
+  contents: read
+concurrency:
+  group: galicia-public-probe-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Inspect official archive identities, pagination and source date semantics
+        run: |
+          python -u - <<'PY'
+          import hashlib,json,re,time
+          from datetime import datetime,timezone
+          from pathlib import Path
+          from urllib.parse import urljoin,urlsplit,parse_qsl
+          import requests
+          from bs4 import BeautifulSoup
+          from requests.adapters import HTTPAdapter
+          from urllib3.util.retry import Retry
+          roots={
+            'consultations':'https://economia.xunta.gal/es/transparencia/informacion-publica/en-tramitacion/instalacions-de-xeracion',
+            'authorizations':'https://economia.xunta.gal/es/transparencia/informacion-publica/autorizacions-administrativas/instalacions-de-xeracion',
+            'environmental':'https://economia.xunta.gal/es/transparencia/informacion-publica/documentacion-ambiental/impacto-ambiental/instalacions-xeracion',
+          }
+          out=Path('reports/galicia_probe');out.mkdir(parents=True,exist_ok=True)
+          session=requests.Session();session.headers['User-Agent']='SpainRenewablesRadar/0.4 (official-source audit)'
+          session.mount('https://',HTTPAdapter(max_retries=Retry(total=2,connect=1,read=1,backoff_factor=1,status_forcelist=(429,500,502,503,504))))
+          audit={'source':'XUNTA_PUBLIC','implemented':False,'scope':'first archive pages and small detail sample; not a complete collector','archives':{},'acquisitions':[]}
+          def get(url,label):
+              response=session.get(url,timeout=(8,40));response.raise_for_status()
+              host=urlsplit(response.url).hostname or ''
+              assert host=='economia.xunta.gal' or host.endswith('.xunta.gal'),'Non-official redirect'
+              raw=response.content;digest=hashlib.sha256(raw).hexdigest()
+              file=label+'.html';(out/file).write_bytes(raw)
+              audit['acquisitions'].append({'url':response.url,'requested_url':url,'file':file,'bytes':len(raw),'sha256':digest,'retrieved_at':datetime.now(timezone.utc).isoformat()})
+              return BeautifulSoup(raw,'html.parser'),response.url
+          for category,url in roots.items():
+              soup,final=get(url,category+'-index');body=soup.get_text(' ',strip=True)
+              declared=re.search(r'(?:consulta|disponibles?)\s+(\d+)\s+expedientes',body,re.I)
+              details={};paging={}
+              for a in soup.select('a[href]'):
+                  link=urljoin(final,a['href']);args=dict(parse_qsl(urlsplit(link).query))
+                  text=' '.join(a.stripped_strings)
+                  if 'content' in args and 'expediente' in args['content'] and text:
+                      details[args['content']]={'url':link,'title':text,'html':str(a.parent)[:6000]}
+                  if 'page' in args:paging[args['page']]=link
+              item={'declared_records':int(declared[1]) if declared else None,'sample_records':details,'pagination':paging,'detail_samples':[]}
+              audit['archives'][category]=item
+              print('INDEX',category,'DECLARED',item['declared_records'],'LINKS',len(details),'PAGINATION',json.dumps(paging,ensure_ascii=False),flush=True)
+              for key,record in list(details.items())[:2]:
+                  print('ROW',category,key,record['title'],'CONTEXT',record['html'][:2500],flush=True)
+                  ds,detail_url=get(record['url'],category+'-'+key.replace('.html',''));main=ds.find('main') or ds.find(id='content') or ds
+                  for tag in main.select('script,style,nav,header,footer'):tag.decompose()
+                  text=main.get_text('\n',strip=True);(out/(category+'-'+key+'.txt')).write_text(text,encoding='utf-8')
+                  dates=[]
+                  for t in main.select('time,[datetime],.date,.fecha,.data'):
+                      dates.append({'tag':str(t)[:900],'text':t.get_text(' ',strip=True)})
+                  docs=[]
+                  for a in main.select('a[href]'):
+                      target=urljoin(detail_url,a['href']);label=a.get_text(' ',strip=True)
+                      if '.pdf' in target.lower() or '/dog/' in target.lower():docs.append({'url':target,'label':label})
+                  item['detail_samples'].append({'external_id':key,'url':detail_url,'text':text,'date_elements':dates,'documents':docs})
+                  print('DETAIL',category,key,'DATE_ELEMENTS',json.dumps(dates,ensure_ascii=False),'DOCS',json.dumps(docs[:15],ensure_ascii=False),flush=True)
+                  anchors=[]
+                  for pattern in [r'data de publicaci',r'fecha de publicaci',r'prazo',r'plazo',r'\d{1,2}/\d{1,2}/20\d\d']:
+                      for m in list(re.finditer(pattern,text,re.I))[:3]:anchors.append(text[max(0,m.start()-80):m.end()+200])
+                  print('DATE_CONTEXT',category,key,json.dumps(anchors,ensure_ascii=False),flush=True)
+                  time.sleep(.2)
+              if not details or not declared:raise ValueError('Official source shape must be inspected before implementation')
+          (out/'probe.json').write_text(json.dumps(audit,ensure_ascii=False,indent=2),encoding='utf-8')
+          print('PROBE_COMPLETE',json.dumps({k:{'declared':v['declared_records'],'first_page_records':len(v['sample_records'])} for k,v in audit['archives'].items()},ensure_ascii=False),flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: galicia-public-source-probe
+          path: reports/galicia_probe/
+          if-no-files-found: error
