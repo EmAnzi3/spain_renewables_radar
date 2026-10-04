@@ -2,7 +2,7 @@ from __future__ import annotations
 import argparse
 import os
 from datetime import date,timedelta
-from app.collectors import BOECollector,BOCYLCollector,BOACollector,BOJACollector,DOCMCollector,DOECollector,BORMCollector,BOCMCollector,SABIACollector,AndaluciaPublicCollector,GVAPublicCollector
+from app.collectors import BOECollector,BOCYLCollector,BOACollector,BOJACollector,DOCMCollector,DOECollector,BORMCollector,BOCMCollector,SABIACollector,AndaluciaPublicCollector,GVAPublicCollector,DOGCollector
 from app.dashboard import write_dashboard
 from app.db import connect
 from app.enrichment import (
@@ -20,6 +20,7 @@ COLLECTOR_CLASSES={
     "BOE":BOECollector,"BOCYL":BOCYLCollector,"BOA":BOACollector,"BOJA":BOJACollector,
     "DOCM":DOCMCollector,"DOE":DOECollector,"BORM":BORMCollector,"BOCM":BOCMCollector,
     "MITECO_SABIA":SABIACollector,"AND_PUBLIC":AndaluciaPublicCollector,"GVA_PUBLIC":GVAPublicCollector,
+    "DOG":DOGCollector,
 }
 
 def daterange(start:date,end:date):
@@ -33,7 +34,7 @@ def parse_args():
     p.add_argument("--days",type=int,default=7,help="giorni inclusi fino a oggi")
     p.add_argument("--since",help="YYYY-MM-DD")
     p.add_argument("--until",help="YYYY-MM-DD")
-    p.add_argument("--sources",default="BOE,BOCYL,BOA,BOJA,DOCM,DOE,BORM,BOCM,AND_PUBLIC,GVA_PUBLIC,MITECO_SABIA",help="sorgenti separate da virgola")
+    p.add_argument("--sources",default="BOE,BOCYL,BOA,BOJA,DOCM,DOE,BORM,BOCM,AND_PUBLIC,GVA_PUBLIC,MITECO_SABIA,DOG",help="sorgenti separate da virgola")
     p.add_argument("--db",default=os.getenv("RADAR_DB","data/spain_renewables.sqlite"))
     p.add_argument("--skip-ree",action="store_true")
     p.add_argument("--skip-miteco",action="store_true")
@@ -141,6 +142,7 @@ def main():
         print("MITECO: reports/miteco_registry_latest.csv")
         print("MITECO exact matches: reports/miteco_exact_matches_latest.csv")
     if "GVA_PUBLIC" in wanted:print("GVA source assertions: reports/gva_public/source_flags.html")
+    if "DOG" in wanted:print("DOG original evidence: reports/dog/coverage.json; Galicia links: reports/dog/galicia_links.json")
     print("Dashboard: docs/index.html")
     conn.close()
     if q_error:raise SystemExit(f"Quality gate failed: {q_error} structural project errors")

@@ -11,7 +11,7 @@
   {"code":"DOGC","name":"Diari Oficial de la Generalitat de Catalunya","kind":"bulletin","scope":"Catalunya","implemented":false,"url":"https://dogc.gencat.cat/"},
   {"code":"DOGV","name":"Diari Oficial de la Generalitat Valenciana","kind":"bulletin","scope":"Comunitat Valenciana","implemented":false,"url":"https://dogv.gva.es/"},
   {"code":"DOE","name":"Diario Oficial de Extremadura","kind":"bulletin","scope":"Extremadura","implemented":true,"url":"https://doe.juntaex.es/"},
-  {"code":"DOG","name":"Diario Oficial de Galicia","kind":"bulletin","scope":"Galicia","implemented":false,"url":"https://www.xunta.gal/diario-oficial-galicia"},
+  {"code":"DOG","name":"Diario Oficial de Galicia","kind":"bulletin","scope":"Galicia","implemented":true,"url":"https://www.xunta.gal/diario-oficial-galicia/portalPublicoHome.do?lang=es","validation_run":37220564261,"probe_run":37196236454,"coverage_scope":"Official monthly calendar, all listed Spanish edition sections, target titles and original HTML legal texts; separately scoped multi-project notices; exact-reference archive links only"},
   {"code":"BOCM","name":"Boletín Oficial de la Comunidad de Madrid","kind":"bulletin","scope":"Madrid","implemented":true,"url":"https://www.bocm.es/"},
   {"code":"BORM","name":"Boletín Oficial de la Región de Murcia","kind":"bulletin","scope":"Murcia","implemented":true,"url":"https://datosabiertos.regiondemurcia.es/carm/catalogo/sector-publico/indices-del-boletin-oficial-de-la-region-de-murcia-ano-actual"},
   {"code":"BON","name":"Boletín Oficial de Navarra","kind":"bulletin","scope":"Navarra","implemented":false,"url":"https://bon.navarra.es/"},

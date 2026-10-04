@@ -1,4 +1,4 @@
-"""Evidence-based certification of the eleven implemented source adapters."""
+"""Evidence-based certification of the twelve implemented source adapters."""
 from __future__ import annotations
 import csv,json,os,sys,hashlib
 from collections import Counter
@@ -10,8 +10,9 @@ from app.parser import ParsedEvent
 from app.reporting import geography_accounting,build_commercial_rows
 from app.store import save_event
 from scripts.gva_integration_gate import validate_gva_integration
+from scripts.dog_integration_gate import validate_dog_integration
 
-SOURCES={'BOE','BOCYL','BOA','BOJA','DOCM','DOE','BORM','BOCM','AND_PUBLIC','GVA_PUBLIC','MITECO_SABIA'}
+SOURCES={'BOE','BOCYL','BOA','BOJA','DOCM','DOE','BORM','BOCM','AND_PUBLIC','GVA_PUBLIC','MITECO_SABIA','DOG'}
 
 
 def rows(path):
@@ -81,6 +82,7 @@ def metrics(conn,coverage,quality,sabia,and_public,borm):
         'miteco_exact_matches':len(rows('reports/miteco_exact_matches_latest.csv')),
     }
     result.update(validate_gva_integration(conn,coverage,quality))
+    result.update(validate_dog_integration(conn,coverage))
     if invalid or missing_days or source_errors or issues['ERROR']:
         raise ValueError('Identity, source-day, or structural quality failure: '+json.dumps(result,ensure_ascii=False))
     return result
