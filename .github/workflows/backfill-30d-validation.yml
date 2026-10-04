@@ -4,75 +4,71 @@ on:
   push:
     paths:
       - '.github/workflows/backfill-30d-validation.yml'
-      - 'app/collectors/*.py'
-      - 'app/parser.py'
-      - 'app/identifiers.py'
-      - 'app/identity_migration.py'
-      - 'app/store.py'
-      - 'app/lifecycle.py'
-      - 'app/geo.py'
-      - 'app/run_pipeline.py'
-      - 'app/reporting.py'
-      - 'app/scoring.py'
-      - 'app/enrichment/*.py'
-      - 'app/db.py'
+      - 'app/**'
+      - 'tests/**'
+      - 'scripts/**'
+      - 'config/**'
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: official-backfill-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   backfill:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     env:
       PYTHONUNBUFFERED: '1'
+      SABIA_WORKERS: '4'
+      SABIA_FORCE_LIVE_SAMPLE: '1'
+      SABIA_SEED_RUN_ID: '37184831950'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt
-      - name: Unit tests before live collection
+      - name: Unit and regression tests before collection
         run: python -m unittest discover -s tests -v
-      - name: Run 30-day official-source backfill
+      - name: Optional recent official detail cache
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          github-token: ${{ github.token }}
+          run-id: 37184831950
+          name: sabia-30d-output
+          path: sabia-recovery-input
+      - name: Preserve original cache retrieval dates and re-fetch all discovery indexes
+        run: python scripts/recover_sabia_snapshot.py
+      - name: Freeze complete Spanish calendar day
+        run: echo "VALIDATION_UNTIL=$(TZ=Europe/Madrid date -d yesterday +%F)" >> "$GITHUB_ENV"
+      - name: Ten-source live smoke before full backfill
         timeout-minutes: 25
-        run: python -m app.run_pipeline --days 30 --until "$(TZ=Europe/Madrid date -d yesterday +%F)" --strict-coverage
-      - name: Print backfill metrics and check identity invariants
         run: |
-          python - <<'PY'
-          import csv,json,sqlite3
-          from pathlib import Path
-          from collections import Counter
-          from app.identifiers import valid_expediente
-          con=sqlite3.connect('data/spain_renewables.sqlite');con.row_factory=sqlite3.Row
-          with open('reports/quality_issues_latest.csv',encoding='utf-8-sig') as f:quality=Counter(r['severity'] for r in csv.DictReader(f))
-          with open('reports/coverage_latest.csv',encoding='utf-8-sig') as f:coverage=list(csv.DictReader(f))
-          invalid=[dict(r) for r in con.execute('SELECT project_key,expediente FROM projects WHERE expediente IS NOT NULL') if not valid_expediente(r['expediente'])]
-          metrics={
-            'projects':con.execute('SELECT count(*) FROM projects').fetchone()[0],
-            'events':con.execute('SELECT count(*) FROM events').fetchone()[0],
-            'by_source':dict(con.execute('SELECT source_code,count(*) FROM events GROUP BY source_code').fetchall()),
-            'quality':dict(quality),'source_day_errors':sum(r['status']=='ERROR' for r in coverage),
-            'invalid_project_identifiers':invalid,
-            'missing':dict(con.execute('SELECT sum(project_name IS NULL) no_name,sum(power_mw IS NULL) no_mw,sum(province IS NULL) no_province,sum(expediente IS NULL) no_expediente FROM projects').fetchone()),
-          }
-          print('CERTIFICATION',json.dumps(metrics,ensure_ascii=False))
-          Path('reports/validation_metrics.json').write_text(json.dumps(metrics,ensure_ascii=False,indent=2),encoding='utf-8')
-          if invalid or quality['ERROR'] or metrics['source_day_errors']:raise SystemExit('Identity, quality or coverage gate failed')
-          con.close()
-          PY
+          python -m app.run_pipeline --days 3 --until "$VALIDATION_UNTIL" --db data/full_smoke.sqlite --skip-ree --skip-miteco --strict-coverage
+          mkdir -p smoke_output
+          cp -r reports docs smoke_output/
+      - name: Ten-source 30-day backfill with national enrichment
+        timeout-minutes: 25
+        run: python -m app.run_pipeline --days 30 --until "$VALIDATION_UNTIL" --strict-coverage
+      - name: Certify source coverage, identities, provenance, missing data and idempotency
+        run: python scripts/validate_complete_pipeline.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: backfill-30d-output
           path: |
             data/spain_renewables.sqlite
+            data/full_smoke.sqlite
+            data/sabia_cache/
             data/migrations/
+            smoke_output/
             reports/
             docs/
             app/
             tests/
             scripts/
             config/
+            .github/workflows/
           if-no-files-found: error

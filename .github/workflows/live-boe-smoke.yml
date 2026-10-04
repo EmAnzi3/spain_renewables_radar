@@ -1,48 +1,48 @@
 name: live-official-sources-smoke
-
 on:
   workflow_dispatch:
   schedule:
-    - cron: "17 4 * * *"
-  push:
-    paths:
-      - ".github/workflows/live-boe-smoke.yml"
-      - "app/collectors/*.py"
-      - "app/parser.py"
-      - "app/lifecycle.py"
-      - "app/geo.py"
-      - "app/run_pipeline.py"
-      - "app/reporting.py"
-      - "app/enrichment/*.py"
-      - "app/db.py"
-
+    - cron: '17 4 * * *'
+# Pushes are covered by the sequential smoke + backfill workflow, not concurrent full scans.
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: official-smoke-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
   live-boe:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
+    timeout-minutes: 35
+    env:
+      PYTHONUNBUFFERED: '1'
+      SABIA_WORKERS: '4'
+      SABIA_SEED_RUN_ID: '37184831950'
+      SABIA_FORCE_LIVE_SAMPLE: '1'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: '3.12'
       - run: pip install -r requirements.txt
-      - name: Scan last 3 days across implemented official sources
-        run: python -m app.run_pipeline --days 3 --strict-coverage
-      - name: Upload smoke outputs
+      - name: Optional recent official detail cache
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          github-token: ${{ github.token }}
+          run-id: 37184831950
+          name: sabia-30d-output
+          path: sabia-recovery-input
+      - run: python scripts/recover_sabia_snapshot.py
+      - name: Scan last three complete days across implemented sources
+        run: python -m app.run_pipeline --days 3 --until "$(TZ=Europe/Madrid date -d yesterday +%F)" --strict-coverage
+      - name: Upload smoke outputs even when coverage fails
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: official-sources-smoke-output
           path: |
-            reports/change_reports/
-            reports/coverage_latest.csv
-            reports/coverage_latest.html
-            reports/quality_issues_latest.csv
-            reports/quality_issues_latest.html
-            reports/ree_capacity_latest.csv
-            reports/miteco_registry_latest.csv
-            reports/miteco_exact_matches_latest.csv
-            reports/miteco_registry_latest.txt
-            docs/data.json
-            docs/index.html
+            reports/
+            docs/
+            data/spain_renewables.sqlite
           if-no-files-found: error

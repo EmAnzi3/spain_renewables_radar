@@ -33,7 +33,7 @@ def parse_args():
     p.add_argument("--days",type=int,default=7,help="giorni inclusi fino a oggi")
     p.add_argument("--since",help="YYYY-MM-DD")
     p.add_argument("--until",help="YYYY-MM-DD")
-    p.add_argument("--sources",default="BOE,BOCYL,BOA,BOJA,DOCM,DOE,BORM,BOCM,AND_PUBLIC",help="sorgenti separate da virgola")
+    p.add_argument("--sources",default="BOE,BOCYL,BOA,BOJA,DOCM,DOE,BORM,BOCM,AND_PUBLIC,MITECO_SABIA",help="sorgenti separate da virgola")
     p.add_argument("--db",default=os.getenv("RADAR_DB","data/spain_renewables.sqlite"))
     p.add_argument("--skip-ree",action="store_true")
     p.add_argument("--skip-miteco",action="store_true")

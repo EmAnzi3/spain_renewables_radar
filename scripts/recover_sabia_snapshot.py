@@ -1,6 +1,6 @@
 """Seed reusable official HTML; dates/provenance remain unchanged and indexes are fetched live."""
 from __future__ import annotations
-import hashlib,json,shutil,sys
+import hashlib,json,shutil,sys,os
 from datetime import datetime,timezone
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
@@ -34,7 +34,7 @@ def main():
     today=datetime.now(timezone.utc).date().isoformat()
     source=Path("sabia-recovery-input/data/sabia_cache")
     result=seed_details(source,Path("data/sabia_cache")/today/PARSER_VERSION)
-    result["origin_run"]=37160816843
+    result["origin_run"]=int(os.getenv("SABIA_SEED_RUN_ID","37160816843"))
     result["cache_check_date"]=today
     result["note"]="Original detail retrieval times are unchanged. All five discovery indexes must be acquired live."
     out=Path("reports/sabia");out.mkdir(parents=True,exist_ok=True)

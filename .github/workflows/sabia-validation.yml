@@ -1,18 +1,7 @@
 name: sabia-validation
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - '.github/workflows/sabia-validation.yml'
-      - 'app/collectors/sabia*.py'
-      - 'tests/test_sabia*.py'
-      - 'tests/fixtures/sabia*.json'
-      - 'scripts/validate_sabia_output.py'
-      - 'scripts/recover_sabia_snapshot.py'
-      - 'app/parser.py'
-      - 'app/run_pipeline.py'
-      - 'app/reporting.py'
-      - 'app/collectors/__init__.py'
+# Standalone diagnostic; standard push validation now includes SABIA in the full pipeline.
 permissions:
   contents: read
   actions: read

@@ -11,7 +11,7 @@ from urllib3.util.retry import Retry
 from bs4 import BeautifulSoup
 from xml.etree import ElementTree as ET
 
-from app.parser import parse_event
+from app.parser import parse_event, normalize_text
 
 API="https://analisis.datosabiertos.jcyl.es/api/explore/v2.1/catalog/datasets/bocyl/records"
 RELEVANT=re.compile(r"fotovolta|parque\s+e[oó]lico|instalaci[oó]n\s+e[oó]lica|almacenamiento|bater[ií]a|hibridaci[oó]n|aerogenerador",re.I)
@@ -92,6 +92,8 @@ class BOCYLCollector:
                     for tag in soup.select("script,style,nav,header,footer"):tag.decompose()
                     text=soup.get_text("\n",strip=True)
                     if len(text)<100:raise ValueError("BOCYL HTML document too short")
+                    if normalize_text(str(row.get("titulo") or "")) not in normalize_text(text):
+                        raise ValueError("BOCYL HTML does not contain the expected official title")
                 return text,(row.get("enlace_fichero_html") or url).replace("http://","https://",1)
             except (requests.RequestException,ValueError,ET.ParseError,RuntimeError) as exc:
                 errors.append(f"{field}: {exc}")

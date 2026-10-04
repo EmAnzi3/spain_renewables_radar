@@ -57,6 +57,22 @@ class IdentitySafetyTests(unittest.TestCase):
             self.assertEqual(before,[tuple(row) for row in conn.execute('SELECT * FROM events')])
             self.assertEqual(len(list((Path(tmp)/'migrations').glob('*.sqlite'))),1);conn.close()
 
+    def test_unrelated_legacy_repair_keeps_intentionally_unnamed_sabia_component(self):
+        from app.collectors.sabia import events_from_detail
+        from test_sabia_assets import BY_CODE
+        with tempfile.TemporaryDirectory() as tmp:
+            conn=connect(str(Path(tmp)/'test.sqlite'))
+            detail=dict(BY_CODE['20260233'],entry_date='2026-09-01',raw_text='Exact official payload')
+            source=events_from_detail(detail,'FTV',detail['source_url'])[0]
+            self.assertIsNone(source.project_name);save_event(conn,source)
+            legacy=event(code='old-reference');save_event(conn,legacy)
+            conn.execute("UPDATE events SET expediente='incoado' WHERE external_id='old-reference'");conn.commit()
+            result=repair_legacy_identities(conn,report_dir=Path(tmp)/'reports')
+            self.assertEqual(result['status'],'REPAIRED')
+            self.assertIsNone(conn.execute('SELECT project_name FROM projects WHERE project_key=?',(source.project_key,)).fetchone()[0])
+            self.assertEqual(conn.execute('SELECT raw_text FROM events WHERE source_code=?',(source.source_code,)).fetchone()[0],'Exact official payload')
+            conn.close()
+
     def test_explicit_viso_name_beats_description_of_inverters(self):
         text='La planta fotovoltaica dispondrá de 25 inversores. Tecnología solar fotovoltaica denominada «PSFV Viso Energy».'
         self.assertEqual(extract_project_name(text),'PSFV Viso Energy')

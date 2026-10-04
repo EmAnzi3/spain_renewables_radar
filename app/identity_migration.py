@@ -61,7 +61,7 @@ def repair_legacy_identities(conn, *, report_dir='reports/identity_repair', back
                                 'old_expediente':source['expediente'],'new_expediente':row['expediente']})
         else:
             old=original_projects.get(row['project_key'],{})
-            name=old.get('project_name') or extract_project_name(row['title'])
+            name=old.get('project_name') if old else extract_project_name(row['title'])
         row['_project_name']=name
         mapping[source['project_key']].add(row['project_key'])
         kept.append(row);groups[row['project_key']].append(row)

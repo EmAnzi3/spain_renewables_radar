@@ -16,11 +16,18 @@ class BOCYLIdentityTests(unittest.TestCase):
     def test_xml_network_failure_uses_published_html_and_not_summary(self):
         collector=BOCYLCollector()
         row={'enlace_fichero_xml':'https://bocyl.jcyl.es/17.xml','enlace_fichero_html':'https://bocyl.jcyl.es/17.do','titulo':'Summary'}
-        with patch.object(collector,'_get_text',side_effect=[requests.Timeout('timeout'),'<html><body>'+('Official detailed text '*10)+'</body></html>']):
+        with patch.object(collector,'_get_text',side_effect=[requests.Timeout('timeout'),'<html><body>Summary '+('Official detailed text '*10)+'</body></html>']):
             text,url=collector._detail_text(row)
             self.assertIn('Official detailed text',text);self.assertEqual(url,row['enlace_fichero_html'])
         with patch.object(collector,'_get_text',side_effect=requests.Timeout('timeout')):
             with self.assertRaisesRegex(RuntimeError,'unavailable'):collector._detail_text(row)
+
+    def test_html_maintenance_page_is_not_valid_detail(self):
+        collector=BOCYLCollector()
+        row={'enlace_fichero_html':'https://bocyl.jcyl.es/test.do','titulo':'Expected official disposition title'}
+        with patch.object(collector,'_get_text',return_value='<html><body>'+('Temporarily unavailable '*12)+'</body></html>'):
+            with self.assertRaisesRegex(RuntimeError,'expected official title'):
+                collector._detail_text(row)
 
     def test_old_identity_is_repaired_from_source_without_payload_loss(self):
         with tempfile.TemporaryDirectory() as tmp:
