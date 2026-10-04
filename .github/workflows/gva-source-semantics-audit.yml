@@ -1,0 +1,65 @@
+name: gva-source-semantics-audit
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/gva-source-semantics-audit.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pypdf
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 37186563752
+          name: gva-public-documents-probe
+          path: gva-acts-input
+      - name: Extract original act titles, explicit asset names and operative decisions
+        run: |
+          python -u - <<'PY'
+          import json,re,hashlib
+          from pathlib import Path
+          from pypdf import PdfReader
+          src=Path('gva-acts-input');out=Path('reports/gva_semantics');out.mkdir(parents=True,exist_ok=True)
+          records=json.loads((src/'records.json').read_text(encoding='utf-8'))
+          for row in records:
+              print('SOURCE',row['external_id'],row['publication_date'],row['title'])
+              row['legal_texts']=[]
+              for item in row['pdf_documents']:
+                  path=src/item['file'];raw=path.read_bytes()
+                  assert hashlib.sha256(raw).hexdigest()==item['sha256']
+                  reader=PdfReader(path)
+                  text='\n'.join(p.extract_text() or '' for p in reader.pages)
+                  flat=' '.join(text.split())
+                  row['legal_texts'].append({'url':item['url'],'sha256':item['sha256'],'text':text})
+                  (out/(item['file']+'.txt')).write_text(text,encoding='utf-8')
+                  print('ACT',item['url'],'PAGES',len(reader.pages),'CHARS',len(text))
+                  print('TITLE',flat[:1000])
+                  patterns=[r'denominad[oa]',r'potencia instalada',r'capacidad de acceso',r'RESUELV[OE]',r'Primero[.\s:–-]',r'desistimiento',r'pérdida sobrevenida',r'desaparición sobrevenida']
+                  emitted=[]
+                  for pattern in patterns:
+                      matches=list(re.finditer(pattern,flat,re.I))
+                      selected=matches[-2:] if pattern in (r'RESUELV[OE]',r'Primero[.\s:–-]') else matches[:2]
+                      for match in selected:
+                          start=max(0,match.start()-70);end=min(len(flat),match.end()+650)
+                          if any(abs(start-prev)<80 for prev in emitted):continue
+                          emitted.append(start);print('EVIDENCE',flat[start:end])
+              print('---')
+          (out/'records.json').write_text(json.dumps(records,ensure_ascii=False,indent=2),encoding='utf-8')
+          print('AUDIT',json.dumps({'publications':len(records),'acts':sum(len(r['legal_texts']) for r in records),'implementation':False}))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gva-source-semantics-audit
+          path: reports/gva_semantics/
+          if-no-files-found: error
