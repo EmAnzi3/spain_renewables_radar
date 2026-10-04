@@ -16,10 +16,11 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -r requirements.txt
-      - name: Inspect official dated navigation and preserve the responses
+      - name: Inspect official calendar routes and preserve source evidence
         run: |
           python -u - <<'PY'
           import hashlib,json,re
+          import xml.etree.ElementTree as ET
           from datetime import datetime,timedelta,timezone
           from pathlib import Path
           from urllib.parse import urljoin,urlsplit
@@ -33,27 +34,50 @@ jobs:
           session.mount('https://',HTTPAdapter(max_retries=Retry(total=1,backoff_factor=1,status_forcelist=(429,500,502,503,504))))
           root=Path('reports/dog_probe');root.mkdir(parents=True,exist_ok=True)
           base='https://www.xunta.gal/diario-oficial-galicia/'
-          end=datetime.now(ZoneInfo('Europe/Madrid')).date()-timedelta(days=1)
-          dates=[end-timedelta(days=i) for i in range(3)]
-          targets=[('rss',base+'rss/Sumario_gl.rss')]+[(d.isoformat(),base+'portalPublicoHome.do?fecha='+d.strftime('%Y%m%d')+'&lang=es') for d in dates]
-          audit={'source':'DOG','implemented':False,'collector_certified':False,'responses':[]}
-          for label,url in targets:
+          audit={'source':'DOG','implemented':False,'collector_certified':False,'responses':[],'navigation':[]}
+          def fetch(url,label):
+              if urlsplit(url).hostname!='www.xunta.gal':raise ValueError('Non-official URL')
               response=session.get(url,timeout=(8,40))
               if urlsplit(response.url).hostname!='www.xunta.gal':raise ValueError('Unexpected redirect host')
-              raw=response.content;(root/(label+'.html')).write_bytes(raw)
-              soup=BeautifulSoup(raw,'html.parser');text=' '.join(soup.stripped_strings)
-              entry={'label':label,'url':response.url,'status':response.status_code,'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest(),'retrieved_at':datetime.now(timezone.utc).isoformat(),'links':[]}
-              for a in soup.find_all('a',href=True):
-                  link=urljoin(response.url,a['href']);name=a.get_text(' ',strip=True)
-                  if any(k in link for k in ('/dog/Publicados/','portalPublicoHome','mostrarContenido','calendario','Indice','Sumario')):
-                      entry['links'].append({'text':name[:250],'url':link})
-              entry['frames']=[t.get('src') for t in soup.select('iframe[src],frame[src]')]
-              entry['inputs']=[{k:t.get(k) for k in ('name','id','value','onclick')} for t in soup.select('input,button,form')][:50]
-              entry['body_excerpt']=text[:4500]
-              audit['responses'].append(entry)
-              print('DOG_PROBE',json.dumps(entry,ensure_ascii=False),flush=True)
-              (root/'probe.json').write_text(json.dumps(audit,ensure_ascii=False,indent=2),encoding='utf-8')
-              response.raise_for_status()
+              raw=response.content;(root/(label+'.txt')).write_bytes(raw)
+              audit['responses'].append({'url':response.url,'status':response.status_code,'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest(),'retrieved_at':datetime.now(timezone.utc).isoformat()})
+              response.raise_for_status();return response
+          response=fetch(base+'rss/Sumario_gl.rss','rss')
+          tree=ET.fromstring(response.content)
+          items=[{'title':i.findtext('title'),'url':i.findtext('link'),'pubDate':i.findtext('pubDate')} for i in tree.findall('./channel/item')]
+          audit['rss_items']=items
+          print('RSS',json.dumps({'items':len(items),'dates':sorted({i['pubDate'] for i in items if i['pubDate']})},ensure_ascii=False))
+          response=fetch(base+'portalPublicoHome.do?lang=es','home')
+          soup=BeautifulSoup(response.content,'html.parser')
+          scripts=[]
+          for index,tag in enumerate(soup.find_all('script')):
+              src=tag.get('src')
+              if src:
+                  url=urljoin(response.url,src)
+                  if urlsplit(url).hostname=='www.xunta.gal' and not any(k in url.lower() for k in ('jquery','bootstrap','readspeaker')):
+                      scripts.append((url,'script-'+str(index)))
+              elif tag.string:
+                  scripts.append((None,tag.string))
+          for url,label in scripts[:25]:
+              text=fetch(url,label).text if url else label
+              snippets=[]
+              for m in re.finditer(r'(?:calendario|calendar|ruta|fecha|\.do[?\x22\x27])',text,re.I):
+                  excerpt=text[max(0,m.start()-120):m.end()+300]
+                  if excerpt not in snippets:snippets.append(excerpt)
+                  if len(snippets)>=16:break
+              if snippets:
+                  audit['navigation'].append({'script':url or 'inline','snippets':snippets})
+                  print('NAVIGATION',json.dumps({'script':url or 'inline','snippets':snippets},ensure_ascii=False))
+          end=datetime.now(ZoneInfo('Europe/Madrid')).date()-timedelta(days=1)
+          for offset in range(3):
+              day=end-timedelta(days=offset)
+              response=fetch(base+'portalPublicoHome.do?fecha='+day.strftime('%Y%m%d')+'&lang=es',day.isoformat())
+              page=BeautifulSoup(response.content,'html.parser')
+              paths=[urljoin(response.url,a['href']) for a in page.select('a[href]') if re.search(r'(?:Indice|Secciones).*_es\.',a['href'])]
+              item={'requested_date':day.isoformat(),'edition_links':paths,'date_parameter_alone_not_certified':True}
+              audit.setdefault('dated_navigation',[]).append(item)
+              print('DATE_CHECK',json.dumps(item,ensure_ascii=False))
+          (root/'probe.json').write_text(json.dumps(audit,ensure_ascii=False,indent=2),encoding='utf-8')
           PY
       - uses: actions/upload-artifact@v4
         if: always()
