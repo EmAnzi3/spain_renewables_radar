@@ -6,7 +6,6 @@ on:
       - '.github/workflows/dogc-pagination-contract-audit.yml'
 permissions:
   contents: read
-  actions: read
 concurrency:
   group: dogc-pagination-contract-audit
   cancel-in-progress: true
@@ -20,44 +19,46 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt
-      - uses: actions/download-artifact@v4
-        with:
-          github-token: ${{ github.token }}
-          run-id: 37242571670
-          name: dogc-dated-index-output
-          path: previous-index-evidence
-      - name: Inspect original search responses and linked public pagination code
+      - name: Verify whole-search export URL from the actual official response
         run: |
           python -u - <<'PY'
-          import json,re,hashlib
-          from datetime import datetime,timezone
+          import csv,hashlib,io,json
+          from datetime import datetime,timedelta,timezone
           from pathlib import Path
+          from urllib.parse import urlsplit,parse_qs
+          from zoneinfo import ZoneInfo
           import requests
+          from scripts.probe_dogc_services import VerifiedDOGCTLSAdapter,SERVICE
+          from scripts.audit_dogc_index import search_parameters
           out=Path('reports/dogc_pagination_contract');out.mkdir(parents=True,exist_ok=True)
-          roots=list(Path('previous-index-evidence').rglob('acquisitions.json'))
-          if len(roots)!=1:raise ValueError('Ambiguous original source manifest')
-          root=roots[0].parent;seen=set();observations=[]
-          for item in json.loads(roots[0].read_text()):
-              if not re.fullmatch(r'search:\d+',item['label']):continue
-              raw=(root/(item['sha256']+'.bin')).read_bytes()
-              if hashlib.sha256(raw).hexdigest()!=item['sha256']:raise ValueError('Original source hash mismatch')
-              data=json.loads(raw);rows=data.get('resultSearch',[]);ids=[r.get('idDocument') for r in rows]
-              observation={'label':item['label'],'parameters':item['parameters'],
-                  'metadata':{k:v for k,v in data.items() if k!='resultSearch' and not isinstance(v,(dict,list))},
-                  'rows':len(rows),'first_ids':ids[:5],'last_ids':ids[-5:],'overlap_with_earlier_pages':sorted(set(ids)&seen)}
-              seen.update(ids);observations.append(observation)
-              print('ORIGINAL_PAGINATION',json.dumps(observation,ensure_ascii=False))
-          url='https://dogc.gencat.cat/web/system/modules/cat.gencat.wcmResponsive.formatters.httpFetch/resources/fpca_cerca_resultats_dogc/js/fpca_cerca_resultats_dogc.js'
-          r=requests.get(url,timeout=(8,30),allow_redirects=False);r.raise_for_status()
-          if r.status_code!=200 or len(r.content)>500000:raise ValueError('Unexpected public script response')
-          text=r.content.decode('utf-8');lines=text.splitlines();selected=set()
-          for i,line in enumerate(lines):
-              if any(x in line for x in ('JSON.stringify','searchId','pageNumber','numPage','inputParameters.page','changePage','page:','pagination')):
-                  selected.update(range(max(0,i-5),min(len(lines),i+9)))
-          filtered=[{'line':i+1,'text':lines[i]} for i in sorted(selected) if not re.search(r'(apikey|api_key|token|password|authorization|secret)',lines[i],re.I)]
-          print('PUBLIC_PAGINATION_CONTRACT',json.dumps(filtered,ensure_ascii=False))
-          (out/'source-script.js').write_bytes(r.content)
-          (out/'evidence.json').write_text(json.dumps({'original_run':37242571670,'search_pages':observations,'script_url':url,'script_sha256':hashlib.sha256(r.content).hexdigest(),'script_acquired_at':datetime.now(timezone.utc).isoformat(),'script_lines':filtered,'index_certified':False},ensure_ascii=False,indent=2),encoding='utf-8')
+          session=requests.Session();session.mount(SERVICE+'/',VerifiedDOGCTLSAdapter())
+          end=datetime.now(ZoneInfo('Europe/Madrid')).date()-timedelta(days=1);start=end-timedelta(days=29)
+          def read(response,label):
+              try:
+                  response.raise_for_status()
+                  if response.status_code!=200:raise ValueError('Unexpected source redirect')
+                  chunks=[];size=0
+                  for chunk in response.iter_content(65536):
+                      size+=len(chunk)
+                      if size>8000000:raise ValueError('Bounded public export limit exceeded')
+                      chunks.append(chunk)
+                  raw=b''.join(chunks);(out/(label+'.bin')).write_bytes(raw)
+                  print('EXPORT_ACQUISITION',json.dumps({'label':label,'url':response.url,'bytes':size,'sha256':hashlib.sha256(raw).hexdigest(),'content_type':response.headers.get('Content-Type'),'retrieved_at':datetime.now(timezone.utc).isoformat()},ensure_ascii=False))
+                  return raw
+              finally:response.close()
+          raw=read(session.post(SERVICE+'/eadop-rest/api/dogc/searchDOGC',json=search_parameters(start,end,1),timeout=(8,40),allow_redirects=False,stream=True),'search')
+          data=json.loads(raw);url=data['urlCSVDownloadSearch'];p=urlsplit(url);q=parse_qs(p.query)
+          if p.scheme!='https' or p.hostname!='portaldogc.gencat.cat' or p.path!='/utilsEADOP/AppJava/ExcelProviderServlet' or p.username or p.password or p.port not in (None,443):raise ValueError('Unexpected export endpoint')
+          if q.get('idSearch')!=[str(data['searchId'])] or q.get('portal')!=['dogc'] or q.get('typeDownload')!=['csv']:raise ValueError('Export does not match original search')
+          raw=read(session.get(url,timeout=(8,40),allow_redirects=False,stream=True),'official-export')
+          try:text=raw.decode('utf-8-sig');encoding='utf-8-sig'
+          except UnicodeDecodeError:text=raw.decode('cp1252');encoding='cp1252'
+          print('EXPORT_TEXT_PREFIX',repr(text[:2500]))
+          try:
+              dialect=csv.Sniffer().sniff(text[:20000],delimiters=';,\t');rows=list(csv.reader(io.StringIO(text),dialect))
+              print('EXPORT_CSV_SHAPE',json.dumps({'encoding':encoding,'delimiter':dialect.delimiter,'rows':len(rows),'headers_and_first_rows':rows[:5],'last_rows':rows[-2:],'search_total':data['numResultSearch']},ensure_ascii=False))
+          except csv.Error as exc:print('EXPORT_CSV_ERROR',str(exc))
+          (out/'summary.json').write_text(json.dumps({'search_total':data['numResultSearch'],'search_id':data['searchId'],'export_url':url,'encoding':encoding,'body_bytes':len(raw),'index_certified':False},ensure_ascii=False,indent=2),encoding='utf-8')
           PY
       - uses: actions/upload-artifact@v4
         if: always()
