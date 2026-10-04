@@ -1,4 +1,4 @@
-"""Independent live GVA gate; registry stays off until validation succeeds."""
+"""Independent live GVA gate; no activation before a reconciled 30-day run."""
 from __future__ import annotations
 import argparse
 from collections import Counter
@@ -20,7 +20,6 @@ def main():
     end=datetime.strptime(args.until,'%Y-%m-%d').date() if args.until else datetime.now(ZoneInfo('Europe/Madrid')).date()-timedelta(days=1)
     start=end-timedelta(days=29);collector=GVAPublicCollector();smoke=[]
     for offset in (2,1,0):smoke.extend(collector.collect_day(end-timedelta(days=offset)))
-    # A naturally empty recent window is not evidence that extraction works.
     positive=[];positive_day=None
     sample_dates=sorted({r['publication_date'] for r in collector.inventory if start.isoformat()<=r['publication_date']<=end.isoformat()},reverse=True)
     for day_text in sample_dates:
@@ -73,6 +72,7 @@ def main():
     (collector.output/'validation_metrics.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
     for e in events:print('GVA_EVENT',json.dumps({'id':e.external_id,'name':e.project_name,'mw':e.power_mw,'province':e.province,'reference':e.expediente,'type':e.event_type,'categories':collector.records[e.external_id]['categories']},ensure_ascii=False),flush=True)
     print('GVA_CERTIFICATION',json.dumps(result,ensure_ascii=False),flush=True);con.close()
+    assert not flags.get('SOURCE_LIFECYCLE_UNMAPPED'),'Unmapped current administrative decision'
     assert counts['ERROR']==0,'Structural project errors must be fixed, not waived'
 
 

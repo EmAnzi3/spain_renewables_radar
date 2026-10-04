@@ -137,7 +137,9 @@ def explicit_name(text):
 def classify_current_title(title):
     low=fold(title)
     if re.search(r'informacion\s+publica|\bip\s+solicitudes',low):return 'PUBLIC_INFO','EARLY'
-    if not re.search(r'resolucion|\bres\.',low):return 'OTHER','EARLY'
+    # GVA prefixes some current resolutions with a municipality and underscore:
+    # 'CHESTE_Res.'. An underscore is not a word boundary in Python regexes.
+    if not re.search(r'resolucion|(?<![a-z0-9])res\.',low):return 'OTHER','EARLY'
     if re.search(r'acepta(?:r)?(?:\s+de\s+plano)?\s+el\s+desistimiento|acepta\s+desistimiento',low):return 'WITHDRAWN','BLOCKED'
     if re.search(r'\bdeniega\b|\bdenegacion\b',low):return 'DENIED','BLOCKED'
     if re.search(r'perdida\s+sobrevenida|desaparicion\s+sobrevenida|terminacion\s+(?:del\s+)?procedimiento',low):return 'PROCEDURE_ENDED','BLOCKED'
@@ -159,8 +161,6 @@ def record_fields(record):
     if not generation and re.search(r'subestaci[oó]n|l[ií]nea.*tensi[oó]n',title,re.I):return {'disposition':'GRID_CONTEXT_ONLY'},flags
     if re.search(r'gas\s+natural|\bglp\b|hidrocarburos|autoconsumo',title,re.I):return {'disposition':'NON_TARGET'},flags
     technology=detect_technology(title+'\n'+'\n'.join(headers)+'\n'+'\n'.join(t[:6000] for t in texts))
-    # CF is the explicit abbreviation for central fotovoltaica in these GVA
-    # generation proceedings. A company name or bare acronym is not sufficient.
     if technology is None and cf_scope:technology='PV'
     if technology not in {'PV','WIND','BESS','HYBRID'}:return {'disposition':'NON_TARGET'},flags
     if re.search(r'hibridaci[oó]n|hibridada',title,re.I):technology='HYBRID'
@@ -188,6 +188,19 @@ def record_fields(record):
         candidate,_=find_province(text)
         if candidate in {'Alicante','Alicante/Alacant','Castellón','Castelló','Valencia','València'}:
             province={'Castelló':'Castellón','València':'Valencia','Alicante/Alacant':'Alicante'}.get(candidate,candidate);break
+    province_origin='source_text' if province else None
+    # Only exact geographic metadata may fill a gap. The source's generic
+    # 'Instalaciones autorizadas' category is NEVER evidence for the lifecycle.
+    category_provinces=sorted(set(record.get('categories',[])) & {'Valencia','Alicante','Castellón'})
+    if len(category_provinces)==1:
+        category_province=category_provinces[0]
+        if province is None:
+            province=category_province;province_origin='official_geographic_category'
+        elif province!=category_province:
+            flags.append({'code':'SOURCE_PROVINCE_DISAGREEMENT','severity':'WARN',
+                          'source_text_province':province,'official_category_province':category_province})
+    elif len(category_provinces)>1:
+        flags.append({'code':'MULTIPLE_OFFICIAL_PROVINCE_CATEGORIES','severity':'WARN','values':category_provinces})
     main_power=power_candidates(title)
     header_power=[dict(item,source_url=doc['url']) for doc in documents for item in power_candidates(act_header(doc.get('text','')))]
     addition=bool(re.search(r'hibridaci[oó]n.*(?:almacenamiento|bater[ií]as)',title,re.I))
@@ -208,7 +221,8 @@ def record_fields(record):
             'expediente':reference,'province':province,'ccaa':CCAA,'event_type':event_type,'commercial_stage':stage,
             'evidence':{'name_origin':name_origin if name else None,'reference_original':refs,
                         'power_basis':basis if power is not None else None,'power_assertions':main_power+header_power,
-                        'lifecycle_origin':'current_publication_title','explicit_cf_scope':cf_scope}}
+                        'lifecycle_origin':'current_publication_title','explicit_cf_scope':cf_scope,
+                        'province_origin':province_origin,'official_province_categories':category_provinces}}
     fields['project_key']=build_project_key(name,technology,province,record['external_id'],reference)
     return fields,flags
 

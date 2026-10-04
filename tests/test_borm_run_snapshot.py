@@ -8,12 +8,12 @@ from unittest.mock import Mock,patch
 
 from app.collectors.borm import BORMCollector,INDEX_JSON
 from app.run_snapshot import snapshot_paths
-from test_borm_transport import BORMTransportTests
+import test_borm_transport
 
 
 class BORMSameRunSnapshotTests(unittest.TestCase):
     def test_smoke_and_backfill_use_one_original_acquisition(self):
-        fixture=BORMTransportTests();fixture.setUp()
+        fixture=test_borm_transport.BORMTransportTests();fixture.setUp()
         raw=json.dumps([fixture.row]).encode('utf-8-sig')
         with tempfile.TemporaryDirectory() as tmp,patch.dict(os.environ,{'BORM_RUN_SNAPSHOT_DIR':tmp+'/snapshot','BORM_RUN_SNAPSHOT_SCOPE':'run-1:attempt-1'}),patch('app.collectors.borm.Path',side_effect=lambda p:Path(tmp)/p):
             smoke=BORMCollector();smoke.session.get=Mock(return_value=fixture.response(raw))
@@ -30,7 +30,7 @@ class BORMSameRunSnapshotTests(unittest.TestCase):
             self.assertEqual((Path(tmp)/'reports/borm/index_raw.json').read_bytes(),raw)
 
     def test_new_attempt_must_fetch_live_again(self):
-        fixture=BORMTransportTests();fixture.setUp()
+        fixture=test_borm_transport.BORMTransportTests();fixture.setUp()
         raw=json.dumps([fixture.row]).encode()
         with tempfile.TemporaryDirectory() as tmp,patch.dict(os.environ,{'BORM_RUN_SNAPSHOT_DIR':tmp+'/snapshot','BORM_RUN_SNAPSHOT_SCOPE':'run-1:attempt-1'}),patch('app.collectors.borm.Path',side_effect=lambda p:Path(tmp)/p):
             first=BORMCollector();first.session.get=Mock(return_value=fixture.response(raw));first._rows()
@@ -40,7 +40,7 @@ class BORMSameRunSnapshotTests(unittest.TestCase):
             self.assertEqual(second.audit['acquisition_mode'],'LIVE')
 
     def test_bad_snapshot_does_not_hide_live_failure(self):
-        fixture=BORMTransportTests();fixture.setUp()
+        fixture=test_borm_transport.BORMTransportTests();fixture.setUp()
         raw=json.dumps([fixture.row]).encode()
         with tempfile.TemporaryDirectory() as tmp,patch.dict(os.environ,{'BORM_RUN_SNAPSHOT_DIR':tmp+'/snapshot','BORM_RUN_SNAPSHOT_SCOPE':'run-1:attempt-1'}),patch('app.collectors.borm.Path',side_effect=lambda p:Path(tmp)/p),patch('app.collectors.borm.time.sleep'):
             first=BORMCollector();first.session.get=Mock(return_value=fixture.response(raw));first._rows()
