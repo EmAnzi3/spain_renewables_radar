@@ -9,17 +9,17 @@ permissions:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - run: pip install -r requirements.txt
-      - name: Follow published calendar protocol and verify dated editions
+      - name: Reconcile every official edition in the thirty-day window
         run: |
           python -u - <<'PY'
-          import hashlib,json,re
+          import hashlib,html,json,re,time
           from datetime import datetime,timedelta,timezone
           from pathlib import Path
           from urllib.parse import urljoin,urlsplit,parse_qsl
@@ -29,49 +29,68 @@ jobs:
           from requests.adapters import HTTPAdapter
           from urllib3.util.retry import Retry
           base='https://www.xunta.gal/diario-oficial-galicia/'
-          root=Path('reports/dog_probe');root.mkdir(parents=True,exist_ok=True)
-          audit={'source':'DOG','implemented':False,'collector_certified':False,'acquisitions':[],'months':[],'editions':[]}
-          s=requests.Session();s.headers['User-Agent']='SpainRenewablesRadar/0.5 (official calendar validation)'
+          out=Path('reports/dog_probe');out.mkdir(parents=True,exist_ok=True)
+          audit={'source':'DOG','implemented':False,'collector_certified':False,'acquisitions':[],'calendar':[],'days':[],'notices':[]}
+          s=requests.Session();s.headers['User-Agent']='SpainRenewablesRadar/0.5 (official DOG audit)'
           s.mount('https://',HTTPAdapter(max_retries=Retry(total=2,backoff_factor=1,status_forcelist=(429,500,502,503,504),allowed_methods=frozenset({'GET','POST'}))))
+          def save(): (out/'probe.json').write_text(json.dumps(audit,ensure_ascii=False,indent=2),encoding='utf-8')
           def request(url,label,data=None):
-              if urlsplit(url).hostname!='www.xunta.gal':raise ValueError('Unexpected public host')
+              if urlsplit(url).scheme!='https' or urlsplit(url).hostname!='www.xunta.gal':raise ValueError('Unexpected public host')
               r=s.post(url,data=data,timeout=(8,45)) if data is not None else s.get(url,timeout=(8,45))
               if urlsplit(r.url).hostname!='www.xunta.gal':raise ValueError('Unexpected redirect')
-              raw=r.content;(root/(label+'.txt')).write_bytes(raw)
+              raw=r.content;(out/(label+'.html')).write_bytes(raw)
               audit['acquisitions'].append({'url':r.url,'method':'POST' if data is not None else 'GET','payload':data,'status':r.status_code,'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest(),'retrieved_at':datetime.now(timezone.utc).isoformat()})
-              (root/'probe.json').write_text(json.dumps(audit,ensure_ascii=False,indent=2),encoding='utf-8')
-              r.raise_for_status();return r
-          home=request(base+'portalPublicoHome.do?lang=es','home')
-          end=datetime.now(ZoneInfo('Europe/Madrid')).date()-timedelta(days=1)
-          start=end-timedelta(days=29)
-          months=sorted({(start.year,start.month),(end.year,end.month)})
-          for year,month in months:
-              r=request(base+'portalPublicoHome.do?method=getDiasDog',f'calendar-{year}-{month}',{'mes':month,'ano':year,'idioma':'es'})
-              try:calendar=r.json()
-              except ValueError:
-                  print('CALENDAR_NON_JSON',r.status_code,r.text[:1000]);raise
-              print('CALENDAR',year,month,json.dumps(calendar,ensure_ascii=False),flush=True)
-              audit['months'].append({'year':year,'month':month,'calendar':calendar})
-              if not isinstance(calendar,list) or not calendar:raise ValueError('Calendar is not a nonempty list')
-              for index,item in enumerate(calendar[:2]+calendar[-2:]):
-                  if not isinstance(item,dict) or not item.get('url'):raise ValueError('Missing official calendar URL')
-                  url=urljoin(base,item['url']);response=request(url,f'edition-{year}-{month}-{index}')
-                  soup=BeautifulSoup(response.content,'html.parser')
-                  links=[]
+              save();r.raise_for_status();time.sleep(.1);return r
+          relevant=re.compile(r'fotovolta|parque\s+e[oó]lico|\bbess\b|almacenamiento\s+(?:el[eé]ctrico|de\s+energ[ií]a)|hibridaci[oó]n',re.I)
+          request(base+'portalPublicoHome.do?lang=es','home')
+          end=datetime.now(ZoneInfo('Europe/Madrid')).date()-timedelta(days=1);start=end-timedelta(days=29)
+          for year,month in sorted({(start.year,start.month),(end.year,end.month)}):
+              data={'mes':month,'ano':year,'idioma':'es'}
+              calendar=request(base+'portalPublicoHome.do?method=getDiasDog',f'calendar-{year}-{month}',data).json()
+              if not isinstance(calendar,list) or not calendar:raise ValueError('Invalid calendar')
+              for item in calendar:
+                  day=datetime.strptime(item['fecha'],'%d/%m/%Y').date()
+                  if (day.year,day.month)!=(year,month):raise ValueError('Wrong calendar month')
+                  item=dict(item,date=day.isoformat(),resolved_url=urljoin(base,html.unescape(item['url'])))
+                  audit['calendar'].append(item)
+          seen=set()
+          for offset in range(30):
+              day=start+timedelta(days=offset);stamp=day.strftime('%Y%m%d')
+              editions=[x for x in audit['calendar'] if x['date']==day.isoformat()]
+              count=0;targets=0
+              for n,edition in enumerate(editions):
+                  r=request(edition['resolved_url'],f'{stamp}-edition-{n}');soup=BeautifulSoup(r.content,'html.parser')
+                  expected=day.strftime('%d/%m/%Y')
+                  if expected not in (soup.title.get_text(' ',strip=True) if soup.title else ''):raise ValueError('Returned edition has a different date')
+                  sections={}
                   for a in soup.select('a[href]'):
-                      target=urljoin(response.url,a['href'])
-                      if any(k in target for k in ('Secciones','Indice','Anuncio')):links.append({'label':a.get_text(' ',strip=True),'url':target})
-                  record={'calendar':item,'url':response.url,'links':links,'text':' '.join(soup.stripped_strings)[:1800]}
-                  audit['editions'].append(record)
-                  print('EDITION',json.dumps(record,ensure_ascii=False),flush=True)
-                  if not links:raise ValueError('No edition navigation in returned page')
-                  if index==0:
-                      sections=list(dict.fromkeys(x['url'].split('#')[0] for x in links if 'Secciones' in x['url']))
-                      for n,section_url in enumerate(sections):
-                          rr=request(section_url,f'section-{year}-{month}-{n}');ss=BeautifulSoup(rr.content,'html.parser')
-                          rows=[{'url':urljoin(rr.url,a['href']),'text':a.get_text(' ',strip=True)} for a in ss.select('a[href]') if 'Anuncio' in a['href']]
-                          print('SECTION',section_url,'announcements',len(rows),json.dumps(rows[:4],ensure_ascii=False),flush=True)
-              (root/'probe.json').write_text(json.dumps(audit,ensure_ascii=False,indent=2),encoding='utf-8')
+                      url=urljoin(r.url,a['href']);p=urlsplit(url);ruta=dict(parse_qsl(p.query)).get('ruta','')
+                      if p.hostname=='www.xunta.gal' and p.path.endswith('/mostrarContenido.do') and f'/{stamp}/' in ruta and re.search(r'/Secciones\d+_es\.html$',ruta):
+                          sections[ruta]=url.split('#')[0]
+                  if not sections:raise ValueError('No dated section navigation')
+                  for j,(ruta,url) in enumerate(sorted(sections.items())):
+                      rr=request(url,f'{stamp}-section-{n}-{j}');ss=BeautifulSoup(rr.content,'html.parser')
+                      if expected not in (ss.title.get_text(' ',strip=True) if ss.title else ''):raise ValueError('Section date mismatch')
+                      for a in ss.select('a[href]'):
+                          target=urljoin(rr.url,a['href']);p=urlsplit(target)
+                          if p.hostname!='www.xunta.gal' or not re.search(r'/Anuncio[^/]+_es\.html$',p.path):continue
+                          if f'/{stamp}/' not in p.path:raise ValueError('Notice date mismatch')
+                          if target in seen:continue
+                          seen.add(target);count+=1
+                          title=a.get_text(' ',strip=True)
+                          if relevant.search(title):
+                              targets+=1;audit['notices'].append({'date':day.isoformat(),'url':target,'title':title})
+              item={'date':day.isoformat(),'editions':len(editions),'notices':count,'renewable_candidates':targets,'status':'NO_EDITION_IN_CALENDAR' if not editions else 'DATED_INDEX_OK'}
+              audit['days'].append(item);print('DOG_DAY',json.dumps(item,ensure_ascii=False),flush=True);save()
+          for i,notice in enumerate(audit['notices'][:8]):
+              r=request(notice['url'],f'target-{i}');soup=BeautifulSoup(r.content,'html.parser')
+              text=' '.join(soup.stripped_strings)
+              notice['sample_detail']=text[:10000]
+              print('DETAIL_SAMPLE',json.dumps(notice,ensure_ascii=False),flush=True)
+              print('DETAIL_TAGS',[(t.name,t.get('id'),t.get('class')) for t in soup.select('h1,h2,h3,article,main')])
+          audit['dated_index_probe_complete']=True
+          print('DOG_WINDOW',json.dumps({'window_start':str(start),'window_end':str(end),'calendar_editions':len(audit['calendar']),'days':len(audit['days']),'target_notices':len(audit['notices']),'notice_count':len(seen),'collector_certified':False},ensure_ascii=False),flush=True)
+          save()
           PY
       - uses: actions/upload-artifact@v4
         if: always()
