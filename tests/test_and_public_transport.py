@@ -78,4 +78,34 @@ class ArchiveTransportTests(unittest.TestCase):
         self.assertTrue(info['complete']);self.assertEqual(info['bytes'],len(BODY))
         self.assertIn('+00:00',info['retrieved_at'])
 
+    def test_observed_official_dataset_redirect_is_followed_and_audited(self):
+        target='https://www.juntadeandalucia.es/ssdigitales/festa/download-pro/dataset-documento_sometido_a_informacion.json'
+        first=response([],302,{'Location':target});last=response([BODY]);last.url=target
+        session=Mock();session.get.side_effect=[first,last];audit={}
+        with tempfile.TemporaryDirectory() as tmp:
+            raw,url=download_archive(session,URL,tmp,30,audit)
+        self.assertEqual((raw,url),(BODY,target))
+        self.assertEqual(audit['download_attempts'][0]['redirects'][0]['to'],target)
+        self.assertEqual(audit['download_attempts'][0]['download_url'],target)
+        self.assertFalse(session.get.call_args_list[0].kwargs['allow_redirects'])
+        first.close.assert_called_once();last.close.assert_called_once()
+
+    def test_foreign_redirect_rejected_before_contacting_destination(self):
+        session=Mock();session.get.return_value=response([],302,{'Location':'https://evil.test/data.json'})
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaisesRegex(ValueError,'destination'):download_archive(session,URL,tmp,30,{})
+        self.assertEqual(session.get.call_count,1)
+
+    def test_other_path_even_on_official_domain_is_not_assumed_to_be_the_dataset(self):
+        session=Mock();session.get.return_value=response([],302,{'Location':'https://www.juntadeandalucia.es/other.json'})
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaisesRegex(ValueError,'destination'):download_archive(session,URL,tmp,30,{})
+        self.assertEqual(session.get.call_count,1)
+
+    def test_repeated_redirects_stop_without_downloading_a_body(self):
+        session=Mock();session.get.return_value=response([],302,{'Location':URL})
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaisesRegex(ValueError,'budget'):download_archive(session,URL,tmp,30,{})
+        self.assertEqual(session.get.call_count,4)
+
 if __name__=='__main__':unittest.main()

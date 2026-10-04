@@ -4,7 +4,7 @@ import hashlib
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from urllib.parse import urlsplit
+from urllib.parse import urlsplit, urljoin
 import requests
 
 RECOVERABLE = (requests.exceptions.ChunkedEncodingError,
@@ -13,11 +13,28 @@ RECOVERABLE = (requests.exceptions.ChunkedEncodingError,
                requests.exceptions.Timeout)
 
 
+ARCHIVE_ROUTES = {
+    ('datos.juntadeandalucia.es', '/api/v0/public-documents/all'),
+    ('www.juntadeandalucia.es', '/ssdigitales/festa/download-pro/dataset-documento_sometido_a_informacion.json'),
+}
+
+
+def validate_archive_url(url):
+    """Only the official API and its observed, official dataset redirect."""
+    parsed = urlsplit(url)
+    if (parsed.scheme != 'https' or parsed.username or parsed.password
+            or parsed.port not in (None, 443)
+            or (parsed.hostname, parsed.path) not in ARCHIVE_ROUTES):
+        raise ValueError('Unexpected archive destination: ' + url)
+    return url
+
+
 def download_archive(session, url, output, timeout, audit, *, max_attempts=3,
                      max_bytes=64 * 1024 * 1024):
     """Return complete bytes and URL; partial transfers are evidence, never input."""
     if max_attempts < 1 or max_attempts > 3:
         raise ValueError('Download attempt budget must be between one and three')
+    validate_archive_url(url)
     output = Path(output)
     output.mkdir(parents=True, exist_ok=True)
     attempts = audit.setdefault('download_attempts', [])
@@ -27,11 +44,26 @@ def download_archive(session, url, output, timeout, audit, *, max_attempts=3,
                 'started_at': datetime.now(timezone.utc).isoformat()}
         attempts.append(info)
         try:
-            response = session.get(url, timeout=timeout, stream=True)
-            info['http_status'] = response.status_code
-            if (urlsplit(response.url).scheme != 'https'
-                    or urlsplit(response.url).netloc != urlsplit(url).netloc):
-                raise ValueError('Unexpected archive redirect')
+            target = url
+            info['redirects'] = []
+            for _ in range(4):
+                response = session.get(target, timeout=timeout, stream=True, allow_redirects=False)
+                info['http_status'] = response.status_code
+                info['download_url'] = response.url
+                validate_archive_url(response.url)
+                if response.status_code not in (301, 302, 303, 307, 308):
+                    break
+                location = response.headers.get('Location')
+                if not location:
+                    raise ValueError('Archive redirect has no destination')
+                destination = urljoin(target, location)
+                info['redirects'].append({'from': target, 'to': destination,
+                                          'http_status': response.status_code})
+                target = validate_archive_url(destination)
+                response.close()
+                response = None
+            else:
+                raise ValueError('Archive redirect budget exceeded')
             response.raise_for_status()
             for part in response.iter_content(chunk_size=65536):
                 size += len(part)
