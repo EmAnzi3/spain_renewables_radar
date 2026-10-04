@@ -1,0 +1,82 @@
+{
+  "record_type": "verified_checkpoint_summary",
+  "evidence_origin": "CATALUNYA_CERTIFIED and test output in completed GitHub Actions job 111551279565; summary, not a byte-identical copy of the artifact report",
+  "repository": "EmAnzi3/spain_renewables_radar",
+  "checkpoint_date_europe_rome": "2026-10-05",
+  "functional_head_sha": "b9e0cb7076c84743ace93c658979f20af60c07dc",
+  "run_id": "37241609997",
+  "job_id": "111551279565",
+  "conclusion": "success",
+  "tests_passed_in_validation_run": 242,
+  "artifact_name": "catalunya-inventory-output",
+  "artifact_id": "11317693006",
+  "artifact_sha256": "b9f1361f7dc9bcad1f3aa5dda633015befc26e98d0e224841b3f927ad7833ee8",
+  "artifact_report": "reports/catalunya_inventory_validation/certification.json",
+  "independent_live_snapshots": 2,
+  "first_snapshot_retrieved_at": "2026-10-04T22:51:50.223538+00:00",
+  "second_snapshot_retrieved_at": "2026-10-04T22:51:55.947367+00:00",
+  "content_sha256": "11eae40638bd7b3a78f1da3b5bf54b6f1dd2430dfd88d012d45fd7d964c628e4",
+  "first_snapshot_mode": "BASELINE",
+  "second_snapshot_mode": "DELTA",
+  "semantic_changes": {"newly_observed": 0, "changed": 0, "not_seen": 0},
+  "original_byte_provenance_verified": true,
+  "idempotent_replay": true,
+  "source_counts_and_versions_rechecked": true,
+  "live_validation_page_size": 100,
+  "original_municipal_rows": 495,
+  "diagnostic_groups": 434,
+  "unique_projects_certified": false,
+  "dated_collector_enabled": false,
+  "dated_events_created": 0,
+  "datasets": {
+    "WIND": {
+      "dataset_id": "dh5g-4nit",
+      "rows": 137,
+      "diagnostic_groups": 115,
+      "exact_reference_name_groups": 37,
+      "unresolved_reference_rows": 78,
+      "multi_municipal_groups": 14,
+      "groups_without_power": 28,
+      "dataset_updated_at": "2026-09-28T08:47:13+00:00",
+      "quality_flag_group_counts": {
+        "REFERENCE_MISSING_NO_CROSS_MUNICIPALITY_MERGE": 78,
+        "N_M_AEROGENERADORS_SOURCE_ZERO_PRESERVED": 42,
+        "POT_NCIA_MW_SOURCE_ZERO_PRESERVED": 42,
+        "PROJECT_POWER_UNKNOWN": 28
+      }
+    },
+    "PV": {
+      "dataset_id": "ggx8-jkp4",
+      "rows": 358,
+      "diagnostic_groups": 319,
+      "exact_reference_name_groups": 315,
+      "unresolved_reference_rows": 4,
+      "multi_municipal_groups": 28,
+      "groups_without_power": 0,
+      "dataset_updated_at": "2026-09-28T08:48:11+00:00",
+      "quality_flag_group_counts": {
+        "REFERENCE_MISSING_NO_CROSS_MUNICIPALITY_MERGE": 4,
+        "POT_NCIA_MW_SOURCE_ZERO_PRESERVED": 27,
+        "SUPERF_CIE_HA_SOURCE_ZERO_PRESERVED": 28,
+        "REFERENCE_SHARED_BY_DIFFERENT_NAMES_NOT_MERGED": 2
+      }
+    }
+  },
+  "entry_points": {
+    "module": "app.catalunya_inventory",
+    "windows_launcher": "aggiorna_inventario_catalogna.bat",
+    "local_report": "reports/catalunya_inventory/index.html",
+    "last_attempt_status": "reports/catalunya_inventory/run_status.json",
+    "persistent_baseline": "data/catalunya_inventory_baseline.json"
+  },
+  "limits": [
+    "The 495 rows are municipal source rows, not 495 plants or commercial opportunities.",
+    "The 434 diagnostic groups are not a certified unique-project census; 82 unreferenced rows remain separate.",
+    "The initial baseline is not a batch of newly announced projects; not_seen does not imply withdrawal.",
+    "Repeated project power, total area and turbine counts are not summed across municipalities; conflicting positive values stay unresolved.",
+    "Source zeros are preserved; unknown power is not zero generation capacity.",
+    "Dataset update time and environmental meeting dates are not project publication or authorization dates.",
+    "No publication, authorization, construction dates or EPC contractor are inferred.",
+    "This standalone inventory does not add a thirteenth dated collector to the production radar."
+  ]
+}
