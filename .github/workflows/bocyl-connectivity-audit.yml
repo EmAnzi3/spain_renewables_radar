@@ -1,0 +1,41 @@
+name: bocyl-connectivity-audit
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/bocyl-connectivity-audit.yml'
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Inspect official index and alternative published document links
+        run: |
+          python -u - <<'PY'
+          import json,requests
+          from app.collectors.bocyl import API,RELEVANT,EXCLUDE,BOCYLCollector
+          s=requests.Session()
+          r=s.get(API,params={'where':"fecha_publicacion=date'2026-09-14'",'limit':100},timeout=(8,25))
+          r.raise_for_status(); payload=r.json()
+          rows=[x for x in payload['results'] if RELEVANT.search(x.get('titulo') or '') and not EXCLUDE.search(x.get('titulo') or '')]
+          print('INDEX_TOTAL',payload['total_count'],'RENEWABLE_ROWS',len(rows))
+          for row in rows:
+              print('DISPOSITION',json.dumps(row,ensure_ascii=False))
+              print('CURRENT_EXTERNAL_ID',BOCYLCollector._external_id(row))
+          for row in rows[:2]:
+              for key in ('enlace_fichero_xml','enlace_fichero_html','enlace_fichero_pdf'):
+                  url=row.get(key)
+                  if not url:continue
+                  url=url.replace('http://','https://',1)
+                  try:
+                      d=s.get(url,timeout=(6,12));print('DOCUMENT',key,d.status_code,d.url,len(d.content),d.headers.get('content-type'))
+                      if 'pdf' not in d.headers.get('content-type',''):print('SAMPLE',d.text[:180])
+                  except requests.RequestException as e:print('DOCUMENT_ERROR',key,type(e).__name__,str(e)[:250])
+          PY
