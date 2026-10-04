@@ -26,6 +26,23 @@ jobs:
         run: python -m unittest discover -s tests -v
       - name: Reconcile thirty-day calendars and editions with every search page
         run: python -u -m scripts.audit_dogc_index
+      - name: Report original source headers and precise unresolved discrepancies
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('reports/dogc_index_audit')
+          if (root/'audit.json').exists():print('AUDIT_RESULT', (root/'audit.json').read_text())
+          manifest=root/'raw/acquisitions.json'
+          if manifest.exists():
+              for item in json.loads(manifest.read_text()):
+                  if not item['label'].startswith('edition:'):continue
+                  data=json.loads((root/'raw'/(item['sha256']+'.bin')).read_text())
+                  headers=[{k:v for k,v in s.items() if k!='section'} for s in data.get('sumaris',[])]
+                  print('ORIGINAL_EDITION_HEADERS',json.dumps({'request':item['parameters'],'label':item['label'],'headers':headers},ensure_ascii=False))
+          if (root/'reconciliation.json').exists():print('INDEX_DIFFERENCES',(root/'reconciliation.json').read_text())
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
