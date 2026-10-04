@@ -1,142 +1,84 @@
 # Spain Renewables Radar
 
-Radar per monitorare la pipeline spagnola di progetti **fotovoltaici, eolici, BESS e ibridi** usando **solo fonti ufficiali e gratuite**.
+Radar per progetti **fotovoltaici, eolici, BESS e ibridi** in Spagna, da fonti **ufficiali e gratuite**. Nessun aggregatore commerciale.
 
 ## Architettura
 
-**bollettini ufficiali → eventi amministrativi → progetto unico → lifecycle → enrichment INE/REE/MITECO → scoring commerciale → controlli qualità → report/dashboard**
+Fonti ufficiali → eventi amministrativi → progetto unico → lifecycle → enrichment INE/REE/MITECO → scoring separato → quality gate → report/dashboard.
 
-Nessun aggregatore commerciale è usato come sorgente o dipendenza.
+## Stato certificato
+
+**Run 37193300195 — SUCCESS**, codice `18518b1580380b0bb31c1e3cd9112da365682b0c`, finestra **4 settembre–3 ottobre 2026**:
+
+- **218 schede progetto / 224 eventi**, non 218 opportunità commerciali attive;
+- **11 collector**, smoke live e 30 giorni per ogni fonte;
+- **157 test**, provenienza e replay idempotente superati;
+- **0 errori fonte/giorno**, qualità **0 ERROR / 3 WARN / 109 INFO**;
+- mancanti: nome 2, MW 58, provincia singola 8, expediente 41;
+- tutti gli 8 casi senza provincia singola sono multi-provincia, senza forzatura geografica;
+- REE: 931 nodi, snapshot 2026-10-01; MITECO: 71.727 impianti, acquisizione 2026-10-04, 8 match esatti conservativi.
+
+`CURRENT_STATE.md` riporta limiti, run, metriche e prossimi passi. La copertura nazionale delle fonti non è ancora completa.
 
 ## Fonti operative
 
-Collector ufficiali implementati:
+Bollettini: **BOE, BOCYL, BOA, BOJA, DOCM, DOE, BORM, BOCM**.
 
-- **BOE** — Boletín Oficial del Estado;
-- **BOCYL** — Castilla y León;
-- **BOA** — Aragón;
-- **BOJA** — Andalucía;
-- **DOCM** — Castilla-La Mancha;
-- **DOE** — Extremadura;
-- **BORM** — Región de Murcia, tramite dataset ufficiale Open Data degli indici BORM;
-- **BOCM** — Comunidad de Madrid, tramite fonte ufficiale per data/XML.
+Altri collector: **MITECO_SABIA, AND_PUBLIC, GVA_PUBLIC**. SABIA copre milestone ENTRY/CONSULT datati, non tutte le variazioni amministrative. GVA è già integrato: il precedente ZIP `spain_radar_gva_preview_55ecc9d.zip` è superato e non va applicato a `main`.
 
-Enrichment gratuiti implementati:
+Enrichment: **INE comuni**, **REE capacità/accesso**, **MITECO RAIPEE**. Dati di rete aggregati non confermano l'accesso di un singolo progetto; matching del registro conservativo.
 
-- **INE** — catalogo ufficiale dei comuni per enrichment deterministico comune → provincia/CCAA;
-- **REE** — snapshot di capacità/accesso per nodo, usato come contesto di rete e non come falsa conferma del singolo progetto;
-- **MITECO / Registro administrativo de instalaciones de producción** — snapshot del registro impianti e matching conservativo per nome progetto + CCAA.
+Le altre fonti nel registry `config/sources.json` restano `implemented=false` fino a probe, collector reale, test, smoke live, backfill e assenza di errori strutturali. GVA non equivale a un collector DOGV.
 
-Il registry config/sources.json contiene anche gli altri bollettini autonomici, marcati implemented=false finché non esiste un collector realmente validato.
+## Galicia: inventario distinto dal radar datato
 
-## Stato validato
+`app.galicia_archive` acquisisce e riconcilia gli archivi ufficiali regionali e le schede HTML, con originali e confronto tra snapshot. Il primo inventario crea una BASELINE, **non nuove opportunità**. La rimozione da un elenco non implica ritiro del progetto.
 
-Backfill ufficiale di 30 giorni, GitHub Actions **37134192228 — SUCCESS**:
+Le date degli atti, i periodi di consultazione e le date nei link DOG restano separati dalle date web ignote. I documenti allegati sono indicizzati, non acquisiti. Il modulo non crea eventi nel database progetti e non è incluso negli undici collector certificati. La validazione dell'inventario non certifica la completezza delle pubblicazioni storiche o correnti del DOG.
 
-- **106 progetti**;
-- **128 eventi amministrativi**;
-- source/day errors: **0**;
-- quality gate: **0 ERROR, 1 WARN, 40 INFO**;
-- BOE 41 eventi;
-- BOCYL 15;
-- BOA 24;
-- BOJA 7;
-- DOCM 17;
-- DOE 8;
-- BORM 11;
-- BOCM 5;
-- REE: **931 nodi** nello snapshot 2026-10-01;
-- MITECO: **71.727 impianti** nello snapshot 2026-10-03, con **8 matching esatti** conservativi;
-- missing: nome 1, MW 25, provincia singola 1, expediente 14.
+## Lifecycle, scoring ed EPC/BoP
 
-Il solo progetto senza provincia singola è un caso multi-provincia esplicitamente riconosciuto. Non viene inventata una provincia unica.
+Eventi: PUBLIC_INFO, DIA, PRIOR_AUTH, CONSTRUCTION_AUTH, PUBLIC_UTILITY, EXPROPRIATION, MODIFICATION, WITHDRAWN, DENIED, PROCEDURE_ENDED; SABIA conserva il proprio perimetro di milestone documentati.
 
-## Lifecycle
+Stati derivati: EARLY, PERMITTING, AUTHORIZED, PRECONSTRUCTION, BLOCKED. Una richiesta di autorizzazione non equivale a una concessione.
 
-Eventi riconosciuti:
-
-PUBLIC_INFO, DIA, PRIOR_AUTH, CONSTRUCTION_AUTH, PUBLIC_UTILITY, EXPROPRIATION, MODIFICATION, WITHDRAWN, DENIED.
-
-Stati derivati:
-
-EARLY, PERMITTING, AUTHORIZED, PRECONSTRUCTION, BLOCKED.
-
-## Scoring commerciale
-
-Lo scoring è un layer separato dal lifecycle e non modifica il dato amministrativo.
-
-Il dashboard esporta:
-
-- commercial_score;
-- commercial_priority;
-- componenti dello score;
-- recency;
-- stato EPC, oggi EPC_UNKNOWN finché l'enrichment EPC non viene implementato.
-
-## EPC / BoP
-
-È implementato un layer conservativo di evidenze EPC/BoP sui documenti ufficiali già raccolti.
-
-Stati:
-
-- EPC_CONFIRMED
-- EPC_CANDIDATE
-- EPC_UNKNOWN
-
-Il promotore non viene mai assunto come EPC. Sul backfill certificato corrente le fonti amministrative non contengono evidenze EPC/BoP sufficientemente esplicite: i 106 progetti restano quindi EPC_UNKNOWN.
-
-Output dedicati:
-
-- reports/epc_bop_evidence_latest.csv
-- reports/epc_bop_evidence_latest.html
-
-La prossima estensione userà comunicati EPC/developer/supplier, gare e documenti pubblici; eventuale stampa specializzata resterà un lead da confermare.
-
-## Vista provinciale
-
-La vista provinciale separa sempre:
-
-- MW identificati;
-- progetti senza MW.
-
-Include conteggi per FV, eolico, BESS/ibrido e per stato EARLY, PERMITTING, AUTHORIZED, PRECONSTRUCTION e BLOCKED.
+Score e priorità commerciali sono separati dal dato amministrativo. EPC/BoP usa evidenze esplicite in una tabella separata e gli stati EPC_CONFIRMED, EPC_CANDIDATE, EPC_UNKNOWN. Promotore non significa EPC. La ricerca esterna dei contractor resta successiva all'ampliamento delle fonti pubbliche di discovery.
 
 ## Avvio Windows
 
-~~~bat
+```bat
 py -m venv .venv
 .\.venv\Scripts\python.exe -m pip install --upgrade pip
 .\.venv\Scripts\pip.exe install -r requirements.txt
 aggiorna_radar_spagna.bat
-~~~
+```
 
 Backfill manuale:
 
-~~~bat
+```bat
 .\.venv\Scripts\python.exe -m app.run_pipeline --days 30
-~~~
+```
+
+Inventario Galicia separato:
+
+```bat
+.\.venv\Scripts\python.exe -m app.galicia_archive
+```
 
 ## Output
 
-- DB: data/spain_renewables.sqlite
-- variazioni: reports/change_reports/changes_latest.html
-- coverage sorgenti: reports/coverage_latest.html
-- quality gate: reports/quality_issues_latest.html
-- EPC/BoP: reports/epc_bop_evidence_latest.html
-- vista provinciale: reports/province_view_latest.html
-- vista provinciale CSV: reports/province_view_latest.csv
-- REE: reports/ree_capacity_latest.csv
-- MITECO: reports/miteco_registry_latest.csv
-- matching MITECO: reports/miteco_exact_matches_latest.csv
-- dashboard: docs/index.html
+- Database: `data/spain_renewables.sqlite`.
+- Variazioni: `reports/change_reports/changes_latest.html`.
+- Copertura e qualità: `reports/coverage_latest.html`, `reports/quality_issues_latest.html`.
+- EPC/BoP: `reports/epc_bop_evidence_latest.html` e CSV.
+- Vista provinciale: `reports/province_view_latest.html` e CSV.
+- REE/MITECO: `reports/ree_capacity_latest.csv`, `reports/miteco_registry_latest.csv`, `reports/miteco_exact_matches_latest.csv`.
+- Lacune e contrasti della fonte: `reports/andalucia_public/source_gaps.html`, `reports/gva_public/source_flags.html`.
+- Galicia: `reports/galicia_archive/index.html`, `inventory.json`, `inventory.csv`, `changes.json`, `window_audit.json`; baseline locale persistente `data/galicia_archive_baseline.json`.
+- Dashboard: `docs/index.html`.
+
+La vista provinciale distingue MW identificati, MW sconosciuti, progetti multi-provincia e potenze di gruppo non allocate; non duplica potenze nelle province.
 
 ## Regole
 
-- fonte ufficiale e URL originario sempre preservati;
-- meglio un campo vuoto che un dato inventato;
-- owner/promotore ed EPC sono entità diverse;
-- lifecycle e score commerciale restano separati;
-- dati REE aggregati per nodo/CCAA non equivalgono automaticamente alla conferma di un progetto;
-- i flag qualità non correggono automaticamente i dati;
-- una pubblicazione che raggruppa più progetti senza nomi individuali resta senza nome;
-- un progetto multi-provincia non viene forzato su una singola provincia.
+URL, external_id, date e testi originali sempre preservati. Meglio campo vuoto che dato inventato. Conflitti segnalati, non risolti arbitrariamente. Nomi mancanti non ricavati dal promotore. La qualità strutturale non garantisce che ogni campo sia già completo o semanticamente perfetto.

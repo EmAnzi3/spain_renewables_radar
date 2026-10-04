@@ -1,0 +1,63 @@
+name: galicia-archive-validation
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "app/galicia_archive.py"
+      - "tests/test_galicia_archive.py"
+      - ".github/workflows/galicia-archive-validation.yml"
+
+concurrency:
+  group: galicia-archive-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    env:
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: All unit and regression tests
+        run: python -m unittest discover -s tests -v
+      - name: Complete official archive and all HTML details
+        run: |
+          python -m app.galicia_archive --until "$(TZ=Europe/Madrid date -d yesterday +%F)"
+      - name: Verify baseline replay, provenance and explicit coverage limitations
+        run: |
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          from app.galicia_archive import reconcile
+          root=Path('reports/galicia_archive')
+          data=json.loads((root/'inventory.json').read_text())
+          summary=json.loads((root/'summary.json').read_text())
+          assert data['complete'] and len(data['records'])==sum(a['records'] for a in data['archives'].values())
+          assert summary['details']==summary['records']
+          assert summary['project_events_created']==0
+          assert summary['historical_web_backfill_certified'] is False
+          replay=reconcile(data,data)
+          assert not any(replay[k] for k in ('newly_observed','changed','not_seen'))
+          for acquisition in data['acquisitions']:
+              raw=(root/'raw'/(acquisition['sha256']+'.html')).read_bytes()
+              assert hashlib.sha256(raw).hexdigest()==acquisition['sha256']
+              assert len(raw)==acquisition['bytes'] and acquisition['retrieved_at']
+          print('ARCHIVE_VALIDATION',json.dumps(summary,ensure_ascii=False))
+          print('NOT_A_DATED_DISCOVERY_COLLECTOR: current inventory only; unknown web dates are not manufactured')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: galicia-archive-output
+          path: |
+            reports/galicia_archive/
+            data/galicia_archive_baseline.json
+          if-no-files-found: warn
