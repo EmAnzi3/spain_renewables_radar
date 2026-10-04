@@ -1,0 +1,68 @@
+name: gva-public-documents-probe
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/gva-public-documents-probe.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 37186210816
+          name: gva-public-inventory-probe
+          path: gva-source-input
+      - name: Read the explicit PDF links from each current official document directory
+        run: |
+          python -u - <<'PY'
+          import hashlib,json,time
+          from pathlib import Path
+          from urllib.parse import urljoin,urlparse,unquote
+          import requests
+          from requests.adapters import HTTPAdapter
+          from urllib3.util.retry import Retry
+          from bs4 import BeautifulSoup
+          src=Path('gva-source-input');out=Path('reports/gva_documents_probe');out.mkdir(parents=True,exist_ok=True)
+          records=json.loads((src/'window_records.json').read_text(encoding='utf-8'))
+          s=requests.Session();s.headers['User-Agent']='SpainRenewablesRadar/0.3 official-document-audit'
+          s.mount('https://',HTTPAdapter(max_retries=Retry(total=2,backoff_factor=0.8,status_forcelist=(429,500,502,503,504))))
+          for record in records:
+              record['pdf_documents']=[]
+              for directory in record['documents']:
+                  raw=(src/directory['file']).read_bytes()
+                  if not raw.startswith(b'<!') and b'<html' not in raw[:1000].lower():continue
+                  soup=BeautifulSoup(raw,'html.parser')
+                  for a in soup.select('a[href]'):
+                      url=urljoin(directory['final_url'],a['href'])
+                      if not (urlparse(url).hostname or '').endswith('.gva.es'):continue
+                      if not urlparse(url).path.lower().endswith('.pdf'):continue
+                      # The probe deliberately follows only top-level official linked acts, not all technical subfolders.
+                      if len(record['pdf_documents'])>=6:raise ValueError('Unexpected document count; inspect directory before continuing')
+                      r=s.get(url,timeout=(8,35));r.raise_for_status()
+                      if r.content[:5]!=b'%PDF-':raise ValueError('Official linked PDF returned non-PDF bytes')
+                      name=record['external_id']+'-'+str(len(record['pdf_documents']))+'.pdf'
+                      (out/name).write_bytes(r.content)
+                      record['pdf_documents'].append({'url':url,'final_url':r.url,'label':a.get_text(' ',strip=True),'file':name,
+                          'bytes':len(r.content),'sha256':hashlib.sha256(r.content).hexdigest()})
+                      print('OFFICIAL_PDF',record['external_id'],a.get_text(' ',strip=True),len(r.content),flush=True)
+                      time.sleep(0.1)
+          (out/'records.json').write_text(json.dumps(records,ensure_ascii=False,indent=2),encoding='utf-8')
+          print('PROBE_ONLY',len(records),'PUBLICATIONS',sum(len(r['pdf_documents']) for r in records),'TOP_LEVEL_PDF_DOCUMENTS',flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gva-public-documents-probe
+          path: reports/gva_documents_probe/
+          if-no-files-found: error
