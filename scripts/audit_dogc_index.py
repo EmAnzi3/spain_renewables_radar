@@ -35,7 +35,10 @@ def source_date(value):
 def plain_title(value):
     if not isinstance(value, str) or not value.strip():
         raise ValueError('Missing official disposition title')
-    return ' '.join(BeautifulSoup(value, 'html.parser').get_text(' ', strip=True).split())
+    title = ' '.join(BeautifulSoup(value, 'html.parser').get_text(' ', strip=True).split())
+    if not title:
+        raise ValueError('Disposition title contains no readable text')
+    return title
 
 
 def one_parameter(url, name):
@@ -71,14 +74,47 @@ def parse_calendar(data, year, month):
     return days
 
 
-def parse_summary(data, edition, day):
+def summary_scopes(data, edition, day):
+    """Principal edition plus explicitly identified same-day official annexes."""
     summaries = data.get('sumaris') if isinstance(data, dict) else None
-    if not isinstance(summaries, list) or not summaries:
-        raise ValueError('Edition summary is missing')
+    if not isinstance(summaries, list) or not summaries or not re.fullmatch(r'\d+', edition):
+        raise ValueError('Edition summary is missing or has an invalid base identity')
+    seen = set()
+    scopes = []
+    for summary in summaries:
+        if not isinstance(summary, dict):
+            raise ValueError('Invalid edition header')
+        identity = summary.get('numDOGC')
+        if not isinstance(identity, str) or identity in seen or source_date(summary.get('dateDOGC')) != day:
+            raise ValueError('Repeated edition identity or publication date differs from calendar')
+        if identity != edition:
+            suffix = identity[len(edition):] if identity.startswith(edition) else ''
+            if not re.fullmatch(r'[A-Z]', suffix) or summary.get('title') != 'Annex ' + suffix:
+                raise ValueError('Unrelated edition cannot be included as an annex')
+        # Both identity and attachment link must corroborate the source scope.
+        url = summary.get('linkDownloadDOGCPDF')
+        if not isinstance(url, str):
+            raise ValueError('Edition lacks its original download identity')
+        parts = urlsplit(url)
+        if (parts.scheme != 'https' or parts.hostname != 'portaldogc.gencat.cat'
+                or parts.username or parts.password or parts.port not in (None, 443)
+                or parts.path != '/utilsEADOP/AppJava/PdfProviderServlet'
+                or parse_qs(parts.query).get('dogcId') != [identity]):
+            raise ValueError('Original download link disagrees with edition or annex identity')
+        if not isinstance(summary.get('section'), list) or not summary['section']:
+            raise ValueError('Edition has no section structure')
+        seen.add(identity)
+        scopes.append((identity, summary))
+    if edition not in seen:
+        raise ValueError('Annex-only response cannot replace the requested principal edition')
+    return scopes
+
+
+def parse_summary(data, edition, day):
     result = {}
-    def walk(node):
+    def walk(node, scope):
         if isinstance(node, list):
-            for child in node: walk(child)
+            for child in node: walk(child, scope)
         elif isinstance(node, dict):
             if 'linkDownloadDocumentPDF' in node:
                 url = node['linkDownloadDocumentPDF']; p = urlsplit(url)
@@ -86,21 +122,18 @@ def parse_summary(data, edition, day):
                         or p.port not in (None, 443) or p.path != '/utilsEADOP/AppJava/PdfProviderServlet'):
                     raise ValueError('Unrecognized official document link')
                 identity = one_parameter(url, 'documentId')
-                record = {'document_id': identity, 'publication_date': day.isoformat(), 'edition': edition,
+                record = {'document_id': identity, 'publication_date': day.isoformat(), 'edition': scope,
+                          'base_edition': edition, 'edition_kind': 'PRINCIPAL' if scope == edition else 'ANNEX',
                           'title': plain_title(node.get('title')), 'source_title': node['title'],
                           'source_url': url, 'body_acquired': False}
                 key = (identity, day.isoformat())
                 if key in result and result[key] != record:
-                    raise ValueError('Conflicting dispositions in one edition')
+                    raise ValueError('Conflicting disposition identity across edition scopes')
                 result[key] = record
             for value in node.values():
-                if isinstance(value, (list, dict)): walk(value)
-    for summary in summaries:
-        if str(summary.get('numDOGC')) != edition or source_date(summary.get('dateDOGC')) != day:
-            raise ValueError('Edition number/date differs from live calendar')
-        if not isinstance(summary.get('section'), list) or not summary['section']:
-            raise ValueError('Edition has no section structure')
-        walk(summary['section'])
+                if isinstance(value, (list, dict)): walk(value, scope)
+    for scope, summary in summary_scopes(data, edition, day):
+        walk(summary['section'], scope)
     if not result:
         raise ValueError('Published edition has no identifiable dispositions')
     return result
@@ -220,7 +253,7 @@ def main():
         if inputs.get('uriCalendar') != '/eadop-rest/api/dogc/calendarDOGC' or inputs.get('uriCerDogc') != '/eadop-rest/api/dogc/searchDOGC':
             raise ValueError('Official service routes changed')
         months = sorted({(start.year,start.month),(end.year,end.month)})
-        days = {}; summaries = {}; editions = 0
+        days = {}; summaries = {}; editions = 0; annexes = 0
         for year, month in months:
             data = client.post(f'calendar:{year}:{month}','calendarDOGC',form={'year':year,'month':month,'language':'ca'})
             days.update({d:e for d,e in parse_calendar(data,year,month).items() if start <= d <= end})
@@ -229,6 +262,7 @@ def main():
             if edition is not None:
                 data = client.post('edition:'+str(day),'summaryDOGC',form={'numDOGC':edition,'language':'ca'})
                 records = parse_summary(data,edition,day); editions += 1
+                annexes += sum(scope != edition for scope, _ in summary_scopes(data,edition,day))
                 if set(summaries) & set(records): raise ValueError('Duplicate dated edition')
                 summaries.update(records)
             print('DOGC_INDEX_DAY',day,edition or 'NO_EDITION',flush=True)
@@ -268,7 +302,7 @@ def main():
         atomic_json(root/'candidates.json',candidates)
         rows = ''.join('<tr><td>'+html.escape(r['publication_date'])+'</td><td>'+html.escape(r['title'])+'</td><td><a href="'+html.escape(r['source_url'],quote=True)+'">Fonte ufficiale</a></td></tr>' for r in candidates)
         (root/'index.html').write_text('<!doctype html><html lang="it"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DOGC — verifica indice</title><h1>DOGC — avvisi candidati</h1><p>Finestra '+str(start)+' — '+str(end)+'. Solo indice: testi integrali non acquisiti, pertinenza e progetti da verificare. Nessun nuovo evento inserito nel radar.</p><table><tr><th>Pubblicazione</th><th>Titolo originale</th><th>Documento</th></tr>'+rows+'</table></html>',encoding='utf-8')
-        result.update(index_complete=True,source_days=30,publication_editions=editions,no_edition_days=30-editions,
+        result.update(index_complete=True,source_days=30,publication_editions=editions,annex_editions=annexes,no_edition_days=30-editions,
                       edition_dispositions=len(summaries),search_reported_count=total,search_pages=pages,
                       title_candidates=len(candidates),independent_index_reconciliation=True,original_byte_replay_verified=True,
                       index_sha256=hashlib.sha256(canonical(sorted((k[0],k[1],r['title']) for k,r in summaries.items())).encode()).hexdigest())

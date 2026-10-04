@@ -16,8 +16,20 @@ def month_rows():
 def summary():
     document={'title':'Resolució <i>solar</i>',
         'linkDownloadDocumentPDF':'https://portaldogc.gencat.cat/utilsEADOP/AppJava/PdfProviderServlet?documentId=123&type=01'}
-    return {'sumaris':[{'numDOGC':'9765','dateDOGC':'04/10/2026','section':[
+    return {'sumaris':[{'numDOGC':'9765','dateDOGC':'04/10/2026',
+        'linkDownloadDOGCPDF':'https://portaldogc.gencat.cat/utilsEADOP/AppJava/PdfProviderServlet?dogcId=9765&language=ca_ES','section':[
         {'header':[{'subheader':[{'document':[document]}]}]}]}]}
+
+
+def with_annex():
+    result=summary()
+    annex=copy.deepcopy(result['sumaris'][0])
+    annex.update(numDOGC='9765A',title='Annex A',
+        linkDownloadDOGCPDF='https://portaldogc.gencat.cat/utilsEADOP/AppJava/PdfProviderServlet?dogcId=9765A&language=ca_ES')
+    doc=annex['section'][0]['header'][0]['subheader'][0]['document'][0]
+    doc['linkDownloadDocumentPDF']=doc['linkDownloadDocumentPDF'].replace('documentId=123','documentId=456')
+    result['sumaris'].append(annex)
+    return result
 
 
 def search_row(number=123):
@@ -107,6 +119,42 @@ class DOGCIndexTests(unittest.TestCase):
     def test_source_date_format_not_guessed(self):
         for value in ['2026-10-04','04/10/26',None,'31/02/2026']:
             with self.assertRaises(ValueError):source_date(value)
+
+    def test_same_day_official_annex_keeps_distinct_source_scope(self):
+        records=parse_summary(with_annex(),'9765',self.end)
+        self.assertEqual(len(records),2)
+        annex=records[('456','2026-10-04')]
+        self.assertEqual(annex['edition'],'9765A')
+        self.assertEqual(annex['base_edition'],'9765')
+        self.assertEqual(annex['edition_kind'],'ANNEX')
+
+    def test_annex_with_different_publication_date_fails(self):
+        data=with_annex();data['sumaris'][1]['dateDOGC']='03/10/2026'
+        with self.assertRaises(ValueError):parse_summary(data,'9765',self.end)
+
+    def test_annex_download_link_must_identify_same_annex(self):
+        data=with_annex();data['sumaris'][1]['linkDownloadDOGCPDF']=data['sumaris'][0]['linkDownloadDOGCPDF']
+        with self.assertRaises(ValueError):parse_summary(data,'9765',self.end)
+
+    def test_unrelated_edition_cannot_be_disguised_as_annex(self):
+        data=with_annex();data['sumaris'][1]['numDOGC']='9766A'
+        with self.assertRaises(ValueError):parse_summary(data,'9765',self.end)
+
+    def test_annex_title_must_agree_with_scope(self):
+        data=with_annex();data['sumaris'][1]['title']='Annex B'
+        with self.assertRaises(ValueError):parse_summary(data,'9765',self.end)
+
+    def test_annex_without_principal_is_not_complete_edition(self):
+        data=with_annex();data['sumaris'].pop(0)
+        with self.assertRaises(ValueError):parse_summary(data,'9765',self.end)
+
+    def test_duplicate_edition_header_is_not_silently_accepted(self):
+        data=summary();data['sumaris'].append(copy.deepcopy(data['sumaris'][0]))
+        with self.assertRaises(ValueError):parse_summary(data,'9765',self.end)
+
+    def test_markup_without_readable_title_is_not_a_disposition(self):
+        data=summary();data['sumaris'][0]['section'][0]['header'][0]['subheader'][0]['document'][0]['title']='<span></span>'
+        with self.assertRaises(ValueError):parse_summary(data,'9765',self.end)
 
 
 if __name__=='__main__':unittest.main()
