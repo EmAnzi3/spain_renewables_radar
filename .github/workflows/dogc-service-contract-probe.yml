@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - '.github/workflows/dogc-service-contract-probe.yml'
+      - 'scripts/probe_dogc_services.py'
 permissions:
   contents: read
 concurrency:
@@ -18,95 +19,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: pip install requests beautifulsoup4
-      - name: Verify actual read-only service responses without active-only filters
-        run: |
-          python -u - <<'PY'
-          import hashlib,json,re
-          from datetime import datetime,timedelta,timezone
-          from pathlib import Path
-          from urllib.parse import urljoin,urlsplit
-          from zoneinfo import ZoneInfo
-          import requests
-          from bs4 import BeautifulSoup
-          out=Path('reports/dogc_contract_probe');out.mkdir(parents=True,exist_ok=True)
-          session=requests.Session();session.headers['User-Agent']='SpainRenewablesRadar/0.6 (public read-only source verification)'
-          acquisitions=[];failures=[]
-          def request(url,*,form=None,payload=None):
-              for _ in range(4):
-                  p=urlsplit(url)
-                  if p.scheme!='https' or p.hostname!='dogc.gencat.cat' or p.username or p.password or p.port not in (None,443):raise ValueError('Unexpected destination')
-                  method='POST' if form is not None or payload is not None else 'GET'
-                  if method=='POST' and p.path not in {'/eadop-rest/api/dogc/calendarDOGC','/eadop-rest/api/dogc/summaryDOGC','/eadop-rest/api/dogc/summaryLastPublishedDOGC','/eadop-rest/api/dogc/searchDOGC'}:raise ValueError('Not a read-only public source operation')
-                  r=session.request(method,url,data=form,json=payload,timeout=(8,45),allow_redirects=False,stream=True)
-                  if r.status_code in (301,302,303,307,308):
-                      location=r.headers.get('Location');r.close()
-                      if method!='GET' or not location:raise ValueError('Unexpected redirect in source request')
-                      url=urljoin(url,location);continue
-                  try:
-                      parts=[];size=0
-                      for chunk in r.iter_content(65536):
-                          size+=len(chunk)
-                          if size>6_000_000:raise ValueError('Response too large')
-                          parts.append(chunk)
-                      raw=b''.join(parts);sha=hashlib.sha256(raw).hexdigest()
-                      (out/(sha+'.bin')).write_bytes(raw)
-                      acquisitions.append({'url':url,'method':method,'parameters':form if form is not None else payload,'status':r.status_code,'sha256':sha,'bytes':len(raw),'retrieved_at':datetime.now(timezone.utc).isoformat()})
-                      print('ACQUISITION',json.dumps(acquisitions[-1],ensure_ascii=False))
-                      r.raise_for_status();return raw
-                  finally:r.close()
-              raise ValueError('Too many redirects')
-          def compact(value,depth=0):
-              if isinstance(value,dict):return {k:compact(v,depth+1) for k,v in value.items()}
-              if isinstance(value,list):return {'length':len(value),'first': [compact(v,depth+1) for v in value[:3]]}
-              if isinstance(value,str):return value[:1800]
-              return value
-          home='https://dogc.gencat.cat/ca/inici/'
-          try:
-              soup=BeautifulSoup(request(home),'html.parser')
-              config={t.get('id'):t.get('value') for t in soup.select('input[id]')}
-              scripts={Path(urlsplit(urljoin(home,t['src'])).path).name:urljoin(home,t['src']) for t in soup.select('script[src]')}
-              constants=request(scripts['constants.js']).decode('utf-8')
-              match=re.search(r'\bHOST_PRO\s*=\s*[\x27\x22]([^\x27\x22]+)',constants)
-              if not match:raise ValueError('Public production host missing')
-              host=match[1];print('PUBLIC_PRODUCTION_HOST',host)
-              if host!='dogc.gencat.cat':raise ValueError('New production host requires explicit review before contact')
-              for field,expected in [('uriCalendar','/eadop-rest/api/dogc/calendarDOGC'),('uriCerDogc','/eadop-rest/api/dogc/searchDOGC'),('uriUltimDOGCPublicat','/eadop-rest/api/dogc/summaryLastPublishedDOGC')]:
-                  if config.get(field)!=expected:raise ValueError('Public endpoint contract changed: '+field)
-              calendar_script=request(scripts['fpca_calendari_dogc.js']).decode('utf-8')
-              print('CALENDAR_MONTH_CONTRACT',json.dumps([line.strip() for line in calendar_script.splitlines() if 'selectedMonth' in line or 'getMonth' in line]))
-              end=datetime.now(ZoneInfo('Europe/Madrid')).date()-timedelta(days=1);start=end-timedelta(days=29)
-              base='https://'+host
-              for year,month in sorted({(start.year,start.month),(end.year,end.month)}):
-                  raw=request(base+config['uriCalendar'],form={'month':month,'year':year,'language':'ca'})
-                  data=json.loads(raw)
-                  (out/f'calendar-{year}-{month}.json').write_bytes(raw)
-                  print('CALENDAR_RESPONSE',json.dumps(data,ensure_ascii=False))
-                  if not isinstance(data,dict) or not isinstance(data.get('calendar'),list):raise ValueError('Invalid calendar response')
-              raw=request(base+config['uriUltimDOGCPublicat'],form={'language':'ca'});latest=json.loads(raw)
-              print('LATEST_RESPONSE',json.dumps(compact(latest),ensure_ascii=False))
-              if not latest.get('sumaris'):raise ValueError('Missing latest edition')
-              edition=latest['sumaris'][0]['numDOGC']
-              raw=request(base+'/eadop-rest/api/dogc/summaryDOGC',form={'numDOGC':edition,'language':'ca'})
-              summary=json.loads(raw);(out/'edition-sample.json').write_bytes(raw)
-              print('EDITION_RESPONSE',json.dumps(compact(summary),ensure_ascii=False))
-              payload={'typeSearch':'1','value':'','title':False,'current':False,'range':[],'issuingAuthority':[],
-                  'publicationDateInitial':start.strftime('%d/%m/%Y'),'publicationDateFinal':end.strftime('%d/%m/%Y'),
-                  'dispositionDateInitial':'','dispositionDateFinal':'','sectionDOGC':[],'thematicDescriptor':[],
-                  'organizationDescriptor':[],'geographicDescriptor':[],'aranese':False,'expandSearchFullText':False,
-                  'noCurrent':False,'orderBy':'3','page':'1','numResultsByPage':'50','advanced':True,'language':'ca'}
-              raw=request(base+config['uriCerDogc'],payload=payload);data=json.loads(raw)
-              (out/'search-sample.json').write_bytes(raw)
-              print('SEARCH_RESPONSE',json.dumps(compact(data),ensure_ascii=False))
-              if not isinstance(data.get('resultSearch'),list) or 'numResultSearch' not in data:raise ValueError('Invalid search response')
-              print('SEARCH_ENERGY_SAMPLE',json.dumps([r for r in data['resultSearch'] if re.search(r'fotovolta|e[oò]lic|bateri|emmagatzem|hibrid',r.get('title',''),re.I)],ensure_ascii=False))
-              (out/'summary.json').write_text(json.dumps({'service_responses_observed':True,'calendar_months':2,'window_start':str(start),'window_end':str(end),'search_count':data['numResultSearch'],'search_rows_downloaded':len(data['resultSearch']),'collector_implemented':False,'backfill_certified':False},ensure_ascii=False,indent=2),encoding='utf-8')
-          except Exception as exc:
-              failures.append({'type':type(exc).__name__,'error':str(exc)});raise
-          finally:
-              (out/'acquisitions.json').write_text(json.dumps(acquisitions,ensure_ascii=False,indent=2),encoding='utf-8')
-              (out/'failures.json').write_text(json.dumps(failures,ensure_ascii=False,indent=2),encoding='utf-8')
-          PY
+      - run: pip install -r requirements.txt
+      - name: Probe observed public service host and actual source responses
+        run: python -u scripts/probe_dogc_services.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:

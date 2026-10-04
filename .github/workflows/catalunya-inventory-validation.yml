@@ -1,0 +1,66 @@
+name: catalunya-inventory-validation
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'app/catalunya_inventory.py'
+      - 'tests/test_catalunya_inventory.py'
+      - '.github/workflows/catalunya-inventory-validation.yml'
+permissions:
+  contents: read
+concurrency:
+  group: catalunya-inventory-validation-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: All unit and regression tests
+        run: python -m unittest discover -s tests -v
+      - name: Two independent live acquisitions with persistent baseline and real pagination
+        run: |
+          python -m app.catalunya_inventory --output reports/catalunya_inventory_validation --baseline data/catalunya_validation_baseline.json --page-size 100
+          python -m app.catalunya_inventory --output reports/catalunya_inventory_validation --baseline data/catalunya_validation_baseline.json --page-size 100
+      - name: Verify originals, semantic comparison and absence of fabricated events
+        run: |
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          from app.catalunya_inventory import reconcile,verify_evidence
+          root=Path('reports/catalunya_inventory_validation')
+          generations=sorted((root/'snapshots').iterdir())
+          assert len(generations)==2, 'Exactly two independent acquisitions are required'
+          snapshots=[json.loads((g/'inventory.json').read_text()) for g in generations]
+          for g,s in zip(generations,snapshots):
+              assert verify_evidence(s,g/'raw')
+              assert s['dated_events_created']==0 and s['unique_projects_certified'] is False
+          a,b=snapshots
+          first=json.loads((generations[0]/'changes.json').read_text())
+          second=json.loads((generations[1]/'changes.json').read_text())
+          assert first==reconcile(None,a)
+          assert second==reconcile(a,b)
+          replay=reconcile(b,b)
+          assert not any(replay[k] for k in ('newly_observed','changed','not_seen'))
+          assert json.loads(Path('data/catalunya_validation_baseline.json').read_text())==b
+          metrics=json.loads((generations[1]/'metrics.json').read_text())
+          metrics.update(head_sha=os.environ['GITHUB_SHA'],run_id=os.environ['GITHUB_RUN_ID'],
+              independent_live_snapshots=2,raw_provenance_verified=True,
+              semantic_changes={k:len(second[k]) for k in ('newly_observed','changed','not_seen')},
+              dated_collector_enabled=False,unique_projects_certified=False)
+          (root/'certification.json').write_text(json.dumps(metrics,ensure_ascii=False,indent=2),encoding='utf-8')
+          print('CATALUNYA_CERTIFIED',json.dumps(metrics,ensure_ascii=False))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: catalunya-inventory-output
+          path: |
+            reports/catalunya_inventory_validation/
+            data/catalunya_validation_baseline.json
+          if-no-files-found: error
