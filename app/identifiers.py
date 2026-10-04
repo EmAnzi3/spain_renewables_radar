@@ -21,6 +21,9 @@ def valid_expediente(value) -> bool:
     if not isinstance(value, str):
         return False
     value = value.strip()
+    # Explicit Galicia authority reference formats retain the original internal space.
+    if re.fullmatch(r'IN\d{3}[A-Z]\s+\d{4}/\d+(?:-[A-Z0-9]+)*|FV\s+\d+/\d{4}', value, re.I):
+        return True
     return bool(len(value) >= 3 and re.search(r'\d', value)
                 and re.fullmatch(r'(?:(?:INAGA|PRETOR|SIAGGE)\s+)?[A-Z0-9][A-Z0-9._/\-]{2,70}', value, re.I))
 
@@ -33,7 +36,6 @@ def extract_identifier(text: str, *, body: bool = False) -> str | None:
             value = re.sub(r'^SIAGGE\s+', '', value, flags=re.I)
             if valid_expediente(value) and value.casefold() not in [x.casefold() for x in found]:
                 found.append(value)
-    # Several body references may identify other plants or ancillary permits.
     if body and len(found) != 1:
         return None
     return found[0] if found else None

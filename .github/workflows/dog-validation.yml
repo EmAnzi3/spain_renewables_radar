@@ -1,0 +1,60 @@
+name: dog-validation
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/dog-validation.yml'
+      - 'app/collectors/dog.py'
+      - 'app/identifiers.py'
+      - 'tests/test_dog.py'
+      - 'tests/fixtures/dog/**'
+      - 'scripts/validate_dog.py'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: dog-validation-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: All unit and regression tests
+        run: python -m unittest discover -s tests -v
+      - name: Optional previously acquired Galicia archive for exact-reference comparison
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          github-token: ${{ github.token }}
+          run-id: 37195445929
+          name: galicia-archive-output
+          path: archive-input
+      - name: Preserve original Galicia baseline without redating it
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import shutil
+          found=list(Path('archive-input').rglob('galicia_archive_baseline.json'))
+          if len(found)>1:raise RuntimeError('Ambiguous archive baseline')
+          if found:
+              Path('data').mkdir(exist_ok=True)
+              shutil.copyfile(found[0],'data/galicia_archive_baseline.json')
+          PY
+      - name: Live smoke and complete thirty-day DOG backfill
+        run: python scripts/validate_dog.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dog-validation-output
+          path: |
+            reports/dog_smoke/
+            reports/dog_validation/
+          if-no-files-found: error
