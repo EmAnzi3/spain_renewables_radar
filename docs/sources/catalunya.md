@@ -1,56 +1,94 @@
-# Catalunya — public source discovery checkpoint
+# Catalunya — repeatable official inventory
 
-## Verified evidence, 4 October 2026
+Checkpoint: **2026-10-05 Europe/Rome**. This is a standalone inventory, not a dated project-event collector.
 
-Probe: [37221339629 — SUCCESS](https://github.com/EmAnzi3/spain_renewables_radar/actions/runs/37221339629), code `e9b3043a5fe55111e3f801140a728f41d840171f`.
+## Official source and original discovery
 
-Artifact: `catalunya-public-probe-output`, ID `11310348543`, contains the complete original response bytes, acquisition URLs/times/SHA-256, rows, diagnostic groups, metadata and summary. Count and dataset-version checks were made before and after collection. No project or administrative event was created by this probe.
+The Generalitat environmental portal links both datasets:
 
-The datasets are linked directly by the [Generalitat environmental viewer](https://mediambient.gencat.cat/es/05_ambits_dactuacio/avaluacio_ambiental/energies_renovables/visor/index.html).
+- Origin: `https://mediambient.gencat.cat/es/05_ambits_dactuacio/avaluacio_ambiental/energies_renovables/visor/index.html`
+- Wind: `dh5g-4nit`, Parcs eòlics de Catalunya.
+- Photovoltaic: `ggx8-jkp4`, Plantes solars fotovoltaiques a Catalunya.
+- Dataset API host: `analisi.transparenciacatalunya.cat`.
 
-| Observation | Wind `dh5g-4nit` | PV `ggx8-jkp4` |
+Historical discovery run **37221339629 — SUCCESS** acquired the complete datasets, not only sample rows. The retained probe found 137 wind rows and 358 PV rows, with source update times 2026-09-28T08:47:13Z and 2026-09-28T08:48:11Z respectively. Some wind metadata contained nested legacy PV metadata: only matching top-level dataset identity, fields and version are interpreted. Nested legacy information and contact details are not used as project evidence.
+
+The PV dataset's declared scope is ground-mounted plants above 100 kW nominal, including projects in processing and operation; operational coverage has its own historical limitations. Do not interpret this inventory as all Spanish renewable projects or all construction opportunities.
+
+## Implemented module and live validation
+
+- Module: **`app/catalunya_inventory.py`**.
+- Windows launcher: **`aggiorna_inventario_catalogna.bat`**.
+- Functional commit: **b9e0cb7076c84743ace93c658979f20af60c07dc**.
+- [Validation run **37241609997 — SUCCESS**](https://github.com/EmAnzi3/spain_renewables_radar/actions/runs/37241609997), job **111551279565**.
+- **242 unit/regression tests passed in that run**, followed by two independent live acquisitions with page size 100, before/after source count/version checks, original-byte reconstruction, baseline/delta verification and idempotent replay.
+- [Artifact **11317693006**, `catalunya-inventory-output`](https://github.com/EmAnzi3/spain_renewables_radar/actions/runs/37241609997/artifacts/11317693006).
+- Artifact SHA256: `b9f1361f7dc9bcad1f3aa5dda633015befc26e98d0e224841b3f927ad7833ee8`.
+- Original certification: `reports/catalunya_inventory_validation/certification.json` in the artifact.
+- Checked summary: `docs/validation/2026-10-05-catalunya-inventory.json` (explicitly a verified log-derived summary, not a byte-identical artifact copy).
+
+Acquisition timestamps are preserved as **2026-10-04T22:51:50.223538+00:00** and **2026-10-04T22:51:55.947367+00:00**, both on October 5 in Europe/Rome. Both produced semantic content hash `11eae40638bd7b3a78f1da3b5bf54b6f1dd2430dfd88d012d45fd7d964c628e4`. First mode BASELINE; second DELTA with **zero newly observed, changed or not-seen groups**. No project events were created.
+
+| Inventory measure | Wind | PV |
 |---|---:|---:|
-| Complete source rows | 137 | 358 |
-| Exact application-reference + name groups, diagnostic only | 37 | 315 |
-| Groups represented by multiple municipal rows | 14 | 28 |
-| Rows without application reference | 78 | 4 |
-| Rows with source power equal to zero | 50 | 37 |
-| Exact duplicate rows | 0 | 0 |
-| Groups with conflicting positive MW values | 0 | 0 |
-| References used by different names | 0 | 1 |
-| Latest environmental meeting date present | 2024-01-26 | 2026-08-06 |
-| Meeting-dated rows in 2026-09-04 through 2026-10-03 | 0 | 0 |
+| Original municipal rows | 137 | 358 |
+| Diagnostic groups, including unresolved rows | 115 | 319 |
+| Exact reference-and-name groups | 37 | 315 |
+| Unreferenced rows kept separate | 78 | 4 |
+| Groups spanning multiple municipal rows | 14 | 28 |
+| Groups without determinable positive capacity | 28 | 0 |
 
-Source dataset-update timestamps are **2026-09-28 08:47:13 UTC** for wind and **08:48:11 UTC** for PV. These timestamps concern the datasets, not individual projects, permits or publication dates.
+**495 municipal rows and 434 diagnostic groups are not a certified unique-project count.** In particular, 82 rows lack a reference and are not merged just because names resemble one another. One PV reference is used for two different names: both groups remain separate and flagged.
 
-Rows by source state, **not deduplicated project counts**:
+## Acquisition contract
 
-- Wind: Autoritzat 10, En servei 78, En tramitació 27, No autoritzat 22.
-- PV: Autoritzat 130, En servei 13, En tramitació 193, No autoritzat 21, Desistit 1.
+The module rechecks that the official environmental page still links both dataset identities. It validates top-level metadata and the field types, retains all reported columns and uses the actual accepted SoQL projection:
 
-## Material interpretation rules
+```text
+$select=:id AS socrata_row_id, <explicit official column names>
+$order=:id
+$limit=<bounded page size>
+$offset=<page offset>
+```
 
-1. A row can describe a project's municipality, rather than a distinct plant. Never count every row as a project or sum repeated project-wide MW. The same application/name may have one positive MW row and a secondary municipality row with zero. Preserve every original row and all municipality membership; do not present these zeros as zero-capacity plants.
-2. An application reference alone is not always a unique plant identifier: the PV snapshot includes a reference associated with different names. Preserve explicit asset scope and keep ambiguous groupings in review. The diagnostic group counts above are not certified unique opportunities.
-3. `data_pon_ncia` is an environmental-panel meeting date. It is not a web-publication date, construction authorization date or work start date. Current `estat` and `sentit_acord` are source assertions, not dated events to be manufactured.
-4. `En servei` denotes an operating plant in the source. Do not put it among prospective construction opportunities merely because it was first downloaded today. Missing application references remain missing; they are not reconstructed from the promoter.
-5. Use the top-level metadata whose `id` matches the requested dataset. The wind metadata response contains nested legacy information about another dataset; it must not overwrite the actual wind schema or data version. Preserve the raw response, but do not republish unrelated administrative account metadata in user-facing reports.
-6. Snapshot staleness and incomplete temporal coverage must be visible. No recent `data_pon_ncia` entries does not mean there are no recent renewable projects or DOGC publications in Catalunya.
-7. Source-reported nominal MW, land area and municipality fields remain separate. Owner/promoter is not EPC. A source snapshot must not overwrite an existing project's administrative lifecycle based only on approximate name matching.
+The originally attempted trailing wildcard projection was rejected by the service and corrected using observed error/response evidence. A regression test protects the accepted explicit-column form. New valid source columns remain included; unsafe or colliding identifiers cause failure.
 
-## Next implementation boundary
+The collector checks exact page lengths, unique source row IDs across pages, total row count, and metadata/count stability after acquiring both datasets. It stores original bytes with SHA256, request URL and real retrieval time. The verification step reconstructs rows from those original pages and validates the complete count/version proof, rather than trusting generated reports alone.
 
-The next module should persist a complete, repeatable snapshot with original evidence, deterministic scoped identities, municipality-level membership, explicit missing fields and changes relative to the preceding snapshot. The first snapshot is a BASELINE, not hundreds of new announcements. Current-state opportunities may be shown as an undated source inventory, separately from the dated administrative feed.
+Transport has bounded retries and size limits. Redirects or non-public/unexpected destinations require review. An HTTP 403 is not retried or bypassed. A response/contract error is not a valid empty dataset.
 
-The dated DOGC publications require their own verified acquisition path and matching evidence; dataset timestamps cannot substitute for it. No Catalunya collector is enabled in `config/sources.json` by this checkpoint, and DOGC remains unimplemented. Official BESS or other additional datasets must be independently discovered and probed; coverage must not be inferred from the existence of the viewer.
+## Identity, quantities and dates
 
-## Official endpoints actually acquired
+Grouping uses **dataset + exact administrative reference + exact name**. Without a reference, a source row remains a separate unresolved record. Technical Socrata row IDs are preserved as provenance but excluded from semantic comparison because a publisher can replace rows without changing their content. Source field changes are not silently ignored.
 
-- `https://analisi.transparenciacatalunya.cat/api/views/dh5g-4nit.json`
-- `https://analisi.transparenciacatalunya.cat/resource/dh5g-4nit.json?$select=count(*)`
-- `https://analisi.transparenciacatalunya.cat/resource/dh5g-4nit.json?$limit=10000`
-- `https://analisi.transparenciacatalunya.cat/api/views/ggx8-jkp4.json`
-- `https://analisi.transparenciacatalunya.cat/resource/ggx8-jkp4.json?$select=count(*)`
-- `https://analisi.transparenciacatalunya.cat/resource/ggx8-jkp4.json?$limit=10000`
+All municipalities and original municipal values are retained. Province attribution uses the source municipality code prefix only when its format is valid; unresolved codes are flagged. A promoter address is not used as the plant location.
 
-The request limit is a bounded probe safeguard, not a silent pagination limit. A count at or above that limit, a changed source version, missing required fields or a count mismatch fails the probe.
+Repeated total plant MW, total site area and total turbine count are counted once within an exact group, not summed across municipalities. Distinct conflicting positive values remain unresolved. Source zeros remain in the original rows, and an unknown positive project capacity is not published as zero capacity. Municipal area/turbine figures remain separate from plant totals.
+
+State labels are source assertions, not freshly issued permits. `data_pon_ncia` is an environmental meeting date, not a publication date. Dataset modification times are not individual-project publication times. Publication date, authorization date, work start/end and EPC contractor remain unset. Operating plants are not relabeled as new construction opportunities.
+
+## Persistence and reports
+
+```bat
+aggiorna_inventario_catalogna.bat
+```
+
+Or, using the configured project environment:
+
+```bat
+.\.venv\Scripts\python.exe -m app.catalunya_inventory
+```
+
+Default report: `reports/catalunya_inventory/index.html`.
+Default state: `data/catalunya_inventory_baseline.json`.
+Last attempt status: `reports/catalunya_inventory/run_status.json`.
+
+Each timestamped snapshot retains `inventory.json`, `inventory.csv`, `index.html`, `changes.json`, `metrics.json` and original response files. HTML escapes source text; CSV protects against formula interpretation. The report provides text search over names, municipalities and references.
+
+The baseline is protected by an exclusive writer lock and atomic JSON replacement. Failed acquisition/validation does not replace the last valid baseline. Each completed snapshot is independently retained. The launcher opens the report only after success. Read `run_status.json` to distinguish a failed latest attempt from an older valid report. There is no new scheduler or automatic public-dashboard publication.
+
+BASELINE means initial inventory, not new opportunities. DELTA reports newly observed/changed/not-seen records; NOT_SEEN does not prove withdrawal. Changes to unreferenced rows can appear as disappearance plus a newly observed row because a safe project identity is missing; no false identity continuity is invented.
+
+## Remaining boundary
+
+This module does **not** enable `DOGC` or add a thirteenth dated collector. The dated-source audit is documented in `dogc.md`; its independent search reconciliation remains unresolved. Linking inventories to dated events requires official document identity or exact reference evidence and separate validation. No automatic fuzzy cross-source merge was added.

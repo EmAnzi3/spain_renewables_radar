@@ -1,10 +1,12 @@
 # CURRENT STATE — Spain Renewables Radar
 
-## Ultima certificazione integrata — 4 ottobre 2026
+Aggiornamento del checkpoint: **5 ottobre 2026, Europe/Rome**. Le date UTC originali delle acquisizioni rimangono conservate.
+
+## Ultima certificazione integrata verificata — 4 ottobre 2026
 
 - **[Run 37220893072 — SUCCESS](https://github.com/EmAnzi3/spain_renewables_radar/actions/runs/37220893072)**, codice funzionale **f4a88a6fe7a8706b5e30a52d168b93e060beaaeb**.
 - Finestra completa **4 settembre–3 ottobre 2026**.
-- **12 collector integrati**, 30 giorni per ciascuno; smoke live, **208 test**, controlli di identità, provenienza e replay superati.
+- **12 collector integrati**, 30 giorni per ciascuno; smoke live, **208 test nel run certificato**, controlli di identità, provenienza e replay superati.
 - **221 schede progetto / 227 eventi**, contro 218/224 del precedente perimetro a undici fonti. Non sono 221 opportunità commerciali attive.
 - **0 errori fonte/giorno**; quality gate **0 ERROR / 3 WARN / 110 INFO**.
 - Mancanti: nome **2**, MW **58**, provincia singola **8**, expediente **41**.
@@ -14,9 +16,11 @@
 - Replay idempotente: nessun nuovo progetto/evento; provenienza degli eventi completa secondo i gate eseguiti.
 - [Artifact 11310701073 — backfill-30d-output](https://github.com/EmAnzi3/spain_renewables_radar/actions/runs/37220893072/artifacts/11310701073). Il report originale completo è `reports/validation_metrics.json` nell'artifact; una sintesi verificata è in `docs/validation/2026-10-04-twelve-source.json`.
 
-Questa certificazione supera i run 37193300195 e 37196640080 a undici fonti, nonché il vecchio checkpoint a dieci fonti. Il pacchetto locale `spain_radar_gva_preview_55ecc9d.zip` è superato: **non applicarlo su main**. I commit successivi a f4a88a6 fino al presente checkpoint riguardano soltanto probe e documentazione, non modificano la pipeline certificata.
+Questa certificazione supera i run 37193300195 e 37196640080 a undici fonti, nonché il vecchio checkpoint a dieci fonti. Il pacchetto locale `spain_radar_gva_preview_55ecc9d.zip` è superato: **non applicarlo su main**.
 
-### Eventi per fonte
+Successivamente sono stati aggiunti l'inventario Catalunya separato, il relativo launcher, probe DOGC, audit, test e documentazione. **I collector esistenti, il parser e la pipeline ordinaria non sono stati modificati da questo blocco.** L'inventario non aggiunge un tredicesimo collector datato. I 268 test passati nelle successive verifiche del codice non sostituiscono una certificazione live integrata. Il run completo 37241609962 è stato cancellato durante lo smoke: non è una nuova certificazione e non aggiorna i conteggi sopra riportati.
+
+### Eventi per fonte nel run integrato certificato
 
 | Fonte | Eventi |
 |---|---:|
@@ -59,7 +63,7 @@ Output operativi: `reports/dog/coverage.json`, `reports/dog/raw/`, `reports/dog/
 
 `app.galicia_archive` è validato come inventario nel run **37195445929**: **487 record/50 pagine/487 schede HTML**, suddivisi in 298 consultazioni, 123 autorizzazioni, 66 documentazione ambientale; **1.936 allegati indicizzati**, non scaricati. Non sono 487 progetti unici. Le date web restano ignote, la data dell'atto più recente riconosciuta è 2026-04-20. BASELINE non significa nuove opportunità e NOT_SEEN non significa WITHDRAWN.
 
-Il collegamento DOG–archivio ammette soltanto lo stesso documento ufficiale oppure il riferimento amministrativo esatto. Nel backfill certificato, il confronto con l'inventario è stato eseguito e ha prodotto **0 collegamenti esatti**: nessuna associazione per somiglianza di nome è stata inventata. La copertura datata ora viene dal DOG; l'archivio non viene retrodatato né trasformato in un feed recente.
+Il collegamento DOG–archivio ammette soltanto lo stesso documento ufficiale oppure il riferimento amministrativo esatto. Nel backfill certificato, il confronto con l'inventario è stato eseguito e ha prodotto **0 collegamenti esatti**: nessuna associazione per somiglianza di nome è stata inventata. La copertura datata viene dal DOG; l'archivio non viene retrodatato né trasformato in un feed recente.
 
 ## Altre fonti operative e limiti
 
@@ -77,20 +81,51 @@ GVA conserva i PDF originali; i campi sono estratti dalle **prime due pagine** d
 
 **BOCYL**: ID della singola disposizione, non della sola edizione; recuperati atti prima collassati. Riparazione delle identità pregresse con backup e invarianti sui contenuti originali.
 
-## Lavoro corrente — Catalunya
+## Catalunya — inventario implementato e validato
 
-**Probe degli inventari ufficiali completato**, non collector attivo. Run **37221339629 — SUCCESS**: dataset eolico `dh5g-4nit` **137 righe**, fotovoltaico `ggx8-jkp4` **358 righe**. Acquisiti gli snapshot completi; conteggi e versione riconciliati prima/dopo. Originali e audit nell'artifact `catalunya-public-probe-output` **11310348543**. Dettagli in `docs/sources/catalunya.md`.
+**[Run 37241609997 — SUCCESS](https://github.com/EmAnzi3/spain_renewables_radar/actions/runs/37241609997)**, codice funzionale **b9e0cb7076c84743ace93c658979f20af60c07dc**. Sono passati **242 test**, due acquisizioni live indipendenti con pagine da 100 righe, ricostruzione dai byte originali, riconciliazione dei conteggi e delle versioni prima/dopo, baseline persistente e replay idempotente.
 
-Righe per comune non equivalgono a impianti unici: 14 gruppi eolici e 28 FV hanno più righe; esistono potenze zero sulle righe secondarie. Un riferimento FV è usato per nomi differenti. Le righe in servizio non sono nuovi cantieri. `data_pon_ncia` è la data della riunione ambientale, non la pubblicazione o l'autorizzazione. Nessun record è stato inserito nel radar sulla base della data di aggiornamento del dataset.
+| Controllo | Eolico | Fotovoltaico |
+|---|---:|---:|
+| Righe comunali originali | 137 | 358 |
+| Gruppi diagnostici complessivi | 115 | 319 |
+| Gruppi con riferimento e nome esatti | 37 | 315 |
+| Righe senza riferimento, mantenute separate | 78 | 4 |
+| Gruppi con più righe comunali | 14 | 28 |
+| Gruppi senza potenza determinabile | 28 | 0 |
 
-**DOGC:** probe della navigazione pubblica **37221624700 — SUCCESS**, codice **adf38e1386bb91e73748b8403bf26a06e5266a40**: homepage e sei asset JavaScript ufficiali acquisiti. Individuati i percorsi pubblici di calendario, ricerca e sommario. **Nessuna risposta del servizio di ricerca/calendario ancora validata, nessun backfill DOGC e nessun collector DOGC dichiarato implementato.** Checkpoint in `docs/sources/dogc.md`.
+**495 righe comunali e 434 gruppi diagnostici non equivalgono a 495 o 434 impianti unici.** Gli 82 record senza riferimento restano separati; un riferimento FV usato per due nomi diversi non provoca la loro fusione. Potenza, superficie totale e numero totale di aerogeneratori ripetuti non vengono sommati fra comuni. Zeri originali conservati; conflitti positivi non risolti arbitrariamente.
 
-Prossimo blocco: acquisizione ripetibile dell'inventario Catalunya con identità e comuni conservati, insieme alla verifica del percorso datato DOGC. Le due evidenze restano distinte finché non esiste un collegamento ufficiale e deterministico.
+La prima acquisizione è BASELINE. La seconda è DELTA: **0 nuove voci osservate, 0 modifiche, 0 voci non più osservate**. Date originali UTC: `2026-10-04T22:51:50.223538+00:00` e `2026-10-04T22:51:55.947367+00:00`. I dataset della fonte risultano aggiornati al **28 settembre 2026**: questa è la data del dataset, non dei progetti.
+
+Modulo **`app.catalunya_inventory`**; avvio Windows **`aggiorna_inventario_catalogna.bat`**. Output locale: **`reports/catalunya_inventory/index.html`**; esito dell'ultimo tentativo: `reports/catalunya_inventory/run_status.json`; baseline: `data/catalunya_inventory_baseline.json`. Ogni snapshot conserva JSON, CSV, report HTML consultabile, variazioni, metriche e originali con hash/data. Un errore di acquisizione non rimpiazza la baseline valida; gli aggiornamenti concorrenti sono bloccati.
+
+[Artifact 11317693006 — catalunya-inventory-output](https://github.com/EmAnzi3/spain_renewables_radar/actions/runs/37241609997/artifacts/11317693006), SHA256 `b9f1361f7dc9bcad1f3aa5dda633015befc26e98d0e224841b3f927ad7833ee8`. Sintesi verificata in `docs/validation/2026-10-05-catalunya-inventory.json`; metodo in `docs/sources/catalunya.md`.
+
+**Nessun evento datato creato e nessun nuovo collector abilitato.** Stato della fonte e data della riunione ambientale non diventano una nuova autorizzazione; nessuna data di pubblicazione/lavori o EPC viene dedotta. Il probe precedente 37221339629 resta evidenza storica, superato per l'acquisizione dell'inventario dalla validazione del modulo ripetibile.
+
+## DOGC — servizi verificati, riconciliazione dell'indice ancora aperta
+
+Il probe dei servizi **37241609987 — SUCCESS** ha verificato risposte reali di calendario, sommario e ricerca. Il servizio pubblico effettivo è `portaldogc.gencat.cat`, individuato negli script ufficiali del sito `dogc.gencat.cat`. Compatibilità TLS corretta con verifica del certificato e del nome host attive, TLS minimo 1.2 e livello di sicurezza 2. Non viene ignorata la verifica SSL.
+
+Il successivo audit **37242571670 — FAILURE**, codice **2f9ed2b8834572659bf0c158506885b6de6806f9**, ha superato **268 test** e acquisito i calendari e i sommari dell'intera finestra **5 settembre–4 ottobre 2026**: **30 giorni, 20 edizioni principali, 3 allegati ufficiali** (`9747A`, `9755A`, `9759A`). I documenti degli allegati conservano numero, data e ambito distinti. I giorni senza edizione sono stabiliti dal calendario ufficiale, non dal giorno della settimana.
+
+**L'indice non è certificato.** La ricerca restituisce 1.525 risultati dichiarati, ma la quinta pagina ripete sette documenti già presenti nelle precedenti. La diagnostica **37242677858 — SUCCESS** ha confermato i duplicati nei byte originali e verificato che i parametri di paginazione corrispondono al codice pubblico del sito. I duplicati non sono stati rimossi per far passare il controllo: potrebbero nascondere omissioni. La causa interna del servizio non è stata accertata.
+
+L'alternativa dell'esportazione CSV completa, tramite l'URL restituito dalla stessa ricerca, è stata provata nel run **37242776975 — FAILURE**: timeout di lettura dopo 40 secondi. **Nessun CSV acquisito o interpretato.** Nessun blocco di autorizzazione è stato aggirato.
+
+Script: `scripts/audit_dogc_index.py`; test: `tests/test_dogc_index_audit.py`; risultati parziali nell'artifact **11318310090**, `dogc-dated-index-output`, del run 37242571670. Sintesi verificata: `docs/validation/2026-10-05-dogc-checkpoint.json`. Contratti e ripartenza: `docs/sources/dogc.md`.
+
+**DOGC resta non implementato nel registry e fuori dalla pipeline ordinaria.** Nessun testo integrale degli atti è stato acquisito in questo blocco, nessun evento/progetto DOGC è stato inserito e nessun collegamento all'inventario Catalunya è stato certificato.
+
+### Prossimo blocco, circoscritto
+
+Rendere deterministica l'acquisizione completa della ricerca DOGC e riconciliarla con i sommari, senza accettare duplicati o lacune: valutare l'export ufficiale con un budget di attesa/retry limitato oppure partizioni ufficiali non sovrapposte da validare. Solo dopo: acquisizione dei testi integrali pertinenti, estrazione conservativa dei campi, collegamento documentale/riferimento esatto con l'inventario, test, smoke e backfill prima dell'abilitazione. Una eventuale validazione limitata ai soli sommari dovrà dichiarare esplicitamente quel perimetro: non equivale al confronto indipendente attualmente mancante.
 
 ## Sequenza approvata
 
 1. SABIA integrato, nei limiti dei milestone dichiarati.
-2. Portali regionali energia/información pública: Andalucía e GVA operativi; Galicia inventariata e DOG datato integrato; Catalunya in lavorazione; altri da acquisire e validare.
+2. Portali regionali energia/información pública: Andalucía e GVA operativi; Galicia inventariata e DOG datato integrato; **inventario Catalunya validato, percorso datato DOGC ancora in lavorazione**; altri da acquisire e validare.
 3. **Nove bollettini autonomici ancora mancanti:** DOGC, DOGV, BON, BOPV, BOPA, BOCANT, BOC-CAN, BOIB, BOR. Copertura bollettini CCAA: **8/17**.
 4. PLACSP e consultazioni preliminari.
 5. IDAE e BDNS/SNPSAP.
@@ -100,4 +135,4 @@ Prossimo blocco: acquisizione ripetibile dell'inventario Catalunya con identità
 
 ## Vincoli
 
-Solo fonti ufficiali/gratuite; nessun aggregatore commerciale. Owner/promotore distinto da EPC. REE è contesto rete. Scoring separato dal lifecycle. Mai inventare nomi, MW, provincia, expediente, date o stato. Preservare external_id, URL, date e raw_text. I flag espongono dubbi, non correggono automaticamente i dati. Il gate strutturale non certifica la perfezione semantica di ciascun campo. Il layer EPC/BoP rimane presente ma non inventa contractor; nel run certificato non risultano evidenze esplicite. Dashboard e aggregati separano MW sconosciuti, multi-provincia e potenze di gruppo non allocate.
+Solo fonti ufficiali/gratuite; nessun aggregatore commerciale. Owner/promotore distinto da EPC. REE è contesto rete. Scoring separato dal lifecycle. Mai inventare nomi, MW, provincia, expediente, date o stato. Preservare external_id, URL, date e raw_text. I flag espongono dubbi, non correggono automaticamente i dati. Il gate strutturale non certifica la perfezione semantica di ciascun campo. Il layer EPC/BoP rimane presente ma non inventa contractor; nel run integrato certificato non risultano evidenze esplicite. Dashboard e aggregati separano MW sconosciuti, multi-provincia e potenze di gruppo non allocate.
