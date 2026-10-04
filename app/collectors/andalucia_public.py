@@ -15,6 +15,7 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 from app.parser import parse_event
+from app.and_public_transport import download_archive
 
 API = 'https://datos.juntadeandalucia.es/api/v0/public-documents'
 ARCHIVE_URL = API + '/all?format=json'
@@ -157,8 +158,11 @@ class AndaluciaPublicCollector:
 
     def _get_count(self):
         response = self.session.get(COUNT_URL, timeout=self.timeout)
-        response.raise_for_status()
-        value = response.json()['count']['result']
+        try:
+            response.raise_for_status()
+            value = response.json()['count']['result']
+        finally:
+            response.close()
         if not isinstance(value, int) or value <= 0:
             raise ValueError('Invalid Andalucia count response')
         return value
@@ -171,19 +175,18 @@ class AndaluciaPublicCollector:
         output = Path('reports/andalucia_public'); output.mkdir(parents=True, exist_ok=True)
         try:
             expected = self._get_count()
-            response = self.session.get(ARCHIVE_URL, timeout=self.timeout)
-            response.raise_for_status()
-            # Preserve the source even when schema or count validation fails.
-            (output/'archive_raw.json').write_bytes(response.content)
-            payload = response.json()
+            raw, download_url = download_archive(self.session, ARCHIVE_URL, output, self.timeout, self.audit)
+            # Preserve complete source bytes even when schema or count validation fails.
+            (output/'archive_raw.json').write_bytes(raw)
+            payload = json.loads(raw)
             after = self._get_count()
             if expected != after:
                 raise ValueError('Andalucia catalogue changed during snapshot; retry a fresh run')
             records = validate_archive(payload, expected)
             parts = partition_archive(records)
             self.audit.update(archive_records=len(records), expected_records=expected,
-                              retrieved_at=datetime.now(timezone.utc).isoformat(), source_url=ARCHIVE_URL,
-                              download_url=response.url, sha256=hashlib.sha256(response.content).hexdigest(),
+                              retrieved_at=self.audit['download_attempts'][-1]['retrieved_at'], source_url=ARCHIVE_URL,
+                              download_url=download_url, sha256=hashlib.sha256(raw).hexdigest(),
                               partitions={key:len(value) for key,value in parts.items()})
             selected = parts['dated'] + parts['undated']
             gaps = write_source_gaps(parts, output)
@@ -198,7 +201,7 @@ class AndaluciaPublicCollector:
             # complete means source snapshot acquired/reconciled, NOT complete source metadata.
             self.audit['complete'] = True
             self._records = parts['dated']
-            print(f"AND_PUBLIC snapshot={len(records)}; dated={len(parts['dated'])}; source gaps={len(gaps)}",flush=True)
+            print(f"AND_PUBLIC snapshot={len(records)}; dated={len(parts['dated'])}; source gaps={len(gaps)}; download attempts={len(self.audit['download_attempts'])}",flush=True)
         except Exception as exc:
             self._fatal_error = str(exc)
             raise
