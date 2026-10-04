@@ -19,23 +19,28 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install requests beautifulsoup4
-      - name: Verify officially linked dataset metadata and bounded live samples
+      - name: Reconcile complete official snapshots without manufacturing administrative events
         run: |
           python - <<'PY'
           import hashlib,json,re
-          from datetime import datetime,timezone
+          from collections import Counter,defaultdict
+          from datetime import date,datetime,timedelta,timezone
+          from decimal import Decimal
           from pathlib import Path
           from urllib.parse import urlsplit,urljoin
+          from zoneinfo import ZoneInfo
           import requests
           from bs4 import BeautifulSoup
           root=Path('reports/catalunya_probe');root.mkdir(parents=True,exist_ok=True)
           s=requests.Session();s.headers['User-Agent']='SpainRenewablesRadar/0.5 (official source probe)'
           allowed={'mediambient.gencat.cat','analisi.transparenciacatalunya.cat','dogc.gencat.cat'}
           audit=[]
+          end=datetime.now(ZoneInfo('Europe/Madrid')).date()-timedelta(days=1)
+          start=end-timedelta(days=29)
           def get(url):
               for _ in range(5):
                   p=urlsplit(url)
-                  if p.scheme!='https' or p.hostname not in allowed or p.username or p.password:raise ValueError('Unexpected probe destination')
+                  if p.scheme!='https' or p.hostname not in allowed or p.username or p.password or p.port not in (None,443):raise ValueError('Unexpected probe destination')
                   r=s.get(url,timeout=(10,45),allow_redirects=False,stream=True)
                   if r.status_code in (301,302,303,307,308):
                       target=urljoin(url,r.headers.get('Location',''));r.close();url=target;continue
@@ -43,7 +48,7 @@ jobs:
                       parts=[];size=0
                       for part in r.iter_content(65536):
                           size+=len(part)
-                          if size>8_000_000:raise ValueError('Probe sample response unexpectedly large')
+                          if size>8_000_000:raise ValueError('Probe response exceeds bounded snapshot size')
                           parts.append(part)
                       raw=b''.join(parts);sha=hashlib.sha256(raw).hexdigest()
                       (root/(sha+'.bin')).write_bytes(raw)
@@ -52,6 +57,9 @@ jobs:
                       r.raise_for_status();return raw
                   finally:r.close()
               raise ValueError('Too many redirects')
+          def count_value(payload):
+              if not isinstance(payload,list) or len(payload)!=1 or not re.fullmatch(r'\d+',str(payload[0].get('count',''))):raise ValueError('Invalid source count')
+              return int(payload[0]['count'])
           origin='https://mediambient.gencat.cat/es/05_ambits_dactuacio/avaluacio_ambiental/energies_renovables/visor/index.html'
           results=[];failures=[]
           try:
@@ -64,14 +72,57 @@ jobs:
                       if not any('/'+dataset in link for link in links):raise ValueError('Dataset no longer linked from official environmental portal')
                       base='https://analisi.transparenciacatalunya.cat'
                       meta=json.loads(get(base+'/api/views/'+dataset+'.json'))
+                      if meta.get('id')!=dataset:raise ValueError('Metadata identity differs from requested dataset')
                       columns=[dict(name=c.get('name'),field=c.get('fieldName'),type=c.get('dataTypeName'),description=c.get('description')) for c in meta.get('columns',[]) if not str(c.get('fieldName','')).startswith(':')]
-                      count=json.loads(get(base+'/resource/'+dataset+'.json?$select=count(*)'))
-                      sample=json.loads(get(base+'/resource/'+dataset+'.json?$limit=5'))
-                      if not isinstance(sample,list) or not columns or not isinstance(count,list):raise ValueError('Unexpected official dataset structure')
-                      result=dict(kind=kind,dataset=dataset,title=meta.get('name'),description=meta.get('description'),attribution=meta.get('attribution'),metadata=meta.get('metadata'),rowsUpdatedAt=meta.get('rowsUpdatedAt'),count=count,columns=columns,sample=sample,source_implemented=False,scope='Probe only. Dataset update timestamps are not project publication or authorization dates.')
-                      results.append(result)
+                      required={'sol_licitud','nom','pot_ncia_mw','municipi','codi_municipi','sol_licitant','estat','data_pon_ncia'}
+                      if not required.issubset({c['field'] for c in columns}):raise ValueError('Required source fields no longer available')
+                      count=count_value(json.loads(get(base+'/resource/'+dataset+'.json?$select=count(*)')))
+                      if not 0<count<10000:raise ValueError('Count requires a new pagination plan, not a truncated snapshot')
+                      all_rows=json.loads(get(base+'/resource/'+dataset+'.json?$limit=10000'))
+                      if not isinstance(all_rows,list) or len(all_rows)!=count:raise ValueError('Rows do not reconcile to official count')
+                      final_count=count_value(json.loads(get(base+'/resource/'+dataset+'.json?$select=count(*)')))
+                      final_meta=json.loads(get(base+'/api/views/'+dataset+'.json'))
+                      if count!=final_count or meta.get('rowsUpdatedAt')!=final_meta.get('rowsUpdatedAt'):raise ValueError('Dataset changed during acquisition; snapshot not certified')
+                      groups=defaultdict(list);date_values=[];unknown_dates=0;zero_rows=0;missing_power=0;missing_refs=0
+                      fingerprints=Counter()
+                      for row in all_rows:
+                          if not isinstance(row,dict) or not row.get('nom') or not row.get('municipi'):raise ValueError('Missing required row identity or municipality')
+                          fingerprints[hashlib.sha256(json.dumps(row,ensure_ascii=False,sort_keys=True).encode()).hexdigest()]+=1
+                          value=row.get('pot_ncia_mw')
+                          if value in (None,''):missing_power+=1
+                          else:
+                              value=Decimal(str(value))
+                              if not value.is_finite() or value<0:raise ValueError('Invalid source power value')
+                              zero_rows+=int(value==0)
+                          ref=row.get('sol_licitud')
+                          if ref:groups[(str(ref),str(row['nom']))].append(row)
+                          else:missing_refs+=1
+                          if row.get('data_pon_ncia'):
+                              date_values.append(date.fromisoformat(row['data_pon_ncia'][:10]))
+                          else:unknown_dates+=1
+                      grouped=[]
+                      for (ref,name),group in groups.items():
+                          positive=sorted({str(Decimal(str(r['pot_ncia_mw'])).normalize()) for r in group if r.get('pot_ncia_mw') not in (None,'') and Decimal(str(r['pot_ncia_mw']))>0})
+                          grouped.append(dict(reference=ref,name=name,rows=len(group),municipal_codes=sorted({r.get('codi_municipi','') for r in group}),positive_mw_values=positive,states=sorted({r.get('estat','') for r in group}),source_rows=group))
+                      names_by_ref=defaultdict(set)
+                      for ref,name in groups:names_by_ref[ref].add(name)
+                      result=dict(kind=kind,dataset=dataset,title=meta.get('name'),attribution=meta.get('attribution'),columns=columns,
+                          rowsUpdatedAt=meta.get('rowsUpdatedAt'),dataset_updated_at=datetime.fromtimestamp(meta['rowsUpdatedAt'],timezone.utc).isoformat(),
+                          records=count,count_reconciled=True,version_stable_during_acquisition=True,
+                          exact_reference_name_groups=len(grouped),groups_with_multiple_rows=sum(g['rows']>1 for g in grouped),
+                          groups_with_conflicting_positive_mw=sum(len(g['positive_mw_values'])>1 for g in grouped),
+                          references_with_different_names=sum(len(names)>1 for names in names_by_ref.values()),
+                          exact_duplicate_rows=sum(n-1 for n in fingerprints.values()),rows_without_reference=missing_refs,
+                          zero_power_rows=zero_rows,missing_power_rows=missing_power,row_states=dict(Counter(r.get('estat','UNKNOWN') for r in all_rows)),
+                          unknown_environmental_meeting_dates=unknown_dates,environmental_meeting_date_max=max(date_values).isoformat() if date_values else None,
+                          window_start=start.isoformat(),window_end=end.isoformat(),meeting_dated_rows_in_window=sum(start<=d<=end for d in date_values),
+                          web_publication_dates_available=False,project_events_created=0,source_implemented=False,
+                          caveats=['Snapshot is not a dated bulletin feed.','Rows may represent project municipalities; groups are diagnostic, not automatically unique projects.','Source zeros remain preserved; no zero or duplicate capacity is used to create opportunity totals.','Current state and environmental meeting date do not prove an authorization publication date.','Only top-level matching dataset metadata is interpreted; unrelated nested legacy metadata is not used.'])
+                      (root/(dataset+'-rows.json')).write_text(json.dumps(all_rows,ensure_ascii=False,indent=2),encoding='utf-8')
+                      (root/(dataset+'-groups.json')).write_text(json.dumps(grouped,ensure_ascii=False,indent=2),encoding='utf-8')
                       (root/(dataset+'.json')).write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
-                      print('CATALUNYA_DATASET',json.dumps(result,ensure_ascii=False),flush=True)
+                      results.append(result)
+                      print('CATALUNYA_INVENTORY_AUDIT',json.dumps(result,ensure_ascii=False),flush=True)
                   except Exception as exc:
                       failures.append(dict(dataset=dataset,error_class=type(exc).__name__,error=str(exc)))
                       print('DATASET_FAILURE',json.dumps(failures[-1]),flush=True)
@@ -79,7 +130,7 @@ jobs:
               failures.append(dict(source=origin,error_class=type(exc).__name__,error=str(exc)))
           finally:
               (root/'acquisition.json').write_text(json.dumps(audit,ensure_ascii=False,indent=2))
-              (root/'summary.json').write_text(json.dumps(dict(results=len(results),failures=failures,collectors_enabled=0),ensure_ascii=False,indent=2))
+              (root/'summary.json').write_text(json.dumps(dict(results=results,failures=failures,collectors_enabled=0),ensure_ascii=False,indent=2))
           if failures:raise SystemExit('Official source probe incomplete: '+json.dumps(failures))
           if len(results)!=2:raise SystemExit('Expected two officially linked energy datasets')
           PY
