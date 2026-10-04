@@ -1,0 +1,86 @@
+name: dogc-service-contract-probe
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/dogc-service-contract-probe.yml'
+permissions:
+  contents: read
+concurrency:
+  group: dogc-service-contract-probe
+  cancel-in-progress: true
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests beautifulsoup4
+      - name: Inspect public navigation request methods and non-secret input fields
+        run: |
+          python -u - <<'PY'
+          import hashlib,json,re
+          from datetime import datetime,timezone
+          from pathlib import Path
+          from urllib.parse import urljoin,urlsplit
+          import requests
+          from bs4 import BeautifulSoup
+          out=Path('reports/dogc_contract_probe');out.mkdir(parents=True,exist_ok=True)
+          session=requests.Session();session.headers['User-Agent']='SpainRenewablesRadar/0.6 (public read-only source verification)'
+          acquisitions=[]
+          def get(url):
+              for _ in range(4):
+                  p=urlsplit(url)
+                  if p.scheme!='https' or p.hostname!='dogc.gencat.cat' or p.username or p.password or p.port not in (None,443):raise ValueError('Unexpected destination')
+                  r=session.get(url,timeout=(8,30),allow_redirects=False,stream=True)
+                  if r.status_code in (301,302,303,307,308):
+                      location=r.headers.get('Location');r.close()
+                      if not location:raise ValueError('Redirect without location')
+                      url=urljoin(url,location);continue
+                  try:
+                      r.raise_for_status();parts=[];size=0
+                      for chunk in r.iter_content(65536):
+                          size+=len(chunk)
+                          if size>3_000_000:raise ValueError('Response too large')
+                          parts.append(chunk)
+                      raw=b''.join(parts);sha=hashlib.sha256(raw).hexdigest()
+                      (out/(sha+'.bin')).write_bytes(raw)
+                      acquisitions.append({'url':url,'sha256':sha,'bytes':len(raw),'retrieved_at':datetime.now(timezone.utc).isoformat()})
+                      return raw
+                  finally:r.close()
+              raise ValueError('Too many redirects')
+          home='https://dogc.gencat.cat/ca/inici/'
+          try:
+              soup=BeautifulSoup(get(home),'html.parser')
+              safe_fields=[]
+              for tag in soup.select('input[id]'):
+                  name=tag.get('id','')
+                  if re.search(r'(protocol|host|port|uri|locale|import)',name,re.I) and not re.search(r'(token|key|auth|password|secret)',name,re.I):
+                      safe_fields.append({'id':name,'value':tag.get('value')})
+              print('PUBLIC_CONFIG',json.dumps(safe_fields,ensure_ascii=False))
+              scripts={Path(urlsplit(urljoin(home,t['src'])).path).name:urljoin(home,t['src']) for t in soup.select('script[src]')}
+              required=['constants.js','fpca_calendari_dogc.js','fpca_sumari_ultim_DOGC_publicat.js','fpca_cerca_resultats_dogc.js']
+              for name in required:
+                  text=get(scripts[name]).decode('utf-8')
+                  selected=[];lines=text.splitlines()
+                  if name=='constants.js':
+                      selected=[line for line in lines if re.search(r'(hostConstant|uriSearchDOGC|apiCalendarDOGC|summaryDOGC|searchDOGC)',line)]
+                  else:
+                      indexes=[i for i,line in enumerate(lines) if '$.ajax({' in line or 'inputParameters = {' in line or 'uriSearchDOGC =' in line]
+                      for i in indexes:
+                          selected.extend(lines[max(0,i-8):min(len(lines),i+36)])
+                  selected=[line for line in selected if not re.search(r'(apikey|api_key|token|password|authorization|secret)',line,re.I)]
+                  print('PUBLIC_REQUEST_CONTRACT',json.dumps({'asset':name,'lines':selected},ensure_ascii=False))
+              (out/'config.json').write_text(json.dumps(safe_fields,ensure_ascii=False,indent=2),encoding='utf-8')
+          finally:
+              (out/'acquisitions.json').write_text(json.dumps(acquisitions,ensure_ascii=False,indent=2),encoding='utf-8')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dogc-service-contract-output
+          path: reports/dogc_contract_probe/
+          if-no-files-found: error
