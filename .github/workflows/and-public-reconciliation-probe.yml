@@ -1,0 +1,55 @@
+name: and-public-reconciliation-probe
+on:
+  workflow_dispatch:
+  push:
+    branches: ['fix/dogc-index-reconciliation']
+    paths: ['.github/workflows/and-public-reconciliation-probe.yml']
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Read official OpenAPI and independent current count
+        run: |
+          python -u - <<'PY'
+          import hashlib,json
+          from datetime import datetime,timezone
+          from pathlib import Path
+          import requests
+          root=Path('reports/and-public-reconciliation');root.mkdir(parents=True,exist_ok=True)
+          manifest=[]
+          urls={
+            'openapi':'https://datos.juntadeandalucia.es/api/v0/public-documents/openapi.json',
+            'count':'https://datos.juntadeandalucia.es/api/v0/public-documents/count',
+          }
+          with requests.Session() as session:
+            session.headers['User-Agent']='SpainRenewablesRadar/official-source-reconciliation'
+            for label,url in urls.items():
+              r=session.get(url,timeout=(8,40),allow_redirects=False)
+              sha=hashlib.sha256(r.content).hexdigest()
+              (root/(label+'.json')).write_bytes(r.content)
+              manifest.append({'label':label,'url':url,'status':r.status_code,'sha256':sha,'bytes':len(r.content),'retrieved_at':datetime.now(timezone.utc).isoformat()})
+              print('SOURCE_RESPONSE',json.dumps(manifest[-1]),flush=True)
+              r.raise_for_status()
+              if r.status_code!=200:raise ValueError('Unexpected contract redirect or status')
+              data=r.json()
+              if label=='openapi':
+                print('OFFICIAL_SERVERS',json.dumps(data.get('servers')),flush=True)
+                print('OFFICIAL_PATHS',json.dumps(data.get('paths'),ensure_ascii=False),flush=True)
+                print('OFFICIAL_SCHEMAS',json.dumps(data.get('components',{}),ensure_ascii=False),flush=True)
+              else:print('OFFICIAL_COUNT',json.dumps(data,ensure_ascii=False),flush=True)
+          (root/'manifest.json').write_text(json.dumps(manifest,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: and-public-reconciliation-probe
+          path: reports/and-public-reconciliation/
+          if-no-files-found: error
