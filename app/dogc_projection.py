@@ -40,6 +40,11 @@ def place_aliases(name):
         article = article.strip()
         if place_norm(article) in {'el','la','els','les','l'}:
             aliases.add(place_norm(article + (' ' if not article.endswith("'") else '') + base.strip()))
+    # The location clause expands Catalan "del" for leading article names.
+    # Apply the same exact grammar transformation to official INE names too,
+    # including internal contractions (Parets del Vallès, Cabra del Camp).
+    # Keep original aliases; homonymous code matches remain unresolved.
+    aliases.update(re.sub(r"\bdel\s+", "de el ", alias) for alias in tuple(aliases))
     return aliases
 
 
