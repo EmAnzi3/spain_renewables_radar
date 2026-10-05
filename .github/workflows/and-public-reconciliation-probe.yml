@@ -9,14 +9,14 @@ permissions:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 4
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - run: pip install requests
-      - name: Read official OpenAPI and independent current count
+      - name: Probe documented search without filters and compare full declared count
         run: |
           python -u - <<'PY'
           import hashlib,json
@@ -25,27 +25,37 @@ jobs:
           import requests
           root=Path('reports/and-public-reconciliation');root.mkdir(parents=True,exist_ok=True)
           manifest=[]
-          urls={
-            'openapi':'https://datos.juntadeandalucia.es/api/v0/public-documents/openapi.json',
-            'count':'https://datos.juntadeandalucia.es/api/v0/public-documents/count',
-          }
+          base='https://datos.juntadeandalucia.es/api/v0/public-documents'
           with requests.Session() as session:
             session.headers['User-Agent']='SpainRenewablesRadar/official-source-reconciliation'
-            for label,url in urls.items():
-              r=session.get(url,timeout=(8,40),allow_redirects=False)
+            def fetch(label,url,params=None):
+              r=session.get(url,params=params,timeout=(8,90),allow_redirects=False)
               sha=hashlib.sha256(r.content).hexdigest()
               (root/(label+'.json')).write_bytes(r.content)
-              manifest.append({'label':label,'url':url,'status':r.status_code,'sha256':sha,'bytes':len(r.content),'retrieved_at':datetime.now(timezone.utc).isoformat()})
+              manifest.append({'label':label,'url':r.url,'parameters':params,'status':r.status_code,'sha256':sha,'bytes':len(r.content),'retrieved_at':datetime.now(timezone.utc).isoformat()})
+              (root/'manifest.json').write_text(json.dumps(manifest,indent=2))
               print('SOURCE_RESPONSE',json.dumps(manifest[-1]),flush=True)
               r.raise_for_status()
-              if r.status_code!=200:raise ValueError('Unexpected contract redirect or status')
-              data=r.json()
-              if label=='openapi':
-                print('OFFICIAL_SERVERS',json.dumps(data.get('servers')),flush=True)
-                print('OFFICIAL_PATHS',json.dumps(data.get('paths'),ensure_ascii=False),flush=True)
-                print('OFFICIAL_SCHEMAS',json.dumps(data.get('components',{}),ensure_ascii=False),flush=True)
-              else:print('OFFICIAL_COUNT',json.dumps(data,ensure_ascii=False),flush=True)
-          (root/'manifest.json').write_text(json.dumps(manifest,indent=2))
+              if r.status_code!=200:raise ValueError('Unexpected redirect or status')
+              return r.json()
+            spec=fetch('openapi',base+'/openapi.json')
+            contract=spec['paths']['/api/v0/public-documents/search']['get']
+            print('SEARCH_CONTRACT',json.dumps(contract,ensure_ascii=False),flush=True)
+            before=fetch('count-before',base+'/count')['count']['result']
+            if type(before) is not int or not 0<before<=25000:raise ValueError('Unbounded/invalid declared count')
+            common={'organism':'-','themes':'-','counseling':'-','title':'-','order_by':'id','format':'json'}
+            def describe(label,data):
+              print('RESULT_SHAPE',label,type(data).__name__,flush=True)
+              if isinstance(data,dict):
+                for key,value in data.items():
+                  print('RESULT_FIELD',label,key,type(value).__name__,len(value) if isinstance(value,(dict,list,str)) else value,flush=True)
+                  if isinstance(value,list):print('RESULT_FIRST_LAST',label,key,json.dumps(value[:2]+value[-2:],ensure_ascii=False)[:6000],flush=True)
+                  elif isinstance(value,dict):print('RESULT_NESTED',label,key,json.dumps(value,ensure_ascii=False)[:2500],flush=True)
+              elif isinstance(data,list):print('RESULT_FIRST_LAST',label,len(data),json.dumps(data[:2]+data[-2:],ensure_ascii=False)[:6000],flush=True)
+            sample=fetch('sample-desc',base+'/search',dict(common,mode='DESC',size=10));describe('sample',sample)
+            complete=fetch('complete-asc',base+'/search',dict(common,mode='ASC',size=before));describe('complete',complete)
+            after=fetch('count-after',base+'/count')['count']['result']
+            print('BEFORE_AFTER',before,after,flush=True)
           PY
       - uses: actions/upload-artifact@v4
         if: always()
