@@ -89,6 +89,8 @@ The baseline is protected by an exclusive writer lock and atomic JSON replacemen
 
 BASELINE means initial inventory, not new opportunities. DELTA reports newly observed/changed/not-seen records; NOT_SEEN does not prove withdrawal. Changes to unreferenced rows can appear as disappearance plus a newly observed row because a safe project identity is missing; no false identity continuity is invented.
 
-## Remaining boundary
+## Boundary with the dated DOGC collector
 
-This module does **not** enable `DOGC` or add a thirteenth dated collector. The dated-source audit is documented in `dogc.md`; its independent search reconciliation remains unresolved. Linking inventories to dated events requires official document identity or exact reference evidence and separate validation. No automatic fuzzy cross-source merge was added.
+This inventory module does **not** itself create dated events. The independent **DOGC collector is now implemented and included in the thirteen-source ordinary pipeline**, validated by integrated run **37350555017** on code **ca598cc0f1e685652c6af58c83c85f6186fafd9e**. The daily-index reconciliation and semantic classification have been completed; see `dogc.md` and `../validation/2026-10-05-thirteen-source.json`. The former statement that DOGC reconciliation remained unresolved is superseded.
+
+The completed DOGC collector does not turn this inventory's dataset or meeting dates into project publication dates. Linking inventories to dated events still requires official document identity or exact reference evidence and separate validation. No automatic fuzzy cross-source merge was added.
