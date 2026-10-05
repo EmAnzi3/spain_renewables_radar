@@ -15,7 +15,7 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 from app.parser import parse_event
-from app.and_public_transport import download_archive
+from app.and_public_catalogue import acquire_catalogue, replay_catalogue
 
 API = 'https://datos.juntadeandalucia.es/api/v0/public-documents'
 ARCHIVE_URL = API + '/all?format=json'
@@ -147,25 +147,13 @@ class AndaluciaPublicCollector:
         self.timeout = (10, max(timeout, 90))
         self.session = requests.Session()
         self.session.headers['User-Agent'] = user_agent
-        retry = Retry(total=2, connect=2, read=1, status=2, backoff_factor=1,
-                      status_forcelist=(429,500,502,503,504), allowed_methods=frozenset({'GET'}))
+        retry = Retry(total=0)  # The catalogue reader owns the single bounded retry budget.
         self.session.mount('https://', HTTPAdapter(max_retries=retry))
         self._records = None
         self._fatal_error = None
         self.audit = {'source_code':self.code, 'complete':False, 'archive_records':0,
                       'expected_records':None, 'relevant_records':0, 'relevant_invalid_dates':[],
                       'dated_coverage_complete':False, 'scope':'DATED_PUBLICATIONS_WITH_UNDATED_INVENTORY'}
-
-    def _get_count(self):
-        response = self.session.get(COUNT_URL, timeout=self.timeout)
-        try:
-            response.raise_for_status()
-            value = response.json()['count']['result']
-        finally:
-            response.close()
-        if not isinstance(value, int) or value <= 0:
-            raise ValueError('Invalid Andalucia count response')
-        return value
 
     def _load(self):
         if self._records is not None:
@@ -174,20 +162,14 @@ class AndaluciaPublicCollector:
             raise RuntimeError(self._fatal_error)
         output = Path('reports/andalucia_public'); output.mkdir(parents=True, exist_ok=True)
         try:
-            expected = self._get_count()
-            raw, download_url = download_archive(self.session, ARCHIVE_URL, output, self.timeout, self.audit)
-            # Preserve complete source bytes even when schema or count validation fails.
-            (output/'archive_raw.json').write_bytes(raw)
-            payload = json.loads(raw)
-            after = self._get_count()
-            if expected != after:
-                raise ValueError('Andalucia catalogue changed during snapshot; retry a fresh run')
-            records = validate_archive(payload, expected)
+            records, acquisition = acquire_catalogue(self.session, output, self.timeout)
+            records = validate_archive(records, acquisition['expected_records'])
+            self.audit.update(acquisition)
+            if replay_catalogue(output, self.audit) != records:
+                raise ValueError('Live catalogue did not reproduce its original responses')
+            self.audit['source_replay_verified'] = True
             parts = partition_archive(records)
-            self.audit.update(archive_records=len(records), expected_records=expected,
-                              retrieved_at=self.audit['download_attempts'][-1]['retrieved_at'], source_url=ARCHIVE_URL,
-                              download_url=download_url, sha256=hashlib.sha256(raw).hexdigest(),
-                              partitions={key:len(value) for key,value in parts.items()})
+            self.audit.update(partitions={key:len(value) for key,value in parts.items()})
             selected = parts['dated'] + parts['undated']
             gaps = write_source_gaps(parts, output)
             self.audit.update(relevant_records=len(selected), source_gaps=len(gaps),
@@ -201,9 +183,10 @@ class AndaluciaPublicCollector:
             # complete means source snapshot acquired/reconciled, NOT complete source metadata.
             self.audit['complete'] = True
             self._records = parts['dated']
-            print(f"AND_PUBLIC snapshot={len(records)}; dated={len(parts['dated'])}; source gaps={len(gaps)}; download attempts={len(self.audit['download_attempts'])}",flush=True)
+            print(f"AND_PUBLIC snapshot={len(records)}; dated={len(parts['dated'])}; source gaps={len(gaps)}; acquisition={self.audit['mode']}",flush=True)
         except Exception as exc:
             self._fatal_error = str(exc)
+            self.audit.update(complete=False, error=str(exc))
             raise
         finally:
             (output/'coverage.json').write_text(json.dumps(self.audit,ensure_ascii=False,indent=2),encoding='utf-8')

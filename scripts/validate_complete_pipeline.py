@@ -5,6 +5,7 @@ from collections import Counter
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from app.db import connect
+from app.and_public_catalogue import replay_catalogue
 from app.identifiers import valid_expediente
 from app.parser import ParsedEvent
 from app.reporting import geography_accounting,build_commercial_rows
@@ -57,6 +58,9 @@ def metrics(conn,coverage,quality,sabia,and_public,borm):
         raise ValueError('SABIA inventory/detail acquisition incomplete')
     if not and_public.get('complete') or sum(and_public['partitions'].values())!=and_public['archive_records']:
         raise ValueError('Andalucia archive accounting incomplete')
+    and_originals=replay_catalogue(Path('reports/andalucia_public'),and_public)
+    if len(and_originals)!=and_public['archive_records']:
+        raise ValueError('Andalucia live original replay count mismatch')
     if conn.execute('PRAGMA foreign_key_check').fetchall():raise ValueError('Foreign key integrity error')
     source_errors=[r for r in coverage if r['status']!='OK']
     result={
@@ -78,6 +82,9 @@ def metrics(conn,coverage,quality,sabia,and_public,borm):
         'sabia_cards_not_in_other_collectors':conn.execute("SELECT COUNT(*) FROM projects p WHERE EXISTS(SELECT 1 FROM events e WHERE e.project_key=p.project_key AND e.source_code='MITECO_SABIA') AND NOT EXISTS(SELECT 1 FROM events e WHERE e.project_key=p.project_key AND e.source_code<>'MITECO_SABIA')").fetchone()[0],
         'sabia_milestone_scope':'ENTRY and CONSULT only; web publication dates unknown; authorization/resolution updates remain covered by gazettes, not derived from the SABIA current-state label',
         'andalucia_archive_records':and_public['archive_records'],
+        'andalucia_live_original_replay_verified':True,
+        'andalucia_catalogue_mode':and_public['mode'],
+        'andalucia_overlap_checked':and_public['overlap_checked'],
         'andalucia_source_metadata_gaps':and_public['source_gaps'],
         'andalucia_source_metadata_complete':and_public['dated_coverage_complete'],
         'geography':geography_accounting(build_commercial_rows(conn)),
