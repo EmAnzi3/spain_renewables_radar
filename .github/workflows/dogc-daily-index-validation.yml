@@ -1,0 +1,47 @@
+name: dogc-daily-index-validation
+on:
+  workflow_dispatch:
+    inputs:
+      until:
+        description: Last complete Spanish calendar day
+        default: '2026-10-04'
+        required: true
+  push:
+    branches: ['fix/dogc-index-reconciliation']
+    paths:
+      - 'scripts/reconcile_dogc_daily.py'
+      - 'tests/test_dogc_daily_index.py'
+      - '.github/workflows/dogc-daily-index-validation.yml'
+permissions:
+  contents: read
+concurrency:
+  group: dogc-daily-index-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: All unit and regression tests
+        run: python -m unittest discover -s tests
+      - name: Two complete independent live index passes
+        env:
+          AUDIT_UNTIL: ${{ inputs.until || '2026-10-04' }}
+        run: python -u -m scripts.reconcile_dogc_daily --until "$AUDIT_UNTIL"
+      - name: Latest actual result, including failures
+        if: always()
+        run: |
+          if [ -f reports/dogc_daily_index/audit.json ]; then
+            cat reports/dogc_daily_index/audit.json
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dogc-daily-index-output
+          path: reports/dogc_daily_index/
+          if-no-files-found: error
