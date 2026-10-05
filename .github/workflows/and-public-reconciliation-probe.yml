@@ -1,0 +1,73 @@
+name: and-public-reconciliation-probe
+on:
+  workflow_dispatch:
+  push:
+    branches: ['fix/dogc-index-reconciliation']
+    paths: ['.github/workflows/and-public-reconciliation-probe.yml']
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Reconcile all source identities without requesting one oversized result
+        run: |
+          python -u - <<'PY'
+          import hashlib,json
+          from datetime import datetime,timezone
+          from pathlib import Path
+          import requests
+          root=Path('reports/and-public-reconciliation');root.mkdir(parents=True,exist_ok=True)
+          manifest=[]
+          base='https://datos.juntadeandalucia.es/api/v0/public-documents'
+          with requests.Session() as session:
+            session.headers['User-Agent']='SpainRenewablesRadar/official-source-reconciliation'
+            def fetch(label,url,params=None):
+              r=session.get(url,params=params,timeout=(8,45),allow_redirects=False)
+              sha=hashlib.sha256(r.content).hexdigest()
+              (root/(label+'.json')).write_bytes(r.content)
+              manifest.append({'label':label,'url':r.url,'parameters':params,'status':r.status_code,'sha256':sha,'bytes':len(r.content),'retrieved_at':datetime.now(timezone.utc).isoformat()})
+              (root/'manifest.json').write_text(json.dumps(manifest,indent=2))
+              print('SOURCE_RESPONSE',json.dumps(manifest[-1]),flush=True)
+              r.raise_for_status()
+              if r.status_code!=200:raise ValueError('Unexpected redirect or status')
+              return r.json()
+            spec=fetch('openapi',base+'/openapi.json')
+            assert '/api/v0/public-documents/search' in spec['paths']
+            before=fetch('count-before',base+'/count')['count']['result']
+            if type(before) is not int or not 0<before<=19000:raise ValueError('Invalid/beyond bounded catalogue size')
+            size=min(before,(before+1)//2+100)
+            common={'organism':'-','themes':'-','counseling':'-','title':'-','order_by':'id','format':'json','size':size}
+            parts=[]
+            for mode in ('ASC','DESC'):
+              data=fetch('ordered-'+mode.lower(),base+'/search',dict(common,mode=mode))
+              rows=data['results']
+              if data['hits']!=size or len(rows)!=size or data['total_hits']!=before:raise ValueError('Search is not the entire requested prefix/suffix')
+              ids=[r['id'] for r in rows]
+              if len(set(ids))!=size or ids!=sorted(ids,reverse=mode=='DESC'):raise ValueError('Source identity ordering/uniqueness failed')
+              parts.append({r['id']:r for r in rows})
+              print('ORDERED_ROWS',mode,len(rows),ids[0],ids[-1],flush=True)
+            after=fetch('count-after',base+'/count')['count']['result']
+            a,b=parts
+            overlap=set(a)&set(b)
+            if before!=after or len(set(a)|set(b))!=before:raise ValueError('Full identity catalogue cannot be reconciled')
+            if any(a[k]!=b[k] for k in overlap):raise ValueError('Overlapping original records changed')
+            combined=dict(a);combined.update(b)
+            ordered=[combined[k] for k in sorted(combined)]
+            (root/'live_records.json').write_text(json.dumps(ordered,ensure_ascii=False,indent=2))
+            report={'complete':True,'rows':len(ordered),'overlap_checked':len(overlap),'expected':before,'first_id':min(combined),'last_id':max(combined),'mode':'COMPLETE_ORDERED_PREFIX_SUFFIX','new_project_events_created':0}
+            (root/'reconciliation.json').write_text(json.dumps(report,indent=2))
+            print('LIVE_CATALOGUE_RECONCILED',json.dumps(report),flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: and-public-reconciliation-probe
+          path: reports/and-public-reconciliation/
+          if-no-files-found: error

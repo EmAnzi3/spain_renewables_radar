@@ -1,0 +1,47 @@
+name: dogc-collector-validation
+on:
+  workflow_dispatch:
+  push:
+    branches: ['fix/dogc-index-reconciliation']
+    paths:
+      - 'app/collectors/dogc.py'
+      - 'app/dogc_projection.py'
+      - 'scripts/validate_dogc_collector.py'
+      - 'tests/test_dogc_collector.py'
+      - 'tests/test_dogc_projection.py'
+      - '.github/workflows/dogc-collector-validation.yml'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: dogc-collector-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: All regression tests before live collection
+        run: python -m unittest discover -s tests -v
+      - name: Live smoke and complete thirty-day DOGC collector validation
+        run: python -u -m scripts.validate_dogc_collector --until 2026-10-04
+      - name: Exact source snapshot for reproducing validation
+        if: always()
+        run: |
+          mkdir -p reports/dogc_source
+          git archive --format=tar HEAD > reports/dogc_source/source.tar
+          git rev-parse HEAD > reports/dogc_source/commit.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dogc-collector-output
+          path: |
+            reports/
+            docs/
+            data/dogc_validation.sqlite
+          if-no-files-found: error

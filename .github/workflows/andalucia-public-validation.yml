@@ -5,6 +5,8 @@ on:
     paths:
       - 'app/collectors/andalucia_public.py'
       - 'app/and_public_transport.py'
+      - 'app/and_public_catalogue.py'
+      - 'tests/test_and_public_catalogue.py'
       - 'tests/test_and_public_transport.py'
       - 'tests/test_andalucia*.py'
       - 'scripts/validate_andalucia_public.py'

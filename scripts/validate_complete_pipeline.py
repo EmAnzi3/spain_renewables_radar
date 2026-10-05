@@ -1,18 +1,21 @@
-"""Evidence-based certification of the twelve implemented source adapters."""
+"""Evidence-based certification of the thirteen implemented source adapters."""
 from __future__ import annotations
 import csv,json,os,sys,hashlib
 from collections import Counter
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from app.db import connect
+from app.and_public_catalogue import replay_catalogue
 from app.identifiers import valid_expediente
 from app.parser import ParsedEvent
 from app.reporting import geography_accounting,build_commercial_rows
 from app.store import save_event
 from scripts.gva_integration_gate import validate_gva_integration
 from scripts.dog_integration_gate import validate_dog_integration
+from scripts.validate_dogc_collector import validate_dogc_integration
+from scripts.validate_source_registry import validate_source_registry, validate_source_days, validate_dogc_geography
 
-SOURCES={'BOE','BOCYL','BOA','BOJA','DOCM','DOE','BORM','BOCM','AND_PUBLIC','GVA_PUBLIC','MITECO_SABIA','DOG'}
+SOURCES={'BOE','BOCYL','BOA','BOJA','DOCM','DOE','BORM','BOCM','AND_PUBLIC','GVA_PUBLIC','MITECO_SABIA','DOG','DOGC'}
 
 
 def rows(path):
@@ -31,6 +34,8 @@ def metrics(conn,coverage,quality,sabia,and_public,borm):
         evidence=[json.loads(r[0]) for r in conn.execute("SELECT evidence_json FROM event_source_metadata WHERE project_key=? AND source_code='MITECO_SABIA'",(p['project_key'],))]
         if not any(r.get('administrative_reference')==p['expediente'] for r in evidence):
             invalid.append({'project_key':p['project_key'],'expediente':p['expediente']})
+    source_registry=validate_source_registry(SOURCES)
+    source_window=validate_source_days(coverage,SOURCES)
     counts={s:sum(r['source_code']==s for r in coverage) for s in SOURCES}
     missing_days={s:n for s,n in counts.items() if n!=30}
     before_projects=conn.execute('SELECT COUNT(*) FROM projects').fetchone()[0]
@@ -53,6 +58,9 @@ def metrics(conn,coverage,quality,sabia,and_public,borm):
         raise ValueError('SABIA inventory/detail acquisition incomplete')
     if not and_public.get('complete') or sum(and_public['partitions'].values())!=and_public['archive_records']:
         raise ValueError('Andalucia archive accounting incomplete')
+    and_originals=replay_catalogue(Path('reports/andalucia_public'),and_public)
+    if len(and_originals)!=and_public['archive_records']:
+        raise ValueError('Andalucia live original replay count mismatch')
     if conn.execute('PRAGMA foreign_key_check').fetchall():raise ValueError('Foreign key integrity error')
     source_errors=[r for r in coverage if r['status']!='OK']
     result={
@@ -74,6 +82,9 @@ def metrics(conn,coverage,quality,sabia,and_public,borm):
         'sabia_cards_not_in_other_collectors':conn.execute("SELECT COUNT(*) FROM projects p WHERE EXISTS(SELECT 1 FROM events e WHERE e.project_key=p.project_key AND e.source_code='MITECO_SABIA') AND NOT EXISTS(SELECT 1 FROM events e WHERE e.project_key=p.project_key AND e.source_code<>'MITECO_SABIA')").fetchone()[0],
         'sabia_milestone_scope':'ENTRY and CONSULT only; web publication dates unknown; authorization/resolution updates remain covered by gazettes, not derived from the SABIA current-state label',
         'andalucia_archive_records':and_public['archive_records'],
+        'andalucia_live_original_replay_verified':True,
+        'andalucia_catalogue_mode':and_public['mode'],
+        'andalucia_overlap_checked':and_public['overlap_checked'],
         'andalucia_source_metadata_gaps':and_public['source_gaps'],
         'andalucia_source_metadata_complete':and_public['dated_coverage_complete'],
         'geography':geography_accounting(build_commercial_rows(conn)),
@@ -83,6 +94,12 @@ def metrics(conn,coverage,quality,sabia,and_public,borm):
     }
     result.update(validate_gva_integration(conn,coverage,quality))
     result.update(validate_dog_integration(conn,coverage))
+    result['dogc']=validate_dogc_integration(conn)
+    result['dogc']['geographic_projection']=validate_dogc_geography(conn)
+    result['collector_registry_verified']=source_registry
+    result['source_window_verified']=source_window
+    if result['dogc']['window_start']!=source_window['start'] or result['dogc']['window_end']!=source_window['end']:
+        raise ValueError('DOGC provenance gate covers a different source window')
     if invalid or missing_days or source_errors or issues['ERROR']:
         raise ValueError('Identity, source-day, or structural quality failure: '+json.dumps(result,ensure_ascii=False))
     return result

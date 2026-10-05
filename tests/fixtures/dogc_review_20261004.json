@@ -1,0 +1,492 @@
+{
+  "case_set": "DOGC_2026-09-05_2026-10-04",
+  "basis": "Expected operative-act categories from the frozen original page texts. Not a certification of all project fields or of future source coverage.",
+  "index_run_id": "37272974422",
+  "body_run_id": "37274256818",
+  "index_sha256": "df0215726bc23af1778dc1a1053f9557f5c5782ee69e3f04994399eeb24e2815",
+  "documents": [
+    {
+      "document_id": "1053764",
+      "event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+      "category": "ENERGY_PROJECT",
+      "pdf_sha256": "44e3999ba1c803c7f6cbc28fee0774f2f6514c97325b94bd5e87188fc7bebde2",
+      "page_count": 10
+    },
+    {
+      "document_id": "1053784",
+      "event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+      "category": "ENERGY_PROJECT",
+      "pdf_sha256": "526dc071b77dedbf17747744e49447f80c0020a521a64c6f5cb548a779c9aa22",
+      "page_count": 9
+    },
+    {
+      "document_id": "1053901",
+      "event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+      "category": "ENERGY_PROJECT",
+      "pdf_sha256": "61f7f79e6b5acfd5c856810732a3ad781706e22a708ed4198b825422db75515f",
+      "page_count": 11
+    },
+    {
+      "document_id": "1053994",
+      "event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+      "category": "ENERGY_PROJECT",
+      "pdf_sha256": "9100f211ba0be5ee48288c73ca6449fda288fa1efa711c8eaf37c8d277fd2681",
+      "page_count": 10
+    },
+    {
+      "document_id": "1054063",
+      "event": "ENVIRONMENTAL_DIA_COMPATIBLE",
+      "category": "ENERGY_PROJECT",
+      "pdf_sha256": "a1b3fccb89963183925dbec13dfbee04350bb602b6c3256dc72763a042c82f2c",
+      "page_count": 10
+    },
+    {
+      "document_id": "1054182",
+      "event": "MUNICIPAL_INITIAL_PROJECT_APPROVAL",
+      "category": "MUNICIPAL_PROJECT",
+      "pdf_sha256": "5c77954de76b8acd32caf22ea0fd9fb887e23940da2689f9d36ff7aaede72f4a",
+      "page_count": 1
+    },
+    {
+      "document_id": "1054243",
+      "event": "PUBLIC_INFO_AUTHORIZATION_REQUEST",
+      "category": "ENERGY_PROJECT",
+      "pdf_sha256": "784e78b05258cb553eb506fc63bc573194e33b0b6de367a75f113e2f36a5cdc8",
+      "page_count": 3
+    },
+    {
+      "document_id": "1054244",
+      "event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+      "category": "ENERGY_PROJECT",
+      "pdf_sha256": "b93f177142cbb2580f9f8db066ed7c18015018691dcebe2ff317a33efa84a1b6",
+      "page_count": 11
+    },
+    {
+      "document_id": "1054255",
+      "event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+      "category": "ENERGY_PROJECT",
+      "pdf_sha256": "c678e137bededc2fa2d045506aeae9c010b8a378f09c6b8a45fcbfdd91932562",
+      "page_count": 11
+    },
+    {
+      "document_id": "1054269",
+      "event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+      "category": "ENERGY_PROJECT",
+      "pdf_sha256": "edf138a6ec7dfa6c6cd5dccc7ac89156d8dbe308890d8c076fc98063a00fe5a2",
+      "page_count": 12
+    },
+    {
+      "document_id": "1054284",
+      "event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+      "category": "ENERGY_PROJECT",
+      "pdf_sha256": "cf2efe89976e53116c46ddcbec73a4b6062f11e16a6987b0317aab7334f9c59c",
+      "page_count": 10
+    },
+    {
+      "document_id": "1054291",
+      "event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+      "category": "ENERGY_PROJECT",
+      "pdf_sha256": "a8706d7ec4c309d34ba0c9ba7e2ebd5e055436f06d6ffb0bcb9652e82f728213",
+      "page_count": 10
+    },
+    {
+      "document_id": "1054428",
+      "event": "PUBLIC_INFO_AUTHORIZATION_REQUEST",
+      "category": "ENERGY_PROJECT",
+      "pdf_sha256": "911bd417d2fd5fbd96696941482287253d8e6f11f2a8197c76704e420da012a4",
+      "page_count": 4
+    },
+    {
+      "document_id": "1054443",
+      "event": "PUBLIC_INFO_AUTHORIZATION_REQUEST",
+      "category": "ENERGY_PROJECT",
+      "pdf_sha256": "91b3c2a68d4aebc091e27d543159360822ec0b5abc6cf38a395aeb4d0809db03",
+      "page_count": 3
+    },
+    {
+      "document_id": "1054455",
+      "event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+      "category": "MUNICIPAL_PROJECT",
+      "pdf_sha256": "d8e175feacfcd16b4e24623e3ade0f31d5889935f69f3088659215a26b0c7acc",
+      "page_count": 1
+    },
+    {
+      "document_id": "1054465",
+      "event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+      "category": "ENERGY_PROJECT",
+      "pdf_sha256": "95580d4fd6ee79fa5384ce53f05efd868c6397b5cb234582796175cda7a65912",
+      "page_count": 11
+    },
+    {
+      "document_id": "1054484",
+      "event": "PUBLIC_INFO_AUTHORIZATION_REQUEST",
+      "category": "ENERGY_PROJECT",
+      "pdf_sha256": "ab3d5347540c7ee4f4e272b71dd438dd9cb70e0132a28d0524ef2655c571bfa0",
+      "page_count": 3
+    },
+    {
+      "document_id": "1054493",
+      "event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+      "category": "MUNICIPAL_PROJECT",
+      "pdf_sha256": "245f20deace8b278656211d3fe2c18fc93645d0d525c230bd31411efb036ab7d",
+      "page_count": 1
+    },
+    {
+      "document_id": "1054540",
+      "event": "CORRECTION",
+      "category": "CORRECTION",
+      "pdf_sha256": "ac6886d23caf32623c2cd61b8149c1f3286eb87ab8c740280c9906d670ec740c",
+      "page_count": 1
+    },
+    {
+      "document_id": "1054549",
+      "event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+      "category": "MUNICIPAL_PROJECT",
+      "pdf_sha256": "1446518bb50a1b82ba927c520d3dba8c4263eee2542b84bce1a6e7e0662d84df",
+      "page_count": 1
+    },
+    {
+      "document_id": "1054550",
+      "event": "PUBLIC_INFO_AUTHORIZATION_REQUEST",
+      "category": "ENERGY_PROJECT",
+      "pdf_sha256": "8375e69523dcc2db7b77f2c2df94c21ae8a6c1e16916000384ffafedafa4484a",
+      "page_count": 3
+    },
+    {
+      "document_id": "1054579",
+      "event": "PRIOR_AND_CONSTRUCTION_AUTH",
+      "category": "ENERGY_PROJECT",
+      "pdf_sha256": "41f282c840892bad6bc9dbd87ba14ba007d0cc1a26bc9c59a94c5eea6fe0f565",
+      "page_count": 5
+    },
+    {
+      "document_id": "1054587",
+      "event": "PUBLIC_INFO_AUTHORIZATION_REQUEST",
+      "category": "ENERGY_PROJECT",
+      "pdf_sha256": "f11fbea79853eb953c6ce426e1dd6129cda956407df8f1f06cbbaf531f28d0c1",
+      "page_count": 3
+    },
+    {
+      "document_id": "1054679",
+      "event": "MATERIAL_STORAGE_NOT_ENERGY_STORAGE",
+      "category": "OUT_OF_SCOPE",
+      "pdf_sha256": "f1b6f386f1aea7cce051f0432156afc66fd06f02b239790aca36eb3a8d4d5cb6",
+      "page_count": 13
+    },
+    {
+      "document_id": "1054787",
+      "event": "PRIOR_AND_CONSTRUCTION_AUTH",
+      "category": "ENERGY_PROJECT",
+      "pdf_sha256": "a72ac4cf3d0d937b2bd98a856f2edfc6aafe1e4f2cb69cc7a7681ac4e4509a52",
+      "page_count": 5
+    },
+    {
+      "document_id": "1054800",
+      "event": "PRIOR_AND_CONSTRUCTION_AUTH",
+      "category": "ENERGY_PROJECT",
+      "pdf_sha256": "3ed824abd961b4ec06457ca515ffa24d19dcd71853fbc664b991a75da83fe2ed",
+      "page_count": 5
+    },
+    {
+      "document_id": "1054804",
+      "event": "PRIOR_AND_CONSTRUCTION_AUTH",
+      "category": "ENERGY_PROJECT",
+      "pdf_sha256": "cb01862502ad86917c52f19fa38ee5620ec8a7ccd0234227697a229ac91c7824",
+      "page_count": 5
+    },
+    {
+      "document_id": "1054805",
+      "event": "PUBLIC_INFO_AUTHORIZATION_REQUEST",
+      "category": "ENERGY_PROJECT",
+      "pdf_sha256": "0afa86cc31a2c2129c3b67ca1606e7a0c57a818d8f053778ec968d16e2288740",
+      "page_count": 5
+    },
+    {
+      "document_id": "1054812",
+      "event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+      "category": "MUNICIPAL_PROJECT",
+      "pdf_sha256": "e1e46f9d51b573106c193f99a0012acde78895b650bb354b634144fe0ede33d3",
+      "page_count": 1
+    },
+    {
+      "document_id": "1054820",
+      "event": "PRIOR_AND_CONSTRUCTION_AUTH",
+      "category": "ENERGY_PROJECT",
+      "pdf_sha256": "044d3dfc0a24d99181e70a4e12102a29af32367b93f29226088076bb94cdbb7a",
+      "page_count": 5
+    },
+    {
+      "document_id": "1054827",
+      "event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+      "category": "MUNICIPAL_PROJECT",
+      "pdf_sha256": "361592b65d2dc37c66c89d70412a04d12c63fa2c5b0b3798ed3dcff5c2df077d",
+      "page_count": 1
+    },
+    {
+      "document_id": "1054831",
+      "event": "PRIOR_AND_CONSTRUCTION_AUTH",
+      "category": "ENERGY_PROJECT",
+      "pdf_sha256": "1c92e8ce684169df850dac3f1dee8fedb15d5e8741a9186107c486ca3a71825b",
+      "page_count": 5
+    },
+    {
+      "document_id": "1054841",
+      "event": "PRIOR_AND_CONSTRUCTION_AUTH",
+      "category": "ENERGY_PROJECT",
+      "pdf_sha256": "971abd3d99719e68e1ee481a6b1889259e77947f179274463208af135f6f0676",
+      "page_count": 5
+    },
+    {
+      "document_id": "1054954",
+      "event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+      "category": "MUNICIPAL_PROJECT",
+      "pdf_sha256": "6c0cb2c5b696ffc2c981ce2812f9ce6d3444b4fbe051207b6ccd7b8b2747d471",
+      "page_count": 1
+    },
+    {
+      "document_id": "1054961",
+      "event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+      "category": "MUNICIPAL_PROJECT",
+      "pdf_sha256": "805081afe20a6c9296d7172d1b79016ad43d3f673a416ba4bdefee49a5b57c3b",
+      "page_count": 1
+    },
+    {
+      "document_id": "1055029",
+      "event": "MOBILITY_INCENTIVE_RULES_NOT_PLANT",
+      "category": "OUT_OF_SCOPE",
+      "pdf_sha256": "8c9468d77e032b11a0fe06eb5910f883ac63544c5cc7d6e70276b7ab4584fd7a",
+      "page_count": 1
+    },
+    {
+      "document_id": "1055105",
+      "event": "PRIOR_AND_CONSTRUCTION_AUTH",
+      "category": "ENERGY_PROJECT",
+      "pdf_sha256": "1b3f6a684eba509d69f9c72450a92c475b150d5183c5817bff3f20f8a9a61dcf",
+      "page_count": 8
+    },
+    {
+      "document_id": "1055132",
+      "event": "PUBLIC_INFO_AUTHORIZATION_REQUEST",
+      "category": "ENERGY_PROJECT",
+      "pdf_sha256": "5b11bcc641f595549286239a0c56ba1e0cb1e662c47066749013c225522d4b02",
+      "page_count": 3
+    },
+    {
+      "document_id": "1055222",
+      "event": "DATA_CENTRE_NOT_RENEWABLE_PLANT",
+      "category": "OUT_OF_SCOPE",
+      "pdf_sha256": "fbf0f47c16b53fefb8b2d4486656761b7de5a6f23350d1a1794261a8cdfc5d54",
+      "page_count": 14
+    },
+    {
+      "document_id": "1055226",
+      "event": "PUBLIC_INFO_AUTHORIZATION_REQUEST",
+      "category": "ENERGY_PROJECT",
+      "pdf_sha256": "2e2547c8b4642a5f6a33c4ed27681de58b2d042643dc5902b6dffe88d4bc4cce",
+      "page_count": 3
+    },
+    {
+      "document_id": "1055360",
+      "event": "PUBLIC_INFO_PUBLIC_UTILITY",
+      "category": "ENERGY_PROJECT",
+      "pdf_sha256": "f4b2ea93832087af96097d234b3d6e88efe83563ee913d562dd2ace455d10cf4",
+      "page_count": 61
+    },
+    {
+      "document_id": "1055481",
+      "event": "PUBLIC_INFO_LAND_USE",
+      "category": "ENERGY_PROJECT",
+      "pdf_sha256": "5a06a7f19b57ac3942c9946e94b1861d4bb897fe1cb504c97cdae75671f6eaed",
+      "page_count": 1
+    },
+    {
+      "document_id": "1055505",
+      "event": "PUBLIC_INFO_AUTHORIZATION_REQUEST",
+      "category": "ENERGY_PROJECT",
+      "pdf_sha256": "5a8959fe36f70df3aedddc6c1c766e2bf5b3809a9e9c84c8c51bd1f24064c1c9",
+      "page_count": 3
+    },
+    {
+      "document_id": "1055506",
+      "event": "PUBLIC_UTILITY_GRANTED",
+      "category": "ENERGY_PROJECT",
+      "pdf_sha256": "f863c82ec917e3dd00757f09f7672fedd7233c176531b32c736cbe1d4706fccf",
+      "page_count": 3
+    },
+    {
+      "document_id": "1055542",
+      "event": "MUNICIPAL_INITIAL_PROJECT_APPROVAL",
+      "category": "MUNICIPAL_PROJECT",
+      "pdf_sha256": "d19325f3d7dc1bf8ffe386ad75f5b20af1027de61b06a68fdb3421aa0a40a596",
+      "page_count": 1
+    },
+    {
+      "document_id": "1055569",
+      "event": "PUBLIC_INFO_AUTHORIZATION_REQUEST",
+      "category": "ENERGY_PROJECT",
+      "pdf_sha256": "8489ab14e0d1da8b0509046c19ea36199330807a82dc0a494491fbd5201e9a89",
+      "page_count": 3
+    },
+    {
+      "document_id": "1055570",
+      "event": "MUNICIPAL_INITIAL_PROJECT_APPROVAL",
+      "category": "MUNICIPAL_PROJECT",
+      "pdf_sha256": "eb8bdfadee09d2648ac91fdbf42393ca8b831385f6e6782dee5f94a7718f49a1",
+      "page_count": 1
+    },
+    {
+      "document_id": "1055647",
+      "event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+      "category": "MUNICIPAL_PROJECT",
+      "pdf_sha256": "cec4ec2315e224627e28df69eab902ce0a03a12f24b90dbf5c9c18c1058f12b8",
+      "page_count": 1
+    }
+  ],
+  "capacity_conflict_document_ids": [
+    "1053901",
+    "1054269",
+    "1054291",
+    "1054244",
+    "1054255",
+    "1054428"
+  ],
+  "quantity_cases": [
+    {
+      "id": "1054243",
+      "scope": "CURRENT_TECHNICAL_BODY",
+      "component": "PV",
+      "source_number": "7.047,936",
+      "source_unit": "kWp",
+      "normalized_value": "7.047936",
+      "normalized_unit": "MW"
+    },
+    {
+      "id": "1054243",
+      "scope": "CURRENT_TECHNICAL_BODY",
+      "component": "BESS",
+      "source_number": "1.260",
+      "source_unit": "kW",
+      "normalized_value": "1.26",
+      "normalized_unit": "MW"
+    },
+    {
+      "id": "1054243",
+      "scope": "CURRENT_TECHNICAL_BODY",
+      "component": "BESS",
+      "source_number": "5.015",
+      "source_unit": "kWh",
+      "normalized_value": "5.015",
+      "normalized_unit": "MWh"
+    },
+    {
+      "id": "1054820",
+      "scope": "CURRENT_TECHNICAL_BODY",
+      "component": "BESS",
+      "source_number": "5.040",
+      "source_unit": "kW",
+      "normalized_value": "5.04",
+      "normalized_unit": "MW"
+    },
+    {
+      "id": "1054820",
+      "scope": "CURRENT_TECHNICAL_BODY",
+      "component": "BESS",
+      "source_number": "4.999",
+      "source_unit": "kW",
+      "normalized_value": "4.999",
+      "normalized_unit": "MW"
+    },
+    {
+      "id": "1054820",
+      "scope": "CURRENT_TECHNICAL_BODY",
+      "component": "BESS",
+      "source_number": "20.060",
+      "source_unit": "kWh",
+      "normalized_value": "20.06",
+      "normalized_unit": "MWh"
+    },
+    {
+      "id": "1054428",
+      "scope": "INDEX_TITLE",
+      "component": "BESS",
+      "source_number": "990",
+      "source_unit": "kW",
+      "normalized_value": "0.99",
+      "normalized_unit": "MW"
+    },
+    {
+      "id": "1054428",
+      "scope": "CURRENT_TECHNICAL_BODY",
+      "component": "BESS",
+      "source_number": "450",
+      "source_unit": "kW",
+      "normalized_value": "0.45",
+      "normalized_unit": "MW"
+    },
+    {
+      "id": "1054428",
+      "scope": "CURRENT_TECHNICAL_BODY",
+      "component": "BESS",
+      "source_number": "990",
+      "source_unit": "kWh",
+      "normalized_value": "0.99",
+      "normalized_unit": "MWh"
+    },
+    {
+      "id": "1054269",
+      "scope": "CURRENT_TECHNICAL_BODY",
+      "component": "PV",
+      "source_number": "9.545.335,80",
+      "source_unit": "kWh",
+      "normalized_value": "9545.3358",
+      "normalized_unit": "MWh/year"
+    },
+    {
+      "id": "1054954",
+      "scope": "CURRENT_TECHNICAL_BODY",
+      "component": "PV",
+      "source_number": "32",
+      "source_unit": "kWp",
+      "normalized_value": "0.032",
+      "normalized_unit": "MW"
+    },
+    {
+      "id": "1054961",
+      "scope": "CURRENT_TECHNICAL_BODY",
+      "component": "PV",
+      "source_number": "25",
+      "source_unit": "kWp",
+      "normalized_value": "0.025",
+      "normalized_unit": "MW"
+    }
+  ],
+  "primary_reference_cases": {
+    "1054820": [
+      "FUE-2025-04391587"
+    ],
+    "1054243": [
+      "FUE-2025-04297197",
+      "FUE-2025-04618993"
+    ],
+    "1055481": [
+      "2025/088803/N"
+    ],
+    "1054540": [
+      "OTAABA20250016"
+    ]
+  },
+  "unchanged_empty_fields": [
+    "construction_start_date",
+    "construction_end_date",
+    "epc",
+    "bop"
+  ],
+  "source_note_cases": {
+    "1054540": "The replacement adds no debe to the Spanish environmental decision; keep the earlier wording and do not create a new plant.",
+    "1055360": "The current utility request names Conca I; shared evacuation also refers to II and III. Do not create extra plant events.",
+    "1054484": "Earlier PV authorization does not grant the newly requested storage expansion.",
+    "1054443": "Earlier PV authorization does not grant the newly requested storage expansion.",
+    "1055542": "Initial approval includes a conditional future final approval; do not promote it.",
+    "1055570": "Initial approval includes a conditional future final approval; do not promote it."
+  }
+}

@@ -1,0 +1,53 @@
+name: dogc-body-original-replay-validation
+on:
+  workflow_dispatch:
+  push:
+    branches: ['fix/dogc-index-reconciliation']
+    paths:
+      - 'scripts/acquire_dogc_bodies.py'
+      - 'scripts/dogc_pdf_headers.py'
+      - 'scripts/recheck_dogc_bodies.py'
+      - 'tests/test_dogc_bodies.py'
+      - 'tests/test_dogc_header_layout.py'
+      - '.github/workflows/dogc-body-validation.yml'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: dogc-body-replay-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: All regression tests
+        run: python -m unittest discover -s tests
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 37272974422
+          name: dogc-daily-index-output
+          path: certified-index
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 37274256818
+          name: dogc-document-bodies-output
+          path: original-bodies
+      - name: Replay full index and every original PDF page without new source downloads
+        run: >-
+          python -u -m scripts.recheck_dogc_bodies
+          --index-root certified-index --expected-index-run 37272974422
+          --body-root original-bodies --expected-body-run 37274256818
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dogc-original-replay-output
+          path: reports/dogc_body_recheck.json
+          if-no-files-found: error

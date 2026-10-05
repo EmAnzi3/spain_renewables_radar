@@ -1,0 +1,76 @@
+name: dogc-semantic-validation
+on:
+  workflow_dispatch:
+  push:
+    branches: ['fix/dogc-index-reconciliation']
+    paths:
+      - 'app/dogc_semantics.py'
+      - 'scripts/classify_dogc_documents.py'
+      - 'tests/test_dogc_semantics.py'
+      - 'tests/test_dogc_semantic_review.py'
+      - 'tests/fixtures/dogc_review_20261004.json'
+      - '.github/workflows/dogc-semantic-validation.yml'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: dogc-semantic-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  classify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Preserve exact tracked source for reproducible validation
+        run: |
+          mkdir -p source-snapshot
+          git archive --format=tar HEAD > source-snapshot/source.tar
+          git rev-parse HEAD > source-snapshot/commit.txt
+          sha256sum source-snapshot/source.tar > source-snapshot/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dogc-source-snapshot
+          path: source-snapshot/
+          if-no-files-found: error
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: All regression tests with machine-readable result
+        run: |
+          python - <<'PY'
+          import json,sys,unittest
+          from pathlib import Path
+          import pypdf
+          suite=unittest.defaultTestLoader.discover('tests')
+          result=unittest.TextTestRunner(verbosity=2).run(suite)
+          path=Path('reports/dogc_semantics/tests.json');path.parent.mkdir(parents=True,exist_ok=True)
+          path.write_text(json.dumps({'tests_run':result.testsRun,'failures':len(result.failures),
+            'errors':len(result.errors),'skipped':len(result.skipped),'successful':result.wasSuccessful(),
+            'python':sys.version,'pypdf':pypdf.__version__},indent=2)+'\n')
+          sys.exit(0 if result.wasSuccessful() else 1)
+          PY
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 37272974422
+          name: dogc-daily-index-output
+          path: certified-index
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 37274256818
+          name: dogc-document-bodies-output
+          path: original-bodies
+      - name: Strict original index/PDF replay, semantic fixtures and offline report
+        run: >-
+          python -u -m scripts.classify_dogc_documents
+          --index-root certified-index --expected-index-run 37272974422
+          --body-root original-bodies --expected-body-run 37274256818
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dogc-semantic-output
+          path: reports/dogc_semantics/
+          if-no-files-found: error

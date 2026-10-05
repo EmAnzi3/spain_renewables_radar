@@ -39,7 +39,7 @@ def commercial_stage(event_type: str) -> str:
         return "PRECONSTRUCTION"
     if event_type in {"CONSTRUCTION_AUTH","PUBLIC_UTILITY"}:
         return "AUTHORIZED"
-    if event_type in {"PRIOR_AUTH","DIA","MODIFICATION"}:
+    if event_type in {"PRIOR_AUTH","DIA","MODIFICATION","ENVIRONMENTAL_SCREENING"}:
         return "PERMITTING"
     return "EARLY"
 

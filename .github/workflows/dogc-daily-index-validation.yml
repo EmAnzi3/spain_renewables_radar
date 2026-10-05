@@ -1,0 +1,75 @@
+name: dogc-daily-index-validation
+on:
+  workflow_dispatch:
+    inputs:
+      until:
+        description: Last complete Spanish calendar day
+        default: '2026-10-04'
+        required: true
+  push:
+    branches: ['fix/dogc-index-reconciliation']
+    paths:
+      - 'scripts/reconcile_dogc_daily.py'
+      - 'tests/test_dogc_daily_index.py'
+      - '.github/workflows/dogc-daily-index-validation.yml'
+permissions:
+  contents: read
+concurrency:
+  group: dogc-daily-index-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: All unit and regression tests
+        run: python -m unittest discover -s tests
+      - name: Two complete independent live index passes
+        env:
+          AUDIT_UNTIL: ${{ inputs.until || '2026-10-04' }}
+        run: python -u -m scripts.reconcile_dogc_daily --until "$AUDIT_UNTIL"
+      - name: Latest actual result, including failures
+        if: always()
+        run: |
+          if [ -f reports/dogc_daily_index/audit.json ]; then
+            cat reports/dogc_daily_index/audit.json
+          fi
+      - name: Compare exact original title pairs when the gate fails
+        if: failure()
+        run: |
+          python - <<'PY'
+          import json,hashlib,re
+          from pathlib import Path
+          from datetime import date
+          from scripts.audit_dogc_index import parse_summary
+          from scripts.reconcile_dogc_daily import parse_complete_day
+          for path in Path('reports/dogc_daily_index').rglob('acquisitions.json'):
+              items={item['label']:item for item in json.loads(path.read_text())}
+              def data(item):
+                  raw=(path.parent/(item['sha256']+'.bin')).read_bytes()
+                  assert hashlib.sha256(raw).hexdigest()==item['sha256']
+                  return json.loads(raw)
+              for label,item in items.items():
+                  match=re.fullmatch(r'edition:([12]):(\d{4}-\d{2}-\d{2})',label)
+                  if not match:continue
+                  other=items.get('daily:'+match[1]+':'+match[2])
+                  if other is None:continue
+                  day=date.fromisoformat(match[2])
+                  left=parse_summary(data(item),item['parameters']['numDOGC'],day)
+                  right=parse_complete_day(data(other),day)
+                  print('ORIGINAL_INDEX_COUNTS',match[2],len(left),len(right))
+                  for key in sorted(set(left)&set(right)):
+                      if left[key]['title']!=right[key]['title']:
+                          print('ORIGINAL_TITLE_PAIR',json.dumps({'key':key,'summary':left[key]['title'],'search':right[key]['title']},ensure_ascii=False))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dogc-daily-index-output
+          path: reports/dogc_daily_index/
+          if-no-files-found: error

@@ -2,6 +2,7 @@ name: backfill-30d-validation
 on:
   workflow_dispatch:
   push:
+    branches: ['main', 'fix/dogc-index-reconciliation']
     paths:
       - '.github/workflows/backfill-30d-validation.yml'
       - 'app/**'
@@ -22,7 +23,6 @@ jobs:
       PYTHONUNBUFFERED: '1'
       SABIA_WORKERS: '4'
       SABIA_FORCE_LIVE_SAMPLE: '1'
-      SABIA_SEED_RUN_ID: '37184831950'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -31,15 +31,24 @@ jobs:
       - run: pip install -r requirements.txt
       - name: Unit and regression tests before collection
         run: python -m unittest discover -s tests -v
+      - name: Select recent own-repository detail cache without changing source dates
+        id: sabia_seed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/select_sabia_seed.py
       - name: Optional recent official detail cache
+        if: steps.sabia_seed.outputs.found == 'true'
         uses: actions/download-artifact@v4
         continue-on-error: true
         with:
           github-token: ${{ github.token }}
-          run-id: 37184831950
-          name: sabia-30d-output
+          run-id: ${{ steps.sabia_seed.outputs.run_id }}
+          artifact-ids: ${{ steps.sabia_seed.outputs.artifact_id }}
+          merge-multiple: true
           path: sabia-recovery-input
       - name: Preserve original cache retrieval dates and re-fetch all discovery indexes
+        env:
+          SABIA_SEED_RUN_ID: ${{ steps.sabia_seed.outputs.run_id || '0' }}
         run: python scripts/recover_sabia_snapshot.py
       - name: Optional historical Galicia inventory for exact-reference links only
         uses: actions/download-artifact@v4
@@ -65,13 +74,13 @@ jobs:
           echo "VALIDATION_UNTIL=$(TZ=Europe/Madrid date -d yesterday +%F)" >> "$GITHUB_ENV"
           echo "BORM_RUN_SNAPSHOT_DIR=data/run_snapshots" >> "$GITHUB_ENV"
           echo "BORM_RUN_SNAPSHOT_SCOPE=${GITHUB_RUN_ID}:${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_ENV"
-      - name: Twelve-source live smoke before full backfill
+      - name: Thirteen-source live smoke before full backfill
         timeout-minutes: 25
         run: |
           python -m app.run_pipeline --days 3 --until "$VALIDATION_UNTIL" --db data/full_smoke.sqlite --skip-ree --skip-miteco --strict-coverage
           mkdir -p smoke_output
           cp -r reports docs smoke_output/
-      - name: Twelve-source 30-day backfill with national enrichment
+      - name: Thirteen-source 30-day backfill with national enrichment
         timeout-minutes: 25
         run: python -m app.run_pipeline --days 30 --until "$VALIDATION_UNTIL" --strict-coverage
       - name: Certify source coverage, identities, provenance, missing data and idempotency
@@ -112,4 +121,7 @@ jobs:
             scripts/
             config/
             .github/workflows/
+            CURRENT_STATE.md
+            README.md
+            requirements.txt
           if-no-files-found: error
