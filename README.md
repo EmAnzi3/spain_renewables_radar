@@ -20,7 +20,7 @@ Gli inventari senza date di pubblicazione verificabili sono moduli separati: non
 - tutti gli 8 casi senza provincia singola sono multi-provincia, senza forzatura geografica;
 - REE: 931 nodi, snapshot 2026-10-01; MITECO: 71.727 impianti, acquisizione 2026-10-04, 8 match esatti conservativi.
 
-`CURRENT_STATE.md` riporta limiti, run, metriche e prossimi passi. La copertura nazionale delle fonti non è ancora completa. Le successive verifiche del codice hanno raggiunto **268 test superati**, ma non costituiscono una nuova certificazione live integrata. L'inventario Catalunya è stato validato separatamente; DOGC non è ancora operativo.
+`CURRENT_STATE.md` riporta limiti, run, metriche e prossimi passi. La copertura nazionale delle fonti non è ancora completa. Le successive verifiche del codice e degli originali DOGC non costituiscono una nuova certificazione live della pipeline ordinaria. L'inventario Catalunya è stato validato separatamente; DOGC non è ancora un collector operativo.
 
 ## Fonti operative
 
@@ -40,7 +40,7 @@ Le altre fonti nel registry `config/sources.json` restano `implemented=false` fi
 
 Le date degli atti, i periodi di consultazione e le date nei link DOG restano separati dalle date web ignote. I documenti allegati sono indicizzati, non acquisiti. L'inventario non crea eventi nel database. Il collegamento al DOG usa soltanto documenti o riferimenti amministrativi esatti: nella finestra certificata il confronto ha prodotto zero collegamenti, senza associazioni inventate.
 
-## Catalunya: inventario operativo, DOGC ancora in verifica
+## Catalunya: inventario operativo, DOGC separato
 
 **[Validazione inventario 37241609997 — SUCCESS](https://github.com/EmAnzi3/spain_renewables_radar/actions/runs/37241609997)**, codice `b9e0cb7076c84743ace93c658979f20af60c07dc`: **242 test**, due acquisizioni live indipendenti con paginazione, conteggi/versioni riconciliati, originali verificati e baseline persistente. Seconda acquisizione senza variazioni; replay idempotente.
 
@@ -48,7 +48,13 @@ I dataset ufficiali contengono **137 righe eoliche e 358 fotovoltaiche**. Sono r
 
 Modulo `app.catalunya_inventory`, launcher `aggiorna_inventario_catalogna.bat`, report HTML/CSV/JSON e variazioni. **Nessun evento datato creato, nessuna modifica ai dodici collector ordinari.** Dettagli: `docs/sources/catalunya.md` e `docs/validation/2026-10-05-catalunya-inventory.json`.
 
-**DOGC non è ancora un collector abilitato.** Calendario, sommari e servizio di ricerca sono raggiungibili con verifica TLS attiva. Nell'audit 5 settembre–4 ottobre 2026 sono stati acquisiti i sommari di 20 edizioni principali e tre allegati; la riconciliazione indipendente si è fermata perché la ricerca paginata ripete sette avvisi. L'esportazione CSV alternativa è andata in timeout. I testi integrali non sono stati acquisiti e l'indice non è certificato. Stato e ripartenza: `docs/sources/dogc.md`, `docs/validation/2026-10-05-dogc-checkpoint.json`.
+### DOGC: indice riconciliato e originali acquisiti
+
+Sviluppo sul branch `fix/dogc-index-reconciliation`, **PR #1 draft e non mergiata**. Nella finestra **5 settembre–4 ottobre 2026**, il run **37272974422 — SUCCESS** riconcilia **1.525 disposizioni**, con due acquisizioni live complete: 30 giorni, 20 edizioni principali, **cinque allegati**, 10 giorni ufficialmente senza edizione. Le ricerche giornaliere complete evitano le sovrapposizioni della paginazione mensile senza scartare duplicati per nascondere omissioni.
+
+Acquisiti i **48 PDF candidati, 299 pagine effettive**. Il controllo corretto **37276204735 — SUCCESS** ricostruisce l'indice dagli originali e verifica hash PDF, provenienza, testo esatto e **299 intestazioni su 299 pagine**, preservando le date originarie e senza nuovi download dalla fonte. Il precedente riepilogo di 218 pagine era errato: il conteggio qui riportato viene dai file e dal replay verificato, non dal solo log.
+
+**Non sono 48 progetti validati.** Restano la classificazione della pertinenza, l'interpretazione del dispositivo e l'estrazione per impianto/componente. Nessun evento o stato DOGC viene inserito nel database e il collector rimane disabilitato. Stato, limiti e discrepanze conservate: `docs/sources/dogc.md`, `docs/validation/2026-10-05-dogc-daily-index.json`, `docs/validation/2026-10-05-dogc-document-bodies.json`.
 
 ## Lifecycle, scoring ed EPC/BoP
 
@@ -95,6 +101,8 @@ Equivalente da terminale:
 
 Il launcher apre il report dopo un'acquisizione riuscita. In caso di errore consultare `reports/catalunya_inventory/run_status.json`: il precedente inventario valido non deve essere interpretato come un nuovo aggiornamento riuscito. Non eliminare la baseline locale per un aggiornamento ordinario: perderesti il riferimento necessario al confronto delle variazioni. Non è stato aggiunto un aggiornamento pianificato automatico.
 
+I controlli DOGC sono workflow di sviluppo separati, non un nuovo comando del BAT ordinario. Non occorre cambiare il launcher del radar per questo checkpoint.
+
 ## Output
 
 - Database: `data/spain_renewables.sqlite`.
@@ -107,7 +115,8 @@ Il launcher apre il report dopo un'acquisizione riuscita. In caso di errore cons
 - DOG: `reports/dog/coverage.json`, `reports/dog/raw/`, `reports/dog/galicia_links.json`.
 - Galicia: `reports/galicia_archive/index.html`, `inventory.json`, `inventory.csv`, `changes.json`, `window_audit.json`; baseline locale persistente `data/galicia_archive_baseline.json`.
 - Catalunya: `reports/catalunya_inventory/index.html`, `run_status.json`, `latest.json`; ogni cartella `snapshots/` conserva report, inventario JSON/CSV, variazioni, metriche e originali. Baseline persistente `data/catalunya_inventory_baseline.json`.
-- Dashboard ordinaria: `docs/index.html`. Gli inventari separati non vengono automaticamente pubblicati nella dashboard.
+- DOGC, solo sviluppo: artifact `dogc-daily-index-output`, `dogc-document-bodies-output` e `dogc-original-replay-output`; il report corretto è `dogc_body_recheck.json`. I conteggi dell'acquisizione originaria e del successivo controllo rimangono distinti.
+- Dashboard ordinaria: `docs/index.html`. Gli inventari separati e i candidati DOGC non vengono automaticamente pubblicati nella dashboard.
 
 La vista provinciale distingue MW identificati, MW sconosciuti, progetti multi-provincia e potenze di gruppo non allocate; non duplica potenze nelle province.
 

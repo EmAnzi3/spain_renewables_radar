@@ -1,6 +1,6 @@
 # CURRENT STATE — Spain Renewables Radar
 
-Aggiornamento del checkpoint: **5 ottobre 2026, Europe/Rome**. Le date UTC originali delle acquisizioni rimangono conservate.
+Aggiornamento del checkpoint: **5 ottobre 2026, Europe/Rome**. Le date UTC originali delle acquisizioni rimangono conservate. Il lavoro DOGC descritto sotto è sul branch **`fix/dogc-index-reconciliation`**, **PR #1 OPEN/DRAFT, non mergiata**; non modifica la pipeline di produzione.
 
 ## Ultima certificazione integrata verificata — 4 ottobre 2026
 
@@ -18,7 +18,7 @@ Aggiornamento del checkpoint: **5 ottobre 2026, Europe/Rome**. Le date UTC origi
 
 Questa certificazione supera i run 37193300195 e 37196640080 a undici fonti, nonché il vecchio checkpoint a dieci fonti. Il pacchetto locale `spain_radar_gva_preview_55ecc9d.zip` è superato: **non applicarlo su main**.
 
-Successivamente sono stati aggiunti l'inventario Catalunya separato, il relativo launcher, probe DOGC, audit, test e documentazione. **I collector esistenti, il parser e la pipeline ordinaria non sono stati modificati da questo blocco.** L'inventario non aggiunge un tredicesimo collector datato. I 268 test passati nelle successive verifiche del codice non sostituiscono una certificazione live integrata. Il run completo 37241609962 è stato cancellato durante lo smoke: non è una nuova certificazione e non aggiorna i conteggi sopra riportati.
+Successivamente sono stati aggiunti l'inventario Catalunya separato, il relativo launcher, moduli DOGC di acquisizione/verifica, test e documentazione. **I collector esistenti, il parser comune e la pipeline ordinaria non sono stati modificati da questo blocco.** L'inventario e i candidati DOGC non aggiungono un tredicesimo collector operativo. I test successivi e i replay degli originali non sostituiscono una certificazione live integrata. Il run completo 37241609962 è stato cancellato durante lo smoke: non è una nuova certificazione e non aggiorna i conteggi sopra riportati.
 
 ### Eventi per fonte nel run integrato certificato
 
@@ -104,29 +104,25 @@ Modulo **`app.catalunya_inventory`**; avvio Windows **`aggiorna_inventario_catal
 
 **Nessun evento datato creato e nessun nuovo collector abilitato.** Stato della fonte e data della riunione ambientale non diventano una nuova autorizzazione; nessuna data di pubblicazione/lavori o EPC viene dedotta. Il probe precedente 37221339629 resta evidenza storica, superato per l'acquisizione dell'inventario dalla validazione del modulo ripetibile.
 
-## DOGC — servizi verificati, riconciliazione dell'indice ancora aperta
+## DOGC — indice riconciliato, PDF verificati, classificazione da completare
 
-Il probe dei servizi **37241609987 — SUCCESS** ha verificato risposte reali di calendario, sommario e ricerca. Il servizio pubblico effettivo è `portaldogc.gencat.cat`, individuato negli script ufficiali del sito `dogc.gencat.cat`. Compatibilità TLS corretta con verifica del certificato e del nome host attive, TLS minimo 1.2 e livello di sicurezza 2. Non viene ignorata la verifica SSL.
+**Indice: run 37272974422 — SUCCESS**, codice `33d69a0353d6db0572ece36fc5606fcd907bdeda`. Finestra **5 settembre–4 ottobre 2026**: **1.525 disposizioni, 30 giorni, due acquisizioni live complete, 20 edizioni principali, cinque allegati, 10 giorni senza edizione**. Confronto di ogni ID, data e titolo fra ricerche giornaliere complete e sommari, riconciliazione del totale mensile e ricostruzione dai byte originali. **Zero omissioni, avvisi aggiuntivi o conflitti sostanziali; 385 varianti tipografiche conservate separatamente.**
 
-Il successivo audit **37242571670 — FAILURE**, codice **2f9ed2b8834572659bf0c158506885b6de6806f9**, ha superato **268 test** e acquisito i calendari e i sommari dell'intera finestra **5 settembre–4 ottobre 2026**: **30 giorni, 20 edizioni principali, 3 allegati ufficiali** (`9747A`, `9755A`, `9759A`). I documenti degli allegati conservano numero, data e ambito distinti. I giorni senza edizione sono stabiliti dal calendario ufficiale, non dal giorno della settimana.
+La paginazione mensile ripeteva sette documenti: ora viene usato un risultato completo per giorno, senza scartare duplicati per nascondere lacune. Gli allegati effettivi sono `9747A`, `9748A`, `9751A`, `9757A`, `9765A`; il riepilogo precedente che ne indicava tre era errato. Dettagli: `docs/validation/2026-10-05-dogc-daily-index.json`.
 
-**L'indice non è certificato.** La ricerca restituisce 1.525 risultati dichiarati, ma la quinta pagina ripete sette documenti già presenti nelle precedenti. La diagnostica **37242677858 — SUCCESS** ha confermato i duplicati nei byte originali e verificato che i parametri di paginazione corrispondono al codice pubblico del sito. I duplicati non sono stati rimossi per far passare il controllo: potrebbero nascondere omissioni. La causa interna del servizio non è stata accertata.
+**48 PDF candidati acquisiti, 299 pagine effettive.** Acquisizione originale `37274256818`, codice `d63e2f5f3333a890e02bb55f00f42c8ceb8c5891`. Il controllo diretto dell'archivio ha smentito il riepilogo intermedio di 218 pagine: l'audit originale riconosceva solo due intestazioni perché l'estrattore colloca molte testate dopo il corpo e può inserire spazi nella data. L'audit e i file originari sono conservati immutati.
 
-L'alternativa dell'esportazione CSV completa, tramite l'URL restituito dalla stessa ricerca, è stata provata nel run **37242776975 — FAILURE**: timeout di lettura dopo 40 secondi. **Nessun CSV acquisito o interpretato.** Nessun blocco di autorizzazione è stato aggirato.
+**Replay corretto: run 37276204735 — SUCCESS**, codice funzionale `f123ed5ba484a1188172a9c8b7b13e9fa605d0d0`. Ricostruiti indice, testo e numero pagine dagli originali; verificati **48/48 documenti e 299/299 intestazioni**, con data, edizione, posizione della pagina e stesso CVE all'interno di ciascun documento. Hash e provenienza coincidono, nessuna pagina è priva di testo, il confronto esatto dei testi è passato. **Zero nuovi download dalla fonte e date originali preservate.** Suite di regressione verde; 12 nuove regressioni sulla disposizione delle intestazioni.
 
-Script: `scripts/audit_dogc_index.py`; test: `tests/test_dogc_index_audit.py`; risultati parziali nell'artifact **11318310090**, `dogc-dated-index-output`, del run 37242571670. Sintesi verificata: `docs/validation/2026-10-05-dogc-checkpoint.json`. Contratti e ripartenza: `docs/sources/dogc.md`.
+Il nuovo artifact **11330421970 — `dogc-original-replay-output`** è stato scaricato e confrontato con il digest API, SHA256 `10d5828a9aef609a599b58eb552fb441eaeb42fffed261b74ec10692a0c57191`. La discrepanza nei metadati esterni dello ZIP di acquisizione originario rimane documentata, senza confonderla con i controlli sui singoli PDF: i loro hash coincidono con il replay corretto. Checkpoint completo: `docs/validation/2026-10-05-dogc-document-bodies.json`; metodo e ripartenza: `docs/sources/dogc.md`.
 
-**DOGC resta non implementato nel registry e fuori dalla pipeline ordinaria.** Nessun testo integrale degli atti è stato acquisito in questo blocco, nessun evento/progetto DOGC è stato inserito e nessun collegamento all'inventario Catalunya è stato certificato.
-
-### Prossimo blocco, circoscritto
-
-Rendere deterministica l'acquisizione completa della ricerca DOGC e riconciliarla con i sommari, senza accettare duplicati o lacune: valutare l'export ufficiale con un budget di attesa/retry limitato oppure partizioni ufficiali non sovrapposte da validare. Solo dopo: acquisizione dei testi integrali pertinenti, estrazione conservativa dei campi, collegamento documentale/riferimento esatto con l'inventario, test, smoke e backfill prima dell'abilitazione. Una eventuale validazione limitata ai soli sommari dovrà dichiarare esplicitamente quel perimetro: non equivale al confronto indipendente attualmente mancante.
+**Questo non abilita DOGC come tredicesimo collector.** I 48 titoli sono candidati ampi, non impianti o autorizzazioni validate. Restano classificazione della pertinenza, lettura del dispositivo con evidenza della pagina, separazione per impianto/componente, test semantici e certificazione integrata. Nessun MW, stato autorizzativo, data di cantiere o EPC è stato dedotto in questo blocco; nessun evento DOGC è stato scritto nel radar.
 
 ## Sequenza approvata
 
 1. SABIA integrato, nei limiti dei milestone dichiarati.
-2. Portali regionali energia/información pública: Andalucía e GVA operativi; Galicia inventariata e DOG datato integrato; **inventario Catalunya validato, percorso datato DOGC ancora in lavorazione**; altri da acquisire e validare.
-3. **Nove bollettini autonomici ancora mancanti:** DOGC, DOGV, BON, BOPV, BOPA, BOCANT, BOC-CAN, BOIB, BOR. Copertura bollettini CCAA: **8/17**.
+2. Portali regionali energia/información pública: Andalucía e GVA operativi; Galicia inventariata e DOG datato integrato; Catalunya inventario validato, DOGC indice/PDF verificati e classificazione in preparazione; altri da acquisire e validare.
+3. **Nove bollettini autonomici ancora non operativi:** DOGC, DOGV, BON, BOPV, BOPA, BOCANT, BOC-CAN, BOIB, BOR. Copertura operativa bollettini CCAA: **8/17**.
 4. PLACSP e consultazioni preliminari.
 5. IDAE e BDNS/SNPSAP.
 6. Concorsi/assegnazioni di capacità MITECO/ITJ.

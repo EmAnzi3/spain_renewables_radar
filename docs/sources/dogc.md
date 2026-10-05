@@ -1,111 +1,68 @@
-# DOGC — verified service contracts, incomplete independent index reconciliation
+# DOGC — indice datato e fascicolo documentale
 
-Checkpoint: **2026-10-05 Europe/Rome**. **DOGC is not enabled as a dated collector. No DOGC project/event was inserted.**
+## Stato al 5 ottobre 2026
 
-## Evidence layers and status
+Sviluppo isolato su `fix/dogc-index-reconciliation`, PR **#1 OPEN/DRAFT**, non integrata in `main`. **L'indice è riconciliato e i 48 PDF candidati sono acquisiti; la classificazione semantica e il collector di produzione non sono completati.** Nessun evento DOGC è stato inserito nel radar ordinario.
 
-| Layer | Observed result | Scope |
+| Livello | Risultato verificato | Evidenza |
 |---|---|---|
-| Official navigation scripts | Run 37221624700 SUCCESS | Historical route discovery only |
-| Actual service responses | Run 37241609987 SUCCESS | Monthly calendars, edition summaries and first search page |
-| Full dated index audit | Run 37242571670 FAILURE | Calendar/edition traversal completed; search pagination repeated documents |
-| Pagination diagnostics | Run 37242677858 SUCCESS | Original repeated IDs verified; request contract matches site JavaScript |
-| Official full-search CSV probe | Run 37242776975 FAILURE | Read timeout; no export body acquired |
+| Indice ufficiale | 1.525 disposizioni; 30 giorni; due acquisizioni live complete | Run `37272974422`, codice `33d69a0353d6db0572ece36fc5606fcd907bdeda` |
+| Calendario/sommari | 20 edizioni principali, 5 allegati, 10 giorni senza edizione | Stesso indice, originali conservati |
+| Selezione ampia per titolo | 48 avvisi candidati, non 48 impianti | `candidates.json` nell'artifact dell'indice |
+| PDF originali | 48 file, **299 pagine effettive** | Acquisizione `37274256818`, codice `d63e2f5f3333a890e02bb55f00f42c8ceb8c5891` |
+| Verifica corretta delle pagine | 299/299 intestazioni; testo ricostruito esattamente; hash e provenienza verificati | Replay `37276204735`, codice `f123ed5ba484a1188172a9c8b7b13e9fa605d0d0` |
+| Interpretazione progetti/permessi | **Da completare** | Nessun campo o evento amministrativo creato |
 
-The checked summary is `docs/validation/2026-10-05-dogc-checkpoint.json`. It is a log-derived checkpoint, not a byte-identical copy of original artifact reports. A successful diagnostic is not a certified collector or complete coverage.
+Checkpoint: `docs/validation/2026-10-05-dogc-daily-index.json` e `docs/validation/2026-10-05-dogc-document-bodies.json`. Il secondo distingue l'acquisizione originaria dal controllo corretto e documenta tutte le discrepanze di verifica.
 
-## Public hosts and read-only operations
+## Percorso ufficiale verificato
 
-Website: `https://dogc.gencat.cat`.
-Service: `https://portaldogc.gencat.cat`.
+Il sito pubblico `dogc.gencat.cat` espone negli asset ufficiali i servizi di `portaldogc.gencat.cat`: calendario mensile, sommario dell'edizione e ricerca. Il probe `37241609987` ha acquisito risposte reali. La compatibilità TLS mantiene verifica del certificato e del nome host, TLS minimo 1.2 e livello di sicurezza 2.
 
-The service host comes from the website's linked `constants.js` (`HOST_PRO`), not from an invented endpoint. Homepage hidden input fields corroborate calendar and search routes. The probe never invokes account, save-search or document-write functions.
+Il percorso verificato usa i servizi ufficiali:
 
-Observed POST form operations:
+- `/eadop-rest/api/dogc/calendarDOGC` per tutti i giorni del mese;
+- `/eadop-rest/api/dogc/summaryDOGC` per le edizioni e gli allegati;
+- `/eadop-rest/api/dogc/searchDOGC` per la ricerca per data di pubblicazione;
+- `/utilsEADOP/AppJava/PdfProviderServlet` per gli originali indicati nei sommari, seguendo solo il redirect HTTPS fornito dal portale verso `/utilsEADOP/PDF/<edizione>/<id>.pdf` nella stessa edizione.
 
-```text
-/eadop-rest/api/dogc/calendarDOGC
-  month=<1-based month>, year=<year>, language=ca
-/eadop-rest/api/dogc/summaryLastPublishedDOGC
-  language=ca
-/eadop-rest/api/dogc/summaryDOGC
-  numDOGC=<number obtained from official calendar>, language=ca
-```
+I domini, gli identificativi e le destinazioni vengono controllati prima del contatto; non si costruiscono percorsi PDF indovinando gli identificativi. Errori permanenti, dinieghi, risposte parziali o redirect estranei non diventano acquisizioni valide.
 
-Search uses JSON POST to `/eadop-rest/api/dogc/searchDOGC`, with explicit publication-date bounds, empty search words/descriptors, `current=false`, `noCurrent=false`, language `ca`, `orderBy=3`, page number and 50 results per page. No active-only filter is applied. The public JavaScript increments `inputParameters.page` and submits the same criteria; it does not use the returned search ID as a pagination cursor. That ID is used for source-provided downloads and saved-search operations.
+## Indice: chiusura della riconciliazione
 
-## Verified TLS compatibility
+La paginazione della ricerca mensile aveva restituito sette documenti ripetuti nella quinta pagina. L'audit `37242571670` si era fermato correttamente; la diagnostica `37242677858` aveva confermato le ripetizioni negli originali e la corrispondenza dei parametri al codice pubblico del sito. La causa interna del servizio non è stata accertata. L'esportazione CSV proposta dal servizio è andata in timeout nel run `37242776975`; non è stata usata come prova di completezza.
 
-The production service initially failed the default Python TLS handshake. A bounded transport audit identified a compatible standard cipher selection. `VerifiedDOGCTLSAdapter` uses `ssl.create_default_context()`, minimum TLS 1.2, security level 2, and:
+Il nuovo modulo `scripts.reconcile_dogc_daily` divide la finestra **5 settembre–4 ottobre 2026** in giorni disgiunti. Per ciascun giorno richiede l'intero risultato in un'unica risposta. Il limite di 1.000 è una protezione esplicita: un conteggio superiore, un limite ignorato, un risultato troncato o un'identità ripetuta fanno fallire il controllo.
 
-```text
-DEFAULT:!aNULL:!eNULL:!EXPORT:!RC4:!3DES:@SECLEVEL=2
-```
+Ogni identità, data e titolo viene confrontato con il sommario dell'edizione e degli allegati, anche nei giorni festivi e nei giorni ufficialmente privi di edizione. La somma è riconciliata con il totale mensile. L'intera acquisizione è ripetuta live: **due passaggi completi, 60 risposte giornaliere, zero documenti mancanti o aggiuntivi, zero differenze sostanziali nei titoli, zero variazioni semantiche fra passaggi**. I byte originali sono ricostruiti e confrontati con gli indici elaborati.
 
-Certificate and hostname checks remain enabled and are covered by regression tests. No `verify=False`, insecure curl option, obsolete TLS protocol or security-level downgrade is used. The adapter is mounted only for the observed DOGC service host.
+Le 385 varianti tipografiche riguardano apostrofi/virgolette e composizione Unicode. I due titoli originali sono conservati. Non vengono rimossi accenti, maiuscole, cifre, identificativi o termini amministrativi per far coincidere testi diversi.
 
-## Actual service probe
+Gli allegati effettivi sono **9747A, 9748A, 9751A, 9757A, 9765A**. Il precedente riepilogo che ne elencava tre era errato; la correzione riguarda la documentazione, non nuove pubblicazioni o nuove date.
 
-Functional commit: **b9e0cb7076c84743ace93c658979f20af60c07dc**.
-[Run **37241609987 — SUCCESS**](https://github.com/EmAnzi3/spain_renewables_radar/actions/runs/37241609987), job **111551279732**.
-Artifact **11316863155**, `dogc-service-contract-output`.
-Artifact SHA256: `74890e3dab0403fab010c66cbba9963e69b8bd65dcaa2fdfe3dc7be39c6476b2`.
+## PDF: verifica dai file, non dai soli log
 
-The search declared **1,525 results** in the complete Spanish-day window **2026-09-05 through 2026-10-04**, but this probe downloaded only the first **50** search rows. Absence of an energy title in that first page is not absence of relevant publications in the window.
+Il modulo `scripts.acquire_dogc_bodies` ricostruisce prima l'indice certificato, verifica l'elenco dei candidati e acquisisce i relativi PDF originali, conservando URL iniziale, redirect, URL finale, hash, byte e data originale. Tutte le pagine sono estratte senza OCR. Questa operazione non interpreta richieste, decisioni, potenze o stato dei cantieri.
 
-## Dated edition acquisition and annex handling
+Il download diretto dell'artifact ha corretto un riepilogo intermedio non affidabile: i file contengono **299 pagine**, non 218. L'audit originario riconosceva solo due intestazioni perché cercava nei primi 1.200 caratteri estratti: il motore PDF colloca molte intestazioni stampate dopo il testo del documento e può inserire spazi nella data. L'originale e il suo audit non sono stati modificati.
 
-Current index-audit script: `scripts/audit_dogc_index.py`.
-Current functional commit: **2f9ed2b8834572659bf0c158506885b6de6806f9**.
-Tests: `tests/test_dogc_index_audit.py` (**26 focused cases**); the full run passed **268 unit/regression tests** before attempting live acquisition.
+`scripts.dogc_pdf_headers` verifica invece il blocco completo della testata ufficiale, con nome del giornale e CVE, indipendentemente dalla posizione nell'estrazione. Controlla **ogni pagina**, data, edizione, numero pagina, numero complessivo e stesso CVE all'interno del documento. Riferimenti storici nel testo non sostituiscono un'intestazione mancante. Dodici nuove regressioni coprono questi casi.
 
-[Run **37242571670 — FAILURE**](https://github.com/EmAnzi3/spain_renewables_radar/actions/runs/37242571670), job **111554040872**.
-[Artifact **11318310090**, `dogc-dated-index-output`](https://github.com/EmAnzi3/spain_renewables_radar/actions/runs/37242571670/artifacts/11318310090).
-SHA256: `384c1dbe9469351661368d87cde2fe483e8144603860e049548fcf0fbafacf7e`.
+`scripts.recheck_dogc_bodies` rilegge gli originali già acquisiti. Il run **37276204735 è SUCCESS**: ricostruzione completa dell'indice, 48 hash PDF corrispondenti, **299/299 intestazioni di pagina**, 48/48 documenti, uguaglianza esatta dei testi ricostruiti, nessuna pagina senza testo. **Zero nuovi download dalla fonte e date originarie conservate.** La suite di regressione è SUCCESS sul medesimo codice.
 
-The audit traversed **all 30 calendar days**, acquiring summaries for **20 principal editions and three same-day official annexes**: `9747A`, `9755A`, `9759A`. The other ten days had no edition according to the calendar. Weekend publication is allowed when the official calendar says so; weekday heuristics are not used.
+Il nuovo artifact `dogc-original-replay-output`, ID **11330421970**, è stato scaricato e verificato localmente: SHA-256 `10d5828a9aef609a599b58eb552fb441eaeb42fffed261b74ec10692a0c57191`. Il report è `dogc_body_recheck.json` e contiene i controlli di ogni documento e pagina.
 
-A summary response may contain its principal edition and annexes. Accepted annexes must have the exact base number plus a single letter, the matching `Annex X` title, the same verified publication date and a corroborating official PDF download link with that exact `dogcId`. Principal edition presence is required. Duplicate headers, wrong dates/links, unrelated editions and unreadable titles fail validation. Each disposition retains principal/annex scope independently; no annex is silently dropped or relabeled as the principal edition.
+La discrepanza osservata nei metadati esterni dello ZIP originario è documentata nel checkpoint, non eliminata: per il contenuto sono stati confrontati i file PDF e i loro hash con il replay corretto. L'archivio del replay corretto coincide con il relativo digest API. Un confronto locale con una diversa versione di pypdf aveva mostrato quattro differenze di spaziatura e non era stato dichiarato replay esatto; il gate CI richiede uguaglianza esatta ed è passato senza differenze.
 
-The saved `edition_index.json` and raw responses are partial evidence. **They do not mean the independent whole-index gate passed.** PDF URLs were indexed but document bodies were not downloaded or interpreted in this work block.
+## Confine ancora aperto
 
-## Precise remaining failure: repeated search results
+I 48 candidati comprendono potenziali falsi positivi e atti con più impianti o componenti. **Non equivalgono a 48 progetti o opportunità.** Non sono stati dedotti MW, autorizzazioni, date di lavori o contractor.
 
-The search service reported 1,525 rows. Requests for pages 1–5 each returned 50 rows. Page 5 repeated seven IDs already observed:
+Prossimo blocco:
 
-```text
-1055509
-1055510
-1055513
-1055514
-1055515
-1055516
-1055518
-```
+1. Classificare la pertinenza e il dispositivo effettivo degli atti, con evidenza della pagina: richiesta non equivale a concessione; decisione ambientale non equivale automaticamente ad autorizzazione alla costruzione.
+2. Estrarre i campi per impianto/componente senza duplicare potenze di gruppo, separando MW/MWp/MWn, MWh e potenze di accesso; mantenere i conflitti espliciti.
+3. Collegare l'inventario Catalunya solo con prove documentali o riferimenti amministrativi deterministici; non usare somiglianze di nome per modificare date o stato.
+4. Eseguire test semantici, smoke, backfill del collector, controlli di provenienza/replay e certificazione integrata prima di abilitarlo come tredicesima fonte.
 
-The audit stopped rather than removing duplicates and claiming completeness: duplicates can conceal omitted results. `search_index.json`, final reconciliation and the energy candidate list were not completed by this failed run. No number of unique energy projects or relevant notices has been certified.
-
-[Diagnostic **37242677858 — SUCCESS**](https://github.com/EmAnzi3/spain_renewables_radar/actions/runs/37242677858), job **111554341716**, downloaded the preceding audit's artifact, checked its raw hashes, confirmed the repeated IDs and read the public JavaScript pagination contract. Requests matched that contract. The service's internal reason for repeated results remains unknown; unstable ordering is a possible explanation, not an established fact.
-
-Diagnostic artifact: **11318380143**, `dogc-pagination-contract-output`.
-SHA256: `fcacedfa67b85ccdd09d3a0903aa2b201c3d338cd55138bcf9b1320fd2f6b2c9`.
-
-## Whole-search CSV alternative: attempted, not acquired
-
-[Probe **37242776975 — FAILURE**](https://github.com/EmAnzi3/spain_renewables_radar/actions/runs/37242776975), job **111554626159**, code **a3491f9e3b23a731dd2be879303c93242d62f615**.
-
-A fresh search returned HTTP 200 and an official `urlCSVDownloadSearch`. The probe validated HTTPS, host `portaldogc.gencat.cat`, path `/utilsEADOP/AppJava/ExcelProviderServlet`, matching returned `idSearch`, `portal=dogc` and `typeDownload=csv`. It then requested that exact URL with certificate verification, redirect checks and a size limit.
-
-The export GET raised **ReadTimeout after 40 seconds** before a usable response body was received. **No CSV was acquired, no schema was verified and no export parser was integrated.** This was a timeout, not evidence of an authorization denial.
-
-Artifact **11317908762**, `dogc-pagination-contract-output`, contains the successful search-response bytes only. SHA256: `fb25b144ad83ffcda729db53da607931361e2c3f113ee3e3cc0aba088530c583`.
-
-## Next implementation boundary
-
-Resolve deterministic full-search acquisition and reconcile it to the complete dated edition set. Candidate approaches to verify, not implemented guarantees: the returned whole-search export with an explicit bounded timeout/retry budget, or non-overlapping official search partitions with independent count/identity reconciliation. Do not add a guessed pagination cursor, relax duplicate detection or call a failed attempt zero results.
-
-If choosing a narrower summaries-only acquisition contract instead, explicitly document and validate that scope with repeatable original acquisition; do not label it as the missing independent search comparison.
-
-Only after the index contract is validated: acquire relevant original document bodies, distinguish current operative decisions from historical recitals, split genuinely separate projects, extract fields with source evidence, link to the Catalunya inventory by official document/exact reference, then run parser tests, live smoke and full backfill before enabling the collector.
-
-The standalone Catalunya inventory is already validated and must remain separate. No dates, capacity, permits, contractors or cross-source matches may be invented to fill the remaining DOGC gap. The production registry still has **12 operational collectors**, not 13.
+La dashboard, il parser comune, il registry e i dodici collector ordinari restano invariati in questa PR. I moduli e gli artifact DOGC sono ancora uno strato di verifica separato.
