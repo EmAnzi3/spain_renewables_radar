@@ -12,7 +12,7 @@ from app.store import save_event
 from scripts.gva_integration_gate import validate_gva_integration
 from scripts.dog_integration_gate import validate_dog_integration
 from scripts.validate_dogc_collector import validate_dogc_integration
-from scripts.validate_source_registry import validate_source_registry, validate_source_days
+from scripts.validate_source_registry import validate_source_registry, validate_source_days, validate_dogc_geography
 
 SOURCES={'BOE','BOCYL','BOA','BOJA','DOCM','DOE','BORM','BOCM','AND_PUBLIC','GVA_PUBLIC','MITECO_SABIA','DOG','DOGC'}
 
@@ -88,6 +88,7 @@ def metrics(conn,coverage,quality,sabia,and_public,borm):
     result.update(validate_gva_integration(conn,coverage,quality))
     result.update(validate_dog_integration(conn,coverage))
     result['dogc']=validate_dogc_integration(conn)
+    result['dogc']['geographic_projection']=validate_dogc_geography(conn)
     result['collector_registry_verified']=source_registry
     result['source_window_verified']=source_window
     if result['dogc']['window_start']!=source_window['start'] or result['dogc']['window_end']!=source_window['end']:

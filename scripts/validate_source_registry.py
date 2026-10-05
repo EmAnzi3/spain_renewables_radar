@@ -45,3 +45,25 @@ def validate_source_days(coverage, expected, days=30):
     return {'start':str(reference[0]),'end':str(reference[-1]),'days':days,
             'collectors':len(expected),'source_day_rows':days*len(expected),
             'unique_contiguous_same_window':True}
+
+
+def validate_dogc_geography(conn):
+    """Source-backed multi-province evidence must survive all later enrichment."""
+    from app.reporting import build_commercial_rows,build_province_view_from_rows
+    checked=[]
+    for meta in conn.execute("SELECT project_key,external_id,evidence_json FROM regional_public_metadata WHERE source_code='DOGC'"):
+        evidence=json.loads(meta['evidence_json'])
+        geography=evidence['extraction']['geography']
+        if geography['status']!='MULTI_PROVINCE':continue
+        expected=set(geography['provinces'])
+        saved=conn.execute('SELECT * FROM project_geo_enrichment WHERE project_key=?',(meta['project_key'],)).fetchone()
+        if (len(expected)<2 or saved is None or saved['status']!='MULTI_PROVINCE'
+                or not expected.issubset(set(json.loads(saved['provinces_json'])))):
+            raise ValueError('DOGC multi-province source evidence was overwritten: '+meta['external_id'])
+        checked.append(meta['project_key'])
+    rows={r['project_key']:r for r in build_commercial_rows(conn)}
+    for key in checked:
+        if len(rows[key].get('provinces',[]))<2 or build_province_view_from_rows([rows[key]]):
+            raise ValueError('Multi-province project was allocated to a single provincial total')
+    return {'multi_province_projects_verified':len(set(checked)),
+            'source_geography_preserved':True,'no_duplicate_provincial_mw_allocation':True}

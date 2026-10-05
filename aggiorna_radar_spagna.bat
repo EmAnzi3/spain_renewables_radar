@@ -14,7 +14,7 @@ if not exist "reports\change_reports" mkdir reports\change_reports
 if not exist "docs" mkdir docs
 
 echo ==========================================================
-echo Spain Renewables Radar - BOE ultimi 7 giorni
+echo Spain Renewables Radar - fonti ufficiali - ultimi 7 giorni
 echo ==========================================================
 "%PY%" -m app.run_pipeline --days 7
 if errorlevel 1 (
