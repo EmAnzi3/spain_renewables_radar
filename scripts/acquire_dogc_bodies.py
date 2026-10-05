@@ -16,7 +16,7 @@ import time
 import uuid
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
-from urllib.parse import parse_qs, urlsplit
+from urllib.parse import parse_qs, urlsplit, urljoin
 
 import requests
 from pypdf import PdfReader
@@ -120,6 +120,25 @@ def validate_document_url(url: str, identity: str) -> None:
         raise ValueError('Document URL does not match the original certified identity')
 
 
+def validated_pdf_redirect(origin: str, location: str, candidate: dict) -> str:
+    """Follow only the source-provided HTTPS PDF in the same official edition.
+
+    The target is obtained from Location, never built by guessing a PDF ID.
+    Date/edition are independently checked again in the downloaded PDF header.
+    """
+    if not isinstance(location, str) or not location:
+        raise ValueError('PDF redirect has no destination')
+    target = urljoin(origin, location)
+    p = urlsplit(target)
+    edition = str(candidate.get('base_edition', candidate['edition']))
+    if (p.scheme != 'https' or p.hostname != 'portaldogc.gencat.cat'
+            or p.port not in (None, 443) or p.username or p.password or p.query or p.fragment
+            or not re.fullmatch(r'\d+', edition)
+            or not re.fullmatch(r'/utilsEADOP/PDF/' + re.escape(edition) + r'/\d+\.pdf', p.path)):
+        raise ValueError('PDF redirect outside the certified official edition: ' + target)
+    return target
+
+
 class BodyClient:
     def __init__(self, root: Path):
         self.root = root; root.mkdir(parents=True, exist_ok=True)
@@ -138,10 +157,16 @@ class BodyClient:
             try:
                 response = self.session.get(url, timeout=(8, 40), stream=True, allow_redirects=False)
                 observation['status'] = response.status_code
-                # Redirects require explicit new source-contract verification, not blind following.
                 if 300 <= response.status_code < 400:
-                    observation['location'] = response.headers.get('Location')
-                    raise ValueError('PDF endpoint redirected; review the original location before contacting it')
+                    location = response.headers.get('Location')
+                    observation['redirect'] = {'status': response.status_code, 'location': location}
+                    target = validated_pdf_redirect(url, location, candidate)
+                    response.close()
+                    response = self.session.get(target, timeout=(8, 40), stream=True, allow_redirects=False)
+                    observation['final_url'] = target
+                    observation['status'] = response.status_code
+                    if 300 <= response.status_code < 400:
+                        raise ValueError('Repeated PDF redirect is not accepted')
                 response.raise_for_status()
                 if response.status_code != 200:
                     raise ValueError('Unexpected PDF success status')
@@ -238,11 +263,12 @@ def main() -> None:
             record = dict(candidate, body_acquired=True, pdf_sha256=acquisition['sha256'],
                           pdf_file='raw/' + acquisition['sha256'] + '.pdf', pages_file=text_file,
                           retrieved_at=acquisition['retrieved_at'], page_count=parsed['page_count'],
+                          source_pdf_url=acquisition.get('final_url', candidate['source_url']),
                           header=parsed['header'], empty_text_pages=parsed['empty_text_pages'],
                           semantic_review='NOT_REVIEWED')
             records.append(record)
             atomic_json(generation / 'documents.json', records)
-            print('DOGC_BODY_ACQUIRED', json.dumps({k: record[k] for k in ('document_id', 'publication_date', 'page_count', 'header', 'empty_text_pages', 'pdf_sha256')}, ensure_ascii=False), flush=True)
+            print('DOGC_BODY_ACQUIRED', json.dumps({k: record[k] for k in ('document_id', 'publication_date', 'page_count', 'header', 'empty_text_pages', 'pdf_sha256', 'source_pdf_url')}, ensure_ascii=False), flush=True)
         if len(records) != len(candidates):
             raise ValueError('Not every candidate has acquired original evidence')
         result.update(acquisition_complete=True, document_bodies_acquired=len(records),
