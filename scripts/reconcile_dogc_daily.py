@@ -15,6 +15,7 @@ import json
 import os
 import re
 import uuid
+import unicodedata
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import urljoin, urlsplit
@@ -23,7 +24,7 @@ from zoneinfo import ZoneInfo
 from bs4 import BeautifulSoup
 from app.catalunya_inventory import atomic_json, canonical
 from scripts.audit_dogc_index import (
-    Client, ENERGY, WEB, compare_indexes, one_parameter, parse_calendar,
+    Client, ENERGY, WEB, compare_indexes as exact_compare_indexes, one_parameter, parse_calendar,
     parse_search, parse_summary, plain_title, search_parameters, source_date,
     summary_scopes,
 )
@@ -71,13 +72,29 @@ def parse_complete_day(data: dict, day: date) -> dict:
     return records
 
 
+def comparison_title(value: str) -> str:
+    # Display typography only: no lowercasing, punctuation deletion, accent
+    # removal, fuzzy similarity or substitution of administrative terms/numbers.
+    return unicodedata.normalize('NFC', value).translate(str.maketrans({'’': "'", '‘': "'", '“': '"', '”': '"'}))
+
+
+def compare_indexes(left: dict, right: dict) -> dict:
+    differences = exact_compare_indexes(left, right)
+    typographic = [key for key in differences['title_conflicts']
+                   if comparison_title(left[key]['title']) == comparison_title(right[key]['title'])]
+    differences['title_conflicts'] = [key for key in differences['title_conflicts'] if key not in typographic]
+    differences['typographic_variants'] = [{'key': key, 'summary_title': left[key]['title'],
+                                          'search_title': right[key]['title']} for key in typographic]
+    return differences
+
+
 def semantic_index(records: dict) -> list:
-    return sorted((key[0], key[1], value['title']) for key, value in records.items())
+    return sorted((key[0], key[1], comparison_title(value['title'])) for key, value in records.items())
 
 
 def require_same_index(left: dict, right: dict) -> None:
     differences = compare_indexes(left, right)
-    if any(differences.values()):
+    if any(differences[key] for key in ('only_in_edition_summaries', 'only_in_search', 'title_conflicts')):
         raise ValueError('Index mismatch: ' + canonical(differences))
 
 
@@ -131,7 +148,7 @@ def acquire_pass(client: Client, days: list[date], pass_number: int, root: Path)
         search.update(daily)
         metric = {'date': str(day), 'edition': edition, 'summary_rows': len(entries),
                   'search_rows': len(daily), 'search_declared_total': response['numResultSearch'],
-                  'single_response_complete': True}
+                  'single_response_complete': True, 'typographic_title_variants': len(differences['typographic_variants'])}
         day_metrics.append(metric)
         print('DOGC_DAILY_RECONCILED', json.dumps(dict(metric, pass_number=pass_number)), flush=True)
     if len(summaries) != total or len(search) != total:
@@ -227,6 +244,8 @@ def main() -> None:
                       title_candidates=len(candidates), independent_index_reconciliation=True,
                       original_byte_replay_verified=True, semantic_changes_between_passes=0,
                       missing_dispositions=0, extra_dispositions=0, title_conflicts=0,
+                      typographic_title_variants=sum(day['typographic_title_variants'] for day in second['days']),
+                      title_comparison_rule='NFC and typographic apostrophes/quotes only; originals retained',
                       index_sha256=hashlib.sha256(canonical(semantic_index(second['summaries'])).encode()).hexdigest())
         atomic_json(generation / 'candidates.json', candidates)
         atomic_json(generation / 'day_metrics.json', second['days'])
