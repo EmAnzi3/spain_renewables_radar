@@ -2,7 +2,7 @@ from __future__ import annotations
 import argparse
 import os
 from datetime import date,timedelta
-from app.collectors import BOECollector,BOCYLCollector,BOACollector,BOJACollector,DOCMCollector,DOECollector,BORMCollector,BOCMCollector,SABIACollector,AndaluciaPublicCollector,GVAPublicCollector,DOGCollector
+from app.collectors import BOECollector,BOCYLCollector,BOACollector,BOJACollector,DOCMCollector,DOECollector,BORMCollector,BOCMCollector,SABIACollector,AndaluciaPublicCollector,GVAPublicCollector,DOGCollector,DOGCCollector
 from app.dashboard import write_dashboard
 from app.db import connect
 from app.enrichment import (
@@ -20,7 +20,7 @@ COLLECTOR_CLASSES={
     "BOE":BOECollector,"BOCYL":BOCYLCollector,"BOA":BOACollector,"BOJA":BOJACollector,
     "DOCM":DOCMCollector,"DOE":DOECollector,"BORM":BORMCollector,"BOCM":BOCMCollector,
     "MITECO_SABIA":SABIACollector,"AND_PUBLIC":AndaluciaPublicCollector,"GVA_PUBLIC":GVAPublicCollector,
-    "DOG":DOGCollector,
+    "DOG":DOGCollector,"DOGC":DOGCCollector,
 }
 
 def daterange(start:date,end:date):
@@ -29,17 +29,17 @@ def daterange(start:date,end:date):
         yield d
         d+=timedelta(days=1)
 
-def parse_args():
+def parse_args(argv=None):
     p=argparse.ArgumentParser()
     p.add_argument("--days",type=int,default=7,help="giorni inclusi fino a oggi")
     p.add_argument("--since",help="YYYY-MM-DD")
     p.add_argument("--until",help="YYYY-MM-DD")
-    p.add_argument("--sources",default="BOE,BOCYL,BOA,BOJA,DOCM,DOE,BORM,BOCM,AND_PUBLIC,GVA_PUBLIC,MITECO_SABIA,DOG",help="sorgenti separate da virgola")
+    p.add_argument("--sources",default="BOE,BOCYL,BOA,BOJA,DOCM,DOE,BORM,BOCM,AND_PUBLIC,GVA_PUBLIC,MITECO_SABIA,DOG,DOGC",help="sorgenti separate da virgola")
     p.add_argument("--db",default=os.getenv("RADAR_DB","data/spain_renewables.sqlite"))
     p.add_argument("--skip-ree",action="store_true")
     p.add_argument("--skip-miteco",action="store_true")
     p.add_argument("--strict-coverage",action="store_true",help="termina con errore se una sorgente/giorno fallisce")
-    return p.parse_args()
+    return p.parse_args(argv)
 
 def main():
     args=parse_args();today=date.today()
@@ -73,8 +73,12 @@ def main():
                 if inserted:
                     new_events.append(event);row["inserted"]+=1;row["new_projects"]+=int(new_project);new_projects+=int(new_project)
             coverage.append(row)
-        if hasattr(collector, "persist_metadata"):
-            collector.persist_metadata(conn)
+        try:
+            if hasattr(collector, "persist_metadata"):
+                collector.persist_metadata(conn)
+        finally:
+            if hasattr(collector, "close"):
+                collector.close()
     missing_geo=conn.execute("SELECT count(*) FROM projects WHERE province IS NULL").fetchone()[0]
     if missing_geo:
         print(f"[INE_MUNICIPALITIES] enriching {missing_geo} projects without province")
@@ -143,6 +147,7 @@ def main():
         print("MITECO exact matches: reports/miteco_exact_matches_latest.csv")
     if "GVA_PUBLIC" in wanted:print("GVA source assertions: reports/gva_public/source_flags.html")
     if "DOG" in wanted:print("DOG original evidence: reports/dog/coverage.json; Galicia links: reports/dog/galicia_links.json")
+    if "DOGC" in wanted:print("DOGC original acts, municipal leads and corrections: reports/dogc/index.html; reports/dogc/coverage.json")
     print("Dashboard: docs/index.html")
     conn.close()
     if q_error:raise SystemExit(f"Quality gate failed: {q_error} structural project errors")

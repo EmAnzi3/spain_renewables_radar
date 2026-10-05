@@ -1,4 +1,4 @@
-"""Evidence-based certification of the twelve implemented source adapters."""
+"""Evidence-based certification of the thirteen implemented source adapters."""
 from __future__ import annotations
 import csv,json,os,sys,hashlib
 from collections import Counter
@@ -11,8 +11,10 @@ from app.reporting import geography_accounting,build_commercial_rows
 from app.store import save_event
 from scripts.gva_integration_gate import validate_gva_integration
 from scripts.dog_integration_gate import validate_dog_integration
+from scripts.validate_dogc_collector import validate_dogc_integration
+from scripts.validate_source_registry import validate_source_registry, validate_source_days
 
-SOURCES={'BOE','BOCYL','BOA','BOJA','DOCM','DOE','BORM','BOCM','AND_PUBLIC','GVA_PUBLIC','MITECO_SABIA','DOG'}
+SOURCES={'BOE','BOCYL','BOA','BOJA','DOCM','DOE','BORM','BOCM','AND_PUBLIC','GVA_PUBLIC','MITECO_SABIA','DOG','DOGC'}
 
 
 def rows(path):
@@ -31,6 +33,8 @@ def metrics(conn,coverage,quality,sabia,and_public,borm):
         evidence=[json.loads(r[0]) for r in conn.execute("SELECT evidence_json FROM event_source_metadata WHERE project_key=? AND source_code='MITECO_SABIA'",(p['project_key'],))]
         if not any(r.get('administrative_reference')==p['expediente'] for r in evidence):
             invalid.append({'project_key':p['project_key'],'expediente':p['expediente']})
+    source_registry=validate_source_registry(SOURCES)
+    source_window=validate_source_days(coverage,SOURCES)
     counts={s:sum(r['source_code']==s for r in coverage) for s in SOURCES}
     missing_days={s:n for s,n in counts.items() if n!=30}
     before_projects=conn.execute('SELECT COUNT(*) FROM projects').fetchone()[0]
@@ -83,6 +87,11 @@ def metrics(conn,coverage,quality,sabia,and_public,borm):
     }
     result.update(validate_gva_integration(conn,coverage,quality))
     result.update(validate_dog_integration(conn,coverage))
+    result['dogc']=validate_dogc_integration(conn)
+    result['collector_registry_verified']=source_registry
+    result['source_window_verified']=source_window
+    if result['dogc']['window_start']!=source_window['start'] or result['dogc']['window_end']!=source_window['end']:
+        raise ValueError('DOGC provenance gate covers a different source window')
     if invalid or missing_days or source_errors or issues['ERROR']:
         raise ValueError('Identity, source-day, or structural quality failure: '+json.dumps(result,ensure_ascii=False))
     return result
