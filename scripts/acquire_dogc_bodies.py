@@ -28,7 +28,7 @@ from scripts.probe_dogc_services import SERVICE, VerifiedDOGCTLSAdapter
 
 MAX_PDF_BYTES = 20_000_000
 MAX_CANDIDATES = 250
-HEADER = re.compile(r'N[úu]m\.?\s*(\d+[A-Z]?)\s*[-–—]\s*(\d{1,2})[./](\d{1,2})[./](\d{4})', re.I)
+from scripts.dogc_pdf_headers import document_headers, header_check
 
 
 def index_generation(root: Path) -> Path:
@@ -202,18 +202,6 @@ class BodyClient:
         raise RuntimeError('Unreachable retry state')
 
 
-def header_check(text: str, candidate: dict) -> dict:
-    # Only the header area, not historical DOGC references elsewhere in the act.
-    match = HEADER.search(text[:1200])
-    if not match:
-        return {'status': 'UNRECOGNIZED', 'original_header': None}
-    found = date(int(match[4]), int(match[3]), int(match[2]))
-    expected = date.fromisoformat(candidate['publication_date'])
-    if found != expected or match[1] != candidate['edition']:
-        raise ValueError('PDF header conflicts with the certified edition/publication date')
-    return {'status': 'VERIFIED', 'original_header': match[0], 'edition': match[1], 'publication_date': str(found)}
-
-
 def extract_pages(raw: bytes, candidate: dict) -> dict:
     reader = PdfReader(io.BytesIO(raw), strict=True)
     if reader.is_encrypted or not 1 <= len(reader.pages) <= 150:
@@ -226,10 +214,13 @@ def extract_pages(raw: bytes, candidate: dict) -> dict:
         pages.append({'page': index, 'text': text})
     if sum(len(page['text']) for page in pages) > 10_000_000:
         raise ValueError('Extracted text exceeds evidence limit')
-    header = header_check(pages[0]['text'], candidate)
+    headers = document_headers(pages, candidate)
+    header = headers[0]
     empty = [p['page'] for p in pages if not p['text'].strip()]
     return {'document_id': candidate['document_id'], 'page_count': len(pages), 'pages': pages,
-            'header': header, 'empty_text_pages': empty, 'ocr_used': False,
+            'header': header, 'page_headers': headers,
+            'publication_evidence_complete': all(h['status'] == 'VERIFIED' for h in headers),
+            'empty_text_pages': empty, 'ocr_used': False,
             'semantic_review': 'NOT_REVIEWED', 'project_fields_extracted': False}
 
 

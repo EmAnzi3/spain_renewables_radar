@@ -117,12 +117,12 @@ class BodyTests(unittest.TestCase):
             with self.assertRaises(ValueError):validate_document_url(url,'1')
 
     def test_header_is_actual_publication_not_act_date(self):
-        result=header_check('Núm. 9747 - 8.9.2026\nResolució de 31 agost',CANDIDATE)
+        result=header_check('Núm. 9747 - 8.9.20261/1 Diari Oficial de la Generalitat de Catalunya\nCVE-DOGC-A-26243001-2026\nResolució de 31 agost',CANDIDATE)
         self.assertEqual(result['status'],'VERIFIED')
 
     def test_wrong_date_or_edition_fails(self):
         for text in ['Núm. 9746 - 8.9.2026','Núm. 9747 - 7.9.2026']:
-            with self.assertRaises(ValueError):header_check(text,CANDIDATE)
+            with self.assertRaises(ValueError):header_check(text+'1/1 Diari Oficial de la Generalitat de Catalunya\nCVE-DOGC-A-26243001-2026',CANDIDATE)
 
     def test_absent_header_is_not_fabricated(self):
         self.assertEqual(header_check('No readable header',CANDIDATE)['status'],'UNRECOGNIZED')
