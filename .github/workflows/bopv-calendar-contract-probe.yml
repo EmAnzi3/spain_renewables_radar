@@ -22,9 +22,10 @@ jobs:
       - name: Preserve official calendar navigation contract without executing source JavaScript
         run: |
           python -u - <<'PY'
-          import hashlib,json,re
+          import ast,hashlib,json,re
           from pathlib import Path
-          from datetime import datetime,timezone
+          from datetime import date,datetime,timedelta,timezone
+          from zoneinfo import ZoneInfo
           from urllib.parse import urljoin,urlsplit
           import requests
           from bs4 import BeautifulSoup
@@ -32,7 +33,7 @@ jobs:
           session=requests.Session();session.headers['User-Agent']='SpainRenewablesRadar/0.7 (official calendar-contract probe)'
           receipts=[]
           result={'source_code':'BOPV','collector_implemented':False,'complete_coverage_certified':False,'events_created':0}
-          def read(url):
+          def read(url,inherited_charset=None):
               p=urlsplit(url)
               if p.scheme!='https' or p.hostname!='www.euskadi.eus' or p.port not in (None,443) or p.username or p.password:
                   raise ValueError('Unverified destination')
@@ -46,20 +47,55 @@ jobs:
                       chunks.append(chunk)
                   raw=b''.join(chunks);sha=hashlib.sha256(raw).hexdigest()
                   (root/(sha+'.txt')).write_bytes(raw)
-                  receipts.append({'url':url,'sha256':sha,'bytes':len(raw),'status':response.status_code,'content_type':response.headers.get('Content-Type'),'retrieved_at':datetime.now(timezone.utc).isoformat()})
-                  return raw.decode(response.encoding or 'utf-8',errors='strict')
+                  charset=response.encoding or inherited_charset
+                  meta={'url':url,'sha256':sha,'bytes':len(raw),'status':response.status_code,
+                        'content_type':response.headers.get('Content-Type'),'retrieved_at':datetime.now(timezone.utc).isoformat(),
+                        'effective_charset':charset,'charset_basis':'response_header' if response.encoding else 'embedding_document_http_charset'}
+                  receipts.append(meta)
+                  if not charset:raise ValueError('No declared or embedding charset for source asset')
+                  return raw.decode(charset,errors='strict')
           try:
               origin='https://www.euskadi.eus/bopv2/datos/Ultimo.shtml'
-              home=read(origin);soup=BeautifulSoup(home,'html.parser')
+              home=read(origin);embedding_charset=receipts[-1]['effective_charset'];soup=BeautifulSoup(home,'html.parser')
               scripts=sorted({urljoin(origin,t['src']) for t in soup.select('script[src]') if t['src'].endswith('/r48-calendario.js')})
               if len(scripts)!=1:raise ValueError('Ambiguous or missing source calendar script')
-              script=read(scripts[0]);result['calendar_script_url']=scripts[0]
+              script=read(scripts[0],embedding_charset);result['calendar_script_url']=scripts[0]
               (root/'calendar_script.js').write_text(script,encoding='utf-8')
-              print('OFFICIAL_BOPV_CALENDAR_JS',script,flush=True)
+              route='"/bopv2/datos/" + mesruta.toString() + anioruta.toString()'
+              if route not in script or 'if (monthc < 10) {monthc = "0" + monthc;}' not in script:
+                  raise ValueError('Observed Spanish month/year route changed; do not guess calendar URLs')
               calendar_links=sorted(set(re.findall(r"src=['\"](/bopv2/datos/Cal[^'\"]+)",home)))
               if len(calendar_links)!=1:raise ValueError('Missing source-provided calendar embed')
               calendar=read(urljoin(origin,calendar_links[0]));(root/'current_calendar.html').write_text(calendar,encoding='utf-8')
-              result.update(probe_success=True,script_bytes=len(script.encode()),source_monthly_navigation_requires_verification=True)
+              end=datetime.now(ZoneInfo('Europe/Madrid')).date()-timedelta(days=1);start=end-timedelta(days=29)
+              requested_days=[start+timedelta(days=n) for n in range(30)];months=sorted({(d.year,d.month) for d in requested_days})
+              observations=[]
+              for year,month in months:
+                  url=urljoin(origin,f'/bopv2/datos/{month:02d}{year}.shtml')
+                  text=read(url)
+                  if not re.search(r"var\s+bopvIdioma\s*=\s*'es'",text):raise ValueError('Unexpected calendar language')
+                  arrays=[]
+                  for name in ('diasHabilitados','enlaces'):
+                      matches=re.findall(r'var\s+'+name+r'\s*=\s*(\[[^;]+\])\s*;',text)
+                      if len(matches)!=1:raise ValueError('Ambiguous official calendar array: '+name)
+                      value=ast.literal_eval(matches[0])
+                      if not isinstance(value,list):raise ValueError('Unexpected calendar data')
+                      arrays.append(value)
+                  enabled,links=arrays
+                  if len(enabled)!=len(links) or len(set(enabled))!=len(enabled):raise ValueError('Calendar dates and edition arrays disagree')
+                  for value,editions in zip(enabled,links):
+                      if not isinstance(value,str) or not re.fullmatch(r'\d{8}',value):raise ValueError('Invalid enabled date')
+                      day=datetime.strptime(value,'%Y%m%d').date()
+                      if (day.year,day.month)!=(year,month):raise ValueError('Source returned a different calendar month')
+                      editions=editions if isinstance(editions,list) else [editions]
+                      if not editions or len(set(editions))!=len(editions) or any(not isinstance(x,str) or not re.fullmatch(r's'+str(year)[2:]+r'_\d{4}\.shtml',x) for x in editions):
+                          raise ValueError('Invalid or repeated official edition filename')
+                      if start<=day<=end:observations.append({'day':str(day),'edition_filenames':editions,'calendar_url':url})
+              (root/'calendar_days.json').write_text(json.dumps(observations,ensure_ascii=False,indent=2),encoding='utf-8')
+              result.update(probe_success=True,script_bytes=len(script.encode()),monthly_navigation_contract_verified=True,
+                            window_start=str(start),window_end=str(end),months_acquired=len(months),enabled_days_in_window=len(observations),
+                            source_edition_filenames=sum(len(x['edition_filenames']) for x in observations),
+                            independent_summary_reconciliation_complete=False)
           except Exception as exc:
               result.update(probe_success=False,error_type=type(exc).__name__,error=str(exc));raise
           finally:
