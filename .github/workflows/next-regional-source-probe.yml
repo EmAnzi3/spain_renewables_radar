@@ -1,0 +1,105 @@
+name: next-regional-source-preflight
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/next-regional-source-probe.yml']
+permissions:
+  contents: read
+concurrency:
+  group: next-regional-source-preflight
+  cancel-in-progress: false
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Probe known public origins and source-provided navigation only
+        run: |
+          python -u - <<'PY'
+          import hashlib,json,re,time
+          from pathlib import Path
+          from datetime import datetime,timezone
+          from urllib.parse import urlsplit,urljoin,urldefrag
+          import requests
+          from bs4 import BeautifulSoup
+          root=Path('reports/next_regional_probe');root.mkdir(parents=True,exist_ok=True)
+          reports=[]
+          for code,origin,host in [('BON','https://bon.navarra.es/es/inicio','bon.navarra.es'),('BOPV','https://www.euskadi.eus/bopv2/datos/Ultimo.shtml','www.euskadi.eus')]:
+              out=root/code;(out/'raw').mkdir(parents=True,exist_ok=True)
+              session=requests.Session();session.headers['User-Agent']='SpainRenewablesRadar/0.6 (official source preflight)'
+              attempts=[];pages=[];seen=set()
+              result={'source_code':code,'origin':origin,'collector_implemented':False,'scope':'BOUNDED_NAVIGATION_PROBE_NOT_30_DAY_COVERAGE','events_created':0}
+              def safe(url):
+                  p=urlsplit(url)
+                  return p.scheme=='https' and p.hostname==host and p.port in (None,443) and not p.username and not p.password
+              def get(url):
+                  for hop in range(3):
+                      if not safe(url):raise ValueError('Unverified external destination')
+                      response=None
+                      for retry in range(2):
+                          meta={'url':url,'attempt':retry+1,'started_at':datetime.now(timezone.utc).isoformat()}
+                          try:
+                              response=session.get(url,timeout=(20,30),allow_redirects=False)
+                              meta.update(status=response.status_code,retrieved_at=datetime.now(timezone.utc).isoformat())
+                              response.raise_for_status()
+                              break
+                          except (requests.ConnectionError,requests.Timeout) as exc:
+                              meta.update(error_type=type(exc).__name__,error=str(exc))
+                              if isinstance(exc,requests.exceptions.SSLError) or retry==1:raise
+                              time.sleep(2)
+                          finally:attempts.append(meta)
+                      if response is None:raise RuntimeError('No response acquired')
+                      if 300<=response.status_code<400:
+                          target=urljoin(url,response.headers.get('Location') or '');meta['location']=target;response.close()
+                          if not safe(target) or target==url:raise ValueError('Unexpected redirect')
+                          url=target;continue
+                      if response.status_code!=200:raise ValueError('Unexpected status')
+                      raw=response.content
+                      if len(raw)>5000000 or 'html' not in response.headers.get('Content-Type','').lower():raise ValueError('Expected bounded HTML')
+                      sha=hashlib.sha256(raw).hexdigest();(out/'raw'/(sha+'.html')).write_bytes(raw);meta.update(sha256=sha,bytes=len(raw))
+                      soup=BeautifulSoup(raw,'html.parser');response.close()
+                      links=[]
+                      for a in soup.select('a[href]'):
+                          target=urldefrag(urljoin(url,a['href']))[0]
+                          if safe(target):links.append({'text':a.get_text(' ',strip=True),'url':target})
+                      controls=[]
+                      for form in soup.select('form'):
+                          controls.append({'method':form.get('method'),'action':urljoin(url,form.get('action') or ''),
+                              'fields':[{'tag':f.name,'name':f.get('name'),'type':f.get('type'),'options':[{'value':o.get('value'),'text':o.get_text(' ',strip=True)} for o in f.select('option')][:32]} for f in form.select('select,input:not([type=hidden]),button')][:30]})
+                      text=soup.get_text(' ',strip=True)
+                      item={'url':url,'sha256':sha,'title':soup.title.get_text(' ',strip=True) if soup.title else None,'headings':[h.get_text(' ',strip=True) for h in soup.select('h1,h2,h3')],'links':links,'forms':controls,'text':text}
+                      pages.append(item);seen.add(url)
+                      print('REGIONAL_SOURCE_PAGE',json.dumps({'code':code,'url':url,'headings':item['headings'],'links':links[:65],'forms':controls},ensure_ascii=False),flush=True)
+                      return item
+                  raise ValueError('Redirect budget exhausted')
+              try:
+                  home=get(origin)
+                  nav=[x for x in home['links'] if re.search(r'calend|archivo|anteriores|consulta avanzada',x['url']+' '+x['text'],re.I)]
+                  for item in nav[:2]:
+                      if item['url'] not in seen:time.sleep(.3);get(item['url'])
+                  candidates=[x for x in home['links'] if re.search(r'fotovolta|e[oó]lic|almacenamiento|\bbater[ií]a|hibrid',x['text'],re.I) and not x['url'].lower().endswith('.pdf')]
+                  for item in candidates[:2]:
+                      if item['url'] not in seen:time.sleep(.3);get(item['url'])
+                  result.update(probe_success=True,pages=len(pages),navigation_links_observed=len(nav),candidate_title_links_observed=len(candidates))
+              except Exception as exc:
+                  result.update(probe_success=False,error_type=type(exc).__name__,error=str(exc))
+              finally:
+                  session.close()
+                  for name,data in [('probe.json',result),('acquisitions.json',attempts),('pages.json',pages)]:
+                      (out/name).write_text(json.dumps(data,ensure_ascii=False,indent=2),encoding='utf-8')
+                  reports.append(result);print('REGIONAL_SOURCE_PROBE',json.dumps(result,ensure_ascii=False),flush=True)
+          (root/'summary.json').write_text(json.dumps(reports,ensure_ascii=False,indent=2),encoding='utf-8')
+          if not any(r['probe_success'] for r in reports):raise RuntimeError('No source probe succeeded; original failures retained')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: next-regional-source-output
+          path: reports/next_regional_probe/
+          if-no-files-found: error
