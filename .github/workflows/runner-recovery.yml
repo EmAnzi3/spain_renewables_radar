@@ -1,0 +1,62 @@
+name: backfill-runner-recovery
+on:
+  workflow_run:
+    workflows: [backfill-30d-validation]
+    types: [completed]
+    branches: [main]
+  push:
+    branches: [main]
+    paths:
+      - '.github/scripts/recover_unassigned_runner.py'
+      - '.github/tests/test_runner_recovery.py'
+      - '.github/workflows/runner-recovery.yml'
+permissions:
+  contents: read
+concurrency:
+  group: runner-recovery-${{ github.event.workflow_run.id || github.run_id }}
+  cancel-in-progress: false
+jobs:
+  policy-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m unittest discover -s .github/tests -v
+  recover:
+    needs: policy-tests
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.run_attempt == 1 &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    permissions:
+      contents: read
+      actions: write
+      checks: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: One retry only for an unassigned hosted runner
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python .github/scripts/recover_unassigned_runner.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: runner-recovery-audit
+          path: reports/runner_recovery.json
+          if-no-files-found: warn
