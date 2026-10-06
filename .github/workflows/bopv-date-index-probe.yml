@@ -1,0 +1,115 @@
+name: bopv-date-index-probe
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/bopv-date-index-probe.yml']
+permissions:
+  contents: read
+concurrency:
+  group: bopv-date-index-probe
+  cancel-in-progress: false
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Acquire observed calendar and explicit publication-date search
+        run: |
+          python -u - <<'PY'
+          import hashlib,json,re
+          from datetime import datetime,timedelta,timezone
+          from pathlib import Path
+          from urllib.parse import urlsplit,urljoin,urldefrag
+          from zoneinfo import ZoneInfo
+          import requests
+          from bs4 import BeautifulSoup
+          origin='https://www.euskadi.eus/bopv2/datos/Ultimo.shtml'
+          root=Path('reports/bopv_date_probe');(root/'raw').mkdir(parents=True,exist_ok=True)
+          session=requests.Session();session.headers['User-Agent']='SpainRenewablesRadar/0.7 (official dated-index probe)'
+          acquisitions=[];pages=[]
+          end=datetime.now(ZoneInfo('Europe/Madrid')).date()-timedelta(days=1);start=end-timedelta(days=29)
+          result={'source_code':'BOPV','window_start':str(start),'window_end':str(end),'collector_implemented':False,'events_created':0,'complete_coverage_certified':False}
+          def safe(url):
+              p=urlsplit(url)
+              return p.scheme=='https' and p.hostname=='www.euskadi.eus' and p.port in (None,443) and not p.username and not p.password
+          def request(label,url,data=None):
+              for hop in range(3):
+                  if not safe(url):raise ValueError('Unexpected source destination')
+                  r=session.request('POST' if data is not None else 'GET',url,data=data,timeout=(15,45),allow_redirects=False)
+                  meta={'label':label,'url':url,'method':r.request.method,'status':r.status_code,'retrieved_at':datetime.now(timezone.utc).isoformat()}
+                  acquisitions.append(meta)
+                  if 300<=r.status_code<400:
+                      target=urljoin(url,r.headers.get('Location',''));meta['location']=target;r.close()
+                      if not safe(target) or target==url:raise ValueError('Unexpected redirect')
+                      url=target
+                      if meta['status'] in (301,302,303):data=None
+                      continue
+                  try:
+                      r.raise_for_status()
+                      raw=r.content
+                      if r.status_code!=200 or len(raw)>5000000 or 'html' not in r.headers.get('Content-Type','').lower():raise ValueError('Expected bounded official HTML')
+                      sha=hashlib.sha256(raw).hexdigest();(root/'raw'/(sha+'.html')).write_bytes(raw)
+                      meta.update(sha256=sha,bytes=len(raw),content_type=r.headers.get('Content-Type'),encoding=r.encoding)
+                      # Respect the HTTP-declared encoding, retaining exact bytes.
+                      soup=BeautifulSoup(r.text,'html.parser')
+                      links=[{'text':a.get_text(' ',strip=True),'url':urldefrag(urljoin(url,a['href']))[0]} for a in soup.select('a[href]') if safe(urljoin(url,a['href']))]
+                      forms=[]
+                      for f in soup.select('form'):
+                          forms.append({'action':urljoin(url,f.get('action') or ''),'method':f.get('method'),'name':f.get('name'),
+                            'fields':[{'name':t.get('name'),'type':t.get('type'),'value':t.get('value'),'checked':t.has_attr('checked'),
+                                       'options':[{'value':o.get('value'),'text':o.get_text(' ',strip=True),'selected':o.has_attr('selected')} for o in t.select('option')][:40] for t in f.select('input,select,button')][:65]})
+                      text='\n'.join(soup.stripped_strings)
+                      page={'label':label,'url':url,'title':soup.title.get_text(' ',strip=True) if soup.title else None,'headings':[h.get_text(' ',strip=True) for h in soup.select('h1,h2,h3')],
+                            'forms':forms,'links':links,'text':text,'sha256':sha}
+                      pages.append(page)
+                      print('BOPV_DATE_PAGE',json.dumps({'label':label,'url':url,'headings':page['headings'],'forms':forms,'links':links[:75],'text_excerpt':text[:1800]},ensure_ascii=False),flush=True)
+                      return soup,page
+                  finally:r.close()
+              raise ValueError('Redirect budget exhausted')
+          try:
+              home,home_info=request('home',origin)
+              calendar_matches=re.findall(r"src=['\"](/bopv2/datos/Cal[^'\"]+)",str(home))
+              if not calendar_matches:raise ValueError('Observed calendar embed absent from current source')
+              cal,cal_info=request('calendar',urljoin(origin,calendar_matches[0]))
+              previous=[x for x in cal_info['links'] if re.search(r'anterior|prev|septiembre',x['text'],re.I)]
+              for index,item in enumerate(previous[:2]):request('calendar-linked-'+str(index),item['url'])
+              searches=[x for x in home_info['links'] if x['text']=='Consulta avanzada']
+              if len(searches)!=1:raise ValueError('Ambiguous official advanced search link')
+              soup,page=request('form',searches[0]['url'])
+              form=soup.find('form',id='formularioID')
+              if not form:raise ValueError('Observed official date search form missing')
+              payload={i['name']:i.get('value','') for i in form.select('input[type=hidden][name]')}
+              for select in form.select('select[name]'):
+                  option=select.find('option',selected=True) or select.find('option')
+                  if option:payload[select['name']]=option.get('value','')
+              payload.update(buscarPorFechaBoletin='true',tipoBusquedaFecha='5',desdeFechaBoletin=start.strftime('%d/%m/%Y'),hastaFechaBoletin=end.strftime('%d/%m/%Y'),textoTitulo='',textoDisposicion='',submit='Buscar')
+              for key in ('buscarPorNumeroBoletin','buscarPorDisposicion','buscarPorAnoNumeroDisposicion','buscarPorFechaDisposicion'):
+                  payload.pop(key,None)
+              action=urljoin(page['url'],form.get('action') or '')
+              result['query_parameters']={k:v for k,v in payload.items() if 'fecha' in k.lower() or k in ('textoTitulo','textoDisposicion','seccionSeleccionado','rangoSeleccionado')}
+              found,found_info=request('publication-window-search',action,payload)
+              for t in found.select('a,input,button'):
+                  signal=' '.join(str(v) for v in t.attrs.values())+' '+t.get_text(' ',strip=True)
+                  if re.search(r'pagin|siguiente|anterior|orden|encontrad|resultado|recuperad',signal,re.I):
+                      print('BOPV_RESULT_CONTROL',json.dumps({'tag':t.name,'attrs':t.attrs,'text':t.get_text(' ',strip=True)},ensure_ascii=False),flush=True)
+              result.update(probe_success=True,pages_acquired=len(pages),search_response_received=True)
+          except Exception as exc:
+              result.update(probe_success=False,error_type=type(exc).__name__,error=str(exc));raise
+          finally:
+              session.close()
+              for filename,value in [('acquisitions.json',acquisitions),('pages.json',pages),('probe.json',result)]:
+                  (root/filename).write_text(json.dumps(value,ensure_ascii=False,indent=2),encoding='utf-8')
+              print('BOPV_DATE_PROBE_RESULT',json.dumps(result,ensure_ascii=False),flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bopv-date-index-probe-output
+          path: reports/bopv_date_probe/
+          if-no-files-found: error
