@@ -1,91 +1,68 @@
 # CURRENT STATE — Spain Renewables Radar
 
-Checkpoint **6 ottobre 2026, Europe/Rome**. La **PR #2 è integrata in main**, commit funzionale **dc4630627ac3043e70bb644a27ce0942ad0580f4**. Il successivo `74635d9a5070dd07f9cb186b6fe6a43304f7008b` aggiunge soltanto un controllo di connettività ARM64. **Classificazione BOPV completata sul perimetro verificato; disponibilità live GVA ancora bloccata.** Non dichiarare risolta la seconda perché sono verdi i test del codice.
+Checkpoint **6 ottobre 2026, Europe/Rome**. Lavoro su `main`. **Il radar operativo prosegue anche con una fonte indisponibile; il portale navigabile contiene 257 schede e 263 eventi. GitHub Pages richiede ancora attivazione amministrativa: il sito pubblico non è dichiarato online.**
 
-## Esiti verificati
+Questo checkpoint supera le descrizioni precedenti che fermavano tutto il lavoro al preflight GVA. Il preflight rimane nel workflow di certificazione completa, non blocca il nuovo aggiornamento operativo parziale. Lo storico dettagliato resta nella [revisione f7b6878](https://github.com/EmAnzi3/spain_renewables_radar/blob/f7b68784789e3f87ce525e7efae5c6ef3c311285/CURRENT_STATE.md) e nei checkpoint di fonte.
 
-| Blocco | Esito |
-|---|---|
-| Suite locale completa | **586 test superati**, compresi 34 nuovi casi BOPV e 22 casi GVA catalogo/sessione/preflight |
-| Test del commit di merge | **37430217747 — SUCCESS** |
-| Test della revisione con probe ARM64 | **37430471783 — SUCCESS** |
-| BOPV classificazione su branch | **37428902802 — SUCCESS**, artifact scaricato e riprodotto localmente |
-| BOPV classificazione post-merge | **37430217754 — SUCCESS** |
-| GVA dedicato post-merge | **37430217761 — FAILURE** |
-| Backfill post-merge | **37430217829 — FAILURE nel preflight GVA**; altre acquisizioni e certificazione integrata SKIPPED |
-| GVA accessi ufficiali alternativi | **37428381186 — FAILURE**; entrambi in timeout prima della risposta HTTP |
-| GVA runner ARM64 | **37430471860 — FAILURE**, stessa destinazione e stesso ConnectTimeout |
-| DOCM/Almagro dedicato | **37420987930 — SUCCESS**, correzione preservata |
-| Ultimo backfill integrato completato | **37406054339 — SUCCESS**, precedente alla correzione Almagro |
+## Aggiornamento operativo verificato
 
-Checkpoint di questo blocco: `docs/validation/2026-10-06-gva-bopv-completion.json`. I nuovi controlli non sono una nuova certificazione integrata riuscita.
+Run **37441856639**, codice **f7b68784789e3f87ce525e7efae5c6ef3c311285**, build SUCCESS; deploy SKIPPED perché Pages non configurato. Finestra tentata **29 settembre–5 ottobre 2026**. Completamento originale **2026-10-06T09:27:13.558058+00:00** (11:27 Europe/Rome).
 
-## GVA — robustezza client pubblicata, disponibilità non certificata
+- **257 schede progetto / 263 eventi** nel database persistente; non 257 nuovi cantieri né 257 nuove opportunità del periodo.
+- **12 fonti COMPLETE su 13**, sette giorni per ogni fonte completata; **GVA_PUBLIC UNAVAILABLE**.
+- Stato **PARTIAL**, `database_promoted=true`, `full_certification=false`.
+- Gli atti precedenti GVA restano nel database con le proprie date: **16 schede** hanno almeno una fonte non aggiornata in questa esecuzione.
+- Quality gate operativo: **0 ERROR / 9 WARN / 184 INFO**. Restano **69 schede senza MW, 39 senza expediente, 2 senza nome**. I nove casi senza provincia singola sono multi-provincia; **zero province realmente irrisolte**.
+- Geografia: 648,16 MW multi-provincia non ripartiti né duplicati; 30 MW del gruppo SABIA 20260224 restano non allocati.
+- Distribuzione degli stati del dataset: **156 EARLY, 47 PERMITTING, 30 AUTHORIZED, 9 PRECONSTRUCTION, 15 BLOCKED**. Stato amministrativo e avvio effettivo dei lavori non sono equivalenti.
 
-Il codice operativo contiene:
+La pagina e il database scaricati sono stati confrontati per tutte le 257 chiavi e per nome, tecnologia, MW, promotore, provincia e stato: coincidenti. Il database supera `PRAGMA integrity_check`.
 
-- **sessione anonima persistente e connessioni riutilizzate**, intervallo minimo di 0,75 secondi fra richieste; reset di connessioni/cookie solo dopo errori transitori;
-- **tre tentativi completi al massimo**, senza retry annidati. Dinieghi, HTTP 400/401/403/404/429, errori di certificato e dati malformati non vengono trasformati in retry o risultati validi;
-- **un catalogo completo riutilizzabile solo nello stesso run/attempt**, entro un'ora, dopo rilettura di tutti gli originali, verifica di hash, date delle singole ricevute, numero/ordine delle pagine e identità univoche; nuova verifica live della prima e dell'ultima pagina;
-- un errore live non autorizza il recupero di dati vecchi; una modifica delle estremità o una cache non valida richiede un nuovo catalogo completo. Le pagine intermedie restano lo snapshot originale dello stesso run, non una nuova acquisizione live attribuita retroattivamente;
-- **job GVA/backfill serializzati** nella stessa concurrency group, per non eseguire contemporaneamente due scansioni;
-- **preflight GVA prima delle altre dodici fonti**, con ricevuta esplicita. Se il catalogo non è disponibile il run fallisce subito, senza una scansione parziale presentata come completa.
+Artifact originali verificati per byte/digest:
 
-Moduli: `app/gva_transport.py`, `app/gva_catalogue.py`, `app/gva_preflight.py`. Nessuna modifica all'interpretazione dei progetti GVA. Il launcher ordinario resta invariato; il preflight anticipato è nel workflow di certificazione, non una nuova fonte.
+| Artifact | ID | Byte | SHA256 |
+|---|---|---:|---|
+| radar-web-navigable | 11402510121 | 39205152 | bec88d91aebf8ba6c12c63e0d03a543692d64fefb2f44749ba57e681ffabaf2a |
+| radar-operational-state | 11401189832 | 5953600 | bef7224476595a797b834884b33984ef1260e5c2e240697511d82f18f18f0c94 |
 
-### Guasto live ancora osservato
+## Portale consultabile e pubblicazione separata
 
-I precedenti problemi erano HTTP 400 e timeout sulla pagina 15. Nei controlli di questo blocco il guasto è precedente: **ConnectTimeout durante l'apertura della connessione, zero byte e nessuna risposta HTTP**. Il probe con timeout connessione di 20 secondi ha verificato `cindi.gva.es` e `mediambient.gva.es`: entrambi risolvono **195.77.19.35** e non rispondono dai runner provati. Non è dimostrato un disservizio globale, un blocco geografico o una causa interna del server.
+Il portale `web/portal.html` generato da `app.web_portal` è autonomo: dati inclusi nella pagina, nessuna API o libreria esterna richiesta per filtrare e navigare. Contiene **Progetti, Province, Fonti e copertura, Avvisi da integrare**, schede con eventi/testi originali, filtri, priorità commerciali e CSV della selezione.
 
-Il run post-merge **37430217829** si è fermato nel nuovo preflight: tre tentativi, nessun dato ricevuto, nessun evento creato. Artifact **11397050969**, **1.182.596 byte**, SHA256 **ae58dfc5684a8ddf55789d7dc89b973b1bd6abac2f77f9de89e7d2dcbb08296e**, scaricato e verificato. Ricevuta `reports/gva_public/preflight.json`; nessun download delle altre dodici fonti.
+**Nuovo workflow `publish-radar-web`**, codice **f2a21b72c469d2d0f33f1e2af00f6754c795b80f**. Il run **37447214551** ha completato il job `prepare` con SUCCESS; `deploy` è SKIPPED per Pages non configurato. La suite esistente e i sette nuovi test di integrità sono passati. Il controllo Chromium desktop/mobile è passato sui dati effettivi: ricerca/scheda, Almagro, tecnologia, province, copertura, lead separati, zero errori JavaScript, nessun overflow a 390 px.
 
-Un confronto su runner standard **ARM64** ha mantenuto endpoint, TLS e budget identici: **37430471860** termina con lo stesso errore, non corregge la disponibilità. Artifact **11396303764**, **3.038 byte**, SHA256 **9cf5fd6a1b5e4ae2cbf66baaf433fe71aadc0a7f356fcc7b15d3a7395922f2a4**, scaricato e verificato. Il workflow ordinario non è stato spostato su ARM64.
+Questo workflow **non rilancia i collector**: recupera un artifact navigabile di un run operativo main riuscito, verifica digest, contenuto HTML/JSON, numero e identità dei progetti, esito browser e stato delle fonti. Conserva integralmente date e contenuti originali. Non trasforma PARTIAL in certificazione completa. In caso di deploy verifica anche l'hash della pagina realmente servita all'URL pubblico.
 
-**Blocco residuo:** recuperare la raggiungibilità dell'endpoint dai runner o identificare e validare un'altra pubblicazione ufficiale equivalente. Non continuare a modificare il parser o rilanciare senza limiti una connessione che non riceve risposte. Non saltare GVA, non usare proxy/credenziali o vecchi record per simulare il successo.
+**Artifact pronto `radar-web-ready`, ID 11404285981**: **2524740 byte**, SHA256 **dfec066e7d01971b63323b5eab48ca3187292a9abef17333db1eac914bd652e7**, scaricato e verificato. Estrazione e apertura di `index.html`; non serve un server per le funzioni della pagina. Il suo HTML coincide byte per byte con il portale operativo originale, SHA256 **633a3df78a7bf9c51150a3943a46dc9586255bb12fb57e92cc56ae8273c1f0fe**.
 
-## BOPV — classificazione completata, collector ancora separato
+### Passaggio amministrativo ancora necessario
 
-Indice ufficiale **37420987792 — SUCCESS**: **306 disposizioni**, ricerca su **31 pagine**, **21 edizioni**, **30 giorni**, inclusi **9 senza edizione**; zero omissioni o conflitti di identità/titolo. Gli originali e le date dei cinque avvisi sono stati verificati indipendentemente.
+La lettura autenticata della configurazione Pages restituisce **404**, stato `PAGES_CONFIGURATION_REQUIRED`; `public_site_verified=false`. I tool GitHub disponibili non espongono una scrittura amministrativa Pages. L'azione ufficiale di abilitazione richiede un token amministrativo diverso dal normale GITHUB_TOKEN: non sono stati richiesti o ricercati segreti.
 
-Il modulo **`app/bopv_semantics.py`** e **`scripts/validate_bopv_semantics.py`** ricostruiscono l'indice dagli originali, classificano tutti i candidati e confrontano ogni impianto con cinque casi revisionati. Ogni valore conserva il paragrafo e l'intervallo esatto della fonte. **34 nuove regressioni** coprono domande/concessioni, DIA, impianti multipli, riferimenti condivisi/estranei, MW/kVA/MWh, geografia e soggetti.
+Nella repository: **Settings → Pages → Build and deployment → Source: GitHub Actions**. Poi eseguire **Actions → publish-radar-web → Run workflow**, lasciando `source_run=37441856639` per questa versione verificata. Non occorre ripetere l'acquisizione di tutte le fonti. Non indicare un URL come live finché il job deploy e la verifica HTTP non sono conclusi.
 
-**Classificazione validata: 37428902802**, codice **81bbcd0ccf74b953e1eb4ee28c7da39ad6ab2484**, ripetuta positivamente su main nel run **37430217754**. Artifact della prima prova **11396013105**, **177.904 byte**, SHA256 **8dc9a0133c708c6cf3bfca39f065790683f05069b54e3556197d798a09999e52**, scaricato, ricalcolato e confrontato campo per campo con una ricostruzione locale dagli HTML originali. Non sono nuove acquisizioni retrodatate: la finestra rimane **6 settembre–5 ottobre 2026**.
+## Correzioni preservate nel portale effettivo
 
-| Impianto | Tecnologia | MW espliciti | Localizzazione di impianto | Evento/stato |
-|---|---|---:|---|---|
-| Hernani I | WIND | 4,99 | Villabona, Gipuzkoa | PUBLIC_INFO / EARLY |
-| Hernani II | WIND | 4,99 | Villabona, Gipuzkoa | PUBLIC_INFO / EARLY |
-| Regina Solar | PV | 10,12 | Vitoria-Gasteiz e Arratzua-Ubarrundia, Álava | PUBLIC_INFO / EARLY |
-| Nova Solar | PV | 1 | Vitoria-Gasteiz, Álava | PUBLIC_INFO / EARLY |
-| Pe Pando | WIND | 30 | Ayala e Okondo, Álava | PUBLIC_INFO / EARLY |
-| Mendi | WIND | 31,2 | Amurrio e Ayala, Álava | DIA / PERMITTING |
+- **BESS Almagro I**: BESS **7,2 MW**, Almagro / Ciudad Real, expediente 13270209226, PUBLIC_INFO/EARLY. Non sono i 7,4 MW del FV preesistente. Correzione documentata e validata DOCM nel run 37420987930.
+- **BESS Cistérniga**: BESS **2,1 MW**, Valladolid, promotore **Soluciones de Ingeniería Industrial II, S.L.**, PUBLIC_INFO/EARLY. Correzione pubblicata in f7b6878, con originale revisionato e migrazione protetta.
+- Le riparazioni dei record preesistenti richiedono hash e vecchi valori attesi, backup SQLite, transazione e idempotenza. Non cambiano identità, URL, testo, date o lifecycle degli eventi.
 
-**Sei impianti energetici, non cinque e non sette.** Il settimo soggetto estratto, **Coalsema**, è un progetto industriale ibrido per autoconsumo, conservato come **SELF_CONSUMPTION_LEAD** separato. Il totale MW resta vuoto: potenza apparente FV, potenza attiva PCS, energia per contenitore e cogenerazione esistente non vengono sommati. Le quantità originali sono comunque disponibili.
+## Fonti alternative e BOPV
 
-Hernani I e II condividono il dossier **20-GE-Y-2025-00004** ma hanno proprietari distinti; l'applicant del gruppo non viene assegnato come owner a entrambi. Regina e Nova conservano i propri dossier distinti, senza prendere quelli degli impianti che condividono l'evacuazione. **Pando e Mendi non hanno un expediente individuale inequivocabile nel testo disponibile**: il campo resta vuoto e l'identità è provvisoria. La categoria GE–Y non diventa un codice di pratica inventato.
+Il portale rende già consultabili gli avvisi della **Delegazione del Governo della Comunitat Valenciana**, con testi e collegamenti documentali, e l'esito dei probe **BOP Valencia, Alicante, Castellón e ICV FV**. Sono fonti pubbliche alternative verificate come accessi, **non cinque nuovi collector certificati né una sostituzione completa GVA**. I dati geografici ICV rimangono contesto/inventario, non eventi datati.
 
-Mendi ha una DIA, non un'autorizzazione alla costruzione. Nessuna data lavori o EPC viene dedotta. Le tabelle disponibili soltanto nel PDF sono segnalate e non interpretate dall'HTML.
+**BOPV**: classificazione verificata, sei impianti energetici più un lead industriale Coalsema, conservati nella sezione separata. Cinque PUBLIC_INFO/EARLY e una DIA/PERMITTING. **BOPV resta `implemented=false` e non entra nelle 257 schede**. Indice 37420987792, classificazione 37428902802 e replay su main 37430217754; dettagli in `docs/sources/bopv.md`.
 
-**BOPV resta `implemented=false`, nessun evento BOPV è scritto nel database ordinario.** La richiesta di classificazione è chiusa sul perimetro verificato; l'abilitazione della quattordicesima fonte richiede ancora collector live, persistenza delle identità provvisorie, smoke, backfill e controlli integrati. Output del classificatore: `index.html`, `assets.csv`, `classified_documents.json`, `originals/` e `validation_metrics.json` nell'artifact. Metodo: `docs/sources/bopv.md`.
+Restano da completare i collector alternativi regionali e il collector BOPV live, con persistenza, smoke e backfill. Non sommare avvisi da integrare e schede del radar per gonfiare i totali.
 
-## Almagro — correzione preservata
+## Certificazione completa distinta dall'operatività
 
-DOCM-2026-7037, pubblicazione **5 ottobre 2026**: **BESS Almagro I, 7,2 MW, Almagro/Ciudad Real, Castilla-La Mancha**, expediente **13270209226**, PUBLIC_INFO/EARLY. I 7,4 MW del FV esistente, 14,6 MW complessivi dopo ibridazione, accesso, kVA/MVA e MWh restano separati.
+L'ultimo backfill rigoroso a 13 fonti concluso rimane **37406054339**, codice 88201b5, finestra 6 settembre–5 ottobre 2026: **256 schede / 262 eventi**. Quell'artifact storico precede le correzioni successive e non viene riscritto. I tentativi rigorosi successivi falliti su GVA restano falliti, incluso **37441856595** su f7b6878. Il successo operativo PARTIAL non li sostituisce.
 
-La migrazione dei valori precedenti resta hash-locked, con backup, transazione e rollback in caso di difformità. È stata provata su una copia del database precedente: solo nome, tecnologia, potenza e provincia di Almagro modificati; identità, testo, URL, date e lifecycle immutati; replay senza ulteriori correzioni.
+13 collector nel codice: BOE, BOCYL, BOA, BOJA, DOCM, DOE, BORM, BOCM, DOG, DOGC, AND_PUBLIC, GVA_PUBLIC, MITECO_SABIA. Bollettini CCAA **9/17**. INE, REE e RAIPEE sono enrichment. Mancanti DOGV, BON, BOPV, BOPA, BOCANT, BOC-CAN, BOIB, BOR. EPC/BoP esterno resta successivo alla discovery.
 
-Prova DOCM **37420987930 — SUCCESS**, **18 eventi / 18 progetti, 30 giorni, zero errori fonte/giorno e strutturali**. Non è una certificazione delle tredici fonti. Evidenze: `docs/validation/2026-10-06-almagro-bopv.json`, `docs/sources/docm-storage.md`.
+## Uso e vincoli
 
-## Ultimo dataset integrato completo, storico
+`aggiorna_radar_web.bat` avvia l'aggiornamento operativo parziale e apre il portale; `aggiorna_radar_spagna.bat` rimane il launcher precedente. `publish-radar-web` pubblica invece un risultato già acquisito, senza rete verso le fonti.
 
-**37406054339 — SUCCESS**, codice **88201b5a2e2f5b35c39ac028d44c4d3e155a3391**, **6 settembre–5 ottobre 2026**: **256 schede / 262 eventi**, 13 fonti × 30 giorni, zero errori fonte/giorno, qualità **0 ERROR / 9 WARN / 184 INFO**. Mancanti: nome2, MW69, provincia singola10, expediente39. La geografia di quel dataset contiene nove multi-provincia e Almagro ancora irrisolto.
-
-**L'artifact storico conserva il vecchio valore Almagro.** Non modificarne retroattivamente i numeri per descrivere il codice corretto. Le sette BESS Begues sono distinte e Gandia Hive è DENIED/BLOCKED. Artifact11388095924,91.685.094byte,SHA256 fae2b7a9b3a15d502bc04ab1b81110b74d6fafceac70c4de5802e61e632f08d6. Storico dettagliato nella revisione precedente di questo documento e nei checkpoint di validazione.
-
-## Perimetro e prossime attività
-
-13 collector nel codice: **BOE, BOCYL, BOA, BOJA, DOCM, DOE, BORM, BOCM, DOG, DOGC, AND_PUBLIC, GVA_PUBLIC, MITECO_SABIA**. GVA è implementato ma attualmente non acquisibile dai runner verificati. Bollettini CCAA **9/17**. Mancanti **DOGV, BON, BOPV, BOPA, BOCANT, BOC-CAN, BOIB, BOR**. INE, REE e RAIPEE sono enrichment, non nuove fonti di discovery.
-
-Prossimi blocchi: disponibilità GVA e nuova prova integrata; collector BOPV basato sulla classificazione validata; altre fonti regionali, PLACSP, IDAE/BDNS, capacità MITECO/ITJ e contesto CNMC. EPC/BoP esterno resta successivo alla discovery. Gli inventari Catalunya/Galicia restano separati, così come milestone SABIA, dati REE e potenze multi-provincia/non allocate.
-
-BAT ordinario **aggiorna_radar_spagna.bat**, ultimi sette giorni, invariato. I commit remoti non aggiornano il database sul PC e non pubblicano da soli una dashboard. Solo fonti ufficiali/gratuite; nessun aggregatore commerciale. Preservare external_id, URL, raw_text, date e ruoli; non abbassare i gate né scambiare un successo del test per disponibilità della fonte.
+Solo fonti ufficiali/gratuite, nessun aggregatore commerciale. Preservare external_id, raw_text, URL, date e ruoli. Promotore distinto da EPC, richiesta distinta da concessione, scoring distinto dal lifecycle. Campi sconosciuti e multi-provincia espliciti; nessun valore inventato. Non confondere dataset persistente, nuova finestra acquisita, classificazione di lead, test, certificazione completa e pubblicazione effettiva.
