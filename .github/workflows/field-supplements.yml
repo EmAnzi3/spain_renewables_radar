@@ -1,0 +1,34 @@
+name: field-evidence-supplements
+on:
+  workflow_dispatch:
+  push:
+    branches: ['main']
+    paths:
+      - '.github/scripts/acquire_field_review_supplements.py'
+      - '.github/workflows/field-supplements.yml'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: field-evidence-supplements
+  cancel-in-progress: false
+jobs:
+  acquire:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Acquire official indexed bodies without changing projects
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python -u .github/scripts/acquire_field_review_supplements.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: field-evidence-supplements
+          path: reports/field_supplements/
+          if-no-files-found: error
