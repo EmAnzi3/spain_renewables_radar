@@ -1,48 +1,42 @@
-# BOPV — official dated index reconciliation
+# BOPV — indice riconciliato e classificazione verificata
 
-Checkpoint **2026-10-06**. **BOPV remains disabled** in the ordinary registry. This module creates no project or administrative event.
+Stato **6 ottobre 2026**: classificazione sul perimetro **6 settembre–5 ottobre 2026** completata e integrata in main tramite PR #2. **Collector non abilitato, nessun evento creato nel database ordinario.**
 
-## Completed acquisition evidence
+## Provenienza e perimetro
 
-Run **37420987792 — SUCCESS**, code **b9752fcc8b5f492bc97f03ccdf83b1857de1b039**. Window **2026-09-06–2026-10-05**:
+Indice **37420987792 — SUCCESS**: ricerca ufficiale su 31 pagine, 306 disposizioni confrontate con i sommari delle 21 edizioni dei calendari ufficiali, 30 giorni inclusi nove senza edizione. Nessuna omissione o differenza sostanziale di titolo/identità. Cinque testi HTML completi e relative date verificati. Artifact11393276447,753694byte,SHA25635f211924f8309c2b14a8e7d6990cbd70ee86e77d076db97671ffb7d9bd8a885. Metodo e probe precedenti restano nei checkpoint 2026-10-06-bopv-preflight.json e 2026-10-06-almagro-bopv.json.
 
-- **306 unique dispositions**, all **31 pages** of the official publication-date search;
-- calendars for both months and every summary of the **21 published editions**;
-- all **30 days** accounted for, including **nine source-declared no-edition days**;
-- complete equality of disposition identities and titles, with **zero omissions and conflicts**;
-- **five candidate HTML bodies**, publication mastheads, identities, titles and edition numbers verified;
-- original-byte receipts preserved; downloaded archive checked and **62 original responses** hashed locally, with all summaries rebuilt and compared.
+Il classificatore ricostruisce prima l'intero indice dai file originali, non si fida del solo elenco generato. Date degli atti e di pubblicazione restano distinte. Non vengono letti domini diversi da quelli ufficiali né aggiunti dati da aggregatori.
 
-Artifact **11393276447**, **753,694 bytes**, SHA256 **35f211924f8309c2b14a8e7d6990cbd70ee86e77d076db97671ffb7d9bd8a885**. Earlier source discovery runs **37402681950** and **37405285898** remain historical evidence; the new run adds complete index reconciliation. Tests: ordinary suite 530, plus **26 BOPV contract tests**.
+## Moduli e validazione
 
-## Actual source contract
+`app/bopv_semantics.py` è una trasformazione pura senza rete o database. `scripts/validate_bopv_semantics.py` ricostruisce l'indice originale, verifica gli hash, classifica tutti i candidati, confronta cinque casi revisionati e ripete la trasformazione senza mutare input o creare identità casuali. Fixture `tests/fixtures/bopv_semantic_review.json`; **34 test** di errori e regressione in `tests/test_bopv_semantics.py`.
 
-Source host **www.euskadi.eus**, official BOPV entry point `/bopv2/datos/Ultimo.shtml`. Month calendars expose literal Spanish `diasHabilitados` and `enlaces` arrays, explicit year/month and edition basenames. Edition pages are requested in the observed year/month directory and independently checked against their own masthead and signed-PDF link. Days are not guessed from weekdays. Unexpected structure or missing coverage fails rather than returning an empty success.
+Classificazione **37428902802 — SUCCESS**, codice81bbcd0ccf74b953e1eb4ee28c7da39ad6ab2484. Ripetuta su main **37430217754 — SUCCESS**, codedc4630627ac3043e70bb644a27ce0942ad0580f4. Artifact11396013105,177904byte,SHA2568dc9a0133c708c6cf3bfca39f065790683f05069b54e3556197d798a09999e52, scaricato e verificato anche ricalcolando localmente tutti i campi dagli HTML originali. È un replay degli originali acquisiti, non una nuova data di pubblicazione o una nuova scansione live.
 
-Summary source IDs and displayed disposition numbers must agree. Spanish article paths use `/bopv2/datos/YYYY/MM/YYNNNNNa.shtml`; the search emits an equivalent `/web01-bopv/es/` prefix. The exact observed presentation flags `BOPV_NOT_IN_PORTAL`, `BOPV_HIDE_CALENDAR`, `R01HNoPortal=true` are permitted without altering the saved URL. Unknown, duplicated or changed parameters are rejected.
+## Risultati per impianto
 
-Historical pages reuse the masthead CSS class for sidebar search headings: only one actual edition masthead is accepted. Inline superscript markup is extracted without inserting false spaces inside units such as m3/año. This changes text extraction, not source wording; raw HTML remains intact, and changed quantities/titles still fail comparison.
+| Atto / pubblicazione | Impianto | MW espliciti | Localizzazione | Evento |
+|---|---|---:|---|---|
+| 2026/04004 — 24 settembre | Hernani I | 4,99 | Villabona, Gipuzkoa | PUBLIC_INFO / EARLY |
+| 2026/04004 — 24 settembre | Hernani II | 4,99 | Villabona, Gipuzkoa | PUBLIC_INFO / EARLY |
+| 2026/03989 — 23 settembre | Regina Solar | 10,12 | Vitoria-Gasteiz e Arratzua-Ubarrundia, Álava | PUBLIC_INFO / EARLY |
+| 2026/03989 — 23 settembre | Nova Solar | 1 | Vitoria-Gasteiz, Álava | PUBLIC_INFO / EARLY |
+| 2026/03987 — 23 settembre | Pe Pando | 30 | Ayala e Okondo, Álava | PUBLIC_INFO / EARLY |
+| 2026/03902 — 16 settembre | Mendi | 31,2 | Amurrio e Ayala, Álava | DIA / PERMITTING |
 
-The search and summaries are separate source representations, not two independent publishers. The reconciliation validates the acquired index in this window; it is not proof that every renewable opportunity appears in title-keyword selection or that every future edition will have identical structure.
+Quattro atti producono **sei impianti energetici**, non sei cantieri autorizzati. Mendi contiene una dichiarazione ambientale, non un permesso di costruzione. L'atto 2026/03988, pubblicato il23settembre, riguarda **Coalsema**, un ibrido industriale per autoconsumo: conservato come **SELF_CONSUMPTION_LEAD** distinto, con MW di progetto non assegnati e richiesta PUBLIC_INFO/EARLY.
 
-## Candidate scope to implement next
+Hernani I e II hanno dossier condiviso20-GE-Y-2025-00004, ma promotori distinti Premier ESPF Ipaz Haizea,S.L. e Premier ESPF Ipaz Haizea2,S.L.; l'applicant comune Premier ESPF Renovables,S.L. non sostituisce gli owner. La sede degli aerogeneratori è Villabona; i comuni attraversati dalla linea non sono assegnati arbitrariamente alla generazione.
 
-The five verified original publications are:
+Regina e Nova conservano rispettivamente01–GE–Y–2025–00021 e01–GE–Y–2025–00031, senza prendere i dossier degli altri impianti che condividono l'evacuazione. Pando e Mendi non hanno un riferimento individuale univoco nel testo: expediente vuoto, identità provvisoria. GE–Y è una categoria di procedimento, non un codice completo inventato.
 
-| Source identity | Publication date | Subject to classify |
-|---|---|---|
-| 2026/04004 | 2026-09-24 | Hernani I–II cluster; two parks require separate identities and owner evidence |
-| 2026/03989 | 2026-09-23 | Regina Solar and Nova Solar; separate project sections and dossiers |
-| 2026/03988 | 2026-09-23 | Coalsema; industrial self-consumption, existing cogeneration, PV and BESS components |
-| 2026/03987 | 2026-09-23 | Pe Pando; public information, not an authorization grant; do not invent an expediente |
-| 2026/03902 | 2026-09-16 | Mendi environmental decision; full operative conditions must remain distinct from construction authorization |
+Coalsema: potenza apparente FV in kVAn, potenza PCS in kW, kWh per contenitore e cogenerazione preesistente sono quantità distinte. Non vengono sommati né convertiti impropriamente in un unico MW. L'impianto industriale rimane visibile come lead, non eliminato o presentato come nuovo parco utility-scale.
 
-These are **five administrative publications, not five unique project opportunities**. The bodies have been read for development scoping, but a reusable semantic classifier, per-project projection and collector validation are not yet complete. Do not publish inferred scalar MW, EPC assignments or construction dates. Supplier/model references are not EPC contract evidence. Coalsema's self-consumption/multi-component scope must be handled explicitly rather than silently excluded or combined.
+## Evidenze e limiti
 
-## Code and output
+Ogni campo conserva indice del paragrafo, intervallo, testo originale e SHA256 del paragrafo. Tutte le quantità sono conservate con unità/basi e `automatically_summable=false`. EPC e date lavori restano vuoti. Conflitti espliciti lasciano il campo scalare sconosciuto; dispositivo non riconosciuto resta REVIEW_REQUIRED e fa fallire la validazione dei candidati.
 
-`.github/scripts/reconcile_bopv_index.py` and `.github/scripts/probe_bopv_dates.py`, with dedicated workflow `.github/workflows/bopv-index-reconciliation.yml`. Source-contract tests stay in `.github/tests/test_bopv*.py`, separate from the dependency-free runner-recovery policy tests.
+La lettura comprende titoli, paragrafi e intestazioni di dispositivo anche quando il DOM usa h6.BOPVClave. Le tabelle indicate dalla fonte come presenti solo nel PDF sono segnalate: non sono state interpretate o trasformate in coordinate inventate.
 
-Artifact folders: `bopv_date_probe/` (search pages, original bodies and source receipts) and `bopv_reconciliation/` (calendar/summary originals, all dispositions, 30-day coverage, candidate date checks and audit). The audit explicitly retains `collector_implemented=false`, `events_created=0`, `source_semantics_validated=false`.
-
-Next steps: source-scoped semantic rules and regression fixtures; separate multi-project identity and quantity handling; actual daily collector; live smoke and thirty-day backfill; integrated validation with all existing sources before activation. No new source was enabled by this checkpoint.
+Output artifact: index.html, assets.csv, classified_documents.json, originals/ e validation_metrics.json. Prima dell'abilitazione di BOPV sono necessari collector live, strategia di persistenza delle identità provvisorie, smoke, backfill e certificazione integrata. Non sommare questi sei impianti ai conteggi storici del radar finché non vengono realmente acquisiti e deduplicati nel database.
