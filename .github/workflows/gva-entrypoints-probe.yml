@@ -1,0 +1,78 @@
+name: gva-entrypoints-probe
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/gva-entrypoints-probe.yml']
+permissions:
+  contents: read
+concurrency:
+  group: gva-entrypoints-probe
+  cancel-in-progress: false
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Inspect only documented public energy entrypoints
+        run: |
+          python -u - <<'PY'
+          import hashlib,json,socket,time
+          from datetime import datetime,timezone
+          from pathlib import Path
+          from urllib.parse import urljoin,urlsplit
+          import requests
+          from app.collectors.gva_public import parse_listing,page_url
+          root=Path('reports/gva_entrypoints');root.mkdir(parents=True,exist_ok=True)
+          results=[]
+          origins=['https://cindi.gva.es/es/web/energia/informacion-publica',
+                   'https://mediambient.gva.es/es/web/energia/informacion-publica']
+          for origin in origins:
+              result={'origin':origin,'responses':[],'probed_at':datetime.now(timezone.utc).isoformat(),'collector_source_changed':False}
+              results.append(result)
+              session=requests.Session();session.headers['User-Agent']='SpainRenewablesRadar/0.8 (official source connectivity audit)'
+              try:
+                  result['dns_addresses']=sorted({x[4][0] for x in socket.getaddrinfo(urlsplit(origin).hostname,443,type=socket.SOCK_STREAM)})
+                  current=origin
+                  for hop in range(4):
+                      p=urlsplit(current)
+                      if p.scheme!='https' or not (p.hostname or '').endswith('.gva.es') or p.username or p.password or p.port not in (None,443):
+                          raise ValueError('Unexpected official source destination')
+                      started=time.monotonic()
+                      with session.get(current,timeout=(20,40),stream=True,allow_redirects=False) as response:
+                          receipt={'url':current,'status':response.status_code,'headers_seconds':round(time.monotonic()-started,3),'retrieved_at':datetime.now(timezone.utc).isoformat()}
+                          result['responses'].append(receipt)
+                          if response.status_code in (301,302,303,307,308):
+                              location=response.headers.get('Location')
+                              if not location:raise ValueError('Redirect missing Location')
+                              receipt['location']=urljoin(current,location);current=receipt['location'];continue
+                          response.raise_for_status()
+                          if response.status_code!=200:raise ValueError('Unexpected status')
+                          raw=b''
+                          for chunk in response.iter_content(65536):
+                              raw+=chunk
+                              if len(raw)>3000000:raise ValueError('Probe response too large')
+                          sha=hashlib.sha256(raw).hexdigest();(root/(sha+'.html')).write_bytes(raw)
+                          receipt.update(bytes=len(raw),sha256=sha,content_type=response.headers.get('Content-Type'))
+                          rows,bounds,route=parse_listing(raw,current)
+                          result.update(listing_valid=True,bounds=bounds,first_ids=[r['external_id'] for r in rows],official_next_page=page_url(route,2) if route else None)
+                          break
+                  else:raise ValueError('Redirect budget exceeded')
+              except Exception as exc:
+                  result.update(listing_valid=False,error_type=type(exc).__name__,error=str(exc))
+              finally:
+                  session.close();(root/'probe.json').write_text(json.dumps(results,ensure_ascii=False,indent=2),encoding='utf-8')
+                  print('GVA_ENTRYPOINT',json.dumps(result,ensure_ascii=False),flush=True)
+          if not any(r.get('listing_valid') for r in results):raise SystemExit('No documented entrypoint returned a valid live listing; no source substitution made')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gva-entrypoints-output
+          path: reports/gva_entrypoints/
+          if-no-files-found: error
