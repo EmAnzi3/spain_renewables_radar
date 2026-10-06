@@ -135,13 +135,23 @@ def explicit_name(text):
 
 
 def classify_current_title(title):
-    low=fold(title)
+    low=fold(flatten(title))
     if re.search(r'informacion\s+publica|\bip\s+solicitudes',low):return 'PUBLIC_INFO','EARLY'
     # GVA prefixes some current resolutions with a municipality and underscore:
     # 'CHESTE_Res.'. An underscore is not a word boundary in Python regexes.
     if not re.search(r'resolucion|(?<![a-z0-9])res\.',low):return 'OTHER','EARLY'
     if re.search(r'acepta(?:r)?(?:\s+de\s+plano)?\s+el\s+desistimiento|acepta\s+desistimiento',low):return 'WITHDRAWN','BLOCKED'
     if re.search(r'\bdeniega\b|\bdenegacion\b',low):return 'DENIED','BLOCKED'
+    # A current resolution dismissing the application for AAP/AAC is a denial,
+    # not a new request. Match the first operative predicate, not an appeal,
+    # rejected allegations or an older decision quoted later in the title.
+    predicate=re.search(r'\bpor la que\s+(.+)',low)
+    if predicate and re.match(
+        r'se desestima la solicitud\s+'
+        r'(?:(?:presentada|formulada)\s+por\s+.{2,200}?[, ]+)?'
+        r'de\s+(?:aap\b|aac\b|autorizacion\s+administrativa\s+(?:previa\b|de\s+construccion\b))',
+        predicate[1]):
+        return 'DENIED','BLOCKED'
     if re.search(r'perdida\s+sobrevenida|desaparicion\s+sobrevenida|terminacion\s+(?:del\s+)?procedimiento',low):return 'PROCEDURE_ENDED','BLOCKED'
     grant=re.search(r'\bse\s+otorga\s+a\b|\botorgando\s+a\b|\bde\s+otorgamiento\s+a\b',low)
     if re.search(r'\bno\s+se\s+otorga\b',low):grant=None

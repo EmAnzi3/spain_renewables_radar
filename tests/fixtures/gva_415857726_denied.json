@@ -1,0 +1,19 @@
+{
+  "provenance": {
+    "run_id": "37401490130",
+    "head_sha": "a1155f5abebd529dbbe382505a511c9a419e6aef",
+    "source_document_sha256": "67dca76f3b9746a7f49ca6f9c837d3d32c4f1cc884012221cdb312c5fec97b41",
+    "source_document_url": "https://mediambient.gva.es/auto/energia/InformacionPublica/Valencia/ATALFE-2023-13-46_Resol/20260929%20RESOL%20DESFAVORABLE%20ATALFE_2023_13_46.pdf",
+    "review_scope": "Official heading, current publication and operative clause visually checked on page 7; this fixture is source excerpts, not a complete live replay."
+  },
+  "record": {
+    "external_id": "415857726",
+    "title": "PALMA DE GANDIA_Resolución del STIEMV por la que se desestima la solicitud presentada por SUN HIVE 76, de AAP y AAC, sobre la construcción de una central de producción de energía eléctrica de tecnología fotovoltaica y de su infraestructura de evacuación, de potencia instalada 1 MW y potencia de los módulos fotovoltaicos de 1.056 kWp, denominada “Gandia Hive”. ATALFE/2023/13/46.",
+    "url": "https://mediambient.gva.es/es/web/energia/informacion-publica/-/asset_publisher/OhlatINc5YvP/content/palma-de-gandia_resoluci%25C3%25B3n-del-stiemv-por-la-que-se-desestima-la-solicitud-presentada-por-sun-hive-76-de-aap-y-aac-sobre-la-construcci%25C3%25B3n%25C2%25A0de-una-central-de-producci%25C3%25B3n-de-energ%25C3%25ADa-el%25C3%25A9ctrica-de-tecnolog%25C3%25ADa-fotovoltaica-y-de-s?_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_OhlatINc5YvP_assetEntryId=415857726&_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_OhlatINc5YvP_redirect=https%3A%2F%2Fmediambient.gva.es%2Fes%2Fweb%2Fenergia%2Finformacion-publica%3Fp_p_id%3Dcom_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_OhlatINc5YvP%26p_p_lifecycle%3D0%26p_p_state%3Dnormal%26p_p_mode%3Dview%26_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_OhlatINc5YvP_cur%3D0%26p_r_p_resetCur%3Dfalse%26_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_OhlatINc5YvP_assetEntryId%3D415857726",
+    "publication_date": "2026-10-05",
+    "categories": ["Energias renovables", "Valencia", "Instalaciones autorizadas"],
+    "summary": "ATALFE/2023/13/46_Resolución"
+  },
+  "legal_header": " \n \nServici Territorial d’Indústria, Energia i Mines de Valencia \n \nC/ Gregorio Gea, 27 · 46009 València \n012 · 963 866 000 \nwww.gva.es \nRAA/SCV/CTT/pmm \nResolución del Servicio Territorial de Industria , Energía y Minas de Valencia por la que se \ndesestima la solicitud presentada por  SUN HIVE 76,  de autorización administrativa previa, \nautorización administrativa de construcción, sobre la  construcción de una central de \nproducción de energía eléctrica de tecnología fotovoltaica y de su infraestructura de \nevacuación, ubicada en  PALMA DE GANDIA , de potencia instalada  1 MW y potencia de los  \nmódulos fotovoltaicos de 1.056 kWp, denominada “GANDIA HIVE”. ATALFE/2023/13/46. \n",
+  "expected": {"event_type": "DENIED", "commercial_stage": "BLOCKED", "project_name": "Gandia Hive", "power_mw": 1.0, "expediente": "ATALFE/2023/13/46"}
+}
