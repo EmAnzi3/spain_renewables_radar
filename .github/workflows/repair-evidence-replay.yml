@@ -1,0 +1,75 @@
+name: repair-evidence-replay
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/repair-evidence-replay.yml']
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: repair-evidence-replay
+  cancel-in-progress: false
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 37401490130
+          name: backfill-30d-output
+          path: frozen-input
+      - name: Reconstruct DOGC originals and diagnose GVA source decisions separately
+        run: |
+          python -u - <<'PY'
+          import hashlib,json,os,sqlite3,sys,traceback
+          from pathlib import Path
+          from collections import Counter
+          sys.path.insert(0,str(Path.cwd()))
+          from scripts.validate_dogc_collector import validate_dogc_integration
+          from scripts.validate_source_registry import validate_dogc_geography
+          from app.collectors.gva_public import record_fields
+          root=Path('frozen-input').resolve();out=Path('reports/repair_evidence_replay');out.mkdir(parents=True,exist_ok=True)
+          result={'code_sha':os.environ['GITHUB_SHA'],'verification_run':os.environ['GITHUB_RUN_ID'],
+                  'original_run':'37401490130','mode':'OFFLINE_ORIGINAL_REPLAY_NOT_LIVE_CERTIFICATION',
+                  'new_source_downloads':0,'production_database_modified':False,'complete':False}
+          source=sqlite3.connect('file:'+str(root/'data/spain_renewables.sqlite')+'?mode=ro',uri=True)
+          conn=sqlite3.connect(':memory:');conn.row_factory=sqlite3.Row;source.backup(conn);source.close()
+          try:
+              result['dogc']=validate_dogc_integration(conn,output=root/'reports/dogc')
+              result['dogc_geography']=validate_dogc_geography(conn)
+              originals=json.loads((root/'reports/gva_public/records.json').read_text())
+              outcomes=[]
+              for record in originals:
+                  fields,flags=record_fields(record)
+                  if fields['disposition']=='TARGET':
+                      if any(f['code']=='SOURCE_LIFECYCLE_UNMAPPED' for f in flags):
+                          raise ValueError('Still-unmapped source decision: '+record['external_id'])
+                      old=record['extraction'];changed={k:{'before':old.get(k),'after':v} for k,v in fields.items() if old.get(k)!=v}
+                      outcomes.append({'external_id':record['external_id'],'source_title':record['title'],
+                                       'event_type':fields['event_type'],'stage':fields['commercial_stage'],'changed_fields':changed})
+              result['gva_target_decisions']=outcomes
+              result['gva_decision_counts']=dict(Counter(x['event_type'] for x in outcomes))
+              result['code_files_sha256']={p:hashlib.sha256(Path(p).read_bytes()).hexdigest() for p in ['scripts/validate_source_registry.py','scripts/validate_dogc_collector.py','app/collectors/gva_public.py']}
+              result['complete']=True
+          except Exception as exc:
+              result.update(error_type=type(exc).__name__,error=str(exc),traceback=traceback.format_exc())
+              raise
+          finally:
+              conn.close()
+              (out/'audit.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
+              print('ACTUAL_FROZEN_REPLAY_OUTCOME',json.dumps({k:v for k,v in result.items() if k!='gva_target_decisions'},ensure_ascii=False),flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: repair-evidence-replay-output
+          path: reports/repair_evidence_replay/
+          if-no-files-found: error
