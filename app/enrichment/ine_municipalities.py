@@ -32,7 +32,7 @@ PROVINCE_CODE_TO_NAME = {
 }
 
 LOCATION_ANCHOR_RE = re.compile(
-    r"(?:t[eé]rminos?\s+municipales?\s+de|municipios?\s+de|ubicaci[oó]n\s*:|"
+    r"(?:t[eé]rminos?\s+municipal(?:es)?\s+de|municipios?\s+de|ubicaci[oó]n\s*:|"
     r"emplazamiento\s*:|situad[oa]s?\s+en|ubicad[oa]s?\s+en)\s+"
     r"([^.;:\n]{2,260})",
     re.I,

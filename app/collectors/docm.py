@@ -8,6 +8,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from app.parser import parse_event
+from app.docm_storage import project_storage
 
 BASE="https://docm.jccm.es/docm/"
 SUMMARY_URL=urljoin(BASE,"cambiarBoletin.do")
@@ -129,6 +130,7 @@ class DOCMCollector:
                 url=source_url,
                 raw_text=detail_text,
             )
+            event=project_storage(event)
             if event.technology:
                 out.append(event)
         return out

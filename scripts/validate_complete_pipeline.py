@@ -5,6 +5,7 @@ from collections import Counter
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from app.db import connect
+from app.docm_storage import validate_docm_storage
 from app.and_public_catalogue import replay_catalogue
 from app.identifiers import valid_expediente
 from app.parser import ParsedEvent
@@ -96,6 +97,7 @@ def metrics(conn,coverage,quality,sabia,and_public,borm):
     result.update(validate_dog_integration(conn,coverage))
     result['dogc']=validate_dogc_integration(conn)
     result['dogc']['geographic_projection']=validate_dogc_geography(conn)
+    result['docm_storage']=validate_docm_storage(conn)
     result['collector_registry_verified']=source_registry
     result['source_window_verified']=source_window
     if result['dogc']['window_start']!=source_window['start'] or result['dogc']['window_end']!=source_window['end']:

@@ -15,6 +15,7 @@ from app.reporting import export_dashboard,write_changes,write_coverage,write_qu
 from app.store import save_event
 from app.identity_migration import repair_legacy_identities
 from app.bocyl_identity import repair_bocyl_external_ids
+from app.docm_storage import repair_and_record as repair_docm_storage
 
 COLLECTOR_CLASSES={
     "BOE":BOECollector,"BOCYL":BOCYLCollector,"BOA":BOACollector,"BOJA":BOJACollector,
@@ -79,6 +80,8 @@ def main():
         finally:
             if hasattr(collector, "close"):
                 collector.close()
+    docm_repair=repair_docm_storage(conn)
+    if docm_repair["status"]!="NOT_NEEDED":print("DOCM storage evidence:",docm_repair,flush=True)
     missing_geo=conn.execute("SELECT count(*) FROM projects WHERE province IS NULL").fetchone()[0]
     if missing_geo:
         print(f"[INE_MUNICIPALITIES] enriching {missing_geo} projects without province")
