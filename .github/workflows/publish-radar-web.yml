@@ -1,0 +1,130 @@
+name: publish-radar-web
+on:
+  workflow_dispatch:
+    inputs:
+      source_run:
+        description: Successful main radar-operational-web run to publish; no new source downloads
+        type: string
+        required: true
+        default: '37441856639'
+  push:
+    branches: ['main']
+    paths:
+      - '.github/scripts/prepare_radar_publication.py'
+      - '.github/tests/test_radar_publication.py'
+      - '.github/workflows/publish-radar-web.yml'
+permissions:
+  contents: read
+concurrency:
+  group: publish-reviewed-radar
+  cancel-in-progress: false
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: read
+      actions: read
+      pages: read
+    outputs:
+      pages_enabled: ${{ steps.pages.outputs.enabled }}
+      index_sha256: ${{ steps.pages.outputs.index_sha256 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt && pip install playwright
+      - name: Existing regressions and publication integrity tests
+        run: |
+          python -m unittest discover -s tests
+          python -m unittest discover -s .github/tests -p test_radar_publication.py -v
+      - name: Verify and package the existing navigable artifact without harvesting
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_RUN: ${{ inputs.source_run || '37441856639' }}
+        run: python .github/scripts/prepare_radar_publication.py --run-id "$SOURCE_RUN"
+      - name: Recheck desktop and mobile navigation on the actual publication
+        run: |
+          cp publication/browser_receipt.json publication/original_browser_receipt.json
+          if ! command -v google-chrome && ! command -v chromium; then python -m playwright install chromium; fi
+          python -m scripts.check_web_portal_browser --site publication
+      - name: Check Pages settings and expose any required administrator action
+        id: pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib,json,os,requests
+          root=Path('publication')
+          r=requests.get('https://api.github.com/repos/'+os.environ['GITHUB_REPOSITORY']+'/pages',headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'},timeout=(15,30),allow_redirects=False)
+          if r.status_code not in (200,403,404):
+              r.raise_for_status()
+              raise RuntimeError('Unexpected Pages configuration response')
+          data=r.json();enabled=r.status_code==200 and data.get('build_type')=='workflow'
+          state='READY_FOR_DEPLOYMENT' if enabled else ('PAGES_READ_PERMISSION_REQUIRED' if r.status_code==403 else 'PAGES_CONFIGURATION_REQUIRED')
+          result={'api_status':r.status_code,'state':state,'workflow_pages_enabled':enabled,'public_site_verified':False,'html_url':data.get('html_url') if r.status_code==200 else None,'build_type':data.get('build_type'),'action_needed':None if enabled else 'Settings > Pages > Build and deployment > Source: GitHub Actions. Then run publish-radar-web again.','new_source_requests':0}
+          (root/'pages_status.json').write_text(json.dumps(result,indent=2))
+          digest=hashlib.sha256((root/'index.html').read_bytes()).hexdigest()
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f:
+              f.write('enabled='+str(enabled).lower()+'\nindex_sha256='+digest+'\n')
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as f:
+              f.write('## Portale verificato\n\n'+state+'\n\n')
+              f.write('Il pacchetto radar-web-ready contiene index.html: apribile senza server.\n\n')
+              if not enabled:f.write('La pagina non e ancora pubblicata online. '+result['action_needed']+'\n')
+          print('PAGES_PUBLICATION_STATE',json.dumps(result))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: radar-web-ready
+          path: publication/
+          if-no-files-found: error
+      - uses: actions/upload-pages-artifact@v3
+        if: steps.pages.outputs.enabled == 'true'
+        with:
+          path: publication/
+  deploy:
+    needs: prepare
+    if: needs.prepare.outputs.pages_enabled == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v4
+        id: deployment
+      - name: Verify the actual public page against the validated file hash
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+          EXPECTED_SHA: ${{ needs.prepare.outputs.index_sha256 }}
+        run: |
+          python - <<'PY'
+          import hashlib,json,os,time,urllib.request
+          from pathlib import Path
+          from datetime import datetime,timezone
+          url=os.environ['PAGE_URL'];expected=os.environ['EXPECTED_SHA'];verified=False
+          for attempt in range(6):
+              try:
+                  with urllib.request.urlopen(urllib.request.Request(url,headers={'Cache-Control':'no-cache'}),timeout=20) as response:
+                      actual=hashlib.sha256(response.read()).hexdigest()
+                  if actual==expected:
+                      verified=True;break
+              except Exception as error:
+                  print(type(error).__name__,str(error))
+              if attempt<5:time.sleep(10)
+          result={'page_url':url,'public_site_verified':verified,'expected_sha256':expected,'verified_at':datetime.now(timezone.utc).isoformat(),'publication_run_id':os.environ['GITHUB_RUN_ID'],'new_source_requests':0}
+          Path('public_deployment_receipt.json').write_text(json.dumps(result,indent=2))
+          print('PUBLIC_PAGE_VERIFIED',json.dumps(result))
+          if not verified:raise RuntimeError('Deployment is not verified at the public URL')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: public-deployment-receipt
+          path: public_deployment_receipt.json
+          if-no-files-found: warn
