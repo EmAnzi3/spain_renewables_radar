@@ -66,7 +66,6 @@ def publication_header(soup, *, summary):
 def parse_calendar(text, year, month):
     if not re.search(r"var\s+bopvIdioma\s*=\s*'es'", text):
         raise ValueError('Unexpected calendar language')
-    # Year and month must be explicitly present even for a month without editions.
     if not re.search(r'var\s+year\s*=\s*'+str(year)+r'\s*;', text) or not re.search(r'var\s+month\s*=\s*'+str(month-1)+r'\s*;', text):
         raise ValueError('Calendar month/year scope changed')
     arrays = []
@@ -115,7 +114,8 @@ def parse_summary(text, url, day, filename):
         if len(anchors)!=1:
             raise ValueError('Ambiguous disposition in summary')
         anchor = anchors[0];target = urljoin(url,anchor['href']);identity=article_id(target)
-        title = anchor.get_text(' ',strip=True)
+        # Inline superscripts must not acquire invented whitespace inside units.
+        title = ' '.join(anchor.get_text('', strip=False).split())
         number = node.parent.select('.BOPVSumarioOrden')
         if (not title or len(number)!=1 or number[0].get_text(strip=True)!=str(int(identity.split('/')[1]))
                 or identity in rows or not target.endswith('a.shtml')):
@@ -133,7 +133,7 @@ def body_provenance(text, url, expected):
     title=soup.select('.BOPVTitulo')
     if (len(identities)!=1 or identities[0].get('value')!=expected['external_id'].replace('/','0')
             or article_id(url)!=expected['external_id'] or str(day)!=expected['publication_date']
-            or edition!=expected['edition'] or len(title)!=1 or title[0].get_text(' ',strip=True)!=expected['title']):
+            or edition!=expected['edition'] or len(title)!=1 or ' '.join(title[0].get_text('', strip=False).split())!=expected['title']):
         raise ValueError('Candidate body identity/date/title differs from its summary')
     return {'external_id':expected['external_id'],'publication_date':str(day),'edition':edition,
             'body_header_verified':True,'semantic_classification':'NOT_VALIDATED'}
@@ -229,7 +229,6 @@ def main():
                 rows=parse_summary(text,url,day,filename)
                 if set(entries).intersection(rows):raise ValueError('One disposition occurs in multiple editions')
                 entries.update(rows);count+=len(rows)
-                # Rebuild from saved original bytes before marking the day verified.
                 raw=(root/'raw'/(receipt['sha256']+'.html')).read_bytes()
                 if hashlib.sha256(raw).hexdigest()!=receipt['sha256'] or parse_summary(raw.decode(receipt['encoding']),url,day,filename)!=rows:
                     raise ValueError('Summary original-byte replay mismatch')

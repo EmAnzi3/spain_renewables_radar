@@ -1,0 +1,71 @@
+name: docm-storage-validation
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/docm-storage-validation.yml'
+permissions:
+  contents: read
+concurrency:
+  group: docm-storage-validation
+  cancel-in-progress: false
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Existing unit and regression tests
+        run: python -m unittest discover -s tests
+      - name: Independent DOCM thirty-day live acquisition
+        run: python -u -m app.run_pipeline --sources DOCM --since 2026-09-06 --until 2026-10-05 --skip-ree --skip-miteco --strict-coverage
+      - name: Verify storage projection, geography, provenance and idempotency
+        run: |
+          python - <<'PY'
+          import csv,json,os
+          from datetime import date,timedelta
+          from pathlib import Path
+          from app.db import connect
+          from app.docm_storage import validate_docm_storage,repair_and_record,source_fingerprint
+          conn=connect('data/spain_renewables.sqlite')
+          with Path('reports/coverage_latest.csv').open(encoding='utf-8-sig') as f: coverage=list(csv.DictReader(f))
+          days=[row['date'] for row in coverage if row['source_code']=='DOCM']
+          expected=[str(date(2026,9,6)+timedelta(days=i)) for i in range(30)]
+          assert sorted(days)==expected and len(days)==len(set(days)), 'DOCM coverage is not the declared contiguous window'
+          assert all(row['status']=='OK' for row in coverage), 'Source/enrichment failed'
+          checked=validate_docm_storage(conn)
+          assert checked['source_scoped_events']==1
+          before=source_fingerprint(conn)
+          replay=repair_and_record(conn)
+          assert replay['corrected_events']==0 and before==source_fingerprint(conn)
+          row=dict(conn.execute("SELECT p.*,e.raw_text,e.external_id FROM projects p JOIN events e USING(project_key) WHERE e.source_code='DOCM' AND e.external_id='DOCM-2026-7037'").fetchone())
+          assert row['project_name']=='BESS Almagro I' and row['power_mw']==7.2 and row['technology']=='BESS'
+          assert row['province']=='Ciudad Real' and row['commercial_stage']=='EARLY' and row['expediente']=='13270209226'
+          assert conn.execute('PRAGMA foreign_key_check').fetchall()==[]
+          with Path('reports/quality_issues_latest.csv').open(encoding='utf-8-sig') as f: quality=list(csv.DictReader(f))
+          assert not any(r['severity']=='ERROR' for r in quality)
+          result={'run_id':os.environ['GITHUB_RUN_ID'],'head_sha':os.environ['GITHUB_SHA'],
+                  'scope':'DOCM_ONLY_NOT_THIRTEEN_SOURCE_CERTIFICATION','window_start':expected[0],'window_end':expected[-1],
+                  'source_days':30,'source_day_errors':0,'projects':conn.execute('SELECT COUNT(*) FROM projects').fetchone()[0],
+                  'events':conn.execute('SELECT COUNT(*) FROM events').fetchone()[0],
+                  'almagro':{k:row[k] for k in ['project_key','project_name','technology','power_mw','province','ccaa','expediente','commercial_stage','external_id']},
+                  'source_replay':checked,'repair_replay_corrected_events':0,'immutable_source_fingerprint':before,
+                  'geography_from_official_municipality':True,'structural_errors':0}
+          Path('reports/docm_storage_validation.json').write_text(json.dumps(result,ensure_ascii=False,indent=2))
+          print('DOCM_STORAGE_VERIFIED',json.dumps(result,ensure_ascii=False))
+          conn.close()
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: docm-storage-validation-output
+          path: |
+            data/spain_renewables.sqlite
+            reports/
+            docs/data.json
+          if-no-files-found: error

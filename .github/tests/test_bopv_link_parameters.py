@@ -12,3 +12,20 @@ class PresentationParametersTests(unittest.TestCase):
         for query in [QUERY+'&documentId=9',QUERY+'&BOPV_NOT_IN_PORTAL',QUERY.replace('true','false'),
                       'documentId=9','BOPV_NOT_IN_PORTAL=another',QUERY.replace('BOPV_HIDE_CALENDAR','UNKNOWN')]:
             with self.subTest(query=query),self.assertRaises(ValueError):m.article_id(URL+'?'+query)
+
+class InlineMarkupTests(unittest.TestCase):
+    def test_superscript_does_not_invent_spaces_inside_units(self):
+        from test_bopv_reconciliation import HTML,URL,DAY,FILE,TITLE
+        node=HTML.replace(TITLE,'Agua de 1.000 m<sup>3</sup>/año para riego.')
+        row=m.parse_summary(node,URL,DAY,FILE)['2026/04093']
+        self.assertEqual(row['title'],'Agua de 1.000 m3/año para riego.')
+    def test_literal_whitespace_and_words_are_not_deleted(self):
+        from test_bopv_reconciliation import HTML,URL,DAY,FILE,TITLE
+        node=HTML.replace(TITLE,'Planta <strong>Solar</strong> de 10 <span>MW</span>.')
+        row=m.parse_summary(node,URL,DAY,FILE)['2026/04093']
+        self.assertEqual(row['title'],'Planta Solar de 10 MW.')
+    def test_different_quantities_still_fail_reconciliation(self):
+        from test_bopv_reconciliation import HTML,URL,DAY,FILE,TITLE
+        rows=m.parse_summary(HTML.replace(TITLE,'Agua de 1.000 m<sup>3</sup>/año.'),URL,DAY,FILE)
+        changed={k:dict(v,title='Agua de 2.000 m3/año.') for k,v in rows.items()}
+        with self.assertRaises(ValueError):m.reconcile(rows,changed)
