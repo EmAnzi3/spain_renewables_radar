@@ -1,5 +1,4 @@
 """Fetch pinned own-repository evidence and resume a validated main state.
-
 Artifact hashes are checked before extraction. Original source dates are kept.
 """
 from __future__ import annotations
@@ -78,6 +77,16 @@ def restore(root:Path,expected:dict):
         if conn.execute('SELECT COUNT(*) FROM projects').fetchone()[0]!=manifest['projects']:raise ValueError('Saved count differs')
     Path('data').mkdir(exist_ok=True);Path('reports/operational').mkdir(parents=True,exist_ok=True)
     shutil.copyfile(src,'data/spain_renewables.sqlite');shutil.copyfile(root/'latest.json','reports/operational/latest.json')
+    # Separate reviewed projection correction: the original source acquisition
+    # state and all event identities/text/dates remain unchanged.
+    from app.bocyl_storage import repair_database
+    from contextlib import closing
+    with closing(sqlite3.connect('data/spain_renewables.sqlite')) as conn:
+        repair=repair_database(conn,Path('reports/bocyl_storage'))
+    if repair['changed_projects']:
+        status.setdefault('projection_repairs',[]).append(repair)
+        status['provenance_note']='Acquisizione operativa '+expected['run_id']+'; proiezione BESS Cistérniga corretta separatamente sul testo originale, senza nuove acquisizioni o modifiche alle date.'
+        Path('reports/operational/latest.json').write_text(json.dumps(status,ensure_ascii=False,indent=2),encoding='utf-8')
     print('OPERATIONAL_STATE_RESTORED',expected['run_id'])
 
 def main():

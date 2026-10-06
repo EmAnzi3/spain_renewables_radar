@@ -12,6 +12,7 @@ from bs4 import BeautifulSoup
 from xml.etree import ElementTree as ET
 
 from app.parser import parse_event, normalize_text
+from app.bocyl_storage import project_event
 
 API="https://analisis.datosabiertos.jcyl.es/api/explore/v2.1/catalog/datasets/bocyl/records"
 RELEVANT=re.compile(r"fotovolta|parque\s+e[oó]lico|instalaci[oó]n\s+e[oó]lica|almacenamiento|bater[ií]a|hibridaci[oó]n|aerogenerador",re.I)
@@ -99,27 +100,17 @@ class BOCYLCollector:
                 errors.append(f"{field}: {exc}")
         if errors:
             raise RuntimeError("BOCYL published detail unavailable; "+"; ".join(errors))
-        # An index-only source without document links is not fabricated full text.
         return str(row.get("titulo") or ""),row.get("enlace_fichero_pdf") or API
 
     def collect_day(self,day:date):
         out=[]
         for row in self._day_rows(day):
             title=str(row.get("titulo") or "")
-            if not RELEVANT.search(title) or EXCLUDE.search(title):
-                continue
+            if not RELEVANT.search(title) or EXCLUDE.search(title):continue
             detail_text,source_url=self._detail_text(row)
             combined=title+"\n"+detail_text
-            if not RELEVANT.search(combined):
-                continue
-            event=parse_event(
-                source_code=self.code,
-                external_id=self._external_id(row),
-                publication_date=day.isoformat(),
-                title=title,
-                url=source_url,
-                raw_text=detail_text,
-            )
-            if event.technology:
-                out.append(event)
+            if not RELEVANT.search(combined):continue
+            event=parse_event(source_code=self.code,external_id=self._external_id(row),publication_date=day.isoformat(),
+                              title=title,url=source_url,raw_text=detail_text)
+            if event.technology:out.append(project_event(event))
         return out

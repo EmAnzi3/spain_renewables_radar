@@ -1,0 +1,72 @@
+name: portal-projection-replay
+on:
+  workflow_dispatch:
+  push:
+    branches: ['main']
+    paths:
+      - 'app/bocyl_storage.py'
+      - 'tests/test_bocyl_storage.py'
+      - 'tests/fixtures/bocyl_cisterniga_review.json'
+      - '.github/workflows/portal-projection-replay.yml'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: portal-projection-replay
+  cancel-in-progress: false
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt && pip install playwright
+      - name: All tests including frozen original and guarded repair
+        run: python -m unittest discover -s tests
+      - name: Download verified own artifacts and repair only the reviewed projection
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python -m scripts.portal_inputs
+          test -f data/spain_renewables.sqlite
+          python -m app.valencian_alternatives --probe-root inputs/alternatives --output reports/alternative_sources.json
+      - name: Check fields, original fingerprint and zero extra repairs
+        run: |
+          python - <<'PY'
+          import json,sqlite3
+          from pathlib import Path
+          from app.bocyl_storage import repair_database,source_fingerprint
+          c=sqlite3.connect('data/spain_renewables.sqlite');c.row_factory=sqlite3.Row
+          before=source_fingerprint(c)
+          r=repair_database(c,Path('reports/bocyl_storage'))
+          assert r['changed_projects']==0
+          row=dict(c.execute("SELECT project_name,technology,power_mw,promoter,commercial_stage FROM projects WHERE project_key='3cd885d540216fbe3d2f'").fetchone())
+          assert row=={'project_name':'BESS Cistérniga','technology':'BESS','power_mw':2.1,'promoter':'Soluciones de Ingeniería Industrial II, S.L.','commercial_stage':'EARLY'}
+          assert source_fingerprint(c)==before
+          result={'type':'REVIEWED_PROJECTION_REPLAY_NOT_NEW_LIVE_ACQUISITION','project':row,'immutable_event_fingerprint':before,'new_source_downloads':0,'extra_repairs':0,'projects':c.execute('SELECT COUNT(*) FROM projects').fetchone()[0],'events':c.execute('SELECT COUNT(*) FROM events').fetchone()[0]}
+          Path('reports/projection_replay.json').write_text(json.dumps(result,ensure_ascii=False,indent=2))
+          print('PROJECTION_VERIFIED',json.dumps(result,ensure_ascii=False));c.close()
+          PY
+      - name: Build the corrected navigable page from the verified database
+        run: >-
+          python -m app.web_portal --db data/spain_renewables.sqlite
+          --status reports/operational/latest.json --output site
+          --bopv inputs/bopv --alternatives reports/alternative_sources.json
+      - name: Real browser checks
+        run: |
+          if ! command -v google-chrome && ! command -v chromium; then python -m playwright install chromium; fi
+          python -m scripts.check_web_portal_browser --site site
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: radar-web-corrected-projection
+          path: |
+            site/
+            reports/bocyl_storage/
+            reports/projection_replay.json
+            reports/operational/latest.json
+            data/spain_renewables.sqlite
+          if-no-files-found: error
