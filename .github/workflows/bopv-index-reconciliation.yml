@@ -1,0 +1,46 @@
+name: bopv-index-reconciliation
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/scripts/reconcile_bopv_index.py'
+      - '.github/tests/test_bopv_reconciliation.py'
+      - '.github/workflows/bopv-index-reconciliation.yml'
+permissions:
+  contents: read
+concurrency:
+  group: bopv-index-reconciliation
+  cancel-in-progress: false
+jobs:
+  reconcile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Existing regression suite and new index-contract tests
+        run: |
+          python -m unittest discover -s tests
+          python -m unittest discover -s .github/tests -p test_bopv_reconciliation.py -v
+      - name: Acquire independent complete live search with original responses
+        run: python -u .github/scripts/probe_bopv_dates.py
+      - name: Reconcile all calendar editions, dispositions and candidate publication headers
+        run: python -u .github/scripts/reconcile_bopv_index.py
+      - name: Actual result, never infer success from test outcome
+        if: always()
+        run: |
+          if [ -f reports/bopv_reconciliation/audit.json ]; then
+            cat reports/bopv_reconciliation/audit.json
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bopv-index-reconciliation-output
+          path: |
+            reports/bopv_date_probe/
+            reports/bopv_reconciliation/
+          if-no-files-found: error
