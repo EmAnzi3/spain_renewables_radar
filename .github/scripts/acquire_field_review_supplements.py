@@ -3,7 +3,7 @@ from __future__ import annotations
 import hashlib,io,json,re,sys,time
 from datetime import datetime,timezone
 from pathlib import Path
-from urllib.parse import urlsplit
+from urllib.parse import urlsplit,urljoin
 import requests
 from bs4 import BeautifulSoup
 from pypdf import PdfReader
@@ -14,21 +14,33 @@ MANIFEST=[]
 LIMIT=15000000
 
 def get(url,hosts):
-    p=urlsplit(url)
-    if p.scheme!='https' or p.hostname not in hosts or p.username or p.password or p.port not in (None,443):raise ValueError('Unapproved source URL')
+    original=url
     for attempt in range(2):
-        receipt={'url':url,'attempt':attempt+1,'retrieved_at':datetime.now(timezone.utc).isoformat(),'complete':False}
+        receipt={'url':original,'attempt':attempt+1,'retrieved_at':datetime.now(timezone.utc).isoformat(),'complete':False,'redirects':[]}
+        response=None
         try:
-            with requests.get(url,timeout=(15,45),stream=True,allow_redirects=False,headers={'User-Agent':'SpainRenewablesRadar/1.0 (official document field review)'}) as r:
-                receipt['status']=r.status_code;r.raise_for_status()
-                if r.status_code!=200:raise ValueError('Redirect or unexpected success requires source review')
+            url=original
+            for redirect in range(4):
+                p=urlsplit(url)
+                if p.scheme!='https' or p.hostname not in hosts or p.username or p.password or p.port not in (None,443):raise ValueError('Unapproved source URL')
+                response=requests.get(url,timeout=(15,45),stream=True,allow_redirects=False,headers={'User-Agent':'SpainRenewablesRadar/1.0 (official document field review)'})
+                receipt['status']=response.status_code
+                if response.status_code in (301,302,303,307,308):
+                    location=response.headers.get('Location')
+                    receipt['redirects'].append({'from':url,'location':location,'status':response.status_code})
+                    response.close()
+                    if not location or redirect==3:raise ValueError('Missing destination or excessive redirects')
+                    url=urljoin(url,location)
+                    continue
+                response.raise_for_status()
+                if response.status_code!=200:raise ValueError('Unexpected source response')
                 chunks=[];size=0
-                for part in r.iter_content(65536):
+                for part in response.iter_content(65536):
                     size+=len(part)
                     if size>LIMIT:raise ValueError('Source size limit exceeded')
                     chunks.append(part)
                 raw=b''.join(chunks)
-                receipt.update(complete=True,sha256=hashlib.sha256(raw).hexdigest(),bytes=len(raw),content_type=r.headers.get('Content-Type'))
+                receipt.update(complete=True,final_url=url,sha256=hashlib.sha256(raw).hexdigest(),bytes=len(raw),content_type=response.headers.get('Content-Type'))
                 return raw,receipt
         except Exception as exc:
             receipt.update(error_type=type(exc).__name__,error=str(exc))
@@ -36,7 +48,9 @@ def get(url,hosts):
             if not transient or attempt==1:raise
             time.sleep(2)
         finally:
+            if response is not None:response.close()
             MANIFEST.append(receipt.copy());(OUT/'requests.json').write_text(json.dumps(MANIFEST,indent=2))
+    raise RuntimeError('Unreachable transport state')
 
 def main():
     records=[];errors=[]
