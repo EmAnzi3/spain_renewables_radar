@@ -261,26 +261,9 @@ class GVAPublicCollector:
                     'pdf_field_extraction_scope':'first_two_pages; no OCR; full original bytes preserved'}
 
     def _get(self,url,limit=12000000):
-        url=official_url(url)
-        for _ in range(5):
-            response=self.session.get(url,timeout=self.timeout,allow_redirects=False,stream=True)
-            if response.status_code in (301,302,303,307,308):
-                location=response.headers.get('Location');response.close()
-                if not location:raise ValueError('Official redirect lacks a destination')
-                url=official_url(urljoin(url,location));continue
-            response.raise_for_status();chunks=[];size=0
-            try:
-                for chunk in response.iter_content(65536):
-                    size+=len(chunk)
-                    if size>limit:raise ValueError('Official source exceeds bounded download size')
-                    chunks.append(chunk)
-            finally:response.close()
-            raw=b''.join(chunks);self.output.mkdir(parents=True,exist_ok=True)
-            digest=hashlib.sha256(raw).hexdigest();extension='.pdf' if raw.startswith(b'%PDF-') else '.html'
-            filename=digest+extension;(self.output/filename).write_bytes(raw)
-            self.audit['acquisitions'].append({'url':url,'file':filename,'sha256':digest,'bytes':len(raw),'retrieved_at':datetime.now(timezone.utc).isoformat()})
-            return raw,url
-        raise ValueError('Too many GVA redirects')
+        from app.gva_transport import fetch_official
+        return fetch_official(url,output=self.output,audit=self.audit,timeout=self.timeout,
+                              user_agent=self.session.headers['User-Agent'],limit=limit)
 
     def _save(self):
         self.output.mkdir(parents=True,exist_ok=True)
