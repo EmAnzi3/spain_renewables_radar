@@ -1,0 +1,52 @@
+name: gva-arm-connectivity-validation
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/gva-arm-connectivity-validation.yml']
+permissions:
+  contents: read
+concurrency:
+  group: gva-arm-connectivity-validation
+  cancel-in-progress: false
+jobs:
+  probe:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 6
+    concurrency:
+      group: official-gva-network-${{ github.repository }}
+      cancel-in-progress: false
+    env:
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Same code regression suite on the standard runner
+        run: python -m unittest discover -s tests
+      - name: Same official endpoint and bounded full-catalogue preflight
+        run: |
+          python - <<'PY'
+          import json,os,platform,socket
+          from pathlib import Path
+          from urllib.parse import urlsplit
+          from app.collectors.gva_public import BASE
+          from app.gva_preflight import run_preflight
+          output=Path('reports/gva_public');output.mkdir(parents=True,exist_ok=True)
+          metadata={'runner_os':os.environ.get('RUNNER_OS'),'runner_arch':os.environ.get('RUNNER_ARCH'),
+                    'machine':platform.machine(),'official_endpoint':BASE,
+                    'probe_only':True,'collector_endpoint_changed':False}
+          try:
+              metadata['dns_addresses']=sorted({row[4][0] for row in socket.getaddrinfo(urlsplit(BASE).hostname,443,type=socket.SOCK_STREAM)})
+          finally:
+              (output/'runner_context.json').write_text(json.dumps(metadata,indent=2),encoding='utf-8')
+          run_preflight()
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gva-arm-connectivity-output
+          path: reports/gva_public/
+          if-no-files-found: error
