@@ -1,0 +1,33 @@
+{
+ "2026/04004":{
+  "raw_html_sha256":"7163f7d8553e77f484940c81aa1a69e935ab7d9597335245788c1dfbc08d1efa",
+  "publication_date":"2026-09-24","classification":"ENERGY_ACT",
+  "assets":[
+   {"project_name":"Hernani I","technology":"WIND","power_mw":4.99,"expediente":"20-GE-Y-2025-00004","promoter":"Premier ESPF Ipaz Haizea, S.L.","site_municipalities_text":"Villabona","province":"Gipuzkoa","event_type":"PUBLIC_INFO","commercial_stage":"EARLY"},
+   {"project_name":"Hernani II","technology":"WIND","power_mw":4.99,"expediente":"20-GE-Y-2025-00004","promoter":"Premier ESPF Ipaz Haizea 2, S.L.","site_municipalities_text":"Villabona","province":"Gipuzkoa","event_type":"PUBLIC_INFO","commercial_stage":"EARLY"}
+  ]
+ },
+ "2026/03989":{
+  "raw_html_sha256":"59c98bf9faa1d0aee7265b16c92571612ea9dfb011553565d4560b586c41572f",
+  "publication_date":"2026-09-23","classification":"ENERGY_ACT",
+  "assets":[
+   {"project_name":"Regina Solar","technology":"PV","power_mw":10.12,"expediente":"01–GE–Y–2025–00021","promoter":"Solaria promoción y desarrollo fotovoltaico, S.L.U.","site_municipalities_text":"Vitoria-Gasteiz y Arratzua-Ubarrundia","province":"Álava","event_type":"PUBLIC_INFO","commercial_stage":"EARLY"},
+   {"project_name":"Nova Solar","technology":"PV","power_mw":1.0,"expediente":"01–GE–Y–2025–00031","promoter":"Solaria promoción y desarrollo fotovoltaico, S.L.U.","site_municipalities_text":"Vitoria-Gasteiz","province":"Álava","event_type":"PUBLIC_INFO","commercial_stage":"EARLY"}
+  ]
+ },
+ "2026/03988":{
+  "raw_html_sha256":"fa3c09434d6cb541d2493719402f917f50b6b0d174801181e2a655d2d93fda8f",
+  "publication_date":"2026-09-23","classification":"SELF_CONSUMPTION_LEAD",
+  "assets":[{"project_name":"Coalsema","technology":"HYBRID","power_mw":null,"expediente":"01–GE–Y–2025–00049","promoter":"Compañía Alavesa de Secado de Madera, S.A.","site_municipalities_text":"Berantevilla","province":"Álava","event_type":"PUBLIC_INFO","commercial_stage":"EARLY"}]
+ },
+ "2026/03987":{
+  "raw_html_sha256":"10640eef7789675799228ff6cd1063c96f814594639726c0447cc3347e56649a",
+  "publication_date":"2026-09-23","classification":"ENERGY_ACT",
+  "assets":[{"project_name":"Pe Pando","technology":"WIND","power_mw":30.0,"expediente":null,"promoter":"Macrina Solar 33, S.L.","site_municipalities_text":"Ayala y Okondo","province":"Álava","event_type":"PUBLIC_INFO","commercial_stage":"EARLY"}]
+ },
+ "2026/03902":{
+  "raw_html_sha256":"957fd28ea8e473488f997185f97ec70bae76906d7ef518461e2d08d9ff977b14",
+  "publication_date":"2026-09-16","classification":"ENERGY_ACT",
+  "assets":[{"project_name":"Mendi","technology":"WIND","power_mw":31.2,"expediente":null,"promoter":"Green Devco Energy 5, S.L.","site_municipalities_text":"Amurrio y Ayala","province":"Álava","event_type":"DIA","commercial_stage":"PERMITTING"}]
+ }
+}

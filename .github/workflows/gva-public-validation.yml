@@ -2,9 +2,13 @@ name: gva-public-validation
 on:
   workflow_dispatch:
   push:
+    branches: [main]
     paths:
       - 'app/collectors/gva_public.py'
-      - 'tests/test_gva_public.py'
+      - 'app/gva_transport.py'
+      - 'app/gva_catalogue.py'
+      - 'app/gva_preflight.py'
+      - 'tests/test_gva*.py'
       - 'scripts/validate_gva_public.py'
       - '.github/workflows/gva-public-validation.yml'
 permissions:
@@ -16,6 +20,9 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     timeout-minutes: 18
+    concurrency:
+      group: official-gva-network-${{ github.repository }}
+      cancel-in-progress: false
     env:
       PYTHONUNBUFFERED: '1'
     steps:

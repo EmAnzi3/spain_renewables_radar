@@ -1,0 +1,43 @@
+name: bopv-semantic-validation
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, feat/bopv-semantic-classification]
+    paths:
+      - 'app/bopv_semantics.py'
+      - 'scripts/validate_bopv_semantics.py'
+      - 'tests/test_bopv_semantics.py'
+      - 'tests/fixtures/bopv_semantic_review.json'
+      - '.github/workflows/bopv-semantic-validation.yml'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: bopv-semantics-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  classify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Full regression suite and semantic negative cases
+        run: python -m unittest discover -s tests -v
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 37420987792
+          name: bopv-index-reconciliation-output
+          path: source-index
+      - name: Rebuild original index and classify every reviewed source act
+        run: python -u -m scripts.validate_bopv_semantics --source-root source-index --expected-run 37420987792
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bopv-classification-output
+          path: reports/bopv_semantics/
+          if-no-files-found: error

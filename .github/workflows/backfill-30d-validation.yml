@@ -19,6 +19,9 @@ jobs:
   backfill:
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    concurrency:
+      group: official-gva-network-${{ github.repository }}
+      cancel-in-progress: false
     env:
       PYTHONUNBUFFERED: '1'
       SABIA_WORKERS: '4'
@@ -31,6 +34,9 @@ jobs:
       - run: pip install -r requirements.txt
       - name: Unit and regression tests before collection
         run: python -m unittest discover -s tests -v
+      - name: Fail fast on GVA access before collecting the other twelve sources
+        timeout-minutes: 8
+        run: python -m app.gva_preflight
       - name: Select recent own-repository detail cache without changing source dates
         id: sabia_seed
         env:

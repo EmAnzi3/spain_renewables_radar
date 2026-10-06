@@ -12,6 +12,8 @@ import json
 import math
 import os
 import re
+from urllib.parse import urlsplit
+from app.gva_transport import verified_url
 
 MAX_AGE = 3600
 
@@ -23,8 +25,14 @@ def scope():
 
 def row_signature(rows):
     # Source URLs may contain page-navigation state; all semantic source fields
-    # must still agree, not merely ID/date. Full originals remain in receipts.
-    return [{k:v for k,v in row.items() if k != 'url'} for row in rows]
+    # and the official destination must agree. Full originals remain in receipts.
+    result = []
+    for row in rows:
+        parsed = urlsplit(verified_url(row['url']))
+        item = {k:v for k,v in row.items() if k != 'url'}
+        item['source_endpoint'] = [parsed.scheme, parsed.hostname, parsed.port, parsed.path]
+        result.append(item)
+    return result
 
 
 def receipt_for(raw, url, audit):
@@ -37,8 +45,16 @@ def receipt_for(raw, url, audit):
 
 def parse_receipts(receipts, output):
     from app.collectors.gva_public import parse_listing
+    if not isinstance(receipts, list) or not 1 <= len(receipts) <= 250:
+        raise ValueError('Invalid catalogue receipt inventory')
     rows, parsed = [], []
     for r in receipts:
+        if not isinstance(r, dict) or not {'url', 'retrieved_at', 'sha256', 'file', 'bytes'}.issubset(r):
+            raise ValueError('Missing required original catalogue receipt fields')
+        verified_url(r['url'])
+        timestamp = datetime.fromisoformat(r['retrieved_at'])
+        if timestamp.tzinfo is None:
+            raise ValueError('Catalogue receipt has no original timezone')
         sha = r.get('sha256', '')
         if not re.fullmatch(r'[0-9a-f]{64}',sha) or r.get('file') != sha + '.html':
             raise ValueError('Invalid catalogue original identity')
@@ -83,6 +99,10 @@ def load_catalogue(get, output, audit):
                 saved=None
             if saved:
                 rows,parts=parse_receipts(saved['pages'],output)
+                now = datetime.now(timezone.utc)
+                actual_dates = [datetime.fromisoformat(r['retrieved_at']) for r in saved['pages']]
+                if oldest != min(actual_dates) or any(not 0 <= (now-d).total_seconds() <= MAX_AGE for d in actual_dates):
+                    raise ValueError('Snapshot age differs from its original page receipts')
                 if row_signature(parts[0][0])!=row_signature(initial[0]) or parts[0][1]!=initial[1]:
                     saved=None
                     audit['catalogue_reuse']['reason']='LIVE_FIRST_PAGE_CHANGED'
