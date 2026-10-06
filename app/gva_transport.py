@@ -1,12 +1,13 @@
-"""Bounded complete-response GVA transport with fresh anonymous retry sessions.
+"""Bounded complete-response GVA transport with anonymous connection reuse.
 
-Adapter retries cannot recover every exception raised while consuming a streamed
-body. Restart from the original GET only for transient transport/server errors,
-never for denial, TLS, rate limits, unsafe redirects or invalid source semantics.
-Original and partial response evidence remains separate from parsed project data.
+A supplied session keeps connections between successful requests, with a minimum
+interval. Transient failures reset its connection pool and anonymous cookies.
+Without a supplied session, each attempt uses an independent anonymous session.
+Permanent HTTP errors, denial, TLS and semantic failures are never retried.
 """
 from __future__ import annotations
 
+from contextlib import nullcontext
 from datetime import datetime, timezone
 import hashlib
 import json
@@ -31,7 +32,7 @@ def verified_url(url: str) -> str:
     return url
 
 
-def fetch_official(url, *, output, audit, timeout, user_agent, limit=12_000_000):
+def fetch_official(url, *, output, audit, timeout, user_agent, limit=12_000_000, session=None):
     origin = verified_url(url)
     if type(limit) is not int or not 0 < limit <= 20_000_000:
         raise ValueError('Invalid GVA response-size limit')
@@ -44,11 +45,15 @@ def fetch_official(url, *, output, audit, timeout, user_agent, limit=12_000_000)
                    'started_at': datetime.now(timezone.utc).isoformat(),
                    'complete': False, 'responses': []}
         attempts.append(attempt)
-        try:
-            # Fresh connection pool per attempt; no nested urllib3 retry budget.
-            with requests.Session() as session:
-                session.headers['User-Agent'] = user_agent
+        if session is not None:
+            adapter = session.get_adapter(origin)
+            if adapter.max_retries.total:
                 session.mount('https://', HTTPAdapter(max_retries=0))
+        try:
+            with (nullcontext(session) if session is not None else requests.Session()) as connection:
+                connection.headers['User-Agent'] = user_agent
+                if number > 1 or session is None:
+                    connection.mount('https://', HTTPAdapter(max_retries=0))
                 current = origin
                 visited = set()
                 for hop in range(MAX_REDIRECTS + 1):
@@ -61,7 +66,13 @@ def fetch_official(url, *, output, audit, timeout, user_agent, limit=12_000_000)
                     response = None
                     chunks = []
                     try:
-                        response = session.get(current, timeout=timeout, stream=True, allow_redirects=False)
+                        if session is not None:
+                            delay = getattr(connection, '_gva_not_before', 0) - time.monotonic()
+                            if delay > 0:
+                                time.sleep(delay)
+                        response = connection.get(current, timeout=timeout, stream=True, allow_redirects=False)
+                        if session is not None:
+                            connection._gva_not_before = time.monotonic() + 0.75
                         receipt['status'] = response.status_code
                         if response.status_code in (301, 302, 303, 307, 308):
                             location = response.headers.get('Location')
@@ -81,7 +92,6 @@ def fetch_official(url, *, output, audit, timeout, user_agent, limit=12_000_000)
                                 raise ValueError('Official source exceeds bounded download size')
                             chunks.append(chunk)
                         raw = b''.join(chunks)
-                        # Content-Length is a wire size; compare only identity encoding.
                         declared = response.headers.get('Content-Length')
                         encoding = response.headers.get('Content-Encoding', 'identity').lower()
                         if declared is not None and encoding in ('', 'identity'):
@@ -120,8 +130,11 @@ def fetch_official(url, *, output, audit, timeout, user_agent, limit=12_000_000)
                          or isinstance(exc, requests.HTTPError) and status in TRANSIENT_STATUS)
             if isinstance(exc, requests.exceptions.SSLError) or not transient or number == MAX_ATTEMPTS:
                 raise
+            if session is not None:
+                session.close()
+                session.cookies.clear()
             print(f'GVA transient {type(exc).__name__}: complete GET retry {number + 1}/{MAX_ATTEMPTS}', flush=True)
-            time.sleep(number * 2)
+            time.sleep(number * 3)
         finally:
             attempt['finished_at'] = datetime.now(timezone.utc).isoformat()
             temporary = output / ('transport_attempts.' + operation + '.tmp')

@@ -263,7 +263,7 @@ class GVAPublicCollector:
     def _get(self,url,limit=12000000):
         from app.gva_transport import fetch_official
         return fetch_official(url,output=self.output,audit=self.audit,timeout=self.timeout,
-                              user_agent=self.session.headers['User-Agent'],limit=limit)
+                              user_agent=self.session.headers['User-Agent'],limit=limit,session=self.session)
 
     def _save(self):
         self.output.mkdir(parents=True,exist_ok=True)
@@ -282,20 +282,10 @@ class GVAPublicCollector:
         if self.inventory is not None:return
         if self._fatal:raise RuntimeError(self._fatal)
         try:
-            raw,url=self._get(BASE);rows,bounds,route=parse_listing(raw,url);first,last,total=bounds
-            if first!=1:raise ValueError('GVA archive did not start at first row')
-            size=last;pages=math.ceil(total/size)
-            if pages>250:raise ValueError('GVA source exceeds reviewed page bound')
-            inventory=list(rows)
-            for page in range(2,pages+1):
-                raw,url=self._get(page_url(route,page));found,bounds,_=parse_listing(raw,url)
-                if bounds!=(1+(page-1)*size,min(page*size,total),total):raise ValueError('GVA pagination ignored or catalogue changed')
-                inventory.extend(found);time.sleep(.1)
-            if len(inventory)!=total or len({r['external_id'] for r in inventory})!=total:raise ValueError('GVA archive missing or duplicate source identities')
-            raw,url=self._get(BASE);final,bounds,_=parse_listing(raw,url)
-            if bounds[2]!=total or [(r['external_id'],r['publication_date']) for r in final]!=[(r['external_id'],r['publication_date']) for r in rows]:raise ValueError('GVA archive changed during acquisition')
+            from app.gva_catalogue import load_catalogue
+            inventory,details=load_catalogue(self._get,self.output,self.audit)
             self.inventory=inventory
-            self.audit.update(complete=True,declared_records=total,archive_records=len(inventory),pages=pages,distinct_ids=len({r['external_id'] for r in inventory}))
+            self.audit.update(details,complete=True)
             (self.output/'inventory.json').write_text(json.dumps(inventory,ensure_ascii=False,indent=2),encoding='utf-8')
         except Exception as exc:self._fatal=str(exc);raise
         finally:self._save()

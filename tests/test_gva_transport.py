@@ -106,7 +106,7 @@ class GVATransportTests(unittest.TestCase):
         self.assertEqual(factory.call_count,1)
     def test_empty_or_partial_success_remains_subject_to_source_parser(self):
         collector=GVAPublicCollector(out_dir=str(self.root))
-        with patch('app.gva_transport.requests.Session',return_value=session([response(chunks=[b'<html>maintenance</html>'])])) as factory:
+        with patch.object(collector,'_get',return_value=(b'<html>maintenance</html>',URL)) as factory:
             with self.assertRaisesRegex(ValueError,'pagination'):collector._load()
             with self.assertRaises(RuntimeError):collector._load()
         self.assertEqual(factory.call_count,1)
