@@ -1,0 +1,76 @@
+name: bopv-calendar-contract-probe
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/bopv-calendar-contract-probe.yml']
+permissions:
+  contents: read
+concurrency:
+  group: bopv-calendar-contract-probe
+  cancel-in-progress: false
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Preserve official calendar navigation contract without executing source JavaScript
+        run: |
+          python -u - <<'PY'
+          import hashlib,json,re
+          from pathlib import Path
+          from datetime import datetime,timezone
+          from urllib.parse import urljoin,urlsplit
+          import requests
+          from bs4 import BeautifulSoup
+          root=Path('reports/bopv_calendar_contract');root.mkdir(parents=True,exist_ok=True)
+          session=requests.Session();session.headers['User-Agent']='SpainRenewablesRadar/0.7 (official calendar-contract probe)'
+          receipts=[]
+          result={'source_code':'BOPV','collector_implemented':False,'complete_coverage_certified':False,'events_created':0}
+          def read(url):
+              p=urlsplit(url)
+              if p.scheme!='https' or p.hostname!='www.euskadi.eus' or p.port not in (None,443) or p.username or p.password:
+                  raise ValueError('Unverified destination')
+              with session.get(url,timeout=(15,40),allow_redirects=False,stream=True) as response:
+                  response.raise_for_status()
+                  if response.status_code!=200:raise ValueError('Unverified redirect or response')
+                  chunks=[];size=0
+                  for chunk in response.iter_content(65536):
+                      size+=len(chunk)
+                      if size>1500000:raise ValueError('Source-contract size limit')
+                      chunks.append(chunk)
+                  raw=b''.join(chunks);sha=hashlib.sha256(raw).hexdigest()
+                  (root/(sha+'.txt')).write_bytes(raw)
+                  receipts.append({'url':url,'sha256':sha,'bytes':len(raw),'status':response.status_code,'content_type':response.headers.get('Content-Type'),'retrieved_at':datetime.now(timezone.utc).isoformat()})
+                  return raw.decode(response.encoding or 'utf-8',errors='strict')
+          try:
+              origin='https://www.euskadi.eus/bopv2/datos/Ultimo.shtml'
+              home=read(origin);soup=BeautifulSoup(home,'html.parser')
+              scripts=sorted({urljoin(origin,t['src']) for t in soup.select('script[src]') if t['src'].endswith('/r48-calendario.js')})
+              if len(scripts)!=1:raise ValueError('Ambiguous or missing source calendar script')
+              script=read(scripts[0]);result['calendar_script_url']=scripts[0]
+              (root/'calendar_script.js').write_text(script,encoding='utf-8')
+              print('OFFICIAL_BOPV_CALENDAR_JS',script,flush=True)
+              calendar_links=sorted(set(re.findall(r"src=['\"](/bopv2/datos/Cal[^'\"]+)",home)))
+              if len(calendar_links)!=1:raise ValueError('Missing source-provided calendar embed')
+              calendar=read(urljoin(origin,calendar_links[0]));(root/'current_calendar.html').write_text(calendar,encoding='utf-8')
+              result.update(probe_success=True,script_bytes=len(script.encode()),source_monthly_navigation_requires_verification=True)
+          except Exception as exc:
+              result.update(probe_success=False,error_type=type(exc).__name__,error=str(exc));raise
+          finally:
+              session.close()
+              for filename,value in [('acquisitions.json',receipts),('probe.json',result)]:
+                  (root/filename).write_text(json.dumps(value,ensure_ascii=False,indent=2),encoding='utf-8')
+              print('BOPV_CALENDAR_CONTRACT',json.dumps(result,ensure_ascii=False),flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bopv-calendar-contract-output
+          path: reports/bopv_calendar_contract/
+          if-no-files-found: error
