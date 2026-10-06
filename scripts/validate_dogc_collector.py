@@ -19,7 +19,7 @@ from zoneinfo import ZoneInfo
 from app.catalunya_inventory import atomic_json
 from app.collectors.dogc import DOGCCollector
 from app.db import connect
-from app.dogc_projection import event_from_record
+from app.dogc_projection import events_from_record
 from app.dogc_semantics import classify_document
 from app.enrichment.ine_municipalities import INE_MUNICIPALITIES_URL, parse_ine_municipalities
 from app.reporting import write_changes, write_coverage, write_quality_issues, write_province_view, export_dashboard
@@ -86,31 +86,34 @@ def validate_dogc_integration(conn, output='reports/dogc', expected_days=30):
         if parsed!=json.loads(safe_file(g,doc['pages_file']).read_text()):raise ValueError('DOGC exact original page replay differs')
         record=classify_document(candidate,parsed['pages']);page_count+=len(parsed['pages'])
         if record!=doc['classification']:raise ValueError('DOGC semantic original replay differs')
-        event,evidence=event_from_record(record,parsed['pages'],catalog);classifications.append(record)
+        projections=events_from_record(record,parsed['pages'],catalog);classifications.append(record)
         observation=conn.execute('SELECT * FROM dogc_document_observations WHERE external_id=?',(identity,)).fetchone()
         if not observation or observation['pdf_sha256']!=candidate['pdf_sha256'] or json.loads(observation['record_json'])!=record:
             raise ValueError('DOGC document observation missing or altered')
-        if event is None:
+        if not projections:
             if conn.execute("SELECT 1 FROM events WHERE source_code='DOGC' AND external_id=?",(identity,)).fetchone():
                 raise ValueError('A local lead/correction/excluded document became an energy permit')
             continue
-        expected_events.append(event);geo_counts[evidence['extraction']['geography']['status']]+=1
-        capacity_counts[evidence['extraction']['capacity_selection']['status']]+=1
-        row=conn.execute("SELECT * FROM events WHERE source_code='DOGC' AND external_id=?",(identity,)).fetchone()
-        if not row:raise ValueError('DOGC expected event missing from database')
-        for field,value in asdict(event).items():
-            if field in ('project_name','project_key'):continue
-            if row[field]!=value:raise ValueError(f'DOGC source field changed: {identity}/{field}')
-        if row['project_key']!=event.project_key:
-            alias=conn.execute('SELECT project_key FROM project_identity_aliases WHERE alias_key=?',(event.project_key,)).fetchone()
-            if not alias or alias['project_key']!=row['project_key']:raise ValueError('DOGC event identity lacks exact alias provenance')
-        meta=conn.execute("SELECT * FROM regional_public_metadata WHERE source_code='DOGC' AND external_id=?",(identity,)).fetchone()
-        if not meta or json.loads(meta['evidence_json'])!=dict(evidence,geographic_catalog=cat):raise ValueError('DOGC event metadata differs from originals')
+        for event,evidence in projections:
+            expected_events.append(event);geo_counts[evidence['extraction']['geography']['status']]+=1
+            capacity_counts[evidence['extraction']['capacity_selection']['status']]+=1
+            row=conn.execute("SELECT * FROM events WHERE source_code='DOGC' AND external_id=?",(event.external_id,)).fetchone()
+            if not row:raise ValueError('DOGC expected event missing from database')
+            for field,value in asdict(event).items():
+                if field in ('project_name','project_key'):continue
+                if row[field]!=value:raise ValueError(f'DOGC source field changed: {identity}/{field}')
+            if row['project_key']!=event.project_key:
+                alias=conn.execute('SELECT project_key FROM project_identity_aliases WHERE alias_key=?',(event.project_key,)).fetchone()
+                if not alias or alias['project_key']!=row['project_key']:raise ValueError('DOGC event identity lacks exact alias provenance')
+            meta=conn.execute("SELECT * FROM regional_public_metadata WHERE source_code='DOGC' AND external_id=?",(event.external_id,)).fetchone()
+            if not meta or json.loads(meta['evidence_json'])!=dict(evidence,geographic_catalog=cat):raise ValueError('DOGC event metadata differs from originals')
     total=conn.execute("SELECT count(*) FROM events WHERE source_code='DOGC' AND publication_date BETWEEN ? AND ?",(str(days[0]),str(days[-1]))).fetchone()[0]
     if total!=len(expected_events):raise ValueError('Unexpected DOGC events in audited date window')
     categories=Counter(r['category'] for r in classifications)
     observed=(dispositions,len(classifications),len(expected_events),categories['MUNICIPAL_PROJECT'],categories['CORRECTION'],categories['OUT_OF_SCOPE'])
     expected=tuple(audit['totals'][k] for k in ('index_dispositions','title_candidates','energy_events','municipal_leads','corrections','excluded'))
+    if audit['totals'].get('energy_documents',len(expected_events))!=categories['ENERGY_PROJECT']:
+        raise ValueError('DOGC energy source-document count differs from classified documents')
     if observed!=expected or categories['REVIEW_REQUIRED']:raise ValueError('DOGC outcome accounting failed')
     fixture=Path('tests/fixtures/dogc_review_20261004.json');review=None
     if days[0]==date(2026,9,5) and days[-1]==date(2026,10,4):
@@ -122,7 +125,7 @@ def validate_dogc_integration(conn, output='reports/dogc', expected_days=30):
     if conn.execute('PRAGMA foreign_key_check').fetchall():raise ValueError('DOGC database foreign-key violation')
     result={'head_sha':os.getenv('GITHUB_SHA'),'run_id':os.getenv('GITHUB_RUN_ID'),'window_start':str(days[0]),'window_end':str(days[-1]),
         'source_days':len(days),'source_day_errors':0,'index_dispositions':dispositions,'candidate_documents':len(classifications),
-        'pdf_pages':page_count,'energy_events':len(expected_events),'unique_energy_project_keys':len({e.project_key for e in expected_events}),
+        'pdf_pages':page_count,'energy_documents':categories['ENERGY_PROJECT'],'energy_events':len(expected_events),'unique_energy_project_keys':len({e.project_key for e in expected_events}),
         'municipal_leads':categories['MUNICIPAL_PROJECT'],'corrections':categories['CORRECTION'],'out_of_scope':categories['OUT_OF_SCOPE'],
         'event_types':dict(Counter(e.event_type for e in expected_events)),'stages':dict(Counter(e.commercial_stage for e in expected_events)),
         'geography':dict(geo_counts),'power_selection':dict(capacity_counts),'missing_power_events':sum(e.power_mw is None for e in expected_events),

@@ -5,6 +5,8 @@ import json
 import os
 import re
 import unicodedata
+import time
+import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, datetime, timezone
 from pathlib import Path
@@ -189,6 +191,64 @@ class SABIACollector:
         temp.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding='utf-8')
         temp.replace(path)
 
+    def _fetch_index_html(self, kind: str) -> str:
+        """One bounded budget for complete GET-form/POST-result transactions.
+
+        requests may time out while consuming a response body after urllib3 has
+        handed it back. The HTTP adapter cannot reliably retry that read. Retry
+        the whole read-only search once, with a fresh anonymous form/session.
+        No retry for TLS, denial, rate limits, malformed HTML or source semantics.
+        """
+        attempts=self.audit.setdefault('index_attempts', [])
+        for number in (1,2):
+            audit={'type':kind,'attempt':number,'started_at':datetime.now(timezone.utc).isoformat(),
+                   'completed':False,'responses':[]}
+            attempts.append(audit)
+            try:
+                with self._session() as session:
+                    # No nested adapter retries: this method owns the total budget.
+                    session.mount('https://',HTTPAdapter(max_retries=0))
+                    def request(method, **kwargs):
+                        audit['stage']=method
+                        response=None
+                        try:
+                            response=getattr(session,method)(SEARCH_URL, timeout=(10,60), **kwargs)
+                            response.raise_for_status()
+                            if response.status_code!=200:raise RuntimeError('Unexpected SABIA index response')
+                            raw=response.content
+                            if len(raw)>20_000_000:raise RuntimeError('SABIA index response exceeds limit')
+                            filename=kind+'-'+uuid.uuid4().hex+'-'+method+'-raw.html'
+                            (self.cache_dir/filename).write_bytes(raw)
+                            audit['responses'].append({'method':method.upper(),'endpoint':response.url,
+                                'retrieved_at':datetime.now(timezone.utc).isoformat(),
+                                'sha256':hashlib.sha256(raw).hexdigest(),'bytes':len(raw),'file':filename})
+                            return response.text
+                        finally:
+                            if response is not None:response.close()
+                    page=request('get')
+                    form=BeautifulSoup(page,'html.parser').find('form',id='formulario')
+                    if form is None:raise RuntimeError('SABIA search form missing')
+                    payload={i['name']:i.get('value','') for i in form.select('input[name]') if i.get('type')=='hidden'}
+                    payload.update(accion='proy_resultados',select_tipo=kind,select_estado_tramitacion='',
+                                   select_comunidades='',codigo='',titulo='',select_organo_sustantivo='',select_promotor='')
+                    html_text=request('post',data=payload)
+                    if not parse_search_html(html_text,kind):raise RuntimeError('Unexpected zero SABIA inventory for type '+kind)
+                    audit['completed']=True
+                    return html_text
+            except Exception as exc:
+                audit.update(error_type=type(exc).__name__,error=str(exc)[:500])
+                status=getattr(getattr(exc,'response',None),'status_code',None)
+                transient=(isinstance(exc,(requests.ConnectionError,requests.Timeout,requests.exceptions.ChunkedEncodingError))
+                           or isinstance(exc,requests.HTTPError) and status in (500,502,503,504))
+                if isinstance(exc,requests.exceptions.SSLError) or not transient or number==2:
+                    raise
+                print(f'SABIA index {kind}: transient {type(exc).__name__}; retrying complete search once',flush=True)
+                time.sleep(2)
+            finally:
+                audit['finished_at']=datetime.now(timezone.utc).isoformat()
+                self._write_json(self.cache_dir/'index_attempts.json',attempts)
+        raise RuntimeError('Unreachable SABIA retry state')
+
     def _load_candidates(self) -> dict[str, dict]:
         if self._candidate_rows is not None:
             return self._candidate_rows
@@ -198,16 +258,7 @@ class SABIACollector:
             if cached.exists():
                 html_text = cached.read_text(encoding='utf-8')
             else:
-                with self._session() as session:
-                    r = session.get(SEARCH_URL, timeout=self.timeout); r.raise_for_status()
-                    form = BeautifulSoup(r.text, 'html.parser').find('form', id='formulario')
-                    if form is None:
-                        raise RuntimeError('SABIA search form missing')
-                    payload = {i['name']: i.get('value','') for i in form.select('input[name]') if i.get('type') == 'hidden'}
-                    payload.update(accion='proy_resultados', select_tipo=kind, select_estado_tramitacion='',
-                                   select_comunidades='', codigo='', titulo='', select_organo_sustantivo='', select_promotor='')
-                    r = session.post(SEARCH_URL, data=payload, timeout=(10,60)); r.raise_for_status()
-                    html_text = r.text
+                html_text = self._fetch_index_html(kind)
             rows = parse_search_html(html_text, kind)
             if not rows:
                 raise RuntimeError('Unexpected zero SABIA inventory for type ' + kind)

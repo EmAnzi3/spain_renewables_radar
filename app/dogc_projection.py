@@ -117,6 +117,8 @@ def scalar_capacity(record, technology):
 
 def event_from_record(record, pages, catalog):
     """Return (event or None, evidence). Non-energy records remain audited leads."""
+    if record.get('named_asset_group'):
+        raise ValueError('Use events_from_record for an explicit multi-plant act')
     verify_evidence(record,pages)
     if not record.get('document_classified') or record['category']=='REVIEW_REQUIRED':
         raise ValueError('DOGC unresolved operative decision: '+record['document_id'])
@@ -160,3 +162,12 @@ def event_from_record(record, pages, catalog):
         'quality_flags':flags,'legal_documents':[{'url':record['source_url'],'pdf_url':record['source_pdf_url'],
              'sha256':record['pdf_sha256'],'format':'PDF','page_count':record['page_count'],'retrieved_at':record['source_retrieved_at']} ]}
     return event,evidence
+
+
+def events_from_record(record, pages, catalog):
+    """One source act can cover several explicit plants; preserve document scope."""
+    if record.get('named_asset_group'):
+        from app.dogc_named_assets import project_named_assets
+        return project_named_assets(record, pages, catalog)
+    event, evidence = event_from_record(record, pages, catalog)
+    return [(event,evidence)] if event is not None else []

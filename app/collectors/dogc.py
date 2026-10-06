@@ -16,7 +16,7 @@ import uuid
 from zoneinfo import ZoneInfo
 
 from app.catalunya_inventory import atomic_json
-from app.dogc_projection import event_from_record
+from app.dogc_projection import events_from_record
 from app.dogc_semantics import classify_document
 from app.enrichment.ine_municipalities import INE_MUNICIPALITIES_URL, parse_ine_municipalities
 from scripts.acquire_dogc_bodies import BodyClient, extract_pages
@@ -72,7 +72,7 @@ class DOGCCollector:
         if stamp in self.audit['days'] and self.audit['days'][stamp]['status']=='ERROR':
             raise RuntimeError(self.audit['days'][stamp]['error'])
         stats={'status':'ERROR','complete_calendar_day':day<datetime.now(ZoneInfo('Europe/Madrid')).date(),
-               'index_dispositions':0,'title_candidates':0,'energy_events':0,'municipal_leads':0,'corrections':0,'excluded':0,'review_required':0}
+               'index_dispositions':0,'title_candidates':0,'energy_documents':0,'energy_events':0,'municipal_leads':0,'corrections':0,'excluded':0,'review_required':0}
         try:
             if day>datetime.now(ZoneInfo('Europe/Madrid')).date():raise ValueError('Future publication day')
             edition=self._month(day)[day];entries={};annexes=[]
@@ -102,14 +102,18 @@ class DOGCCollector:
                     stats['review_required']+=1
                     raise ValueError('DOGC new wording requires review: '+candidate['document_id'])
                 if record['category']=='ENERGY_PROJECT':self._ensure_catalog()
-                event,evidence=event_from_record(record,parsed['pages'],self.catalog or [])
-                if event:
-                    events.append(event);metadata[event.external_id]=evidence;stats['energy_events']+=1
+                projections=events_from_record(record,parsed['pages'],self.catalog or [])
+                if projections:
+                    stats['energy_documents']+=1
+                    for event,evidence in projections:
+                        if event.external_id in metadata:
+                            raise ValueError('DOGC repeated projected event identity')
+                        events.append(event);metadata[event.external_id]=evidence;stats['energy_events']+=1
                 elif record['category']=='MUNICIPAL_PROJECT':stats['municipal_leads']+=1
                 elif record['category']=='CORRECTION':stats['corrections']+=1
                 elif record['category']=='OUT_OF_SCOPE':stats['excluded']+=1
-            if stats['title_candidates']!=sum(stats[k] for k in ('energy_events','municipal_leads','corrections','excluded')):
-                raise ValueError('DOGC dispositions not fully accounted for')
+            if stats['title_candidates']!=sum(stats[k] for k in ('energy_documents','municipal_leads','corrections','excluded')):
+                raise ValueError('DOGC source documents not fully accounted for')
             self.metadata.update(metadata);self.projected.update({e.external_id:asdict(e) for e in events})
             self.days[stamp]=events;stats['status']='OK'
             return events
@@ -121,7 +125,7 @@ class DOGCCollector:
     def _save(self):
         self.audit['complete']=bool(self.audit['days']) and all(d['status']=='OK' for d in self.audit['days'].values())
         self.audit['totals']={key:sum(day.get(key,0) for day in self.audit['days'].values()) for key in
-             ('index_dispositions','title_candidates','energy_events','municipal_leads','corrections','excluded','review_required')}
+             ('index_dispositions','title_candidates','energy_documents','energy_events','municipal_leads','corrections','excluded','review_required')}
         self.audit['updated_at']=datetime.now(timezone.utc).isoformat()
         atomic_json(self.generation/'coverage.json',self.audit);atomic_json(self.output/'coverage.json',self.audit)
         atomic_json(self.generation/'documents.json',list(self.records.values()))
@@ -137,6 +141,9 @@ class DOGCCollector:
         rows=[]
         for identity,item in sorted(self.records.items()):
             r=item['classification'];event=self.projected.get(identity,{})
+            if r.get('named_asset_group'):
+                group=r['named_asset_group']
+                event={'power_mw':str(group['plant_count'])+' impianti × '+group['per_plant_power_mw']+' MW ciascuno'}
             rows.append('<tr><td>'+esc(r['publication_date'])+'</td><td>'+esc(r['category'])+'</td><td>'+esc(r['event'])+
                 '</td><td>'+esc((r['project_name'] or{}).get('value') or r['source_title'])+'</td><td>'+esc(event.get('power_mw'))+
                 '</td><td>'+esc(event.get('province'))+'</td><td><a href="'+esc(str(self.generation.relative_to(self.output))+'/'+item['pdf_file'])+'">PDF originale</a></td></tr>')
@@ -158,7 +165,8 @@ class DOGCCollector:
                 (identity,record['publication_date'],record['source_url'],record['pdf_sha256'],record['category'],record['event'],json.dumps(record,ensure_ascii=False)))
         for identity,evidence in self.metadata.items():
             event=conn.execute("SELECT * FROM events WHERE source_code='DOGC' AND external_id=?",(identity,)).fetchone()
-            record=self.records[identity]['classification']
+            document_id=evidence.get('source_document_id',identity)
+            record=self.records[document_id]['classification']
             if event is None or event['url']!=record['source_url'] or event['publication_date']!=record['publication_date']:
                 raise ValueError('DOGC source evidence is not tied to its immutable event')
             evidence=dict(evidence,geographic_catalog=self.catalog_evidence)

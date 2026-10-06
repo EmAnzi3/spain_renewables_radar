@@ -169,6 +169,8 @@ def event_classification(doc: Document, title: str) -> tuple[str, str, dict | No
     if "d'informe d'impacte ambiental" in title or "de declaració d'impacte ambiental" in title:
         # Start only at the operative body; historical consultations cannot pass.
         marker = doc.find(r"(?:Ponència d'Energies Renovables acorda:?|s'acorda:)\s*Primer")
+        if not marker:
+            marker = doc.find(r"Resolc:\s*Primer\s+Emetre l'informe d'impacte ambiental")
         if marker:
             end = min(len(doc.text), marker.end() + 1800)
             decision = doc.find(r"(?:no s'ha de sotmetre|no cal sotmetre).{0,180}?avaluació d'impacte ambiental ordinària", marker.end(), end)
@@ -408,6 +410,9 @@ def classify_document(candidate: dict, pages: list[dict]) -> dict:
         'field_completeness_certified':False,'live_collector_validated':False,
         'database_writes':0,'production_enabled':False,'automatic_project_merge':False,
     }
+    if category=='ENERGY_PROJECT' and re.search(r"les plantes d'emmagatzematge\s+BESS\b", title):
+        from app.dogc_named_assets import extract_named_assets
+        result['named_asset_group']=extract_named_assets(doc, title, decision)
     result['evidence_spans_verified']=verify_evidence(result,pages)
     if category!='REVIEW_REQUIRED' and not decision:raise ValueError('Classification lacks operative evidence')
     return result

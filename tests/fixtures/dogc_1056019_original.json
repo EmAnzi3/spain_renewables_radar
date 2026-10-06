@@ -1,0 +1,42 @@
+{
+  "provenance": {
+    "run_id": 37366034915,
+    "attempt": 2,
+    "artifact_id": 11383638220,
+    "original_pdf_sha256": "e6bd3869f3a9926491836f47cda1552ba47274c6cc92d6a7d0e83995cf874cdc",
+    "semantic_review": "Original PDF pages 1 and 8 visually checked against the preserved complete artifact; excerpts below are for regression tests, not a live certificate",
+    "fixture_scope": "Reviewed verbatim excerpts, not full PDF replay: page 1 heading/antecedents and technical opening, page 8 operative clause; other pages intentionally omitted. Full 10-page original remains in artifact."
+  },
+  "candidate": {
+    "document_id": "1056019",
+    "publication_date": "2026-10-05",
+    "edition": "9766",
+    "base_edition": "9766",
+    "edition_kind": "PRINCIPAL",
+    "title": "Resolució TER/3432/2026, de 13 d'agost, d'informe d'impacte ambiental del Projecte per a la implantació de les plantes d'emmagatzematge BESS Begues I, BESS Begues II, BESS Begues III, BESS Begues IV, BESS Begues V, BESS Begues VI i BESS Begues VII, de potència instal·lada de 5,04 MW i 20,06 MWh cadascuna, i les infraestructures d'evacuació associades, als termes municipals de Vallirana, Olesa de Bonesvalls i Begues (Barcelona) (OTAABA20260035-URB 035-26)",
+    "source_title": "Resolució TER/3432/2026, de 13 d'agost, d'informe d'impacte ambiental del Projecte per a la implantació de les plantes d'emmagatzematge BESS Begues I, BESS Begues II, BESS Begues III, BESS Begues IV, BESS Begues V, BESS Begues VI i BESS Begues VII, de potència instal·lada de 5,04 MW i 20,06 MWh cadascuna, i les infraestructures d'evacuació associades, als termes municipals de Vallirana, Olesa de Bonesvalls i Begues (Barcelona) (OTAABA20260035-URB 035-26)",
+    "source_url": "https://portaldogc.gencat.cat/utilsEADOP/AppJava/PdfProviderServlet?documentId=1056019&type=01&language=ca_ES",
+    "body_acquired": false,
+    "pdf_sha256": "e6bd3869f3a9926491836f47cda1552ba47274c6cc92d6a7d0e83995cf874cdc",
+    "retrieved_at": "2026-10-06T01:26:13.937439+00:00",
+    "source_pdf_url": "https://portaldogc.gencat.cat/utilsEADOP/PDF/9766/2173706.pdf"
+  },
+  "pages": [
+    {
+      "page": 1,
+      "text": "ANUNCIS\nDEPARTAMENT DE TERRITORI, HABITATGE I TRANSICIÓ ECOLÒGICA\nResolució TER/3432/2026, de 13 d’agost, d’informe d’impacte ambiental del Projecte per a la implantació de\nles plantes d’emmagatzematge BESS Begues I, BESS Begues II, BESS Begues III, BESS Begues IV, BESS\nBegues V, BESS Begues VI i BESS Begues VII, de potència instal·lada de 5,04 MW i 20,06 MWh cadascuna,\ni les infraestructures d’evacuació associades, als termes municipals de Vallirana, Olesa de Bonesvalls i\nBegues (Barcelona) (OTAABA20260035-URB 035-26)\n—1 Antecedents\nEn data 20 d'abril de 2026 es va trametre a l'Oficina Territorial Ambiental de Barcelona la sol·licitud presentada\nper la Direcció General d'Energia d'inici del tràmit administratiu d'avaluació d'impacte ambiental simplificada de\nles plantes d'emmagatzematge anomenades BESS Begues I, BESS Begues II, BESS Begues III, BESS\nBegues IV, BESS Begues V, BESS Begues VI i BESS Begues VII, situades al terme municipal de Vallirana (FUE-\n2025-04353294) i promogudes per les empreses MACRINA SOLAR 21, SL; MACRINA SOLAR 22, SL; MACRINA\nSOLAR 25, SL, i MACRINA SOLAR 26, SL.\n—2 Marc normatiu\nL'apartat n, grup 4, de l'annex II de la Llei 21/2013, de 9 de desembre, d'avaluació ambiental, modificada pel\nReial decret 445/2023, de 13 de juny, pel qual se'n modifiquen els annexos I, II i III, estableix que és objecte\nd'una avaluació d'impacte ambiental simplificada l'emmagatzematge energètic stand-alone a través de bateries\nelectroquímiques o amb qualsevol tecnologia de caràcter híbrid amb instal·lacions d'energia elèctrica.\n—3 Descripció del Projecte i del document ambiental\nL'objecte del Projecte és la implantació de set plantes d'emmagatzematge d'energia de 5,04 MW de potència\ninstal·lada unitària i 20,06 MWh de capacitat d'emmagatzematge en quatre hores cadascuna i les seves\ninfraestructures d'evacuació, ubicades als termes municipals de Vallirana, Olesa de Bonesvalls i Begues\n(Barcelona).\nLes plantes es troben al terme municipal de Vallirana i són accessibles a través del carrer del Garraf del\nmunicipi de Vallirana. Cada planta d'emmagatzematge està composta per quatre contenidors PowerTitan 2.0 de\nla marca Sungrow que contenen sis PCS string i una estació transformadora (power station) MVS5140-LS, que\ninclou l'armari de control, el de connexions, el transformador a 0,69/25 kV i la cel·la RMU.\nDe cada contenidor surten les línies de baixa tensió cap als centres de transformació corresponents, compostos\nper transformadors, quatre de baixa tensió i cel·les d'alta tensió a 25 kV (36 kV), agrupats per evacuar\nl'energia de les bateries a la xarxa.\nEl conjunt es compon principalment d'un sistema de conversió d'energia (PCS-inversor), un panell de\nrecol·lecció de bateries (BCP), un panell de subministrament de bateries (BSP), bateries, un sistema de gestió\nde bateries (BMS), un sistema de gestió d'energia (EMS), un transformador, un gabinet de control intel·ligent\n(SCC) i un controlador local (LC). El sistema auxiliar inclou principalment un sistema de refrigeració líquida\n(LCS), un sistema d'extinció d'incendis (FES) i un sistema d'il·luminació.\n"
+    },
+    {"page": 2, "text": ""},
+    {"page": 3, "text": ""},
+    {"page": 4, "text": ""},
+    {"page": 5, "text": ""},
+    {"page": 6, "text": ""},
+    {"page": 7, "text": ""},
+    {
+      "page": 8,
+      "text": "—6 Resolució\nEn conseqüència, atesa la documentació que s'ha presentat, les respostes que s'han rebut a les consultes que\ns'han formulat i els criteris de l'annex III de la Llei 21/2013, de 9 de desembre, d'avaluació ambiental, relatius\na les característiques del Projecte, la seva ubicació i les característiques de l'impacte potencial, a proposta del\nServei de Projectes,\nResolc:\nPrimer\nEmetre l'informe d'impacte ambiental sobre el Projecte per a la implantació de les plantes d'emmagatzematge\nBESS Begues I, BESS Begues II, BESS Begues III, BESS Begues IV, BESS Begues V, BESS Begues VI i BESS\nBegues VII, de potència instal·lada 5,04 MW i 20,06 MWh cadascuna, i les infraestructures d'evacuació\nassociades, als termes municipals de Vallirana, Olesa de Bonesvalls i Begues, pel qual es determina que no s'ha\nde sotmetre a una avaluació d'impacte ambiental ordinària.\n"
+    },
+    {"page": 9, "text": ""},
+    {"page": 10, "text": ""}
+  ]
+}
