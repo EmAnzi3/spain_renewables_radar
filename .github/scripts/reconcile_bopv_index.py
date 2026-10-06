@@ -13,7 +13,7 @@ import os
 from pathlib import Path
 import re
 import runpy
-from urllib.parse import urljoin, urlsplit
+from urllib.parse import urljoin, urlsplit, parse_qsl
 
 import requests
 from bs4 import BeautifulSoup
@@ -34,7 +34,12 @@ def allowed(url):
 
 def article_id(url):
     p = urlsplit(url); match = ARTICLE.fullmatch(p.path)
-    if not allowed(url) or p.query or not match or match[1][2:] != match[3] or not 1 <= int(match[2]) <= 12:
+    # The official search emits three fixed presentation flags. Keep the
+    # original URL, accept only this exact observed contract or no query.
+    query = parse_qsl(p.query, keep_blank_values=True)
+    presentation = [('BOPV_NOT_IN_PORTAL', ''), ('BOPV_HIDE_CALENDAR', ''), ('R01HNoPortal', 'true')]
+    valid_query = not p.query or (len(query) == 3 and sorted(query) == sorted(presentation))
+    if not allowed(url) or not valid_query or not match or match[1][2:] != match[3] or not 1 <= int(match[2]) <= 12:
         raise ValueError('Unexpected official Spanish disposition URL')
     return match[1] + '/' + match[4]
 
