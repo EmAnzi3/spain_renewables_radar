@@ -1,0 +1,149 @@
+name: radar-operational-web
+on:
+  workflow_dispatch:
+    inputs:
+      refresh:
+        description: Collect all configured sources; source outages are explicitly PARTIAL
+        type: boolean
+        default: true
+  push:
+    branches: ['feat/operational-web-preview', 'main']
+    paths:
+      - 'app/operational.py'
+      - 'app/web_portal.py'
+      - 'app/valencian_alternatives.py'
+      - 'web/portal.html'
+      - 'scripts/portal_inputs.py'
+      - 'scripts/prepare_portal_seed.py'
+      - 'scripts/check_web_portal_browser.py'
+      - 'scripts/export_operational_state.py'
+      - 'tests/test_operational.py'
+      - 'tests/test_web_portal.py'
+      - '.github/workflows/radar-operational-web.yml'
+permissions:
+  contents: read
+concurrency:
+  group: radar-operational-web
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      actions: read
+      pages: read
+    concurrency:
+      group: official-gva-network-${{ github.repository }}
+      cancel-in-progress: false
+    outputs:
+      pages_enabled: ${{ steps.pages.outputs.enabled }}
+    env:
+      PYTHONUNBUFFERED: '1'
+      SABIA_WORKERS: '4'
+      SABIA_FORCE_LIVE_SAMPLE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt && pip install playwright
+      - name: Existing and operational regression suite
+        run: python -m unittest discover -s tests
+      - name: Verify original archive digests and restore the latest valid main state when present
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python -m scripts.portal_inputs
+      - name: Prepare historical seed only when no valid operational state exists
+        id: seed
+        run: |
+          if [ ! -f data/spain_renewables.sqlite ]; then
+            python -m scripts.prepare_portal_seed --seed inputs/baseline
+          fi
+          python -m app.valencian_alternatives --probe-root inputs/alternatives --output reports/alternative_sources.json
+      - name: Build a browsable snapshot before making any new source requests
+        run: >-
+          python -m app.web_portal --db data/spain_renewables.sqlite
+          --status reports/operational/latest.json --output site
+          --bopv inputs/bopv --alternatives reports/alternative_sources.json
+      - name: Real desktop/mobile Chromium checks
+        run: |
+          if ! command -v google-chrome && ! command -v chromium; then python -m playwright install chromium; fi
+          python -m scripts.check_web_portal_browser --site site
+      - uses: actions/upload-artifact@v4
+        with:
+          name: radar-web-snapshot
+          path: site/
+          if-no-files-found: error
+      - name: Operational refresh, all thirteen sources, with explicit partial coverage
+        id: refresh
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.refresh)
+        continue-on-error: true
+        run: >-
+          python -u -m app.operational --db data/spain_renewables.sqlite --days 7
+          --cache-root inputs/baseline/data/sabia_cache
+      - name: Render actual update status, including an unsuccessful latest attempt
+        if: always() && steps.seed.outcome == 'success'
+        run: >-
+          python -m app.web_portal --db data/spain_renewables.sqlite
+          --status reports/operational/latest.json --output site
+          --bopv inputs/bopv --alternatives reports/alternative_sources.json
+      - name: Validate final navigable output
+        if: steps.refresh.outcome == 'success'
+        run: python -m scripts.check_web_portal_browser --site site
+      - name: Preserve the latest checked operational database
+        if: steps.refresh.outcome == 'success'
+        run: python -m scripts.export_operational_state
+      - uses: actions/upload-artifact@v4
+        if: steps.refresh.outcome == 'success'
+        with:
+          name: radar-operational-state
+          path: operational-state/
+          if-no-files-found: error
+      - name: Read actual GitHub Pages configuration; never claim an unpublished URL is live
+        id: pages
+        if: always() && steps.seed.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          import json,os,requests
+          from pathlib import Path
+          r=requests.get('https://api.github.com/repos/'+os.environ['GITHUB_REPOSITORY']+'/pages',headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'},timeout=30)
+          data=r.json();enabled=r.status_code==200 and data.get('build_type')=='workflow'
+          result={'api_status':r.status_code,'workflow_pages_enabled':enabled,'html_url':data.get('html_url') if r.status_code==200 else None,'build_type':data.get('build_type'),'action_needed':None if enabled else 'Repository Settings > Pages > Source: GitHub Actions. Then rerun this workflow.'}
+          Path('site/pages_status.json').write_text(json.dumps(result,indent=2))
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('enabled='+str(enabled).lower()+'\n')
+          print('PAGES_CONFIGURATION',json.dumps(result))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.seed.outcome == 'success'
+        with:
+          name: radar-web-navigable
+          path: |
+            site/
+            reports/operational/
+            reports/docm_repair/
+          if-no-files-found: error
+      - uses: actions/upload-pages-artifact@v3
+        if: github.ref == 'refs/heads/main' && steps.pages.outputs.enabled == 'true' && steps.refresh.outcome != 'failure'
+        with:
+          path: site/
+      - name: Structural update failures remain failures, not partial successes
+        if: steps.refresh.outcome == 'failure'
+        run: |
+          cat reports/operational/latest.json
+          exit 1
+  deploy:
+    if: github.ref == 'refs/heads/main' && needs.build.outputs.pages_enabled == 'true'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v4
+        id: deployment
