@@ -1,0 +1,127 @@
+name: bon-official-source-probe
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/bon-source-probe.yml']
+permissions:
+  contents: read
+  checks: read
+concurrency:
+  group: bon-source-probe
+  cancel-in-progress: false
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Preserve original pre-run failure annotations, not inferred collector errors
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          import os,json
+          from pathlib import Path
+          import requests
+          url='https://api.github.com/repos/EmAnzi3/spain_renewables_radar/check-runs/111951314548/annotations'
+          r=requests.get(url,headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'},timeout=(8,20),allow_redirects=False)
+          r.raise_for_status()
+          if r.status_code!=200:raise RuntimeError('Unexpected annotation response')
+          data=r.json()
+          if not isinstance(data,list):raise RuntimeError('Unexpected annotation payload')
+          root=Path('reports/bon_probe');root.mkdir(parents=True,exist_ok=True)
+          (root/'previous_backfill_annotations.json').write_text(json.dumps(data,ensure_ascii=False,indent=2),encoding='utf-8')
+          print('PREVIOUS_BACKFILL_ANNOTATIONS',json.dumps(data,ensure_ascii=False))
+          PY
+      - name: Read official BON public links and limited original HTML samples
+        run: |
+          python -u - <<'PY'
+          import hashlib,json,re,time
+          from datetime import datetime,timezone
+          from pathlib import Path
+          from urllib.parse import urlsplit,urljoin,urldefrag
+          import requests
+          from bs4 import BeautifulSoup
+
+          root=Path('reports/bon_probe');(root/'raw').mkdir(parents=True,exist_ok=True)
+          session=requests.Session();session.headers['User-Agent']='SpainRenewablesRadar/0.6 (official public-source probe)'
+          acquisitions=[];pages=[];seen=set()
+          result={'source_code':'BON','scope':'PROBE_ONLY','collector_implemented':False,'events_created':0,'complete_30_day_coverage':False}
+          def safe(url):
+              p=urlsplit(url)
+              return p.scheme=='https' and p.hostname=='bon.navarra.es' and p.port in (None,443) and not p.username and not p.password
+          def get(url):
+              for hop in range(3):
+                  if not safe(url):raise ValueError('Unexpected source host or protocol')
+                  response=session.get(url,timeout=(8,30),allow_redirects=False,stream=True)
+                  meta={'url':url,'status':response.status_code,'retrieved_at':datetime.now(timezone.utc).isoformat()}
+                  if 300<=response.status_code<400:
+                      target=urljoin(url,response.headers.get('Location',''));meta['location']=target;acquisitions.append(meta);response.close()
+                      if not safe(target) or target==url:raise ValueError('Unsafe or repeated public redirect')
+                      url=target;continue
+                  try:
+                      response.raise_for_status()
+                      if response.status_code!=200:raise ValueError('Unexpected source response')
+                      chunks=[];size=0
+                      for chunk in response.iter_content(65536):
+                          size+=len(chunk)
+                          if size>5000000:raise ValueError('HTML exceeds bounded probe size')
+                          chunks.append(chunk)
+                      raw=b''.join(chunks);sha=hashlib.sha256(raw).hexdigest();(root/'raw'/(sha+'.html')).write_bytes(raw)
+                      meta.update(sha256=sha,bytes=len(raw),content_type=response.headers.get('Content-Type'))
+                      if 'html' not in (meta['content_type'] or '').lower():raise ValueError('Probe expects HTML, not another resource')
+                      soup=BeautifulSoup(raw,'html.parser')
+                      links=[]
+                      for a in soup.select('a[href]'):
+                          link=urldefrag(urljoin(url,a['href']))[0]
+                          if safe(link):links.append({'title':a.get_text(' ',strip=True),'url':link})
+                      controls=[]
+                      for tag in soup.select('form'):
+                          controls.append({'method':tag.get('method'),'action':urljoin(url,tag.get('action') or ''),
+                              'fields':[{'tag':i.name,'name':i.get('name'),'type':i.get('type'),'options':[{'value':o.get('value'),'text':o.get_text(' ',strip=True)} for o in i.select('option')][:24]} for i in tag.select('select,input:not([type=hidden]),button')][:35]})
+                      item={'url':url,'title':soup.title.get_text(' ',strip=True) if soup.title else None,
+                          'headings':[h.get_text(' ',strip=True) for h in soup.select('h1,h2,h3')],
+                          'links':links,'forms':controls,'text':'\n'.join(soup.stripped_strings)}
+                      pages.append(item);seen.add(url)
+                      relevant=[x for x in links if re.search(r'calend|archivo|anteriores|sumario|/texto/',x['url']+' '+x['title'],re.I)]
+                      print('BON_PAGE',json.dumps({'url':url,'title':item['title'],'headings':item['headings'],'navigation':relevant[:35],'forms':controls[:3]},ensure_ascii=False),flush=True)
+                      return item
+                  finally:
+                      acquisitions.append(meta);response.close()
+              raise ValueError('Redirect budget exhausted')
+          try:
+              home=get('https://bon.navarra.es/es/inicio')
+              navigation=[x for x in home['links'] if re.search(r'calend|archivo|anteriores',x['url']+' '+x['title'],re.I) and '/es/' in x['url']]
+              for item in navigation[:3]:
+                  if item['url'] not in seen:time.sleep(0.3);get(item['url'])
+              summaries=[]
+              for page in list(pages):
+                  summaries += [x for x in page['links'] if '/sumario/' in x['url'] and '/es/' in x['url']]
+              for item in summaries[:2]:
+                  if item['url'] not in seen:time.sleep(0.3);get(item['url'])
+              candidates=[]
+              for page in list(pages):
+                  candidates += [x for x in page['links'] if '/texto/' in x['url'] and '/es/' in x['url'] and re.search(r'fotovolta|e[oó]lic|almacenamiento|bater[ií]a|hibrid',x['title'],re.I)]
+              for item in candidates[:2]:
+                  if item['url'] not in seen:time.sleep(0.3);get(item['url'])
+              result.update(probe_success=True,pages=len(pages),archive_links_observed=len(navigation),summary_links_observed=len(summaries),candidate_title_links_observed=len(candidates))
+          except Exception as exc:
+              result.update(probe_success=False,error_type=type(exc).__name__,error=str(exc));raise
+          finally:
+              session.close()
+              for name,data in [('acquisitions.json',acquisitions),('pages.json',pages),('probe.json',result)]:
+                  (root/name).write_text(json.dumps(data,ensure_ascii=False,indent=2),encoding='utf-8')
+              print('BON_PROBE_RESULT',json.dumps(result,ensure_ascii=False),flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bon-source-probe-output
+          path: reports/bon_probe/
+          if-no-files-found: error
