@@ -40,11 +40,14 @@ def article_id(url):
 
 
 def publication_header(soup, *, summary):
-    nodes = soup.select('h2.tituGeneral')
+    prefix = r'Sumario\s+n\.[º°]\s+(\d+)' if summary else r'N\.[º°]\s+(\d+)'
+    # Historical summaries also use tituGeneral for the sidebar search labels.
+    # Require one actual edition masthead, not one generic style class.
+    nodes = [node for node in soup.select('h2.tituGeneral')
+             if re.match(prefix, ' '.join(node.get_text(' ', strip=True).split()), re.I)]
     if len(nodes) != 1:
         raise ValueError('Missing or ambiguous source masthead')
     title = ' '.join(nodes[0].get_text(' ', strip=True).split())
-    prefix = r'Sumario\s+n\.[º°]\s+(\d+)' if summary else r'N\.[º°]\s+(\d+)'
     number = re.match(prefix, title, re.I); match = DAY_RE.search(title)
     if not number or not match or match[3].lower() not in MONTHS:
         raise ValueError('Unrecognized official publication date/edition')

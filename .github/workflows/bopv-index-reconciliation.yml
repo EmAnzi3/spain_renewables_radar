@@ -5,7 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/scripts/reconcile_bopv_index.py'
-      - '.github/tests/test_bopv_reconciliation.py'
+      - '.github/tests/test_bopv*.py'
       - '.github/workflows/bopv-index-reconciliation.yml'
 permissions:
   contents: read
@@ -25,7 +25,7 @@ jobs:
       - name: Existing regression suite and new index-contract tests
         run: |
           python -m unittest discover -s tests
-          python -m unittest discover -s .github/tests -p test_bopv_reconciliation.py -v
+          python -m unittest discover -s .github/tests -p 'test_bopv*.py' -v
       - name: Acquire independent complete live search with original responses
         run: python -u .github/scripts/probe_bopv_dates.py
       - name: Reconcile all calendar editions, dispositions and candidate publication headers
