@@ -1,68 +1,40 @@
 # Spain Renewables Radar
 
-Radar per progetti **fotovoltaici, eolici, BESS e ibridi** in Spagna, da fonti **ufficiali e gratuite**. Nessun aggregatore commerciale.
+Radar per progetti **fotovoltaici, eolici, BESS e ibridi** spagnoli, da fonti **ufficiali e gratuite**. Nessun aggregatore commerciale.
 
-## Architettura
+**Fonti → eventi amministrativi → progetto unico → lifecycle → enrichment → scoring separato → quality gate → report/dashboard.** Gli inventari senza date verificabili non vengono trasformati in nuovi eventi.
 
-Fonti ufficiali → eventi amministrativi → progetto unico → lifecycle → enrichment INE/REE/MITECO → scoring separato → quality gate → report/dashboard.
+## Stato operativo — 6 ottobre 2026
 
-Gli inventari senza date di pubblicazione verificabili sono moduli separati: non vengono trasformati in nuovi eventi del radar.
+Il codice su `main` include **13 collector**, con DOGC integrato e correzione **BESS Almagro I** pubblicata. La validazione dedicata DOCM di 30 giorni è **SUCCESS**, run **37420987930**: 18 eventi, zero errori, Almagro correttamente a **7,2 MW BESS, Ciudad Real**, PUBLIC_INFO/EARLY. La migrazione dei vecchi valori è controllata da hash dell'originale, backup, transazione e verifica degli invarianti; non altera l'identità o il testo della fonte.
 
-## Codice operativo e ultima certificazione integrata
+**Il più recente backfill integrato dopo questa correzione non è verde:** run **37418379045**, due tentativi falliti durante lo smoke per errori di trasporto del portale GVA. Nessuna fonte è stata esclusa e nessun gate è stato abbassato per certificare dati parziali.
 
-Questa revisione include **13 collector**, compreso **DOGC** nel comando ordinario e nel registry. L'ultima prova integrata completata è il **[run 37350555017 — SUCCESS](https://github.com/EmAnzi3/spain_renewables_radar/actions/runs/37350555017)**, codice `ca598cc0f1e685652c6af58c83c85f6186fafd9e`, finestra **5 settembre–4 ottobre 2026**:
+L'ultimo backfill completo riuscito rimane **37406054339**, codice `88201b5`, finestra **6 settembre–5 ottobre 2026**, con **256 schede / 262 eventi, 13 fonti, zero errori fonte/giorno**, qualità **0 ERROR / 9 WARN / 184 INFO**. Il suo artifact precede la correzione e contiene il vecchio valore Almagro: non confondere il codice attuale con i dati storici di quella prova.
 
-- **240 schede progetto / 246 eventi**, non 240 cantieri o opportunità commerciali attive;
-- **13 collector × 30 giorni**, stessa finestra contigua, smoke live e backfill integrato superati;
-- **0 errori fonte/giorno**, qualità **0 ERROR / 9 WARN / 157 INFO**;
-- mancanti: nome **2**, MW **62**, provincia singola **9**, expediente **41**;
-- i nove casi senza provincia singola sono tutti multi-provincia: **zero province realmente irrisolte**;
-- controlli di identità, provenienza e riesecuzione senza duplicazioni superati;
-- REE: **931 nodi**; registro MITECO: **71.727 impianti**, **8 match esatti** conservativi.
+**BOPV:** indice riconciliato nel run **37420987792 — SUCCESS**: 306 disposizioni, 21 edizioni, 30 giorni, cinque avvisi candidati verificati. **Non è ancora un collector operativo e non incrementa il conteggio delle fonti.**
 
-La prova citata è stata eseguita sul branch della PR #1. Il suo esito non viene retroattivamente attribuito a un diverso commit o a un run post-merge. Lo stato effettivo dell'integrazione e dei workflow sul nuovo HEAD è nella [PR #1](https://github.com/EmAnzi3/spain_renewables_radar/pull/1). La chiusura documentale non modifica il codice funzionale validato.
+Suite ordinaria: **530 test**; altri **26 test di contratto BOPV** nel workflow dedicato. Run delle prove dedicate sul codice `b9752fcc8b5f492bc97f03ccdf83b1857de1b039`. Stato, limiti e artifact verificati in **`CURRENT_STATE.md`** e **`docs/validation/2026-10-06-almagro-bopv.json`**.
 
-L'artifact originale è stato verificato per dimensione e SHA256; il checkpoint persistente è `docs/validation/2026-10-05-thirteen-source.json`. `CURRENT_STATE.md` riporta limiti e prossimi passi. Il precedente risultato **221/227** appartiene alla diversa finestra **4 settembre–3 ottobre**: la differenza fra i totali non misura il contributo DOGC. La copertura nazionale delle fonti non è ancora completa.
+## Fonti
 
-## Fonti operative
+Bollettini operativi: **BOE, BOCYL, BOA, BOJA, DOCM, DOE, BORM, BOCM, DOG, DOGC**. Portali: **AND_PUBLIC, GVA_PUBLIC, MITECO_SABIA**. Copertura dei bollettini CCAA: **9/17**.
 
-Bollettini: **BOE, BOCYL, BOA, BOJA, DOCM, DOE, BORM, BOCM, DOG, DOGC**.
+Non operativi: **DOGV, BON, BOPV, BOPA, BOCANT, BOC-CAN, BOIB, BOR**. Un probe riuscito non equivale a un collector. GVA_PUBLIC non equivale a DOGV. SABIA conserva il perimetro di milestone **ENTRY/CONSULT**, non date web o autorizzazioni desunte dall'etichetta corrente.
 
-Altri collector: **MITECO_SABIA, AND_PUBLIC, GVA_PUBLIC**. SABIA copre milestone ENTRY/CONSULT datati, non tutte le variazioni amministrative. GVA_PUBLIC è distinto dal DOGV, che resta non implementato. Il precedente ZIP `spain_radar_gva_preview_55ecc9d.zip` è superato e non va applicato a `main`.
+Enrichment: **INE comuni**, **REE capacità/accesso**, **MITECO RAIPEE**. Non sono ulteriori fonti di discovery. Il matching del registro è conservativo; i valori di rete aggregati non provano l'accesso di un singolo progetto.
 
-Enrichment: **INE comuni**, **REE capacità/accesso**, **MITECO RAIPEE**. Non sono ulteriori collector di discovery. Dati di rete aggregati non confermano l'accesso di un singolo progetto; il matching del registro è conservativo.
+## Dati e decisioni
 
-Copertura dei bollettini CCAA: **9/17**. Restano non operativi **DOGV, BON, BOPV, BOPA, BOCANT, BOC-CAN, BOIB, BOR**. Le fonti non implementate rimangono tali fino a probe, collector reale, test, smoke live, backfill e controlli strutturali. Non confondere il numero di fonti con la completezza di tutti i progetti spagnoli.
+Un progetto accumula gli eventi successivi senza essere ricreato a ogni pubblicazione. Nomi, potenze, riferimenti, geografia e date mancanti restano vuoti. MW, MWh, MVA/kVA, potenza esistente e ampliamenti vengono mantenuti separati; i progetti multi-provincia non duplicano MW nei totali provinciali.
 
-## Catalunya: DOGC datato e inventario separato
+Stati derivati: **EARLY, PERMITTING, AUTHORIZED, PRECONSTRUCTION, BLOCKED**. Una richiesta non equivale a una concessione; screening ambientale e DIA non provano l'avvio dei lavori. Lo scoring commerciale non modifica il lifecycle. **Promotore non significa EPC**: EPC_CONFIRMED, EPC_CANDIDATE e EPC_UNKNOWN richiedono evidenze specifiche.
 
-**DOGC è incluso nei 13 collector ordinari.** Nel backfill certificato: **1.525 disposizioni**, **48 PDF / 299 pagine**, **33 eventi energetici** su 33 chiavi di progetto. Gli altri candidati sono conservati separatamente: **11 lead municipali, una rettifica e tre atti fuori ambito**.
+Il DOGC conserva separatamente lead municipali, rettifiche e avvisi non pertinenti. Il suo precedente fascicolo di 48 PDF/299 pagine non era un conteggio di 48 progetti. Gli atti successivi e i gruppi multi-impianto sono sottoposti agli stessi controlli; Begues I–VII rimangono sette impianti distinti, non una somma arbitraria.
 
-I 33 eventi sono **13 PUBLIC_INFO, 10 ENVIRONMENTAL_SCREENING, 1 DIA, 8 CONSTRUCTION_AUTH e 1 PUBLIC_UTILITY**. Stati derivati: **EARLY 13, PERMITTING 11, AUTHORIZED 9**. Una richiesta non è una concessione; uno screening ambientale non è un'autorizzazione alla costruzione; un'approvazione municipale non è un permesso energetico.
-
-Per **11 eventi** non è pubblicata una potenza scalare: **6 conflitti**, **3 casi multicomponente**, **2 senza una potenza di progetto univoca**. Geografia integrata: **31 risolti e 2 multi-provincia**, senza duplicazione dei MW. Originali, pagine, quantità e riferimenti sono preservati e verificati dal replay. Metodo e storia delle verifiche: `docs/sources/dogc.md`.
-
-L'inventario `app.catalunya_inventory` resta separato, validato dal run **37241609997**. Contiene **137 righe comunali eoliche e 358 fotovoltaiche**; **434 gruppi diagnostici**, inclusi **82 record senza riferimento tenuti separati**, non sono un censimento certificato di impianti unici. Potenze ripetute tra comuni non vengono sommate. La data del dataset non diventa la data di un progetto. Avvio: `aggiorna_inventario_catalogna.bat`; dettagli: `docs/sources/catalunya.md`.
-
-## Galicia: pubblicazioni e inventario storico distinti
-
-**DOG** è operativo: calendario ufficiale, edizioni/sezioni datate e HTML originali. Nella finestra integrata corrente: **20 edizioni, 786 voci degli indici, 2 pubblicazioni pertinenti e 3 progetti**. I due parchi Monte Arca rimangono distinti; una durata lavori non diventa una data di avvio/fine. Per Porto Barroso la potenza finale dell'ampliamento non è la sola potenza aggiuntiva.
-
-`app.galicia_archive` è un inventario separato, con originali e confronto fra snapshot. La prima acquisizione crea una BASELINE, non nuove opportunità; una rimozione dall'elenco non prova il ritiro del progetto. Il collegamento al DOG richiede documenti o riferimenti amministrativi esatti: nel backfill corrente risultano **zero collegamenti esatti**, senza associazioni inventate.
-
-## Andalucía: catalogo live completo
-
-AND_PUBLIC acquisisce il catalogo pubblico live, non presume che un export offline abbia la stessa copertura. Nel run certificato: **13.636 record**, **200 record sovrapposti verificati** fra ricerche ordinate opposte, ricostruzione dagli originali superata. Restano **25 lacune originarie** nei metadati, esposte nel report. Retry e pagine alternative sono limitati; un errore persistente o una risposta incompleta non diventano un risultato valido.
-
-## Lifecycle, scoring ed EPC/BoP
-
-Eventi: PUBLIC_INFO, ENVIRONMENTAL_SCREENING, DIA, PRIOR_AUTH, CONSTRUCTION_AUTH, PUBLIC_UTILITY, EXPROPRIATION, MODIFICATION, WITHDRAWN, DENIED, PROCEDURE_ENDED; SABIA conserva il proprio perimetro di milestone documentati.
-
-Stati derivati: EARLY, PERMITTING, AUTHORIZED, PRECONSTRUCTION, BLOCKED. Score e priorità commerciali sono separati dal dato amministrativo. EPC/BoP usa evidenze esplicite e gli stati EPC_CONFIRMED, EPC_CANDIDATE, EPC_UNKNOWN. Promotore non significa EPC. La ricerca esterna dei contractor resta successiva all'ampliamento delle fonti pubbliche di discovery.
+Inventari **Catalunya** e **Galicia** separati: date di aggiornamento del dataset non diventano pubblicazioni dei progetti; BASELINE non significa nuove opportunità, NOT_SEEN non significa ritiro. Documentazione: `docs/sources/catalunya.md`, `docs/sources/dogc.md`, `docs/sources/bopv.md`, `docs/sources/docm-storage.md`.
 
 ## Avvio Windows
-
-Configurazione iniziale e radar ordinario:
 
 ```bat
 py -m venv .venv
@@ -71,38 +43,29 @@ py -m venv .venv
 aggiorna_radar_spagna.bat
 ```
 
-Il launcher ordinario usa già il collector DOGC: non occorre un secondo BAT per inserirlo nel radar. Aggiornare prima la propria copia della repository dal `main` integrato; il merge remoto non aggiorna automaticamente il database sul proprio PC.
+Il launcher ordinario usa gli **ultimi 7 giorni**. Aggiornare la copia locale da `main` prima di usarlo; non applicare il vecchio pacchetto `spain_radar_gva_preview_55ecc9d.zip`. Il codice remoto non aggiorna automaticamente il database sul PC.
 
-Backfill manuale:
+Backfill di 30 giorni:
 
 ```bat
-.\.venv\Scripts\python.exe -m app.run_pipeline --days 30
+.\.venv\Scripts\python.exe -m app.run_pipeline --days 30 --strict-coverage
 ```
 
-Inventari separati, usando lo stesso ambiente Python:
+Inventari separati:
 
 ```bat
-.\.venv\Scripts\python.exe -m app.galicia_archive
 aggiorna_inventario_catalogna.bat
+.\.venv\Scripts\python.exe -m app.galicia_archive
 ```
 
-Per Catalunya, un errore non rimpiazza l'ultima baseline valida. Consultare `reports/catalunya_inventory/run_status.json`; non eliminare la baseline per un normale aggiornamento. Non è stato introdotto un nuovo scheduler.
+Non eliminare le baseline per aggiornamenti ordinari. Un errore di acquisizione non deve far apparire il vecchio report come una nuova acquisizione riuscita; per Catalunya controllare `reports/catalunya_inventory/run_status.json`.
 
 ## Output
 
-- Database: `data/spain_renewables.sqlite`; dashboard generata: `docs/index.html`.
-- Variazioni: `reports/change_reports/changes_latest.html`.
-- Copertura e qualità: `reports/coverage_latest.html`, `reports/quality_issues_latest.html`.
-- EPC/BoP e vista provinciale: `reports/epc_bop_evidence_latest.html`, `reports/province_view_latest.html`, con CSV.
-- REE/MITECO: `reports/ree_capacity_latest.csv`, `reports/miteco_registry_latest.csv`, `reports/miteco_exact_matches_latest.csv`.
-- Lacune regionali: `reports/andalucia_public/source_gaps.html`, `reports/gva_public/source_flags.html`.
-- DOG: `reports/dog/coverage.json`, originali e collegamenti deterministici in `reports/dog/`.
-- DOGC: `reports/dogc/index.html`, `coverage.json` e cartelle di acquisizione con PDF, pagine, eventi, metadati e categorie escluse. Solo gli eventi energetici entrano nel radar ordinario.
-- Galicia: `reports/galicia_archive/index.html`; baseline locale `data/galicia_archive_baseline.json`.
-- Catalunya inventario: `reports/catalunya_inventory/index.html`, `run_status.json`, snapshot e baseline locale `data/catalunya_inventory_baseline.json`.
+Database: `data/spain_renewables.sqlite`. Variazioni: `reports/change_reports/changes_latest.html`. Copertura: `reports/coverage_latest.html`. Qualità: `reports/quality_issues_latest.html`. Dashboard generata: `docs/index.html`.
 
-La dashboard viene rigenerata dalla pipeline. Il workflow di validazione conserva database, report e dashboard nell'artifact; un merge del codice non è, da solo, una nuova acquisizione né una pubblicazione automatica su un sito. La vista provinciale separa MW identificati, sconosciuti, multi-provincia e potenze di gruppo non allocate, senza duplicarli.
+Vista provinciale: `reports/province_view_latest.html` e CSV, con MW sconosciuti e multi-provincia separati. EPC/BoP: `reports/epc_bop_evidence_latest.html`. REE/RAIPEE: esportazioni CSV in `reports/`.
 
-## Regole
+Evidenze regionali: `reports/dog/`, `reports/dogc/`, `reports/gva_public/`, `reports/andalucia_public/`. Correzioni Almagro e backup: `reports/docm_storage/`. Inventari: `reports/catalunya_inventory/`, `reports/galicia_archive/`.
 
-URL, external_id, date e testi originali sempre preservati. Meglio campo vuoto che dato inventato. Conflitti segnalati, non risolti arbitrariamente. Nomi mancanti non ricavati dal promotore. Il verde dei controlli non garantisce che ogni campo sia completo o semanticamente perfetto. Una prova fallita o incompleta non viene presentata come certificazione.
+Il workflow di validazione conserva database, originali e report nell'artifact. **Un commit non pubblica automaticamente un sito e una validazione dedicata non certifica tutte le fonti.** Consultare il checkpoint per distinguere ultimo codice, ultima prova completa e problemi residui.
