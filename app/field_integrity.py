@@ -106,19 +106,29 @@ def explicit_capacity_corrections(text, **source):
     return found
 
 def audit_project(project, events):
-    candidates, corrections = [], []
+    candidates, corrections, titled = [], [], set()
     for event in events:
         fields = {k: event.get(k) or '' for k in ('source_code','external_id','publication_date','url')}
         raw = event.get('raw_text') or ''
         candidates += company_mentions(raw, project_name=project.get('project_name'), **fields)
-        heading = norm(event.get('title') or '')
+        heading_text=event.get('title') or ''
+        # Official correction titles refer to the operative current company.
+        # Superseded company names in quoted 'donde dice' paragraphs must not
+        # compete with the single current company explicitly in that title.
+        if norm(project.get('project_name')) and norm(project['project_name']) in norm(heading_text):
+            title_companies={company_key(x.value) for x in company_mentions(
+                heading_text,project_name=project['project_name'], **fields)}
+            if len(title_companies)==1:
+                titled.update(title_companies)
+        heading = norm(heading_text)
         if any(marker in heading for marker in ('corrig', 'rectific', 'correc')):
             corrections += explicit_capacity_corrections(raw, **fields)
     groups = defaultdict(list)
     for e in candidates:
         groups[company_key(e.value)].append(e)
     linked = {k:group for k,group in groups.items() if any(x.role.endswith('_PROJECT_LINKED') for x in group)}
-    eligible = linked or groups
+    titled_groups={k:v for k,v in groups.items() if k in titled}
+    eligible = titled_groups if len(titled)==1 and len(titled_groups)==1 else (linked or groups)
     selected = next(iter(eligible.values())) if len(eligible) == 1 and project.get('project_name') else []
     company = max(selected, key=lambda e:(len(e.value), e.publication_date)).value if selected else None
     fixed_values = {e.value for _,e in corrections}
