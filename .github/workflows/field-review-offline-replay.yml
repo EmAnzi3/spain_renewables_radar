@@ -1,0 +1,60 @@
+name: field-review-offline-replay
+on:
+  workflow_dispatch:
+  push:
+    branches: ['fix/official-project-fields']
+    paths:
+      - 'app/field_integrity.py'
+      - 'app/field_geography.py'
+      - 'app/reporting.py'
+      - 'app/run_pipeline.py'
+      - 'scripts/replay_field_review.py'
+      - 'web/portal.html'
+      - 'tests/test_field_integrity.py'
+      - 'tests/test_field_geography.py'
+      - '.github/workflows/field-review-offline-replay.yml'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: field-review-offline-replay-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt && pip install playwright
+      - name: Complete regression tests
+        run: python -m unittest discover -s tests
+      - name: Download frozen prior operational SQLite with its original provenance
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 37441856639
+          name: radar-operational-state
+          path: replay-input/state
+      - name: Download exact prior original browsable data and reviewed external leads
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 37441856639
+          name: radar-web-navigable
+          path: replay-input/portal
+      - name: Replay original project evidence and official INE municipal reference
+        run: python -u -m scripts.replay_field_review
+      - name: Verify actual corrected navigable page in Chromium desktop/mobile
+        run: |
+          if ! command -v google-chrome && ! command -v chromium; then python -m playwright install chromium; fi
+          python -m scripts.check_web_portal_browser --site field-reviewed/site
+      - name: Preserve the new browser proof and review state
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: radar-field-reviewed-preview
+          path: field-reviewed/
+          if-no-files-found: error
