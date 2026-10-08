@@ -16,6 +16,7 @@ from app.store import save_event
 from app.identity_migration import repair_legacy_identities
 from app.bocyl_identity import repair_bocyl_external_ids
 from app.docm_storage import repair_and_record as repair_docm_storage
+from app.field_integrity import apply_verified_field_repairs, review_database
 
 COLLECTOR_CLASSES={
     "BOE":BOECollector,"BOCYL":BOCYLCollector,"BOA":BOACollector,"BOJA":BOJACollector,
@@ -82,6 +83,31 @@ def main():
                 collector.close()
     docm_repair=repair_docm_storage(conn)
     if docm_repair["status"]!="NOT_NEEDED":print("DOCM storage evidence:",docm_repair,flush=True)
+    # Evidence-based field repairs are projection-only. Save the previous
+    # database before changing a published project field.
+    pending=apply_verified_field_repairs(conn,dry_run=True)
+    if pending["changed_fields"]:
+        from pathlib import Path
+        import sqlite3
+        from contextlib import closing
+        from datetime import datetime,timezone
+        backups=Path("data/migrations")
+        backups.mkdir(parents=True,exist_ok=True)
+        stamp=datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+        backup=backups/("field-evidence-before-"+stamp+".sqlite")
+        conn.commit()
+        with closing(sqlite3.connect(backup)) as copy:
+            conn.backup(copy)
+        print("[FIELD_EVIDENCE] previous SQLite projection backed up to",backup)
+    repaired=apply_verified_field_repairs(conn)
+    from pathlib import Path
+    import json
+    fields_dir=Path("reports/field_integrity")
+    fields_dir.mkdir(parents=True,exist_ok=True)
+    (fields_dir/"latest.json").write_text(
+        json.dumps({"repairs":repaired,"reviews":review_database(conn),
+            "source_event_fields_unchanged":True},ensure_ascii=False,indent=2),encoding="utf-8")
+    print("[FIELD_EVIDENCE] repaired promoters",repaired["promoters"],"corrected MW",repaired["power_mw"])
     missing_geo=conn.execute("SELECT count(*) FROM projects WHERE province IS NULL").fetchone()[0]
     if missing_geo:
         print(f"[INE_MUNICIPALITIES] enriching {missing_geo} projects without province")
