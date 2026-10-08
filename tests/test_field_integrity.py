@@ -99,3 +99,23 @@ class FieldReviewTests(unittest.TestCase):
             self.assertEqual(row['external_id'],'BOE-A-2026-MAZO')
             self.assertEqual(row['role'],'GRANTEE_PROJECT_LINKED')
             c.close()
+
+    def test_amended_title_picks_current_company_not_superseded_company(self):
+        for project, current in [('Bañuela','GR Bañuela Renovables, SLU'),
+                                 ('Turbón','GR Turbón Renovables, SLU')]:
+            with self.subTest(project=project):
+                title=('Resolución por la que se corrigen errores en la de 20 de julio '
+                      'por la que se otorga a '+current+', autorización de construcción '
+                      'para el módulo de almacenamiento '+project+', de 21,69 MW.')
+                raw=(title+'\nDonde dice: «Otorgar a GR Aspe Renovables, SLU, '
+                     'autorización para el módulo de almacenamiento '+project+'».\n'
+                     'Debe decir: «Otorgar a '+current+', autorización para el '
+                     'módulo de almacenamiento '+project+'».')
+                p={'project_key':'p','project_name':project,'promoter':None,'power_mw':21.69}
+                event={'raw_text':raw,'title':title,'source_code':'BOE',
+                       'external_id':'BOE-A-CORRECTED','publication_date':'2026-09-30',
+                       'url':'https://www.boe.es/'}
+                review=audit_project(p,[event])
+                self.assertEqual(review['company_proposal'],current)
+                self.assertFalse(review['company_conflict'])
+                self.assertIn('GR Aspe Renovables, SLU',review['company_candidates'])
