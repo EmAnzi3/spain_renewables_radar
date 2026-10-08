@@ -17,6 +17,7 @@ from app.identity_migration import repair_legacy_identities
 from app.bocyl_identity import repair_bocyl_external_ids
 from app.docm_storage import repair_and_record as repair_docm_storage
 from app.field_integrity import apply_verified_field_repairs, review_database
+from app.field_geography import enrich_municipal_context
 
 COLLECTOR_CLASSES={
     "BOE":BOECollector,"BOCYL":BOCYLCollector,"BOA":BOACollector,"BOJA":BOJACollector,
@@ -109,14 +110,24 @@ def main():
             "source_event_fields_unchanged":True},ensure_ascii=False,indent=2),encoding="utf-8")
     print("[FIELD_EVIDENCE] repaired promoters",repaired["promoters"],"corrected MW",repaired["power_mw"])
     missing_geo=conn.execute("SELECT count(*) FROM projects WHERE province IS NULL").fetchone()[0]
-    if missing_geo:
-        print(f"[INE_MUNICIPALITIES] enriching {missing_geo} projects without province")
+    needs_municipal_context=conn.execute("""
+        SELECT COUNT(*) FROM projects p
+        WHERE p.province IS NOT NULL AND NOT EXISTS
+        (SELECT 1 FROM project_geo_enrichment g WHERE g.project_key=p.project_key)
+    """).fetchone()[0]
+    if missing_geo or needs_municipal_context:
+        print(f"[INE_MUNICIPALITIES] province missing={missing_geo}; municipal evidence pending={needs_municipal_context}")
         geo_row={"source_code":"INE_MUNICIPALITIES","date":end.isoformat(),"status":"OK","candidates":0,"inserted":0,"new_projects":0,"error":""}
         try:
             municipalities=fetch_ine_municipalities(timeout=timeout,user_agent=user_agent)
             geo_result=enrich_missing_project_geography(conn,municipalities)
+            municipal_result=enrich_municipal_context(conn,municipalities)
             geo_row["candidates"]=len(municipalities);geo_row["inserted"]=geo_result["resolved"]
+            (fields_dir/"municipal_context.json").write_text(
+                json.dumps({"scope":"DOCUMENTED_MUNICIPAL_CONTEXT_NOT_SITE_COORDINATES",
+                    "results":municipal_result},ensure_ascii=False,indent=2),encoding="utf-8")
             print(f"  INE geography: resolved={geo_result['resolved']} | multi-province={geo_result['multi_province']} | unresolved={geo_result['unresolved']}")
+            print(f"  INE municipality context: {municipal_result}; original project provinces are retained")
         except Exception as exc:
             errors+=1;geo_row["status"]="ERROR";geo_row["error"]=str(exc)[:500]
             print(f"  WARN INE_MUNICIPALITIES: {exc}")
