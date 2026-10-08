@@ -112,7 +112,7 @@ def audit_project(project, events):
         raw = event.get('raw_text') or ''
         candidates += company_mentions(raw, project_name=project.get('project_name'), **fields)
         heading = norm(event.get('title') or '')
-        if 'corrig' in heading or 'rectific' in heading:
+        if any(marker in heading for marker in ('corrig', 'rectific', 'correc')):
             corrections += explicit_capacity_corrections(raw, **fields)
     groups = defaultdict(list)
     for e in candidates:
