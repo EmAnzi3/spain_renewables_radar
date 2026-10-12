@@ -80,8 +80,6 @@ def months(start: date, end: date) -> list[dict]:
 
 
 def build_plan(*,start: date=NATIONAL_START,end: date=date(2026,10,11)) -> dict:
-    from configparser import ConfigParser  # standard library; no external aggregator
-    del ConfigParser
     if not (date(2000,1,1)<=start<=end):
         raise ValueError("Invalid period")
     windows=months(start,end)
@@ -209,7 +207,7 @@ def scan_source(*,source:str,start:date,end:date,out:Path,collector=None,
                 print("HISTORIC_SOURCE_DAY",json.dumps(dict(source_code=source,**row),ensure_ascii=False),flush=True)
         finally:
             if hasattr(external,"close"):external.close()
-    flags={key:sum(code in issues(e) for e in scanned) for key in (
+    flags={key:sum(key in issues(e) for e in scanned) for key in (
         "NO_UNAMBIGUOUS_PROJECT_NAME","MW_MISSING","MW_REVIEW_REQUIRED",
         "PROMOTER_NOT_EXTRACTED","PROMOTER_MALFORMED","PROVINCE_MISSING_OR_MULTIPROVINCE")}
     provinces={}
