@@ -32,6 +32,8 @@ on:
     paths:
       - 'scripts/historical_month.py'
       - 'tests/test_historical_month.py'
+      - 'tests/test_boe_scope.py'
+      - 'app/collectors/boe.py'
       - '.github/workflows/official-national-historical-months.yml'
 permissions:
   contents: read
