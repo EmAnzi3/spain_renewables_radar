@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from datetime import date
+from datetime import date,timedelta
 from urllib.parse import quote
 
 import requests
@@ -24,41 +24,79 @@ class BOJACollector:
     def _get_json(self,url,params=None,allow_empty_400=False):
         r=self.session.get(url,params=params,timeout=self.timeout)
         if allow_empty_400 and r.status_code==400:
-            return {"results":[],"total_hits":0}
+            # The API returns {"status":400,"message":"Bad request"} for
+            # some nonpublication days. This response alone does NOT prove
+            # that the bulletin was empty. Require independent verification.
+            return {"_unverified_400":True}
         r.raise_for_status()
         return r.json()
 
     @staticmethod
-    def _plain(value)->str:
-        if value is None:
-            return ""
-        if not isinstance(value,str):
-            return str(value)
-        return BeautifulSoup(value,"html.parser").get_text(" ",strip=True)
+    def _publication_date(row):
+        from datetime import datetime
+        raw=row.get("date")
+        if not isinstance(raw,str):
+            raise ValueError("BOJA publication date absent")
+        try:
+            return datetime.strptime(raw,"%d/%m/%Y").date()
+        except ValueError:
+            try:return date.fromisoformat(raw)
+            except ValueError as exc:raise ValueError("Invalid BOJA publication date") from exc
 
-    def _day_rows(self,day:date):
-        page=0
+    def _pages(self,start:date,end:date,allow_empty_400=False):
         size=200
+        page=0
+        seen=set()
+        total=None
         while True:
             payload=self._get_json(
                 f"{API}/get/search_pagination",
-                allow_empty_400=True,
-                params={
-                    "order_by":"dateUTC",
-                    "mode":"DESC",
-                    "size":size,
-                    "page":page,
-                    "date_from":day.isoformat(),
-                    "date_to":day.isoformat(),
-                },
-            )
-            rows=payload.get("results") or []
+                allow_empty_400=allow_empty_400,
+                params={"order_by":"dateUTC","mode":"DESC","size":size,
+                        "page":page,"date_from":start.isoformat(),
+                        "date_to":end.isoformat()})
+            if payload.get("_unverified_400"):
+                if page!=0:raise ValueError("BOJA 400 during pagination")
+                yield None
+                return
+            if not isinstance(payload,dict) or not isinstance(payload.get("results"),list):
+                raise ValueError("BOJA malformed search payload")
+            declared=payload.get("total_hits")
+            if type(declared) is not int or declared<0:
+                raise ValueError("BOJA total_hits missing/invalid")
+            if total is None:total=declared
+            elif declared!=total:raise ValueError("BOJA total count changed between pages")
+            rows=payload["results"]
+            if len(rows)>size or len(seen)+len(rows)>total:
+                raise ValueError("BOJA page exceeds declared bound")
             for row in rows:
+                if not isinstance(row,dict) or not row.get("id"):
+                    raise ValueError("BOJA row identity missing")
+                key=str(row["id"])
+                if key in seen:raise ValueError("BOJA repeated row across pages")
+                if not start<=self._publication_date(row)<=end:
+                    raise ValueError("BOJA row outside requested publication window")
+                seen.add(key)
                 yield row
-            total=int(payload.get("total_hits") or payload.get("hits") or 0)
-            if not rows or (page+1)*size >= total:
-                break
+            if len(seen)==total:return
+            if not rows or page>=200:
+                raise ValueError("BOJA truncated or stalled pagination")
             page+=1
+
+    def _day_rows(self,day:date):
+        rows=self._pages(day,day,allow_empty_400=True)
+        first=True
+        for row in rows:
+            if row is None:
+                # Cross-check on a separate official window: a generic HTTP 400
+                # cannot be silently promoted to a true zero-publication day.
+                adjacent=list(self._pages(day-timedelta(days=1),
+                                          day+timedelta(days=1)))
+                if any(self._publication_date(item)==day for item in adjacent):
+                    raise ValueError("BOJA exact-date 400 contradicts adjacent official search")
+                return
+            first=False
+            yield row
 
     @classmethod
     def _flatten_text(cls,node)->str:
