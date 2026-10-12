@@ -24,6 +24,15 @@ class BOJAHistoricalCoverageTests(unittest.TestCase):
   collector=BOJACollector()
   collector._get_json=fn
   return collector
+ def test_official_unique_id_sort_and_bounded_page_size(self):
+  requested=[]
+  def fetch(url,params=None,allow_empty_400=False):
+   requested.append(params.copy())
+   return {'total_hits':1,'results':[row(1)]}
+  list(self.setup_collector(fetch)._day_rows(DAY))
+  self.assertEqual(requested[0]['order_by'],'id')
+  self.assertEqual(requested[0]['size'],100)
+
  def test_server_page_cap_is_not_assumed_requested_page_size(self):
   def fetch(url,params=None,allow_empty_400=False):
    page=params['page']
