@@ -1,0 +1,79 @@
+name: national-historical-backfill-pilot
+
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: Historical period start (inclusive, yyyy-mm-dd)
+        required: true
+        default: '2026-06-20'
+      end:
+        description: Historical period end (inclusive, yyyy-mm-dd)
+        required: true
+        default: '2026-06-24'
+  push:
+    branches:
+      - 'feat/national-24m-backfill'
+    paths:
+      - 'app/historical_backfill.py'
+      - 'tests/test_historical_backfill.py'
+      - '.github/workflows/national-historical-backfill-pilot.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nationwide-history-pilot-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: All unit and regression tests
+        run: python -m unittest discover -s tests
+      - name: Freeze two-year nationwide gazette coverage plan with explicit gaps
+        run: python -m app.historical_backfill --plan --plan-start 2024-10-12 --plan-end 2026-10-11
+      - uses: actions/upload-artifact@v4
+        with:
+          name: national-24m-coverage-plan
+          path: reports/national_historical_backfill/plan.json
+          if-no-files-found: error
+
+  source-pilot:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        source: [BOE, BOJA, BOA, BOCYL, DOCM, DOGC, DOE, DOG, BOCM, BORM]
+    env:
+      PYTHONUNBUFFERED: '1'
+      HTTP_TIMEOUT: '30'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Scan one bounded official historical source period
+        env:
+          SOURCE: ${{ matrix.source }}
+          START: ${{ github.event.inputs.start || '2026-06-20' }}
+          END: ${{ github.event.inputs.end || '2026-06-24' }}
+        run: |
+          python -u -m app.historical_backfill --source "$SOURCE" --from-date "$START" --until "$END"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: history-${{ matrix.source }}-source-evidence
+          path: reports/national_historical_backfill/
+          if-no-files-found: error
