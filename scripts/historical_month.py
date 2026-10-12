@@ -165,10 +165,27 @@ def main(argv=None):
                 raise ValueError('BOE review lead is missing original evidence or has an invalid status')
             result['multi_or_unnamed_official_review_leads']=len(leads)
             result['review_leads_original_sha256']=sha(review)
+        if source=='BOJA':
+            review=work/'reports/boja/historical_restricted_leads.json'
+            if not review.exists():
+                raise ValueError('BOJA legal-restriction evidence report missing')
+            payload=json.loads(review.read_text(encoding='utf-8'))
+            leads=payload.get('restricted_leads')
+            if (payload.get('mode')!='PUBLIC_METADATA_ONLY_NOT_COMPLETE_PERMIT_EVIDENCE'
+                or not isinstance(leads,list) or payload.get('restricted_document_count')!=len(leads)
+                or len({x.get('external_id') for x in leads})!=len(leads)):
+                raise ValueError('BOJA legally restricted document receipt is invalid')
+            if any(x.get('added_to_projects') is not False or not x.get('title')
+                   or not x.get('url') or not x.get('raw_text') for x in leads):
+                raise ValueError('BOJA restricted notice lacks required original metadata')
+            result['legally_restricted_source_bodies']=len(leads)
+            result['restricted_official_metadata_sha256']=sha(review)
+            result['historical_body_coverage']='PARTIAL_RESTRICTED' if leads else 'FULL_AVAILABLE_SOURCE_TEXT'
         result['original_report_sha256']={str(path.relative_to(work)):sha(path)
                     for path in (work/'reports').rglob('*') if path.is_file()}
         result['certified']=(p.returncode==0 and result['source_days_failed']==0
-                             and not result['structural_errors'])
+                             and not result['structural_errors']
+                             and not result.get('legally_restricted_source_bodies',0))
         if result['certified']:
             print('HISTORICAL_SHARD_CERTIFIED',json.dumps({
                 k:v for k,v in result.items() if k not in ('original_report_sha256','source_failures')},ensure_ascii=False))
