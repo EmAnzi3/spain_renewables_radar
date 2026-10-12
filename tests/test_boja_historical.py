@@ -1,4 +1,8 @@
 import unittest
+import calendar
+import tempfile
+from pathlib import Path
+from unittest.mock import patch
 from datetime import date
 from app.collectors.boja import BOJACollector
 
@@ -45,21 +49,34 @@ class BOJAHistoricalCoverageTests(unittest.TestCase):
    return {'total_hits':3,'results':[row(1),row(2)]}
   with self.assertRaisesRegex(ValueError,'repeated'):
    list(self.setup_collector(fetch)._day_rows(DAY))
- def test_unverified_400_must_have_adjacent_official_evidence(self):
+ def test_unverified_400_requires_independent_calendar_evidence(self):
   def fetch(url,params=None,allow_empty_400=False):
    if params['date_from']==str(DAY):return {'_unverified_400':True}
    return {'total_hits':2,'results':[row(1,'04/10/2024'),row(2,'06/10/2024')]}
-  self.assertEqual(list(self.setup_collector(fetch)._day_rows(DAY)),[])
- def test_unverified_400_contradicting_wider_search_is_error(self):
+  collector=self.setup_collector(fetch)
+  checked=[]
+  collector._verified_nonpublication_day=lambda day: checked.append(day) or True
+  self.assertEqual(list(collector._day_rows(DAY)),[])
+  self.assertEqual(checked,[DAY])
+ def test_unverified_400_on_published_edition_is_error(self):
   def fetch(url,params=None,allow_empty_400=False):
    if params['date_from']==str(DAY):return {'_unverified_400':True}
    return {'total_hits':1,'results':[row(1)]}
-  with self.assertRaisesRegex(ValueError,'contradicts'):
-   list(self.setup_collector(fetch)._day_rows(DAY))
- def test_400_in_adjacent_check_is_not_empty(self):
+  collector=self.setup_collector(fetch)
+  def unavailable(day):
+   raise ValueError("BOJA returned HTTP 400 on a date with an official edition")
+  collector._verified_nonpublication_day=unavailable
+  with self.assertRaisesRegex(ValueError,'official edition'):
+   list(collector._day_rows(DAY))
+ def test_400_in_calendar_check_is_not_empty(self):
   def fetch(url,params=None,allow_empty_400=False):
    return {'_unverified_400':True}
-  with self.assertRaises(ValueError):list(self.setup_collector(fetch)._day_rows(DAY))
+  collector=self.setup_collector(fetch)
+  def calendar_error(day):
+   raise ValueError("Official calendar unavailable")
+  collector._verified_nonpublication_day=calendar_error
+  with self.assertRaisesRegex(ValueError,"calendar unavailable"):
+   list(collector._day_rows(DAY))
  def test_missing_row_id_date_total_or_complete_page_must_fail(self):
   variants=[
    {'total_hits':1,'results':[{'date':'05/10/2024'}]},
@@ -72,3 +89,38 @@ class BOJAHistoricalCoverageTests(unittest.TestCase):
     return {'total_hits':2,'results':[]} if params['page'] else case
    with self.subTest(case=case),self.assertRaises(ValueError):
     list(self.setup_collector(fetch)._day_rows(DAY))
+
+
+ def test_official_year_calendar_links_are_independent_publication_proof(self):
+  pieces=[]
+  months=list(__import__('app.collectors.boja',fromlist=['MONTHS_ES']).MONTHS_ES)
+  for i,name in enumerate(months,1):
+   rows=''.join(f'<td class="dia-boja"><a href="/eboja/2024/{i*100+n}/index.html">{n}</a></td>'
+                for n in range(4,22))
+   pieces.append(f'<table class="calendario_tabla"><caption>{name}</caption>{rows}</table>')
+  days=BOJACollector.parse_official_calendar(''.join(pieces),2024)
+  self.assertIn(date(2024,11,4),days)
+  self.assertNotIn(date(2024,11,2),days)
+  self.assertEqual(len(days),216)
+ def test_restricted_announcements_are_leads_not_synthetic_projects(self):
+  title=('Anuncio del Servicio Territorial de Energía sobre solicitud de '
+         'autorización administrativa de la instalación solar fotovoltaica en Sevilla')
+  row={'id':'disposition.2024.219.42','summary':title}
+  collector=BOJACollector()
+  collector._day_rows=lambda day:iter([row])
+  body=title+'\nTexto de acceso restringido en virtud del artículo 32 del Decreto 188/2018.'
+  collector._detail=lambda record:(body,'https://www.juntadeandalucia.es/eboja/2024/219/')
+  self.assertEqual(collector.collect_day(DAY),[])
+  self.assertEqual(len(collector._restricted_review),1)
+  self.assertFalse(collector._restricted_review[0]['added_to_projects'])
+  with tempfile.TemporaryDirectory() as td:
+   import os
+   old=os.getcwd()
+   try:
+    os.chdir(td)
+    collector.persist_metadata(None)
+    import json
+    report=json.loads(Path('reports/boja/historical_restricted_leads.json').read_text())
+    self.assertEqual(report['restricted_document_count'],1)
+    self.assertEqual(report['restricted_leads'][0]['raw_text'],body)
+   finally:os.chdir(old)
