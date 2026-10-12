@@ -16,6 +16,8 @@ RELEVANT=re.compile(r"fotovolta|parque\s+e[oó]lico|instalaci[oó]n\s+e[oó]lica
 EXCLUDE=re.compile(
     r"formalizaci[oó]n\s+de\s+contratos|anuncio\s+de\s+licitaci[oó]n|"
     r"adjudicaci[oó]n\s+de\s+contrat|autoconsumo|objeto:\s*instalaci[oó]n\s+de\s+paneles|"
+    r"comisar[ií]a de aguas.*aprovechamiento de aguas subterráneas|" 
+    r"implantaci[oó]n fotovoltaica para suministro complementario a la elevaci[oó]n de valdelentisco|" 
     r"direcci[oó]n general del catastro|ponencia de valores|"
     r"se declaran instalaciones energ[eé]ticas estrat[eé]gicas los proyectos",
     re.I,
