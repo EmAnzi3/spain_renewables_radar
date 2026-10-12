@@ -25,8 +25,11 @@ from app.db import connect
 ROOT=Path(__file__).resolve().parents[1]
 RANGE_START=date(2024,10,1)
 RANGE_END=date(2026,9,30)
-SUPPORTED=tuple(COLLECTOR_CLASSES)
 INVENTORY_SOURCES={'MITECO_SABIA','AND_PUBLIC','GVA_PUBLIC'}
+# Historical month/edition certification is valid only for date-partitionable
+# bulletins. Archive inventories must be scanned once per source with their
+# own timeline and receipts, never redated as 24 monthly discoveries.
+SUPPORTED=tuple(code for code in COLLECTOR_CLASSES if code not in INVENTORY_SOURCES)
 FIELDS=('source_code','external_id','publication_date','title','url','raw_text',
         'project_key','event_type','commercial_stage')
 def sha(path):
@@ -41,6 +44,8 @@ def month_bounds(month):
         raise ValueError('Month outside the approved 2024-10 .. 2026-09 historical window')
     return first,last
 def validate_source(code):
+    if code in INVENTORY_SOURCES:
+        raise ValueError('Archive inventory cannot be certified as an independent monthly bulletin: '+code)
     if code not in SUPPORTED:
         raise ValueError('Unimplemented source: '+str(code))
     return code
