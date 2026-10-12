@@ -44,7 +44,7 @@ class BOJACollector:
             except ValueError as exc:raise ValueError("Invalid BOJA publication date") from exc
 
     def _pages(self,start:date,end:date,allow_empty_400=False):
-        size=200
+        size=100
         page=0
         seen=set()
         total=None
@@ -52,7 +52,7 @@ class BOJACollector:
             payload=self._get_json(
                 f"{API}/get/search_pagination",
                 allow_empty_400=allow_empty_400,
-                params={"order_by":"dateUTC","mode":"DESC","size":size,
+                params={"order_by":"id","mode":"DESC","size":size,
                         "page":page,"date_from":start.isoformat(),
                         "date_to":end.isoformat()})
             if payload.get("_unverified_400"):
