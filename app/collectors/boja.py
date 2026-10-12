@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import re
-from datetime import date,timedelta
-from urllib.parse import quote
+import json
+import hashlib
+from pathlib import Path
+from datetime import date,timedelta,datetime,timezone
+from urllib.parse import quote,urljoin
 
 import requests
 from bs4 import BeautifulSoup
@@ -10,6 +13,11 @@ from bs4 import BeautifulSoup
 from app.parser import parse_event
 
 API="https://datos.juntadeandalucia.es/api/v0/boja"
+OFFICIAL_CALENDAR="https://www.juntadeandalucia.es/eboja/"
+MONTHS_ES={
+    "enero":1,"febrero":2,"marzo":3,"abril":4,"mayo":5,"junio":6,
+    "julio":7,"agosto":8,"septiembre":9,"octubre":10,"noviembre":11,"diciembre":12
+}
 RELEVANT=re.compile(r"fotovolta|parque\s+e[oó]lico|instalaci[oó]n\s+e[oó]lica|almacenamiento|bater[ií]a|hibridaci[oó]n|aerogenerador",re.I)
 EXCLUDE=re.compile(r"contrataci[oó]n|licitaci[oó]n|adjudicaci[oó]n|autoconsumo|instalaci[oó]n\s+de\s+paneles\s+fotovoltaicos\s+en\s+(?:edificios|cubiertas)",re.I)
 
@@ -20,6 +28,10 @@ class BOJACollector:
         self.timeout=timeout
         self.session=requests.Session()
         self.session.headers.update({"User-Agent":user_agent,"Accept":"application/json"})
+        self._official_year_calendars={}
+        self._calendar_receipts=[]
+        self._restricted_review=[]
+
 
     def _get_json(self,url,params=None,allow_empty_400=False):
         r=self.session.get(url,params=params,timeout=self.timeout)
@@ -30,6 +42,57 @@ class BOJACollector:
             return {"_unverified_400":True}
         r.raise_for_status()
         return r.json()
+
+    @staticmethod
+    def parse_official_calendar(html,year):
+        soup=BeautifulSoup(html,"html.parser")
+        tables=soup.select("table.calendario_tabla")
+        if len(tables)!=12:
+            raise ValueError("BOJA official yearly calendar must expose 12 months")
+        observed_months=set()
+        dates={}
+        for table in tables:
+            caption=table.find("caption")
+            month=MONTHS_ES.get((caption.get_text(" ",strip=True) if caption else "").casefold())
+            if not month or month in observed_months:
+                raise ValueError("BOJA calendar missing or duplicated month")
+            observed_months.add(month)
+            for link in table.select("td.dia-boja a[href]"):
+                try:
+                    n=int(link.get_text(" ",strip=True))
+                    d=date(year,month,n)
+                except ValueError as exc:
+                    raise ValueError("BOJA calendar has invalid day number") from exc
+                href=link.get("href") or ""
+                parsed=re.fullmatch(r"/eboja/"+str(year)+r"/(\d{1,4})/index\.html",href)
+                if parsed is None or d in dates:
+                    raise ValueError("BOJA calendar issue URL or day identity invalid")
+                dates[d]=parsed.group(1)
+        if len(dates)<150:
+            raise ValueError("BOJA official yearly calendar is unexpectedly incomplete")
+        return dates
+
+    def _verified_nonpublication_day(self,day):
+        year=day.year
+        if year not in self._official_year_calendars:
+            url=f"{OFFICIAL_CALENDAR}{year}.html"
+            response=self.session.get(url,timeout=(8,max(self.timeout,40)),allow_redirects=False)
+            response.raise_for_status()
+            if response.status_code!=200 or response.url!=url:
+                raise ValueError("BOJA official calendar refused or redirected")
+            raw=response.content
+            dates=self.parse_official_calendar(raw,year)
+            self._official_year_calendars[year]=dates
+            self._calendar_receipts.append({
+                "year":year,"source_url":url,"retrieved_at":datetime.now(timezone.utc).isoformat(),
+                "sha256":hashlib.sha256(raw).hexdigest(),"original_bytes":len(raw),
+                "edition_days":len(dates),"source":"OFFICIAL_BOJA_YEARLY_EDITION_CALENDAR",
+            })
+            out=Path("reports/boja");out.mkdir(parents=True,exist_ok=True)
+            (out/f"calendar_{year}.html").write_bytes(raw)
+        if day in self._official_year_calendars[year]:
+            raise ValueError("BOJA returned HTTP 400 on a date with an official edition")
+        return True
 
     @staticmethod
     def _publication_date(row):
@@ -89,12 +152,9 @@ class BOJACollector:
         first=True
         for row in rows:
             if row is None:
-                # Cross-check on a separate official window: a generic HTTP 400
-                # cannot be silently promoted to a true zero-publication day.
-                adjacent=list(self._pages(day-timedelta(days=1),
-                                          day+timedelta(days=1)))
-                if any(self._publication_date(item)==day for item in adjacent):
-                    raise ValueError("BOJA exact-date 400 contradicts adjacent official search")
+                # Calendar verified independently on the official eBOJA
+                # publication-year page. An HTTP400 alone is never a zero.
+                self._verified_nonpublication_day(day)
                 return
             first=False
             yield row
@@ -159,6 +219,17 @@ class BOJACollector:
             if not RELEVANT.search(title) or EXCLUDE.search(title):
                 continue
             detail_text,source_url=self._detail(row)
+            if "Texto de acceso restringido" in detail_text:
+                # The official supplement is legally restricted after six
+                # months. Preserve the actual title and visible notice, but
+                # never infer a plant, MW, promoter or granted permit.
+                self._restricted_review.append({
+                    'source_code':self.code,'external_id':str(row.get('id') or ''),
+                    'publication_date':day.isoformat(),'title':title,
+                    'url':source_url,'raw_text':detail_text,
+                    'reason':'OFFICIAL_NOTICE_BODY_RESTRICTED_ARTICLE_32',
+                    'added_to_projects':False})
+                continue
             combined=title+"\n"+detail_text
             if not RELEVANT.search(combined):
                 continue
@@ -173,3 +244,18 @@ class BOJACollector:
             if event.technology:
                 out.append(event)
         return out
+
+    def persist_metadata(self,conn):
+        root=Path("reports/boja");root.mkdir(parents=True,exist_ok=True)
+        reviews=sorted(self._restricted_review,key=lambda x:(x['publication_date'],x['external_id']))
+        if len({x['external_id'] for x in reviews})!=len(reviews):
+            raise ValueError("BOJA restricted notice identities are duplicated")
+        report={'mode':'PUBLIC_METADATA_ONLY_NOT_COMPLETE_PERMIT_EVIDENCE',
+                'restricted_document_count':len(reviews),
+                'original_article_32_legal_scope':True,
+                'cannot_be_counted_as_verified_project_events':True,
+                'official_year_calendar_checks':self._calendar_receipts,
+                'restricted_leads':reviews}
+        (root/'historical_restricted_leads.json').write_text(
+            json.dumps(report,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+        print("BOJA_RESTRICTED_ARCHIVE_LEADS",len(reviews),flush=True)
