@@ -3,7 +3,12 @@ on:
   workflow_dispatch:
   push:
     branches: ['feat/national-historical-backfill']
-    paths: ['.github/workflows/boe-national-historical-24-months.yml']
+    paths:
+      - '.github/workflows/boe-national-historical-24-months.yml'
+      - 'app/boe_scoping.py'
+      - 'app/collectors/boe.py'
+      - 'app/parser.py'
+      - 'tests/test_boe_scope.py'
 permissions:
   contents: read
 concurrency:
