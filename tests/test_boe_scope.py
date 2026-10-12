@@ -63,7 +63,7 @@ class HistoricalOfficialScopeTests(unittest.TestCase):
    def _summary_items(self,day):
     return [{'external_id':'BOE-B-2024-42058','title':title,'url_html':'https://www.boe.es/test'}]
    def _detail_text(self,item):return body,item['url_html']
-  with TemporaryDirectory() as td,patch('os.getcwd',return_value=td):
+  with TemporaryDirectory() as td:
    old=Path.cwd()
    import os
    os.chdir(td)
