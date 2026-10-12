@@ -1,0 +1,46 @@
+name: boja-official-calendar-anomaly-audit
+on:
+  push:
+    branches: ['feat/national-historical-backfill']
+    paths: ['.github/workflows/boja-official-calendar-anomaly-audit.yml']
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Analyze original official 2026/2024 calendar anchors, no inferred dates
+        run: |
+          python - <<'PY'
+          import re,requests
+          from bs4 import BeautifulSoup
+          from app.collectors.boja import BOJACollector
+          for year in (2024,2026):
+              u=f'https://www.juntadeandalucia.es/eboja/{year}.html'
+              r=requests.get(u,headers={'Accept':'text/html'},timeout=(10,40),allow_redirects=False)
+              print('ORIGINAL_CALENDAR',year,r.status_code,len(r.content),r.url)
+              r.raise_for_status()
+              soup=BeautifulSoup(r.content,'html.parser')
+              issues=[]
+              for table in soup.select('table.calendario_tabla'):
+                  month=table.select_one('caption')
+                  label=month.get_text(' ',strip=True) if month else ''
+                  for link in table.select('td.dia-boja a[href]'):
+                      href=link.get('href') or ''
+                      num=link.get_text(' ',strip=True)
+                      if re.fullmatch(r'/eboja/'+str(year)+r'/\d{1,4}/index\.html',href) is None:
+                          issues.append({'month':label,'day':num,'href':href,
+                            'parent':str(link.parent)[:500]})
+              print('CALENDAR_ANOMALIES',year,len(issues),issues[:45])
+              try:
+                  parsed=BOJACollector.parse_official_calendar(r.content,year)
+                  print('CALENDAR_VERIFIED',year,len(parsed))
+              except Exception as e:
+                  print('CALENDAR_PARSE_FAILURE',year,type(e).__name__,str(e))
+          PY
