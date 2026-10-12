@@ -99,6 +99,14 @@ class BOJACollector:
             first=False
             yield row
 
+    @staticmethod
+    def _plain(value)->str:
+        if value is None:
+            return ""
+        if not isinstance(value,str):
+            return str(value)
+        return BeautifulSoup(value,"html.parser").get_text(" ",strip=True)
+
     @classmethod
     def _flatten_text(cls,node)->str:
         parts=[]
