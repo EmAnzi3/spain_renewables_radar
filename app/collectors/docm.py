@@ -19,6 +19,7 @@ RELEVANT=re.compile(
 )
 EXCLUDE=re.compile(
     r"contrataci[oó]n|licitaci[oó]n|adjudicaci[oó]n|autoconsumo|"
+    r"tratamiento de residuos de pilas y bater[ií]as|" 
     r"instalaci[oó]n\s+de\s+paneles\s+fotovoltaicos\s+en\s+(?:edificios|cubiertas)|"
     r"almacenamiento\s+de\s+(?:productos\s+cosm[eé]ticos|productos\s+qu[ií]micos|residuos|chatarra)",
     re.I,
