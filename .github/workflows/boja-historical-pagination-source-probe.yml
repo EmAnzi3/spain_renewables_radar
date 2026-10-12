@@ -1,0 +1,46 @@
+name: boja-historical-pagination-source-probe
+on:
+  workflow_dispatch:
+  push:
+    branches: ['feat/national-historical-backfill']
+    paths: ['.github/workflows/boja-historical-pagination-source-probe.yml']
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Inspect exact official pagination contracts and identity order
+        run: |
+          python - <<'PY'
+          import requests,json
+          url='https://datos.juntadeandalucia.es/api/v0/boja/get/search_pagination'
+          for day in ('2026-07-31','2026-07-06'):
+            for order,size in (('dateUTC',100),('dateUTC',50),('id',100),('number',100)):
+              seen=set()
+              for page in range(4):
+                try:
+                  r=requests.get(url,params={'date_from':day,'date_to':day,
+                      'order_by':order,'mode':'DESC','size':size,'page':page},timeout=(10,30))
+                  if r.status_code!=200:
+                    print('BOJA_PAGE',json.dumps({'day':day,'order':order,
+                      'size':size,'page':page,'status':r.status_code,'body':r.text[:150]}))
+                    break
+                  data=r.json();rows=data.get('results') or []
+                  ids=[str(x.get('id') or '') for x in rows]
+                  repeated=[k for k in ids if k in seen]
+                  seen.update(ids)
+                  print('BOJA_PAGE',json.dumps({'day':day,'order':order,'size':size,
+                    'page':page,'declared':data.get('total_hits'),'returned':len(ids),
+                    'overlap':repeated[:8],'unique_seen':len(seen),
+                    'first':ids[:2],'last':ids[-2:]},ensure_ascii=False))
+                  if not rows or len(seen)>=int(data.get('total_hits') or 0):break
+                except Exception as e:
+                  print('BOJA_PROBE_EXCEPTION',type(e).__name__,str(e));break
+          PY
