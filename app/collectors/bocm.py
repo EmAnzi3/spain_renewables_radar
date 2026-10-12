@@ -15,6 +15,7 @@ RELEVANT=re.compile(r"fotovolta|parque\s+e[oó]lico|instalaci[oó]n\s+e[oó]lica
 EXCLUDE=re.compile(
     r"formalizaci[oó]n\s+(?:de\s+)?(?:contratos?|pr[oó]rroga)|"
     r"contrataci[oó]n|licitaci[oó]n|adjudicaci[oó]n|autoconsumo|"
+    r"plan especial (?:de )?infraestructuras|" 
     r"instalaci[oó]n\s+de\s+paneles\s+fotovoltaicos\s+en\s+(?:edificios|cubiertas)",re.I)
 
 class BOCMCollector:
