@@ -1,0 +1,51 @@
+name: official-regional-historical-wave
+on:
+  workflow_dispatch:
+    inputs:
+      month:
+        description: Historical month YYYY-MM, within Oct 2024–Sep 2026
+        required: true
+        type: string
+        default: '2026-07'
+  push:
+    branches: ['feat/national-historical-backfill']
+    paths: ['.github/workflows/official-regional-historical-wave.yml']
+permissions:
+  contents: read
+concurrency:
+  group: regional-historical-wave-${{ github.ref }}-${{ inputs.month || '2026-07' }}
+  cancel-in-progress: false
+jobs:
+  regional:
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        source: [BOA, BOCYL, DOCM, DOE, BORM, BOCM, DOG, DOGC]
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Verify full regression suite
+        run: python -m unittest discover -s tests
+      - name: Acquire bounded official monthly regional sources
+        env:
+          HTTP_TIMEOUT: '35'
+          PYTHONUNBUFFERED: '1'
+          SABIA_WORKERS: '3'
+        run: >-
+          python -u -m scripts.historical_month
+          --source ${{ matrix.source }}
+          --month ${{ inputs.month || '2026-07' }}
+          --timeout-seconds 3300
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: historical-regional-${{ matrix.source }}-${{ inputs.month || '2026-07' }}
+          path: reports/historical_shards/${{ matrix.source }}/${{ inputs.month || '2026-07' }}/
+          retention-days: 90
+          if-no-files-found: error
