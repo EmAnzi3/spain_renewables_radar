@@ -1,0 +1,52 @@
+name: national-historical-BOE-Andalucia-months
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['feat/national-24m-backfill']
+    paths:
+      - '.github/workflows/national-historical-boe-andalucia.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nationwide-historical-2025-2026-core
+  cancel-in-progress: false
+
+jobs:
+  month:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - {source: BOE, start: '2025-09-01', end: '2025-09-30', tag: '2025-09'}
+          - {source: BOJA, start: '2025-09-01', end: '2025-09-30', tag: '2025-09'}
+          - {source: BOE, start: '2025-10-01', end: '2025-10-31', tag: '2025-10'}
+          - {source: BOJA, start: '2025-10-01', end: '2025-10-31', tag: '2025-10'}
+          - {source: BOE, start: '2026-06-01', end: '2026-06-30', tag: '2026-06'}
+          - {source: BOJA, start: '2026-06-01', end: '2026-06-30', tag: '2026-06'}
+          - {source: BOE, start: '2026-07-01', end: '2026-07-31', tag: '2026-07'}
+          - {source: BOJA, start: '2026-07-01', end: '2026-07-31', tag: '2026-07'}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Historical dates and official source identities, no production writes
+        env:
+          SOURCE: ${{ matrix.source }}
+          FROM: ${{ matrix.start }}
+          UNTIL: ${{ matrix.end }}
+        run: |
+          python -u -m app.historical_backfill --source "$SOURCE" --from-date "$FROM" --until "$UNTIL"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: history-${{ matrix.source }}-${{ matrix.tag }}
+          path: reports/national_historical_backfill/
+          if-no-files-found: error
