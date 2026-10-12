@@ -1,0 +1,58 @@
+name: national-historical-evidence-reconciliation
+on:
+  workflow_dispatch:
+  push:
+    branches: ['feat/national-24m-backfill']
+    paths:
+      - 'scripts/reconcile_historical_batches.py'
+      - 'tests/test_historical_reconciliation.py'
+      - '.github/workflows/national-historical-evidence-reconciliation.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Regression and immutable-evidence tests
+        run: python -m unittest discover -s tests
+      - name: Download two-year plan from original pilot
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 38218228458
+          name: national-24m-coverage-plan
+          path: frozen-plan
+      - name: Download source-day original observations from national pilot
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 38218228458
+          pattern: history-*-source-evidence
+          merge-multiple: true
+          path: observed
+      - name: Download complete historical BOE and BOJA source months
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 38218806409
+          pattern: history-*
+          merge-multiple: true
+          path: observed
+      - name: Reconcile original day digests, conflicting identities and source coverage
+        run: >-
+          python -m scripts.reconcile_historical_batches
+          --input-root observed --plan frozen-plan/plan.json
+          --output reports/national_historical_review
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: national-historical-review-dashboard
+          path: reports/national_historical_review/
+          if-no-files-found: error
