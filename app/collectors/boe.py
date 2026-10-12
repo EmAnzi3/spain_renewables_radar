@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import re
+import json
+from pathlib import Path
 from datetime import date
 from urllib.parse import urljoin
 
@@ -9,6 +11,7 @@ from bs4 import BeautifulSoup
 from xml.etree import ElementTree as ET
 
 from app.parser import BOE_ID_RE, parse_event
+from app.boe_scoping import notice_scope
 
 BASE="https://www.boe.es"
 API_BASE=f"{BASE}/datosabiertos/api/boe/sumario"
@@ -31,6 +34,7 @@ class BOECollector:
         self.timeout=timeout
         self.session=requests.Session()
         self.session.headers.update({"User-Agent":user_agent})
+        self.review_leads=[]
 
     def _get(self,url:str)->str|None:
         r=self.session.get(url,timeout=self.timeout)
@@ -63,7 +67,7 @@ class BOECollector:
         results={}
         for item in BOECollector._iter_api_items(payload):
             title=str(item.get("titulo") or "")
-            if not RELEVANT.search(title) or EXCLUDE.search(title):
+            if not RELEVANT.search(title) or EXCLUDE.search(title) or notice_scope(title)[0]=='OUT_OF_SCOPE':
                 continue
             boe_id=str(item.get("identificador") or "").upper()
 
@@ -86,7 +90,7 @@ class BOECollector:
         results={}
         for node in soup.find_all(["li","p","div"]):
             text=" ".join(node.stripped_strings)
-            if not text or not RELEVANT.search(text) or EXCLUDE.search(text):continue
+            if not text or not RELEVANT.search(text) or EXCLUDE.search(text) or notice_scope(text)[0]=='OUT_OF_SCOPE':continue
             boe_id=None;href=None
             for a in node.find_all("a",href=True):
                 candidate=a.get_text(" ",strip=True)+" "+a["href"]
@@ -138,9 +142,43 @@ class BOECollector:
             combined=item["title"]+"\n"+detail_text
             if not RELEVANT.search(combined) or EXCLUDE.search(item["title"]):
                 continue
+            scope,reason=notice_scope(item["title"])
+            if scope!='CANDIDATE':
+                if scope!='OUT_OF_SCOPE':
+                    self.review_leads.append({'source_code':'BOE','external_id':item['external_id'],
+                        'publication_date':day.isoformat(),'title':item['title'],
+                        'url':source_url,'raw_text':detail_text,'reason':reason,
+                        'state':scope,'added_to_projects':False})
+                continue
             event=parse_event(
                 source_code=self.code,external_id=item["external_id"],publication_date=day.isoformat(),
                 title=item["title"],url=source_url,raw_text=detail_text
             )
+            if event.technology and not event.project_name:
+                # A missing individual identity is NOT a new unique project.
+                # Keep the complete primary evidence in a review queue.
+                self.review_leads.append({'source_code':'BOE','external_id':item['external_id'],
+                    'publication_date':day.isoformat(),'title':item['title'],
+                    'url':source_url,'raw_text':detail_text,
+                    'reason':'INDIVIDUAL_PLANT_NAME_UNRESOLVED',
+                    'state':'REVIEW_UNNAMED_ASSET','added_to_projects':False})
+                continue
             if event.technology:out.append(event)
         return out
+
+    def persist_metadata(self,conn):
+        root=Path('reports/boe')
+        root.mkdir(parents=True,exist_ok=True)
+        unique={}
+        for lead in self.review_leads:
+            key=(lead['source_code'],lead['external_id'])
+            if key in unique and unique[key]!=lead:
+                raise ValueError('Conflicting BOE review lead identity')
+            unique[key]=lead
+        rows=sorted(unique.values(),key=lambda x:(x['publication_date'],x['external_id']))
+        (root/'review_leads.json').write_text(
+            json.dumps({'mode':'UNRESOLVED_LEADS_NOT_PROJECTS',
+                'cannot_be_counted_as_energy_project_events':True,
+                'lead_count':len(rows),'leads':rows},ensure_ascii=False,indent=2)+'\n',
+            encoding='utf-8')
+        print('BOE_REVIEW_LEADS',len(rows),flush=True)
