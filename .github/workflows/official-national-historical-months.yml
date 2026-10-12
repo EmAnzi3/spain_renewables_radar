@@ -8,11 +8,11 @@ on:
         type: string
         default: '2026-07'
       source:
-        description: 'A single implemented official source; ALL_IMPLEMENTED runs every validated collector for that month'
+        description: 'A dated official bulletin; ALL_DATED_BULLETINS excludes undated archive snapshots'
         required: true
         type: choice
         options:
-          - ALL_IMPLEMENTED
+          - ALL_DATED_BULLETINS
           - BOE
           - BOJA
           - BOA
@@ -23,10 +23,7 @@ on:
           - BOCM
           - DOG
           - DOGC
-          - AND_PUBLIC
-          - GVA_PUBLIC
-          - MITECO_SABIA
-        default: ALL_IMPLEMENTED
+        default: ALL_DATED_BULLETINS
   push:
     branches: ['feat/national-historical-backfill']
     paths:
@@ -37,6 +34,7 @@ on:
       - 'tests/test_parser.py'
       - 'app/collectors/boja.py'
       - 'app/collectors/boe.py'
+      - 'app/boe_scoping.py'
       - '.github/workflows/official-national-historical-months.yml'
 permissions:
   contents: read
@@ -66,7 +64,7 @@ jobs:
           source=os.environ['SELECTED_SOURCE']
           month=os.environ['SELECTED_MONTH']
           month_bounds(month)
-          codes=['BOE','BOJA'] if source=='PILOT' else (list(SUPPORTED) if source=='ALL_IMPLEMENTED' else [validate_source(source)])
+          codes=['BOE','BOJA'] if source=='PILOT' else (list(SUPPORTED) if source=='ALL_DATED_BULLETINS' else [validate_source(source)])
           result={'include':[{'source':code,'month':month} for code in codes]}
           with open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('matrix='+json.dumps(result,separators=(',',':'))+'\n')
           print('HISTORICAL_SHARD_PLAN',json.dumps(result))
