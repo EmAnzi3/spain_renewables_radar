@@ -20,6 +20,9 @@ EXPEDIENTE_RE=re.compile(
     re.I,
 )
 PROJECT_PATTERNS=[
+    # A named single hybrid installation may be unquoted and followed by
+    # a parenthetical technology specification (e.g. "híbrida Araña (eólica...").
+    re.compile(r"(?:instalaci[oó]n|planta)\s+h[ií]brid[ao]\s+([A-ZÁÉÍÓÚÜÑ][^(),;:]{2,80}?)\s*\(\s*(?:e[oó]lic[oa]|solar|fotovoltaic[ao])",re.I),
     re.compile(r"parque\s+e[oó]lico\s+(?:denominado\s+)?[«“\"]?(.{3,120}?)[»”\"]?\s+de\s+\d+(?:[.,]\d+)?\s*(?:MW|MWn|MWp)\b",re.I),
     # Explicit umbrella hybrid names precede component descriptions.
     re.compile(r"h[ií]brid[oa]\s+[«“\"]([^»”\"]{2,120})[»”\"]",re.I),
@@ -142,6 +145,7 @@ def _clean_project_name(value:str)->str:
     cuts=[
         r"\s+y\s+las?\s+infraestructuras?\b",
         r"\s+y\s+su\s+infraestructura\b",
+        r"\s+y\s+sus\s+infraestructuras\b",
         r"\s+de\s+\d{1,4}(?:[\.,]\d+)?\s*(?:MWp|MWac|MWn|MW)\b",
         r"\s+ubicad[ao]\b",
         r"\s+situad[ao]\b",
