@@ -7,6 +7,19 @@ def row(n,day='05/10/2024'):
  return {'id':'disposition.2024.200.'+str(n),'date':day,'summary':'Resolución de energía'}
 
 class BOJAHistoricalCoverageTests(unittest.TestCase):
+ def test_actual_summary_html_and_details_parser_remain_operable(self):
+  self.assertEqual(BOJACollector._plain('<p>Proyecto <b>fotovoltaico</b></p>'),
+                   'Proyecto fotovoltaico')
+  row={'id':'disposition.2026.128.9',
+       'summary':'<p>Autorización parque <b>fotovoltaico</b> de 20 MW</p>'}
+  collector=BOJACollector()
+  collector._day_rows=lambda day: iter([row])
+  collector._detail=lambda row: ('La instalación fotovoltaica Solar del Sur, de 20 MW',
+                                  'https://www.juntadeandalucia.es/eboja.html')
+  events=collector.collect_day(DAY)
+  self.assertEqual(len(events),1)
+  self.assertEqual(events[0].source_code,'BOJA')
+
  def setup_collector(self,fn):
   collector=BOJACollector()
   collector._get_json=fn
