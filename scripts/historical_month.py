@@ -134,6 +134,19 @@ def main(argv=None):
         result['structural_errors']=[{'code':x.get('code'),'project_key':x.get('project_key')}
                                    for x in issues if x.get('severity')=='ERROR']
         result['database_sha256']=sha(actual)
+        # The current BORM annual JSON is not a historical archive.
+        # A 2024/2025 month outside its observed min/max cannot become a
+        # certified zero-project result just because collect_day returns [].
+        if source=='BORM':
+            audit_file=work/'reports/borm/index_acquisition.json'
+            if not audit_file.exists():
+                raise ValueError('BORM annual-index source-date evidence is missing')
+            borm_audit=json.loads(audit_file.read_text(encoding='utf-8'))
+            earliest=borm_audit.get('min_publication_date')
+            latest=borm_audit.get('max_publication_date')
+            result['source_index_window']={'earliest':earliest,'latest':latest}
+            if not earliest or not latest or earliest>str(first) or latest<str(last):
+                raise ValueError('BORM_CURRENT_ANNUAL_INDEX_DOES_NOT_COVER_REQUESTED_HISTORICAL_MONTH')
         result['original_report_sha256']={str(path.relative_to(work)):sha(path)
                     for path in (work/'reports').rglob('*') if path.is_file()}
         result['certified']=(p.returncode==0 and result['source_days_failed']==0
