@@ -245,7 +245,7 @@ class ParserTests(unittest.TestCase):
         rows=__import__("json").loads(repaired)
         self.assertEqual(rows[0]["DOCN"],"1")
 
-    def test_boja_empty_400_can_be_treated_as_no_publication(self):
+    def test_boja_400_is_not_evidence_of_an_empty_publication(self):
         class FakeResponse:
             status_code=400
             def raise_for_status(self):
@@ -259,7 +259,7 @@ class ParserTests(unittest.TestCase):
         collector.session=FakeSession()
         self.assertEqual(
             collector._get_json("x",allow_empty_400=True),
-            {"results":[],"total_hits":0},
+            {"_unverified_400":True},
         )
 
 if __name__=="__main__":
