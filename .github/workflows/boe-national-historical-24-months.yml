@@ -1,0 +1,43 @@
+name: boe-national-historical-24-months
+on:
+  workflow_dispatch:
+  push:
+    branches: ['feat/national-historical-backfill']
+    paths: ['.github/workflows/boe-national-historical-24-months.yml']
+permissions:
+  contents: read
+concurrency:
+  group: boe-historical-24m
+  cancel-in-progress: false
+jobs:
+  boe-month:
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        month: [2024-10, 2024-11, 2024-12, 2025-01, 2025-02, 2025-03, 2025-04, 2025-05, 2025-06, 2025-07, 2025-08, 2025-09, 2025-10, 2025-11, 2025-12, 2026-01, 2026-02, 2026-03, 2026-04, 2026-05, 2026-06, 2026-07, 2026-08, 2026-09]
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Full regression suite
+        run: python -m unittest discover -s tests
+      - name: Historical national BOE — individual, auditable month
+        env:
+          HTTP_TIMEOUT: '35'
+          PYTHONUNBUFFERED: '1'
+        run: >-
+          python -u -m scripts.historical_month
+          --source BOE --month ${{ matrix.month }}
+          --timeout-seconds 3300
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: boe-historical-${{ matrix.month }}
+          path: reports/historical_shards/BOE/${{ matrix.month }}/
+          retention-days: 90
+          if-no-files-found: error
