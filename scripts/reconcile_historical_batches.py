@@ -13,7 +13,7 @@ import html
 import json
 from pathlib import Path
 import re
-from types import SimpleNamespace
+from app.parser import ParsedEvent
 
 from app.historical_backfill import (
     SCANNABLE, REGIONAL_GAZETTES, MISSING_GAZETTES, official_event, issues,
@@ -48,7 +48,7 @@ def validate_bundle(folder:Path):
     for r in events:
         day=date.fromisoformat(r['publication_date'])
         if not start<=day<=end:raise ValueError("Event from a foreign date")
-        official_event(SimpleNamespace(**r),audit['source_code'],day)
+        official_event(ParsedEvent(**r),audit['source_code'],day)
     for d in daily:
         own=[x for x in events if x['publication_date']==d['date']]
         if d['status']=='COMPLETE':
