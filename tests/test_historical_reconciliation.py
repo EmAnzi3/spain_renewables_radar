@@ -24,10 +24,11 @@ class Stub:
         pass
 
 class HistoricalAggregateTests(unittest.TestCase):
-    def make_bundle(self,root,day,identity='BOE-A-2026-13561',name='FV La Puebla 3',project_key='single'):
-        events={day:[event(day,identity,name,project_key)]}
-        scan_source(source='BOE',start=day,end=day,out=root,collector=Stub(events),clock=date(2026,10,12))
-        folder=root/('BOE_'+str(day)+'_'+str(day))
+    def make_bundle(self,root,day,identity='BOE-A-2026-13561',name='FV La Puebla 3',project_key='single',range_start=None):
+        start=range_start or day
+        events={d:([event(day,identity,name,project_key)] if d==day else []) for d in (start,day)}
+        scan_source(source='BOE',start=start,end=day,out=root,collector=Stub(events),clock=date(2026,10,12))
+        folder=root/('BOE_'+str(start)+'_'+str(day))
         self.assertTrue(validate_bundle(folder)[0]['complete'])
         return folder
 
@@ -35,7 +36,7 @@ class HistoricalAggregateTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             d=date(2026,6,22);root=Path(tmp)
             f=self.make_bundle(root/'first',d)
-            g=self.make_bundle(root/'second',d)
+            g=self.make_bundle(root/'second',d,range_start=date(2026,6,21))
             result=aggregate([f,g])
             self.assertEqual(result['scanned_bundle_count'],2)
             self.assertEqual(result['unique_official_event_ids'],1)
@@ -60,7 +61,7 @@ class HistoricalAggregateTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             d=date(2026,6,22);root=Path(tmp)
             f=self.make_bundle(root/'first',d,'BOE-A-2026-1',project_key='key-1')
-            g=self.make_bundle(root/'second',d,'BOE-A-2026-2',project_key='key-2')
+            g=self.make_bundle(root/'second',date(2026,6,23),'BOE-A-2026-2',project_key='key-2')
             result=aggregate([f,g])
             self.assertEqual(result['unique_official_event_ids'],2)
             self.assertEqual(result['provisional_named_project_groups'],2)
@@ -69,7 +70,7 @@ class HistoricalAggregateTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             d=date(2026,6,22);root=Path(tmp)
             f=self.make_bundle(root/'first',d,'BOE-A-2026-1',name='FV La Puebla 3',project_key='shared')
-            g=self.make_bundle(root/'second',d,'BOE-A-2026-2',name='FV La Puebla 4',project_key='shared')
+            g=self.make_bundle(root/'second',date(2026,6,23),'BOE-A-2026-2',name='FV La Puebla 4',project_key='shared')
             result=aggregate([f,g])
             self.assertEqual(result['unique_official_event_ids'],2)
             self.assertEqual(result['provisional_named_project_groups'],0)
