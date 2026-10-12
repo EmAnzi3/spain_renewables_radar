@@ -1,0 +1,32 @@
+name: boja-empty-response-contract-probe
+on:
+  workflow_dispatch:
+  push:
+    branches: ['feat/national-historical-backfill']
+    paths: ['.github/workflows/boja-empty-response-contract-probe.yml']
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Official BOJA empty date response contract
+        run: |
+          python - <<'PY'
+          import requests,json
+          url='https://datos.juntadeandalucia.es/api/v0/boja/get/search_pagination'
+          for day in ('2026-07-04','2026-07-06','2024-10-05','2024-10-07'):
+              r=requests.get(url,params={
+                  'order_by':'dateUTC','mode':'DESC','size':200,'page':0,
+                  'date_from':day,'date_to':day},timeout=(10,30))
+              print('OFFICIAL_BOJA_DATE',json.dumps({'date':day,'status':r.status_code,
+                  'content_type':r.headers.get('Content-Type'),
+                  'original_sample':r.text[:1200]},ensure_ascii=False))
+              if r.status_code not in (200,400):raise RuntimeError('Unexpected official response status')
+          PY
