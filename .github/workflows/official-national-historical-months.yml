@@ -1,0 +1,100 @@
+name: official-national-historical-months
+on:
+  workflow_dispatch:
+    inputs:
+      month:
+        description: 'One past complete calendar month, YYYY-MM (2024-10 through 2026-09)'
+        required: true
+        type: string
+        default: '2026-07'
+      source:
+        description: 'A single implemented official source; ALL_IMPLEMENTED runs every validated collector for that month'
+        required: true
+        type: choice
+        options:
+          - ALL_IMPLEMENTED
+          - BOE
+          - BOJA
+          - BOA
+          - BOCYL
+          - DOCM
+          - DOE
+          - BORM
+          - BOCM
+          - DOG
+          - DOGC
+          - AND_PUBLIC
+          - GVA_PUBLIC
+          - MITECO_SABIA
+        default: ALL_IMPLEMENTED
+  push:
+    branches: ['feat/national-historical-backfill']
+    paths:
+      - 'scripts/historical_month.py'
+      - 'tests/test_historical_month.py'
+      - '.github/workflows/official-national-historical-months.yml'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: historical-months-${{ github.ref }}-${{ github.event.inputs.month || 'pilot-2026-07' }}
+  cancel-in-progress: false
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - id: plan
+        env:
+          SELECTED_SOURCE: ${{ inputs.source || 'PILOT' }}
+          SELECTED_MONTH: ${{ inputs.month || '2026-07' }}
+        run: |
+          python - <<'PY'
+          import json,os
+          from scripts.historical_month import month_bounds,validate_source,SUPPORTED
+          source=os.environ['SELECTED_SOURCE']
+          month=os.environ['SELECTED_MONTH']
+          month_bounds(month)
+          codes=['BOE','BOJA'] if source=='PILOT' else (list(SUPPORTED) if source=='ALL_IMPLEMENTED' else [validate_source(source)])
+          result={'include':[{'source':code,'month':month} for code in codes]}
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('matrix='+json.dumps(result,separators=(',',':'))+'\n')
+          print('HISTORICAL_SHARD_PLAN',json.dumps(result))
+          PY
+  shards:
+    needs: plan
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Regression tests before historical source calls
+        run: python -m unittest discover -s tests
+      - name: Collect one historical source/month with original bodies and coverage
+        env:
+          HTTP_TIMEOUT: '35'
+          PYTHONUNBUFFERED: '1'
+          SABIA_WORKERS: '3'
+        run: >-
+          python -u -m scripts.historical_month
+          --source "${{ matrix.source }}"
+          --month "${{ matrix.month }}"
+          --timeout-seconds 3300
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: historical-${{ matrix.source }}-${{ matrix.month }}
+          path: reports/historical_shards/${{ matrix.source }}/${{ matrix.month }}/
+          retention-days: 90
+          if-no-files-found: error
