@@ -4,7 +4,7 @@ import sqlite3
 import tempfile
 import unittest
 from pathlib import Path
-from scripts.historical_month import month_bounds,validate_source,coverage_summary,source_summary
+from scripts.historical_month import month_bounds,validate_source,coverage_summary,source_summary,validate_annual_index_scope
 
 class HistoricalMonthsTests(unittest.TestCase):
     def test_exact_approved_24_month_window(self):
@@ -50,3 +50,13 @@ class HistoricalMonthsTests(unittest.TestCase):
             c.execute("UPDATE events SET source_code='BOJA'")
             c.commit();c.close()
             with self.assertRaises(ValueError):source_summary(db,'BOE')
+
+
+    def test_borm_current_year_index_must_not_certify_old_years_as_zero(self):
+        snapshot={'min_publication_date':'2026-01-02','max_publication_date':'2026-10-10'}
+        self.assertEqual(
+            validate_annual_index_scope(snapshot,date(2026,7,1),date(2026,7,31)),
+            {'earliest':'2026-01-02','latest':'2026-10-10'})
+        for first,last in [(date(2024,11,1),date(2024,11,30)),(date(2025,7,1),date(2025,7,31))]:
+            with self.subTest(first=first),self.assertRaisesRegex(ValueError,'BORM_CURRENT_ANNUAL_INDEX'):
+                validate_annual_index_scope(snapshot,first,last)
