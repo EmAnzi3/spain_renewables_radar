@@ -84,6 +84,13 @@ def coverage_summary(path,source,first,last):
             'source_days_failed':len(failures),'source_failures':failures,
             'discovered_candidates':sum(int(r['candidates']) for r in rows),
             'newly_inserted_source_events':sum(int(r['inserted']) for r in rows)}
+def validate_annual_index_scope(audit,first,last):
+    earliest=audit.get('min_publication_date')
+    latest=audit.get('max_publication_date')
+    if not earliest or not latest or earliest>str(first) or latest<str(last):
+        raise ValueError('BORM_CURRENT_ANNUAL_INDEX_DOES_NOT_COVER_REQUESTED_HISTORICAL_MONTH')
+    return {'earliest':earliest,'latest':latest}
+
 def main(argv=None):
     a=argparse.ArgumentParser()
     a.add_argument('--source',required=True)
@@ -142,11 +149,22 @@ def main(argv=None):
             if not audit_file.exists():
                 raise ValueError('BORM annual-index source-date evidence is missing')
             borm_audit=json.loads(audit_file.read_text(encoding='utf-8'))
-            earliest=borm_audit.get('min_publication_date')
-            latest=borm_audit.get('max_publication_date')
-            result['source_index_window']={'earliest':earliest,'latest':latest}
-            if not earliest or not latest or earliest>str(first) or latest<str(last):
-                raise ValueError('BORM_CURRENT_ANNUAL_INDEX_DOES_NOT_COVER_REQUESTED_HISTORICAL_MONTH')
+            result['source_index_window']=validate_annual_index_scope(borm_audit,first,last)
+        if source=='BOE':
+            review=work/'reports/boe/review_leads.json'
+            if not review.exists():
+                raise ValueError('Missing BOE grouped/unnamed official-review ledger')
+            payload=json.loads(review.read_text(encoding='utf-8'))
+            leads=payload.get('leads')
+            if (payload.get('mode')!='UNRESOLVED_LEADS_NOT_PROJECTS'
+                or not isinstance(leads,list) or payload.get('lead_count')!=len(leads)
+                or len({(x.get('source_code'),x.get('external_id')) for x in leads})!=len(leads)):
+                raise ValueError('Invalid/duplicate official BOE review ledger')
+            if any(x.get('added_to_projects') is not False or not x.get('raw_text')
+                   or not x.get('title') or not x.get('url') for x in leads):
+                raise ValueError('BOE review lead is missing original evidence or has an invalid status')
+            result['multi_or_unnamed_official_review_leads']=len(leads)
+            result['review_leads_original_sha256']=sha(review)
         result['original_report_sha256']={str(path.relative_to(work)):sha(path)
                     for path in (work/'reports').rglob('*') if path.is_file()}
         result['certified']=(p.returncode==0 and result['source_days_failed']==0
