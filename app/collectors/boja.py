@@ -56,7 +56,7 @@ class BOJACollector:
                         "page":page,"date_from":start.isoformat(),
                         "date_to":end.isoformat()})
             if payload.get("_unverified_400"):
-                if page!=0:raise ValueError("BOJA 400 during pagination")
+                if not allow_empty_400 or page!=0:raise ValueError("BOJA HTTP 400 not established as a zero-publication day")
                 yield None
                 return
             if not isinstance(payload,dict) or not isinstance(payload.get("results"),list):
@@ -67,8 +67,8 @@ class BOJACollector:
             if total is None:total=declared
             elif declared!=total:raise ValueError("BOJA total count changed between pages")
             rows=payload["results"]
-            if len(rows)>size or len(seen)+len(rows)>total:
-                raise ValueError("BOJA page exceeds declared bound")
+            if len(rows)>size:
+                raise ValueError("BOJA page exceeds requested size")
             for row in rows:
                 if not isinstance(row,dict) or not row.get("id"):
                     raise ValueError("BOJA row identity missing")
@@ -77,6 +77,7 @@ class BOJACollector:
                 if not start<=self._publication_date(row)<=end:
                     raise ValueError("BOJA row outside requested publication window")
                 seen.add(key)
+                if len(seen)>total:raise ValueError("BOJA page exceeds declared total")
                 yield row
             if len(seen)==total:return
             if not rows or page>=200:
