@@ -76,7 +76,7 @@ class BOJACollector:
         year=day.year
         if year not in self._official_year_calendars:
             url=f"{OFFICIAL_CALENDAR}{year}.html"
-            response=self.session.get(url,timeout=(8,max(self.timeout,40)),allow_redirects=False)
+            response=self.session.get(url,headers={'Accept':'text/html'},timeout=(8,max(self.timeout,40)),allow_redirects=False)
             response.raise_for_status()
             if response.status_code!=200 or response.url!=url:
                 raise ValueError("BOJA official calendar refused or redirected")
