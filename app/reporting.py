@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 
 from app.scoring import score_project
+from app.field_integrity import promoter_status
 from app.source_quality import regional_evidence_by_project,regional_quality_issues
 from app.enrichment.epc_bop import project_epc_summary
 
@@ -60,6 +61,8 @@ def build_commercial_rows(conn):
             epc_status=epc["status"],
         )
         row=dict(project)
+        row["promoter_evidence_status"]=promoter_status(project.get("promoter"))
+        row["contact_readiness"]=("CONTACT_IDENTIFIED" if row["promoter_evidence_status"]=="LEGAL_NAME_FORMAT" else "PROMOTER_REVIEW_REQUIRED")
         row["commercial_score"]=scored["score"]
         row["commercial_priority"]=scored["priority"]
         row["epc_status"]=scored["epc_status"]
@@ -316,6 +319,12 @@ def write_quality_issues(conn,out_dir="reports"):
         elif mw > 1000:
             add(p,"WARN","POWER_OUTLIER_GT_1000_MW",f"Potenza molto elevata ({mw} MW): verificare unità/decimali e progetto.")
 
+        company_state=promoter_status(p.get("promoter"))
+        if company_state=="MISSING":
+            add(p,"WARN" if p.get("commercial_stage") in {"AUTHORIZED","PRECONSTRUCTION"} else "INFO",
+                "MISSING_PROMOTER","Soggetto responsabile non estratto: verificare l'atto, non confondere con EPC.")
+        elif company_state=="REVIEW_REQUIRED":
+            add(p,"WARN","SUSPICIOUS_PROMOTER","Campo azienda non conforme a una ragione sociale verificabile; richiesta revisione.")
         if not p.get("province"):
             if p['project_key'] in multi_geo:
                 add(p,"INFO","MULTI_PROVINCE","La fonte dichiara più province; potenza non ripartita arbitrariamente.")
@@ -323,6 +332,13 @@ def write_quality_issues(conn,out_dir="reports"):
                 add(p,"INFO","MISSING_PROVINCE","Provincia non attribuita con sufficiente confidenza.")
         if not p.get("expediente"):
             add(p,"INFO","MISSING_EXPEDIENTE","Numero expediente non estratto.")
+        if p.get("province") and p.get("project_key") not in multi_geo:
+            muni=conn.execute("SELECT municipalities_json FROM project_geo_enrichment WHERE project_key=?",
+                              (p["project_key"],)).fetchone()
+            if not muni or not json.loads(muni["municipalities_json"] or "[]"):
+                add(p,"INFO","MUNICIPALITY_SCOPE_UNVERIFIED",
+                    "La provincia è nota, ma i comuni dell'impianto non sono verificati separatamente dalla rete.")
+
 
     issues.extend(regional_quality_issues(conn))
     fields=[

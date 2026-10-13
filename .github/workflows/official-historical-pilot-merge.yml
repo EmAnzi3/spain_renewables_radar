@@ -1,0 +1,51 @@
+name: official-historical-pilot-merge
+on:
+  workflow_dispatch:
+  push:
+    branches: ['feat/national-historical-backfill']
+    paths:
+      - 'scripts/merge_historical_shards.py'
+      - 'tests/test_merge_historical_shards.py'
+      - '.github/workflows/official-historical-pilot-merge.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Entire regression suite
+        run: python -m unittest discover -s tests
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 38223116476
+          name: historical-BOE-2026-07
+          path: pilot/BOE/2026-07
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 38223116476
+          name: historical-BOJA-2026-07
+          path: pilot/BOJA/2026-07
+      - name: Recheck both source datasets and consolidate projects/events
+        run: >-
+          python -u -m scripts.merge_historical_shards
+          --shard pilot/BOE/2026-07
+          --shard pilot/BOJA/2026-07
+          --db data/historical_merged.sqlite
+          --output reports/historical_merged
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: historical-pilot-merged
+          path: |
+            data/historical_merged.sqlite
+            reports/historical_merged/
+          if-no-files-found: error

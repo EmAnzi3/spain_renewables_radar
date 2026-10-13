@@ -1,0 +1,41 @@
+name: boja-historical-calendar-contract-probe
+on:
+  push:
+    branches: ['feat/national-historical-backfill']
+    paths: ['.github/workflows/boja-historical-calendar-contract-probe.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests beautifulsoup4
+      - name: Inspect exact 2024 BOJA public calendar DOM without bypassing restricted acts
+        run: |
+          python - <<'PY'
+          import requests,re
+          from bs4 import BeautifulSoup
+          url='https://www.juntadeandalucia.es/eboja/2024.html'
+          r=requests.get(url,timeout=(10,45),allow_redirects=False)
+          print('BOJA_CALENDAR_HTTP',r.status_code,r.url,len(r.content))
+          r.raise_for_status()
+          soup=BeautifulSoup(r.content,'html.parser')
+          for x in soup.find_all(string=re.compile(r'noviembre',re.I))[:8]:
+              t=x.parent
+              print('MONTH_NODE',t.name,t.attrs,repr(t.get_text(' ',strip=True)))
+              for up in range(3):
+                  if t is None:break
+                  print('MONTH_CONTEXT',up,t.name,t.attrs,str(t)[:2400].replace('\\n',' '))
+                  t=t.parent
+          for a in soup.find_all('a',href=True):
+              href=a['href']
+              if re.search(r'/2024/(21[34]|2[01][0-9])/',href):
+                  print('EDITION_EXAMPLE',href,repr(a.get_text(' ',strip=True)),
+                        str(a.parent)[:450].replace('\\n',' '))
+          PY
