@@ -50,3 +50,27 @@ class DOGVTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class DOGVIdentityTests(unittest.TestCase):
+    """Titles verbatim from DOGV-2026-31952, DOGV-2026-29807, DOGV-2026-31305 (summaries 13-14/10/2026)."""
+    def ev(self, title, body=""):
+        from app.parser import parse_event
+        e = parse_event(source_code="DOGV", external_id="X", publication_date="2026-10-13", title=title, url="u", raw_text=body + "\nComunitat Valenciana")
+        return DOGVCollector.refine_identity(e, title, body)
+
+    def test_named_plant_and_atalfe_from_title(self):
+        e = self.ev("CORRECCIÓN DE ERRORES de la Resolución de 25 de noviembre de 2025, del Servicio Territorial de Industria, Energía y Minas de Alicante, por la que se otorga a Fotovoltaica El Glaciar, SL, autorización administrativa previa, autorización administrativa de construcción y aprobación del plan de desmantelamiento y restauración del terreno y el entorno afectado para una central fotovoltaica, ubicada en Elche (Alicante), de potencia instalada 9,9 MW, denominada FV Asprillas I, incluida su infraestructura de evacuación. ATALFE/2021/24.")
+        self.assertEqual((e.project_name, e.expediente, e.power_mw), ("FV Asprillas I", "ATALFE/2021/24", 9.9))
+
+    def test_title_name_replaces_body_fragment(self):
+        e = self.ev("RESOLUCIÓN de 1 de septiembre de 2026, del Servicio Territorial de Industria, Energía y Minas de Valencia, por la que se deniega a Energía, Innovación y Desarrollo Fotovoltaico, SA, la autorización administrativa previa y autorización administrativa de construcción correspondientes a la central solar generadora fotovoltaica denominada FV Andilla y su infraestructura de evacuación, situada en Andilla. Expediente ATALFE/2022/3/46.",
+                    "siguiente:\n– Solicitante: Energía, Innovación y Desarrollo Fotovoltaico, SA")
+        self.assertEqual(e.project_name, "FV Andilla")
+        self.assertEqual(e.expediente.upper(), "ATALFE/2022/3/46")
+
+    def test_title_without_denominada_keeps_parser_name(self):
+        t = "ANUNCIO por el que se someten a información pública las solicitudes de autorización administrativa previa, autorización administrativa de construcción y ocupación de vías pecuarias, correspondientes a central fotovoltaica hibridada Instalación Fotovoltaica Espioca Solar y BESS Espioca Power, y su infraestructura de evacuación, a ubicar en el término municipal Picassent. ATALFE/2023/63/46."
+        e = self.ev(t)
+        self.assertTrue(e.project_name)
+        self.assertEqual(e.expediente, "ATALFE/2023/63/46")
