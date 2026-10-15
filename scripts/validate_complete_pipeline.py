@@ -1,4 +1,4 @@
-"""Evidence-based certification of the thirteen implemented source adapters."""
+"""Evidence-based certification of the implemented source adapters (fourteen since DOGV promotion, 2026-10-15)."""
 from __future__ import annotations
 import csv,json,os,sys,hashlib
 from collections import Counter
@@ -16,7 +16,7 @@ from scripts.dog_integration_gate import validate_dog_integration
 from scripts.validate_dogc_collector import validate_dogc_integration
 from scripts.validate_source_registry import validate_source_registry, validate_source_days, validate_dogc_geography
 
-SOURCES={'BOE','BOCYL','BOA','BOJA','DOCM','DOE','BORM','BOCM','AND_PUBLIC','GVA_PUBLIC','MITECO_SABIA','DOG','DOGC'}
+SOURCES={'BOE','BOCYL','BOA','BOJA','DOCM','DOE','BORM','BOCM','AND_PUBLIC','GVA_PUBLIC','MITECO_SABIA','DOG','DOGC','DOGV'}
 
 
 def rows(path):

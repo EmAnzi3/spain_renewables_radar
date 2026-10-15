@@ -8,6 +8,8 @@ from datetime import date,timedelta,datetime,timezone
 from urllib.parse import quote,urljoin
 
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 from bs4 import BeautifulSoup
 
 from app.parser import parse_event
@@ -28,6 +30,14 @@ class BOJACollector:
         self.timeout=timeout
         self.session=requests.Session()
         self.session.headers.update({"User-Agent":user_agent,"Accept":"application/json"})
+        # Retry transient GET failures only. A 400 still requires independent
+        # calendar verification; restricted/forbidden bodies are not bypassed.
+        retry=Retry(total=3,connect=3,read=2,status=2,backoff_factor=0.8,
+                    status_forcelist=(429,500,502,503,504),
+                    allowed_methods=frozenset({'GET'}),raise_on_status=False)
+        adapter=HTTPAdapter(max_retries=retry)
+        self.session.mount('https://',adapter)
+        self.session.mount('http://',adapter)
         self._official_year_calendars={}
         self._calendar_receipts=[]
         self._restricted_review=[]
@@ -65,9 +75,12 @@ class BOJACollector:
                     raise ValueError("BOJA calendar has invalid day number") from exc
                 href=link.get("href") or ""
                 parsed=re.fullmatch(r"/eboja/"+str(year)+r"/(\d{1,4})/index\.html",href)
-                if parsed is None or d in dates:
+                multiple=re.fullmatch(r"/eboja/"+str(year)+rf"{month:02d}{n:02d}\.html",href)
+                if d in dates or (parsed is None and multiple is None):
                     raise ValueError("BOJA calendar issue URL or day identity invalid")
-                dates[d]=parsed.group(1)
+                # The official 'varios' page groups multiple bulletin editions.
+                # A search HTTP 400 on such a published day cannot mean zero.
+                dates[d]=parsed.group(1) if parsed else "MULTIPLE_OFFICIAL_EDITIONS"
         if len(dates)<150:
             raise ValueError("BOJA official yearly calendar is unexpectedly incomplete")
         return dates
@@ -191,13 +204,14 @@ class BOJACollector:
     def _detail(self,row:dict)->tuple[str,str]:
         bid=str(row.get("id") or "")
         if not bid:
-            return self._plain(row.get("summary")),"https://www.juntadeandalucia.es/eboja.html"
+            raise ValueError('BOJA detail identity missing')
         url=f"{API}/{quote(bid,safe='')}"
-        try:
-            payload=self._get_json(url)
-        except Exception:
-            payload=row
+        # Exhausted retries must remain a source failure. A search summary
+        # cannot replace an unavailable original body and certify full text.
+        payload=self._get_json(url)
         text=self._flatten_text(payload)
+        if not text:
+            raise ValueError('BOJA detail returned no original source text')
         public_url=None
         def find_url(x):
             nonlocal public_url
@@ -210,7 +224,7 @@ class BOJACollector:
             elif isinstance(x,list):
                 for v in x:find_url(v)
         find_url(payload)
-        return text or self._plain(row.get("summary")),public_url or url
+        return text,public_url or url
 
     def collect_day(self,day:date):
         out=[]

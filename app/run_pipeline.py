@@ -2,7 +2,7 @@ from __future__ import annotations
 import argparse
 import os
 from datetime import date,timedelta
-from app.collectors import BOECollector,BOCYLCollector,BOACollector,BOJACollector,DOCMCollector,DOECollector,BORMCollector,BOCMCollector,SABIACollector,AndaluciaPublicCollector,GVAPublicCollector,DOGCollector,DOGCCollector
+from app.collectors import BOECollector,BOCYLCollector,BOACollector,BOJACollector,DOCMCollector,DOECollector,BORMCollector,BOCMCollector,SABIACollector,AndaluciaPublicCollector,GVAPublicCollector,DOGCollector,DOGCCollector,DOGVCollector
 from app.dashboard import write_dashboard
 from app.db import connect
 from app.enrichment import (
@@ -23,8 +23,12 @@ COLLECTOR_CLASSES={
     "BOE":BOECollector,"BOCYL":BOCYLCollector,"BOA":BOACollector,"BOJA":BOJACollector,
     "DOCM":DOCMCollector,"DOE":DOECollector,"BORM":BORMCollector,"BOCM":BOCMCollector,
     "MITECO_SABIA":SABIACollector,"AND_PUBLIC":AndaluciaPublicCollector,"GVA_PUBLIC":GVAPublicCollector,
-    "DOG":DOGCollector,"DOGC":DOGCCollector,
+    "DOG":DOGCollector,"DOGC":DOGCCollector,"DOGV":DOGVCollector,
 }
+# Collectors available only on explicit request (e.g. --sources DOGV or a
+# historical shard) until live validation promotes them into the certified
+# ordinary set above, the source registry and the default launcher list.
+EXPERIMENTAL_COLLECTOR_CLASSES={}
 
 def daterange(start:date,end:date):
     d=start
@@ -37,7 +41,7 @@ def parse_args(argv=None):
     p.add_argument("--days",type=int,default=7,help="giorni inclusi fino a oggi")
     p.add_argument("--since",help="YYYY-MM-DD")
     p.add_argument("--until",help="YYYY-MM-DD")
-    p.add_argument("--sources",default="BOE,BOCYL,BOA,BOJA,DOCM,DOE,BORM,BOCM,AND_PUBLIC,GVA_PUBLIC,MITECO_SABIA,DOG,DOGC",help="sorgenti separate da virgola")
+    p.add_argument("--sources",default="BOE,BOCYL,BOA,BOJA,DOCM,DOE,BORM,BOCM,AND_PUBLIC,GVA_PUBLIC,MITECO_SABIA,DOG,DOGC,DOGV",help="sorgenti separate da virgola")
     p.add_argument("--db",default=os.getenv("RADAR_DB","data/spain_renewables.sqlite"))
     p.add_argument("--skip-ree",action="store_true")
     p.add_argument("--skip-miteco",action="store_true")
@@ -49,10 +53,11 @@ def main():
     end=date.fromisoformat(args.until) if args.until else today
     start=date.fromisoformat(args.since) if args.since else end-timedelta(days=max(args.days-1,0))
     wanted=[x.strip().upper() for x in args.sources.split(",") if x.strip()]
-    unknown=[x for x in wanted if x not in COLLECTOR_CLASSES]
+    available={**COLLECTOR_CLASSES,**EXPERIMENTAL_COLLECTOR_CLASSES}
+    unknown=[x for x in wanted if x not in available]
     if unknown:raise SystemExit(f"Sorgenti non implementate: {', '.join(unknown)}")
     timeout=int(os.getenv("HTTP_TIMEOUT","30"));user_agent=os.getenv("USER_AGENT","SpainRenewablesRadar/0.1")
-    collectors=[COLLECTOR_CLASSES[code](timeout=timeout,user_agent=user_agent) for code in wanted]
+    collectors=[available[code](timeout=timeout,user_agent=user_agent) for code in wanted]
     conn=connect(args.db)
     source_repair=repair_bocyl_external_ids(conn)
     if source_repair["changed"]:print("BOCYL source-id repair:",source_repair,flush=True)

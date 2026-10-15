@@ -19,7 +19,7 @@ import subprocess
 import sys
 import traceback
 
-from app.run_pipeline import COLLECTOR_CLASSES
+from app.run_pipeline import COLLECTOR_CLASSES,EXPERIMENTAL_COLLECTOR_CLASSES
 from app.db import connect
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -29,7 +29,8 @@ INVENTORY_SOURCES={'MITECO_SABIA','AND_PUBLIC','GVA_PUBLIC'}
 # Historical month/edition certification is valid only for date-partitionable
 # bulletins. Archive inventories must be scanned once per source with their
 # own timeline and receipts, never redated as 24 monthly discoveries.
-SUPPORTED=tuple(code for code in COLLECTOR_CLASSES if code not in INVENTORY_SOURCES)
+SUPPORTED=tuple(code for code in {**COLLECTOR_CLASSES,**EXPERIMENTAL_COLLECTOR_CLASSES} if code not in INVENTORY_SOURCES)
+EXPERIMENTAL_SOURCES=frozenset(EXPERIMENTAL_COLLECTOR_CLASSES)
 FIELDS=('source_code','external_id','publication_date','title','url','raw_text',
         'project_key','event_type','commercial_stage')
 def sha(path):
@@ -110,6 +111,7 @@ def main(argv=None):
         'completeness_claim':'IMPLEMENTED_SOURCE_ONLY_NOT_ALL_SPANISH_REGIONS',
         'non_implemented_regions_are_not_zero_opportunities':True,
         'inventory_source_warning':source in INVENTORY_SOURCES,
+        'experimental_source':source in EXPERIMENTAL_SOURCES,
         'run_id':os.getenv('GITHUB_RUN_ID'),'head_sha':os.getenv('GITHUB_SHA'),
         'started_at':datetime.now(timezone.utc).isoformat(),'certified':False}
     try:

@@ -13,9 +13,9 @@ class HistoricalMonthsTests(unittest.TestCase):
         for value in ('2024-09','2026-10','2026-00','2026-13','202601','bad'):
             with self.subTest(value=value),self.assertRaises(ValueError):month_bounds(value)
     def test_unimplemented_region_is_not_claimed(self):
-        for value in ('DOGV','BON','BOPV','BOR','BOIB','BOC-CAN','BOCANT','BOPA','COMMERCIAL','AND_PUBLIC','GVA_PUBLIC','MITECO_SABIA'):
+        for value in ('BON','BOPV','BOR','BOIB','BOC-CAN','BOCANT','BOPA','COMMERCIAL','AND_PUBLIC','GVA_PUBLIC','MITECO_SABIA'):
             with self.subTest(value=value),self.assertRaises(ValueError):validate_source(value)
-        for value in ('BOE','BOJA','BOA','DOCM','DOG','DOGC'):
+        for value in ('BOE','BOJA','BOA','DOCM','DOG','DOGC','DOGV'):
             self.assertEqual(validate_source(value),value)
     def test_coverage_requires_all_dates_and_preserves_failure(self):
         with tempfile.TemporaryDirectory() as td:
