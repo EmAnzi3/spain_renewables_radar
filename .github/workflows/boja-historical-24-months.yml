@@ -1,4 +1,5 @@
 name: boja-historical-24-months
+run-name: BOJA 24 months - corrected multi-edition calendar (2024-10 through 2026-09)
 on:
   workflow_dispatch:
   push:
@@ -16,7 +17,8 @@ jobs:
       fail-fast: false
       max-parallel: 2
       matrix:
-        month: [2024-10, 2024-11, 2024-12, 2025-01, 2025-02, 2025-03, 2025-04, 2025-05, 2025-06, 2025-07, 2025-08, 2025-09, 2025-10, 2025-11, 2025-12, 2026-01, 2026-02, 2026-03, 2026-04, 2026-05, 2026-06, 2026-07, 2026-08, 2026-09]
+        # Recheck ALL months: the pre-fix calendar could incorrectly certify a zero day.
+        month: ['2024-10', '2024-11', '2024-12', '2025-01', '2025-02', '2025-03', '2025-04', '2025-05', '2025-06', '2025-07', '2025-08', '2025-09', '2025-10', '2025-11', '2025-12', '2026-01', '2026-02', '2026-03', '2026-04', '2026-05', '2026-06', '2026-07', '2026-08', '2026-09']
     runs-on: ubuntu-latest
     timeout-minutes: 65
     steps:
@@ -35,6 +37,30 @@ jobs:
           python -u -m scripts.historical_month
           --source BOJA --month ${{ matrix.month }}
           --timeout-seconds 3300
+      - name: Surface original monthly evidence and explicit gaps
+        if: always()
+        env:
+          SHARD_MONTH: ${{ matrix.month }}
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          month = os.environ['SHARD_MONTH']
+          path = Path('reports/historical_shards/BOJA') / month / 'manifest.json'
+          if not path.is_file():
+              raise SystemExit('BOJA ' + month + ': original manifest missing; NOT certified')
+          manifest = json.loads(path.read_text(encoding='utf-8'))
+          summary = {key: manifest.get(key) for key in (
+              'source', 'month', 'run_id', 'head_sha', 'certified',
+              'source_days_expected', 'source_days_ok', 'source_days_failed',
+              'events', 'quality', 'legally_restricted_source_bodies',
+              'historical_body_coverage', 'source_failures', 'error')}
+          print('BOJA_MONTH_ORIGINAL_EVIDENCE', json.dumps(summary, ensure_ascii=False))
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8') as out:
+              out.write('## BOJA ' + month + '\n\n')
+              out.write('Source/month evidence only; not a national census certificate.\n\n')
+              out.write('```json\n' + json.dumps(summary, ensure_ascii=False, indent=2) + '\n```\n')
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
