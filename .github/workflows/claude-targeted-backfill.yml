@@ -14,9 +14,6 @@ on:
         default: 'feat/national-historical-backfill'
 permissions:
   contents: write
-concurrency:
-  group: claude-targeted-backfill
-  cancel-in-progress: false
 jobs:
   shard:
     strategy:
