@@ -15,6 +15,8 @@ on:
       - 'web/portal.html'
       - 'scripts/portal_inputs.py'
       - 'scripts/prepare_portal_seed.py'
+      - 'scripts/import_certified_history.py'
+      - 'tests/test_import_certified_history.py'
       - 'scripts/check_web_portal_browser.py'
       - 'scripts/export_operational_state.py'
       - 'tests/test_operational.py'
@@ -61,6 +63,13 @@ jobs:
             python -m scripts.prepare_portal_seed --seed inputs/baseline
           fi
           python -m app.valencian_alternatives --probe-root inputs/alternatives --output reports/alternative_sources.json
+      - name: Import complete official historical source-months (data-export branch; additive, idempotent)
+        id: history
+        run: |
+          git fetch --no-tags --depth 1 origin data-export
+          mkdir -p "$RUNNER_TEMP/history"
+          git archive FETCH_HEAD | tar -x -C "$RUNNER_TEMP/history"
+          python -m scripts.import_certified_history --db data/spain_renewables.sqlite --export "$RUNNER_TEMP/history" --report reports/history_import.json
       - name: Build a browsable snapshot before making any new source requests
         run: >-
           python -m app.web_portal --db data/spain_renewables.sqlite
@@ -124,6 +133,7 @@ jobs:
             site/
             reports/operational/
             reports/docm_repair/
+            reports/history_import.json
           if-no-files-found: error
       - uses: actions/upload-pages-artifact@v3
         if: github.ref == 'refs/heads/main' && steps.pages.outputs.enabled == 'true' && steps.refresh.outcome != 'failure'

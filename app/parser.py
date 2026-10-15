@@ -7,7 +7,7 @@ from dataclasses import dataclass, asdict
 
 from app.identifiers import extract_identifier, valid_expediente
 from app.geo import find_province
-from app.lifecycle import classify_event, commercial_stage
+from app.lifecycle import classify_event, commercial_stage,dia_outcome
 
 MW_RE=re.compile(r"(?<!\d)(\d{1,4}(?:[\.,]\d{1,6})?)\s*(?:MWp|MWac|MWn|MW)\b",re.I)
 KW_RE=re.compile(r"(?<!\d)(\d{1,7}(?:[\.,]\d{1,3})?)\s*kW\b",re.I)
@@ -212,6 +212,7 @@ def parse_event(*,source_code,external_id,publication_date,title,url,raw_text)->
     if event_type=="OTHER":
         raw_event=classify_event((raw_text or "")[:4000])
         if raw_event not in {"DENIED","WITHDRAWN"}:event_type=raw_event
+    if event_type=="DIA":event_type=dia_outcome(raw_text)
     stage=commercial_stage(event_type)
     return ParsedEvent(
         source_code=source_code,external_id=external_id,publication_date=publication_date,

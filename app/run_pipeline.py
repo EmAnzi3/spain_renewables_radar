@@ -88,6 +88,9 @@ def main():
             if hasattr(collector, "close"):
                 collector.close()
     docm_repair=repair_docm_storage(conn)
+    from app.dia_repair import repair_unfavourable_dia
+    dia=repair_unfavourable_dia(conn)
+    if dia["reclassified_events"]:print("[DIA_OUTCOME] unfavourable DIA reclassified:",dia,flush=True)
     if docm_repair["status"]!="NOT_NEEDED":print("DOCM storage evidence:",docm_repair,flush=True)
     # Evidence-based field repairs are projection-only. Save the previous
     # database before changing a published project field.

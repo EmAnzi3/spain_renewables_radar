@@ -23,6 +23,18 @@ class PortalTests(unittest.TestCase):
             self.assertEqual(receipt['projects'],1);self.assertFalse(receipt['full_certification'])
             with sqlite3.connect(db) as c:self.assertEqual(list(c.iterdump()),before)
             self.assertNotIn('<script src=',text)
+    def test_long_original_is_excerpted_in_page_but_untouched_in_database(self):
+        from app.web_portal import RAW_EXCERPT_CHARS
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td);db=root/'demo.sqlite';c=connect(str(db));raw='A'*(RAW_EXCERPT_CHARS+500)
+            save_event(c,ParsedEvent(source_code='BOE',external_id='long',publication_date='2026-10-01',title='Lungo',
+                url='https://www.boe.es/long',raw_text=raw,project_name='Lungo',technology='PV',power_mw=5.0,promoter=None,
+                expediente='DEMO-02',province='Madrid',ccaa='Madrid',event_type='PUBLIC_INFO',commercial_stage='EARLY',project_key='long'));c.close()
+            write_portal(db,root/'site',{'state':'PARTIAL','sources':{},'full_certification':False})
+            ev=json.loads((root/'site/data.json').read_text())['records'][0]['events'][0]
+            self.assertEqual(len(ev['raw_text']),RAW_EXCERPT_CHARS);self.assertTrue(ev['raw_text_truncated'])
+            self.assertEqual(ev['raw_text_chars'],len(raw));self.assertEqual(ev['url'],'https://www.boe.es/long')
+            with sqlite3.connect(db) as c:self.assertEqual(c.execute('SELECT raw_text FROM events').fetchone()[0],raw)
     def test_structural_quality_error_is_not_published(self):
         with tempfile.TemporaryDirectory() as td:
             root=Path(td);db=root/'demo.sqlite';connect(str(db)).close()
