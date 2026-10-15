@@ -1,4 +1,16 @@
 from __future__ import annotations
+import re
+
+# The BOE/regional DIA title is identical for favourable and unfavourable outcomes
+# ("por la que se formula declaración de impacto ambiental del proyecto ..."); the outcome
+# is only in the operative clause of the body.
+UNFAVOURABLE_DIA=re.compile(
+    r"(?:formula|emite|dicta|formular)\w*\s+(?:la\s+)?declaraci[oó]n\s+de\s+impacto\s+ambiental\s+"
+    r"(?:en\s+sentido\s+)?desfavorable",re.I)
+
+def dia_outcome(raw_text: str) -> str:
+    """'DIA_UNFAVOURABLE' only when the act itself formulates an unfavourable DIA."""
+    return "DIA_UNFAVOURABLE" if UNFAVOURABLE_DIA.search(raw_text or "") else "DIA"
 
 def classify_event(text: str) -> str:
     t=" ".join((text or "").casefold().split())
@@ -33,7 +45,7 @@ def classify_event(text: str) -> str:
     return "OTHER"
 
 def commercial_stage(event_type: str) -> str:
-    if event_type in {"DENIED","WITHDRAWN","PROCEDURE_ENDED"}:
+    if event_type in {"DENIED","WITHDRAWN","PROCEDURE_ENDED","DIA_UNFAVOURABLE"}:
         return "BLOCKED"
     if event_type=="EXPROPRIATION":
         return "PRECONSTRUCTION"

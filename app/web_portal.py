@@ -8,6 +8,7 @@ from collections import defaultdict
 from contextlib import closing
 from datetime import datetime,timezone
 from pathlib import Path
+from app.territory import PROVINCE_CCAA,normalize_row
 from app.reporting import build_commercial_rows,geography_accounting,write_quality_issues
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -41,6 +42,18 @@ def raw_excerpt(text:str|None)->dict:
     text=text or ''
     return {'raw_text':text[:RAW_EXCERPT_CHARS],'raw_text_chars':len(text),'raw_text_truncated':len(text)>RAW_EXCERPT_CHARS}
 
+def stage_evidence(events:list,stage:str|None)->dict|None:
+    """The official act that determines the displayed administrative stage (newest on ties)."""
+    from app.lifecycle import STAGE_RANK,commercial_stage
+    ranked=[(e,commercial_stage(e['event_type'])) for e in events]
+    if stage=='BLOCKED':candidates=[e for e,s in ranked if s=='BLOCKED']
+    else:
+        best=max((STAGE_RANK.get(s,0) for _,s in ranked),default=None)
+        candidates=[e for e,s in ranked if STAGE_RANK.get(s,0)==best and s==stage] or [e for e,s in ranked if STAGE_RANK.get(s,0)==best]
+    if not candidates:return None
+    e=candidates[0]
+    return {k:e[k] for k in ('event_type','date','source_code','external_id','url','title')}
+
 def payload(database:Path,status:dict,*,bopv:Path|None=None,alternatives:Path|None=None)->dict:
     with closing(sqlite3.connect(f'file:{database.resolve()}?mode=ro',uri=True)) as conn:
         conn.row_factory=sqlite3.Row;rows=build_commercial_rows(conn);events=defaultdict(list)
@@ -59,12 +72,14 @@ def payload(database:Path,status:dict,*,bopv:Path|None=None,alternatives:Path|No
             for m in conn.execute('SELECT * FROM manual_field_overrides'):
                 manual[m['project_key']].append({k:m[k] for k in ('field','value','previous_value','evidence_url','note','author','date')})
         for row in rows:
+            flags[row['project_key']].extend(normalize_row(row))
             row['manual_overrides']=manual[row['project_key']]
             row['events']=events[row['project_key']]
+            row['stage_evidence']=stage_evidence(row['events'],row.get('commercial_stage'))
             row['source_codes']=sorted({e['source_code'] for e in row['events']});row['issues']=flags[row['project_key']]
             if not row['events']:raise ValueError('Project without original event')
         sources=json.loads((ROOT/'config/sources.json').read_text(encoding='utf-8'))
-        data={'records':rows,'status':status,'sources':sources,'bopv':load_bopv(bopv),
+        data={'records':rows,'status':status,'sources':sources,'bopv':load_bopv(bopv),'territory':PROVINCE_CCAA,
               'alternatives':json.loads(alternatives.read_text()) if alternatives and alternatives.exists() else [],
               'geography_accounting':geography_accounting(rows),'generated_at':datetime.now(timezone.utc).isoformat(),
               'provenance_note':status.get('provenance_note','La data di generazione della pagina non è la data degli atti né una certificazione live.')}
