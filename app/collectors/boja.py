@@ -65,9 +65,12 @@ class BOJACollector:
                     raise ValueError("BOJA calendar has invalid day number") from exc
                 href=link.get("href") or ""
                 parsed=re.fullmatch(r"/eboja/"+str(year)+r"/(\d{1,4})/index\.html",href)
-                if parsed is None or d in dates:
+                multiple=re.fullmatch(r"/eboja/"+str(year)+rf"{month:02d}{n:02d}\.html",href)
+                if d in dates or (parsed is None and multiple is None):
                     raise ValueError("BOJA calendar issue URL or day identity invalid")
-                dates[d]=parsed.group(1)
+                # The official 'varios' page groups multiple bulletin editions.
+                # A search HTTP 400 on such a published day cannot mean zero.
+                dates[d]=parsed.group(1) if parsed else "MULTIPLE_OFFICIAL_EDITIONS"
         if len(dates)<150:
             raise ValueError("BOJA official yearly calendar is unexpectedly incomplete")
         return dates
