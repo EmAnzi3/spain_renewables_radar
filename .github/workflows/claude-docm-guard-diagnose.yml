@@ -1,0 +1,22 @@
+name: claude-docm-guard-diagnose
+on: {workflow_dispatch: {}}
+permissions: {contents: write, actions: read}
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -r requirements.txt
+      - env: {GH_TOKEN: '${{ github.token }}'}
+        run: python -m scripts.portal_inputs
+      - run: PYTHONPATH=. python .github/probes/docm_guard_diag.py data/spain_renewables.sqlite "$RUNNER_TEMP/docm.json"
+      - if: always()
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git clone -q --depth 1 -b probe-results "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" "$RUNNER_TEMP/pr"
+          mkdir -p "$RUNNER_TEMP/pr/docm"; cp "$RUNNER_TEMP/docm.json" "$RUNNER_TEMP/pr/docm/${GITHUB_RUN_ID}.json"
+          cd "$RUNNER_TEMP/pr" && git add -A && git commit -qm docm && git push -q origin probe-results
