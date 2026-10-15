@@ -23,14 +23,12 @@ COLLECTOR_CLASSES={
     "BOE":BOECollector,"BOCYL":BOCYLCollector,"BOA":BOACollector,"BOJA":BOJACollector,
     "DOCM":DOCMCollector,"DOE":DOECollector,"BORM":BORMCollector,"BOCM":BOCMCollector,
     "MITECO_SABIA":SABIACollector,"AND_PUBLIC":AndaluciaPublicCollector,"GVA_PUBLIC":GVAPublicCollector,
-    "DOG":DOGCollector,"DOGC":DOGCCollector,
+    "DOG":DOGCollector,"DOGC":DOGCCollector,"DOGV":DOGVCollector,
 }
 # Collectors available only on explicit request (e.g. --sources DOGV or a
 # historical shard) until live validation promotes them into the certified
 # ordinary set above, the source registry and the default launcher list.
-EXPERIMENTAL_COLLECTOR_CLASSES={
-    "DOGV":DOGVCollector,
-}
+EXPERIMENTAL_COLLECTOR_CLASSES={}
 
 def daterange(start:date,end:date):
     d=start
@@ -43,7 +41,7 @@ def parse_args(argv=None):
     p.add_argument("--days",type=int,default=7,help="giorni inclusi fino a oggi")
     p.add_argument("--since",help="YYYY-MM-DD")
     p.add_argument("--until",help="YYYY-MM-DD")
-    p.add_argument("--sources",default="BOE,BOCYL,BOA,BOJA,DOCM,DOE,BORM,BOCM,AND_PUBLIC,GVA_PUBLIC,MITECO_SABIA,DOG,DOGC",help="sorgenti separate da virgola")
+    p.add_argument("--sources",default="BOE,BOCYL,BOA,BOJA,DOCM,DOE,BORM,BOCM,AND_PUBLIC,GVA_PUBLIC,MITECO_SABIA,DOG,DOGC,DOGV",help="sorgenti separate da virgola")
     p.add_argument("--db",default=os.getenv("RADAR_DB","data/spain_renewables.sqlite"))
     p.add_argument("--skip-ree",action="store_true")
     p.add_argument("--skip-miteco",action="store_true")

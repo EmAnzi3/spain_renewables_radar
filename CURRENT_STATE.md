@@ -66,3 +66,7 @@ L'ultimo backfill rigoroso a 13 fonti concluso rimane **37406054339**, codice 88
 `aggiorna_radar_web.bat` avvia l'aggiornamento operativo parziale e apre il portale; `aggiorna_radar_spagna.bat` rimane il launcher precedente. `publish-radar-web` pubblica invece un risultato già acquisito, senza rete verso le fonti.
 
 Solo fonti ufficiali/gratuite, nessun aggregatore commerciale. Preservare external_id, raw_text, URL, date e ruoli. Promotore distinto da EPC, richiesta distinta da concessione, scoring distinto dal lifecycle. Campi sconosciuti e multi-provincia espliciti; nessun valore inventato. Non confondere dataset persistente, nuova finestra acquisita, classificazione di lead, test, certificazione completa e pubblicazione effettiva.
+
+## Aggiornamento 15 ottobre 2026 — DOGV promosso
+
+Il collector **DOGV** (Comunitat Valenciana) è nel set certificato ordinario: registro, default del launcher e `validate_complete_pipeline`. Ora i collector discovery sono **14** e i bollettini CCAA coperti **10/17**. Dettagli e validazione in `docs/sources/dogv.md`. Restano mancanti BON, BOPV, BOPA, BOCANT, BOC-CAN, BOIB e BOR.
