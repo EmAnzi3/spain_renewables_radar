@@ -1,0 +1,201 @@
+{
+  "run_key": "2026-10-15T182442.871874+0000-344c61f3",
+  "started_at": "2026-10-15T18:24:42.872030+00:00",
+  "run_id": "38785355868",
+  "head_sha": "b1bcf946c5ad416887d445e136df3352410c3ac6",
+  "window_start": "2026-10-08",
+  "window_end": "2026-10-14",
+  "state": "FAILED",
+  "full_certification": false,
+  "database_promoted": false,
+  "error_type": "RuntimeError",
+  "error": "Pipeline structural/runtime failure; see pipeline.log",
+  "completed_at": "2026-10-15T18:45:51.490066+00:00",
+  "sources": {
+    "BOE": {
+      "source_code": "BOE",
+      "status": "NOT_REQUESTED",
+      "successful_days": 0,
+      "failed_days": [],
+      "last_complete_window_start": "2026-09-29",
+      "last_complete_window_end": "2026-10-05",
+      "last_complete_run_id": "37441856639",
+      "last_complete_observed_at": "2026-10-06T09:27:13.357004+00:00",
+      "requested_window_start": "2026-09-29",
+      "requested_window_end": "2026-10-05"
+    },
+    "BOCYL": {
+      "source_code": "BOCYL",
+      "status": "NOT_REQUESTED",
+      "successful_days": 0,
+      "failed_days": [],
+      "last_complete_window_start": "2026-09-29",
+      "last_complete_window_end": "2026-10-05",
+      "last_complete_run_id": "37441856639",
+      "last_complete_observed_at": "2026-10-06T09:27:13.357031+00:00",
+      "requested_window_start": "2026-09-29",
+      "requested_window_end": "2026-10-05"
+    },
+    "BOA": {
+      "source_code": "BOA",
+      "status": "NOT_REQUESTED",
+      "successful_days": 0,
+      "failed_days": [],
+      "last_complete_window_start": "2026-09-29",
+      "last_complete_window_end": "2026-10-05",
+      "last_complete_run_id": "37441856639",
+      "last_complete_observed_at": "2026-10-06T09:27:13.357048+00:00",
+      "requested_window_start": "2026-09-29",
+      "requested_window_end": "2026-10-05"
+    },
+    "BOJA": {
+      "source_code": "BOJA",
+      "status": "NOT_REQUESTED",
+      "successful_days": 0,
+      "failed_days": [],
+      "last_complete_window_start": "2026-09-29",
+      "last_complete_window_end": "2026-10-05",
+      "last_complete_run_id": "37441856639",
+      "last_complete_observed_at": "2026-10-06T09:27:13.357063+00:00",
+      "requested_window_start": "2026-09-29",
+      "requested_window_end": "2026-10-05"
+    },
+    "DOCM": {
+      "source_code": "DOCM",
+      "status": "NOT_REQUESTED",
+      "successful_days": 0,
+      "failed_days": [],
+      "last_complete_window_start": "2026-09-29",
+      "last_complete_window_end": "2026-10-05",
+      "last_complete_run_id": "37441856639",
+      "last_complete_observed_at": "2026-10-06T09:27:13.357077+00:00",
+      "requested_window_start": "2026-09-29",
+      "requested_window_end": "2026-10-05"
+    },
+    "DOE": {
+      "source_code": "DOE",
+      "status": "NOT_REQUESTED",
+      "successful_days": 0,
+      "failed_days": [],
+      "last_complete_window_start": "2026-09-29",
+      "last_complete_window_end": "2026-10-05",
+      "last_complete_run_id": "37441856639",
+      "last_complete_observed_at": "2026-10-06T09:27:13.357091+00:00",
+      "requested_window_start": "2026-09-29",
+      "requested_window_end": "2026-10-05"
+    },
+    "BORM": {
+      "source_code": "BORM",
+      "status": "NOT_REQUESTED",
+      "successful_days": 0,
+      "failed_days": [],
+      "last_complete_window_start": "2026-09-29",
+      "last_complete_window_end": "2026-10-05",
+      "last_complete_run_id": "37441856639",
+      "last_complete_observed_at": "2026-10-06T09:27:13.357106+00:00",
+      "requested_window_start": "2026-09-29",
+      "requested_window_end": "2026-10-05"
+    },
+    "BOCM": {
+      "source_code": "BOCM",
+      "status": "NOT_REQUESTED",
+      "successful_days": 0,
+      "failed_days": [],
+      "last_complete_window_start": "2026-09-29",
+      "last_complete_window_end": "2026-10-05",
+      "last_complete_run_id": "37441856639",
+      "last_complete_observed_at": "2026-10-06T09:27:13.357119+00:00",
+      "requested_window_start": "2026-09-29",
+      "requested_window_end": "2026-10-05"
+    },
+    "MITECO_SABIA": {
+      "source_code": "MITECO_SABIA",
+      "status": "NOT_REQUESTED",
+      "successful_days": 0,
+      "failed_days": [],
+      "last_complete_window_start": "2026-09-29",
+      "last_complete_window_end": "2026-10-05",
+      "last_complete_run_id": "37441856639",
+      "last_complete_observed_at": "2026-10-06T09:27:13.357133+00:00",
+      "requested_window_start": "2026-09-29",
+      "requested_window_end": "2026-10-05"
+    },
+    "AND_PUBLIC": {
+      "source_code": "AND_PUBLIC",
+      "status": "NOT_REQUESTED",
+      "successful_days": 0,
+      "failed_days": [],
+      "last_complete_window_start": "2026-09-29",
+      "last_complete_window_end": "2026-10-05",
+      "last_complete_run_id": "37441856639",
+      "last_complete_observed_at": "2026-10-06T09:27:13.357148+00:00",
+      "requested_window_start": "2026-09-29",
+      "requested_window_end": "2026-10-05"
+    },
+    "GVA_PUBLIC": {
+      "source_code": "GVA_PUBLIC",
+      "status": "NOT_REQUESTED",
+      "successful_days": 0,
+      "failed_days": [
+        {
+          "date": "2026-09-29",
+          "error": "HTTPSConnectionPool(host='mediambient.gva.es', port=443): Max retries exceeded with url: /es/web/energia/informacion-publica (Caused by ConnectTimeoutError(<HTTPSConnection(host='mediambient.gva.es', port=443) at 0x7fd83ed35fd0>, 'Connection to mediambient.gva.es timed out. (connect timeout=8)'))"
+        },
+        {
+          "date": "2026-09-30",
+          "error": "HTTPSConnectionPool(host='mediambient.gva.es', port=443): Max retries exceeded with url: /es/web/energia/informacion-publica (Caused by ConnectTimeoutError(<HTTPSConnection(host='mediambient.gva.es', port=443) at 0x7fd83ed35fd0>, 'Connection to mediambient.gva.es timed out. (connect timeout=8)'))"
+        },
+        {
+          "date": "2026-10-01",
+          "error": "HTTPSConnectionPool(host='mediambient.gva.es', port=443): Max retries exceeded with url: /es/web/energia/informacion-publica (Caused by ConnectTimeoutError(<HTTPSConnection(host='mediambient.gva.es', port=443) at 0x7fd83ed35fd0>, 'Connection to mediambient.gva.es timed out. (connect timeout=8)'))"
+        },
+        {
+          "date": "2026-10-02",
+          "error": "HTTPSConnectionPool(host='mediambient.gva.es', port=443): Max retries exceeded with url: /es/web/energia/informacion-publica (Caused by ConnectTimeoutError(<HTTPSConnection(host='mediambient.gva.es', port=443) at 0x7fd83ed35fd0>, 'Connection to mediambient.gva.es timed out. (connect timeout=8)'))"
+        },
+        {
+          "date": "2026-10-03",
+          "error": "HTTPSConnectionPool(host='mediambient.gva.es', port=443): Max retries exceeded with url: /es/web/energia/informacion-publica (Caused by ConnectTimeoutError(<HTTPSConnection(host='mediambient.gva.es', port=443) at 0x7fd83ed35fd0>, 'Connection to mediambient.gva.es timed out. (connect timeout=8)'))"
+        },
+        {
+          "date": "2026-10-04",
+          "error": "HTTPSConnectionPool(host='mediambient.gva.es', port=443): Max retries exceeded with url: /es/web/energia/informacion-publica (Caused by ConnectTimeoutError(<HTTPSConnection(host='mediambient.gva.es', port=443) at 0x7fd83ed35fd0>, 'Connection to mediambient.gva.es timed out. (connect timeout=8)'))"
+        },
+        {
+          "date": "2026-10-05",
+          "error": "HTTPSConnectionPool(host='mediambient.gva.es', port=443): Max retries exceeded with url: /es/web/energia/informacion-publica (Caused by ConnectTimeoutError(<HTTPSConnection(host='mediambient.gva.es', port=443) at 0x7fd83ed35fd0>, 'Connection to mediambient.gva.es timed out. (connect timeout=8)'))"
+        }
+      ],
+      "last_complete_window_start": "2026-09-06",
+      "last_complete_window_end": "2026-10-05",
+      "last_complete_run_id": "37406054339",
+      "last_complete_observed_at": null,
+      "requested_window_start": "2026-09-29",
+      "requested_window_end": "2026-10-05"
+    },
+    "DOG": {
+      "source_code": "DOG",
+      "status": "NOT_REQUESTED",
+      "successful_days": 0,
+      "failed_days": [],
+      "last_complete_window_start": "2026-09-29",
+      "last_complete_window_end": "2026-10-05",
+      "last_complete_run_id": "37441856639",
+      "last_complete_observed_at": "2026-10-06T09:27:13.357176+00:00",
+      "requested_window_start": "2026-09-29",
+      "requested_window_end": "2026-10-05"
+    },
+    "DOGC": {
+      "source_code": "DOGC",
+      "status": "NOT_REQUESTED",
+      "successful_days": 0,
+      "failed_days": [],
+      "last_complete_window_start": "2026-09-29",
+      "last_complete_window_end": "2026-10-05",
+      "last_complete_run_id": "37441856639",
+      "last_complete_observed_at": "2026-10-06T09:27:13.357190+00:00",
+      "requested_window_start": "2026-09-29",
+      "requested_window_end": "2026-10-05"
+    }
+  }
+}

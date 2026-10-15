@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/runner/work/spain_renewables_radar/spain_renewables_radar/app/operational.py", line 179, in <module>
+    if __name__=='__main__':main()
+                            ^^^^^^
+  File "/home/runner/work/spain_renewables_radar/spain_renewables_radar/app/operational.py", line 174, in main
+    status=run_update(Path(args.db),Path(args.output),days=args.days,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/spain_renewables_radar/spain_renewables_radar/app/operational.py", line 130, in run_update
+    if result.returncode:raise RuntimeError('Pipeline structural/runtime failure; see pipeline.log')
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Pipeline structural/runtime failure; see pipeline.log
+exit=1

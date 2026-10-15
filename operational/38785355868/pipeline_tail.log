@@ -1,0 +1,169 @@
+Identity repair: 257 -> 255 projects; backup /home/runner/work/spain_renewables_radar/spain_renewables_radar/reports/operational/runs/2026-10-15T182442.871874+0000-344c61f3/migrations/pre_identity_v2_20261015T182444057151Z.sqlite
+[BOE] 2026-10-08
+[BOE] 2026-10-09
+[BOE] 2026-10-10
+[BOE] 2026-10-11
+[BOE] 2026-10-12
+[BOE] 2026-10-13
+[BOE] 2026-10-14
+BOE_REVIEW_LEADS 0
+[BOCYL] 2026-10-08
+[BOCYL] 2026-10-09
+[BOCYL] 2026-10-10
+[BOCYL] 2026-10-11
+[BOCYL] 2026-10-12
+[BOCYL] 2026-10-13
+[BOCYL] 2026-10-14
+[BOA] 2026-10-08
+[BOA] 2026-10-09
+[BOA] 2026-10-10
+[BOA] 2026-10-11
+[BOA] 2026-10-12
+[BOA] 2026-10-13
+[BOA] 2026-10-14
+[BOJA] 2026-10-08
+[BOJA] 2026-10-09
+[BOJA] 2026-10-10
+[BOJA] 2026-10-11
+[BOJA] 2026-10-12
+[BOJA] 2026-10-13
+[BOJA] 2026-10-14
+BOJA_RESTRICTED_ARCHIVE_LEADS 0
+[DOCM] 2026-10-08
+[DOCM] 2026-10-09
+[DOCM] 2026-10-10
+[DOCM] 2026-10-11
+[DOCM] 2026-10-12
+[DOCM] 2026-10-13
+[DOCM] 2026-10-14
+[DOE] 2026-10-08
+[DOE] 2026-10-09
+[DOE] 2026-10-10
+[DOE] 2026-10-11
+[DOE] 2026-10-12
+[DOE] 2026-10-13
+[DOE] 2026-10-14
+[BORM] 2026-10-08
+[BORM] 2026-10-09
+[BORM] 2026-10-10
+[BORM] 2026-10-11
+[BORM] 2026-10-12
+[BORM] 2026-10-13
+[BORM] 2026-10-14
+[BOCM] 2026-10-08
+[BOCM] 2026-10-09
+[BOCM] 2026-10-10
+[BOCM] 2026-10-11
+[BOCM] 2026-10-12
+[BOCM] 2026-10-13
+[BOCM] 2026-10-14
+[MITECO_SABIA] 2026-10-08
+SABIA index FTV: 769 records
+SABIA index EOL: 434 records
+SABIA index EOM: 74 records
+SABIA index HIB: 343 records
+SABIA index ALM: 39 records
+SABIA details: 100/1659, errors=0
+SABIA details: 200/1659, errors=0
+SABIA details: 300/1659, errors=0
+SABIA details: 400/1659, errors=0
+SABIA details: 500/1659, errors=0
+SABIA details: 600/1659, errors=0
+SABIA details: 700/1659, errors=0
+SABIA details: 800/1659, errors=0
+SABIA details: 900/1659, errors=0
+SABIA details: 1000/1659, errors=0
+SABIA details: 1100/1659, errors=0
+SABIA details: 1200/1659, errors=0
+SABIA details: 1300/1659, errors=0
+SABIA details: 1400/1659, errors=0
+SABIA details: 1500/1659, errors=0
+SABIA details: 1600/1659, errors=0
+[MITECO_SABIA] 2026-10-09
+[MITECO_SABIA] 2026-10-10
+[MITECO_SABIA] 2026-10-11
+[MITECO_SABIA] 2026-10-12
+[MITECO_SABIA] 2026-10-13
+[MITECO_SABIA] 2026-10-14
+[AND_PUBLIC] 2026-10-08
+AND_PUBLIC snapshot=13659; dated=907; source gaps=25; acquisition=COMPLETE_ORDERED_PREFIX_SUFFIX
+[AND_PUBLIC] 2026-10-09
+[AND_PUBLIC] 2026-10-10
+[AND_PUBLIC] 2026-10-11
+[AND_PUBLIC] 2026-10-12
+[AND_PUBLIC] 2026-10-13
+[AND_PUBLIC] 2026-10-14
+[GVA_PUBLIC] 2026-10-08
+GVA transient ConnectTimeout: complete GET retry 2/3
+GVA transient ConnectTimeout: complete GET retry 3/3
+  WARN: HTTPSConnectionPool(host='mediambient.gva.es', port=443): Max retries exceeded with url: /es/web/energia/informacion-publica (Caused by ConnectTimeoutError(<HTTPSConnection(host='mediambient.gva.es', port=443) at 0x7f59111b63f0>, 'Connection to mediambient.gva.es timed out. (connect timeout=8)'))
+[GVA_PUBLIC] 2026-10-09
+  WARN: HTTPSConnectionPool(host='mediambient.gva.es', port=443): Max retries exceeded with url: /es/web/energia/informacion-publica (Caused by ConnectTimeoutError(<HTTPSConnection(host='mediambient.gva.es', port=443) at 0x7f59111b63f0>, 'Connection to mediambient.gva.es timed out. (connect timeout=8)'))
+[GVA_PUBLIC] 2026-10-10
+  WARN: HTTPSConnectionPool(host='mediambient.gva.es', port=443): Max retries exceeded with url: /es/web/energia/informacion-publica (Caused by ConnectTimeoutError(<HTTPSConnection(host='mediambient.gva.es', port=443) at 0x7f59111b63f0>, 'Connection to mediambient.gva.es timed out. (connect timeout=8)'))
+[GVA_PUBLIC] 2026-10-11
+  WARN: HTTPSConnectionPool(host='mediambient.gva.es', port=443): Max retries exceeded with url: /es/web/energia/informacion-publica (Caused by ConnectTimeoutError(<HTTPSConnection(host='mediambient.gva.es', port=443) at 0x7f59111b63f0>, 'Connection to mediambient.gva.es timed out. (connect timeout=8)'))
+[GVA_PUBLIC] 2026-10-12
+  WARN: HTTPSConnectionPool(host='mediambient.gva.es', port=443): Max retries exceeded with url: /es/web/energia/informacion-publica (Caused by ConnectTimeoutError(<HTTPSConnection(host='mediambient.gva.es', port=443) at 0x7f59111b63f0>, 'Connection to mediambient.gva.es timed out. (connect timeout=8)'))
+[GVA_PUBLIC] 2026-10-13
+  WARN: HTTPSConnectionPool(host='mediambient.gva.es', port=443): Max retries exceeded with url: /es/web/energia/informacion-publica (Caused by ConnectTimeoutError(<HTTPSConnection(host='mediambient.gva.es', port=443) at 0x7f59111b63f0>, 'Connection to mediambient.gva.es timed out. (connect timeout=8)'))
+[GVA_PUBLIC] 2026-10-14
+  WARN: HTTPSConnectionPool(host='mediambient.gva.es', port=443): Max retries exceeded with url: /es/web/energia/informacion-publica (Caused by ConnectTimeoutError(<HTTPSConnection(host='mediambient.gva.es', port=443) at 0x7f59111b63f0>, 'Connection to mediambient.gva.es timed out. (connect timeout=8)'))
+[DOG] 2026-10-08
+[DOG] 2026-10-09
+[DOG] 2026-10-10
+[DOG] 2026-10-11
+[DOG] 2026-10-12
+[DOG] 2026-10-13
+[DOG] 2026-10-14
+[DOGC] 2026-10-08
+Xref table not zero-indexed. ID numbers for objects will be corrected.
+fontTools is required to fully parse the encoding of a CFF Type1 font in font dictionary {'/BaseFont': '/ZSPYQU+HelveticaLTStd-Bold', '/Encoding': '/WinAnsiEncoding', '/FirstChar': 32, '/FontDescriptor': IndirectObject(89, 0, 140020507225088), '/LastChar': 250, '/Subtype': '/Type1', '/Type': '/Font', '/Widths': [278, 0, 0, 0, 0, 0, 0, 0, 333, 333, 0, 0, 278, 0, 278, 278, 556, 556, 556, 556, 0, 556, 556, 0, 556, 0, 0, 0, 0, 0, 0, 0, 0, 722, 722, 722, 722, 667, 0, 778, 722, 278, 0, 0, 611, 833, 722, 778, 667, 0, 722, 667, 611, 722, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 556, 611, 556, 611, 556, 333, 611, 0, 278, 0, 0, 278, 889, 611, 611, 611, 611, 389, 556, 333, 611, 556, 0, 556, 0, 500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 278, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 778, 778, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 556, 0, 0, 0, 0, 278, 0, 0, 0, 0, 611, 611, 0, 0, 0, 0, 0, 0, 611]}, but is not installed. Consider installing fontTools if you encounter encoding problems.
+fontTools is required to fully parse the encoding of a CFF Type1 font in font dictionary {'/BaseFont': '/XPQMOY+HelveticaLTStd-Roman', '/Encoding': '/WinAnsiEncoding', '/FirstChar': 32, '/FontDescriptor': IndirectObject(92, 0, 140020507225088), '/LastChar': 119, '/Subtype': '/Type1', '/Type': '/Font', '/Widths': [278, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 333, 278, 278, 556, 556, 556, 556, 556, 0, 0, 556, 556, 556, 278, 0, 0, 0, 0, 0, 0, 0, 667, 0, 722, 0, 0, 0, 0, 278, 0, 0, 556, 0, 722, 0, 0, 0, 0, 667, 0, 0, 0, 0, 667, 0, 0, 0, 0, 0, 0, 0, 0, 556, 0, 500, 556, 556, 0, 556, 556, 0, 0, 0, 0, 0, 556, 556, 556, 0, 0, 0, 278, 0, 0, 722]}, but is not installed. Consider installing fontTools if you encounter encoding problems.
+fontTools is required to fully parse the encoding of a CFF Type1 font in font dictionary {'/BaseFont': '/XPQMOY+HelveticaLTStd-Roman', '/Encoding': '/WinAnsiEncoding', '/FirstChar': 32, '/FontDescriptor': IndirectObject(92, 0, 140020507225088), '/LastChar': 119, '/Subtype': '/Type1', '/Type': '/Font', '/Widths': [278, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 333, 278, 278, 556, 556, 556, 556, 556, 0, 0, 556, 556, 556, 278, 0, 0, 0, 0, 0, 0, 0, 667, 0, 722, 0, 0, 0, 0, 278, 0, 0, 556, 0, 722, 0, 0, 0, 0, 667, 0, 0, 0, 0, 667, 0, 0, 0, 0, 0, 0, 0, 0, 556, 0, 500, 556, 556, 0, 556, 556, 0, 0, 0, 0, 0, 556, 556, 556, 0, 0, 0, 278, 0, 0, 722]}, but is not installed. Consider installing fontTools if you encounter encoding problems.
+fontTools is required to fully parse the encoding of a CFF Type1 font in font dictionary {'/BaseFont': '/XPQMOY+HelveticaLTStd-Roman', '/Encoding': '/WinAnsiEncoding', '/FirstChar': 32, '/FontDescriptor': IndirectObject(92, 0, 140020507225088), '/LastChar': 119, '/Subtype': '/Type1', '/Type': '/Font', '/Widths': [278, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 333, 278, 278, 556, 556, 556, 556, 556, 0, 0, 556, 556, 556, 278, 0, 0, 0, 0, 0, 0, 0, 667, 0, 722, 0, 0, 0, 0, 278, 0, 0, 556, 0, 722, 0, 0, 0, 0, 667, 0, 0, 0, 0, 667, 0, 0, 0, 0, 0, 0, 0, 0, 556, 0, 500, 556, 556, 0, 556, 556, 0, 0, 0, 0, 0, 556, 556, 556, 0, 0, 0, 278, 0, 0, 722]}, but is not installed. Consider installing fontTools if you encounter encoding problems.
+fontTools is required to fully parse the encoding of a CFF Type1 font in font dictionary {'/BaseFont': '/XPQMOY+HelveticaLTStd-Roman', '/Encoding': '/WinAnsiEncoding', '/FirstChar': 32, '/FontDescriptor': IndirectObject(92, 0, 140020507225088), '/LastChar': 119, '/Subtype': '/Type1', '/Type': '/Font', '/Widths': [278, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 333, 278, 278, 556, 556, 556, 556, 556, 0, 0, 556, 556, 556, 278, 0, 0, 0, 0, 0, 0, 0, 667, 0, 722, 0, 0, 0, 0, 278, 0, 0, 556, 0, 722, 0, 0, 0, 0, 667, 0, 0, 0, 0, 667, 0, 0, 0, 0, 0, 0, 0, 0, 556, 0, 500, 556, 556, 0, 556, 556, 0, 0, 0, 0, 0, 556, 556, 556, 0, 0, 0, 278, 0, 0, 722]}, but is not installed. Consider installing fontTools if you encounter encoding problems.
+fontTools is required to fully parse the encoding of a CFF Type1 font in font dictionary {'/BaseFont': '/XPQMOY+HelveticaLTStd-Roman', '/Encoding': '/WinAnsiEncoding', '/FirstChar': 32, '/FontDescriptor': IndirectObject(92, 0, 140020507225088), '/LastChar': 119, '/Subtype': '/Type1', '/Type': '/Font', '/Widths': [278, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 333, 278, 278, 556, 556, 556, 556, 556, 0, 0, 556, 556, 556, 278, 0, 0, 0, 0, 0, 0, 0, 667, 0, 722, 0, 0, 0, 0, 278, 0, 0, 556, 0, 722, 0, 0, 0, 0, 667, 0, 0, 0, 0, 667, 0, 0, 0, 0, 0, 0, 0, 0, 556, 0, 500, 556, 556, 0, 556, 556, 0, 0, 0, 0, 0, 556, 556, 556, 0, 0, 0, 278, 0, 0, 722]}, but is not installed. Consider installing fontTools if you encounter encoding problems.
+fontTools is required to fully parse the encoding of a CFF Type1 font in font dictionary {'/BaseFont': '/XPQMOY+HelveticaLTStd-Roman', '/Encoding': '/WinAnsiEncoding', '/FirstChar': 32, '/FontDescriptor': IndirectObject(92, 0, 140020507225088), '/LastChar': 119, '/Subtype': '/Type1', '/Type': '/Font', '/Widths': [278, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 333, 278, 278, 556, 556, 556, 556, 556, 0, 0, 556, 556, 556, 278, 0, 0, 0, 0, 0, 0, 0, 667, 0, 722, 0, 0, 0, 0, 278, 0, 0, 556, 0, 722, 0, 0, 0, 0, 667, 0, 0, 0, 0, 667, 0, 0, 0, 0, 0, 0, 0, 0, 556, 0, 500, 556, 556, 0, 556, 556, 0, 0, 0, 0, 0, 556, 556, 556, 0, 0, 0, 278, 0, 0, 722]}, but is not installed. Consider installing fontTools if you encounter encoding problems.
+fontTools is required to fully parse the encoding of a CFF Type1 font in font dictionary {'/BaseFont': '/XPQMOY+HelveticaLTStd-Roman', '/Encoding': '/WinAnsiEncoding', '/FirstChar': 32, '/FontDescriptor': IndirectObject(92, 0, 140020507225088), '/LastChar': 119, '/Subtype': '/Type1', '/Type': '/Font', '/Widths': [278, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 333, 278, 278, 556, 556, 556, 556, 556, 0, 0, 556, 556, 556, 278, 0, 0, 0, 0, 0, 0, 0, 667, 0, 722, 0, 0, 0, 0, 278, 0, 0, 556, 0, 722, 0, 0, 0, 0, 667, 0, 0, 0, 0, 667, 0, 0, 0, 0, 0, 0, 0, 0, 556, 0, 500, 556, 556, 0, 556, 556, 0, 0, 0, 0, 0, 556, 556, 556, 0, 0, 0, 278, 0, 0, 722]}, but is not installed. Consider installing fontTools if you encounter encoding problems.
+fontTools is required to fully parse the encoding of a CFF Type1 font in font dictionary {'/BaseFont': '/XPQMOY+HelveticaLTStd-Roman', '/Encoding': '/WinAnsiEncoding', '/FirstChar': 32, '/FontDescriptor': IndirectObject(92, 0, 140020507225088), '/LastChar': 119, '/Subtype': '/Type1', '/Type': '/Font', '/Widths': [278, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 333, 278, 278, 556, 556, 556, 556, 556, 0, 0, 556, 556, 556, 278, 0, 0, 0, 0, 0, 0, 0, 667, 0, 722, 0, 0, 0, 0, 278, 0, 0, 556, 0, 722, 0, 0, 0, 0, 667, 0, 0, 0, 0, 667, 0, 0, 0, 0, 0, 0, 0, 0, 556, 0, 500, 556, 556, 0, 556, 556, 0, 0, 0, 0, 0, 556, 556, 556, 0, 0, 0, 278, 0, 0, 722]}, but is not installed. Consider installing fontTools if you encounter encoding problems.
+fontTools is required to fully parse the encoding of a CFF Type1 font in font dictionary {'/BaseFont': '/XPQMOY+HelveticaLTStd-Roman', '/Encoding': '/WinAnsiEncoding', '/FirstChar': 32, '/FontDescriptor': IndirectObject(92, 0, 140020507225088), '/LastChar': 119, '/Subtype': '/Type1', '/Type': '/Font', '/Widths': [278, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 333, 278, 278, 556, 556, 556, 556, 556, 0, 0, 556, 556, 556, 278, 0, 0, 0, 0, 0, 0, 0, 667, 0, 722, 0, 0, 0, 0, 278, 0, 0, 556, 0, 722, 0, 0, 0, 0, 667, 0, 0, 0, 0, 667, 0, 0, 0, 0, 0, 0, 0, 0, 556, 0, 500, 556, 556, 0, 556, 556, 0, 0, 0, 0, 0, 556, 556, 556, 0, 0, 0, 278, 0, 0, 722]}, but is not installed. Consider installing fontTools if you encounter encoding problems.
+[DOGC] 2026-10-09
+Xref table not zero-indexed. ID numbers for objects will be corrected.
+fontTools is required to fully parse the encoding of a CFF Type1 font in font dictionary {'/BaseFont': '/YKPQUX+HelveticaLTStd-Bold', '/Encoding': '/WinAnsiEncoding', '/FirstChar': 32, '/FontDescriptor': IndirectObject(59, 0, 140020514562480), '/LastChar': 250, '/Subtype': '/Type1', '/Type': '/Font', '/Widths': [278, 0, 0, 0, 0, 0, 0, 0, 333, 333, 0, 0, 278, 333, 278, 0, 556, 556, 556, 556, 0, 556, 556, 556, 0, 556, 0, 0, 0, 0, 0, 0, 0, 722, 722, 722, 722, 667, 611, 778, 722, 278, 0, 0, 611, 833, 722, 778, 667, 0, 722, 667, 611, 722, 667, 944, 0, 0, 0, 0, 0, 0, 0, 0, 0, 556, 611, 556, 611, 556, 333, 611, 0, 278, 278, 556, 278, 889, 611, 611, 611, 611, 389, 556, 333, 611, 556, 0, 556, 556, 500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 278, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 278, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 778, 778, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 556, 0, 0, 0, 0, 0, 0, 0, 556, 0, 0, 0, 0, 278, 0, 0, 0, 0, 611, 611, 0, 0, 0, 0, 0, 0, 611]}, but is not installed. Consider installing fontTools if you encounter encoding problems.
+fontTools is required to fully parse the encoding of a CFF Type1 font in font dictionary {'/BaseFont': '/SJLBOJ+HelveticaLTStd-Roman', '/Encoding': '/WinAnsiEncoding', '/FirstChar': 32, '/FontDescriptor': IndirectObject(62, 0, 140020514562480), '/LastChar': 119, '/Subtype': '/Type1', '/Type': '/Font', '/Widths': [278, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 333, 278, 278, 556, 556, 556, 556, 556, 0, 0, 556, 556, 556, 278, 0, 0, 0, 0, 0, 0, 0, 667, 0, 722, 0, 0, 0, 0, 278, 0, 0, 556, 0, 722, 0, 0, 0, 0, 667, 0, 0, 0, 0, 667, 0, 0, 0, 0, 0, 0, 0, 0, 556, 0, 500, 556, 556, 0, 556, 556, 0, 0, 0, 0, 0, 556, 556, 556, 0, 0, 0, 278, 0, 0, 722]}, but is not installed. Consider installing fontTools if you encounter encoding problems.
+fontTools is required to fully parse the encoding of a CFF Type1 font in font dictionary {'/BaseFont': '/SJLBOJ+HelveticaLTStd-Roman', '/Encoding': '/WinAnsiEncoding', '/FirstChar': 32, '/FontDescriptor': IndirectObject(62, 0, 140020514562480), '/LastChar': 119, '/Subtype': '/Type1', '/Type': '/Font', '/Widths': [278, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 333, 278, 278, 556, 556, 556, 556, 556, 0, 0, 556, 556, 556, 278, 0, 0, 0, 0, 0, 0, 0, 667, 0, 722, 0, 0, 0, 0, 278, 0, 0, 556, 0, 722, 0, 0, 0, 0, 667, 0, 0, 0, 0, 667, 0, 0, 0, 0, 0, 0, 0, 0, 556, 0, 500, 556, 556, 0, 556, 556, 0, 0, 0, 0, 0, 556, 556, 556, 0, 0, 0, 278, 0, 0, 722]}, but is not installed. Consider installing fontTools if you encounter encoding problems.
+fontTools is required to fully parse the encoding of a CFF Type1 font in font dictionary {'/BaseFont': '/SJLBOJ+HelveticaLTStd-Roman', '/Encoding': '/WinAnsiEncoding', '/FirstChar': 32, '/FontDescriptor': IndirectObject(62, 0, 140020514562480), '/LastChar': 119, '/Subtype': '/Type1', '/Type': '/Font', '/Widths': [278, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 333, 278, 278, 556, 556, 556, 556, 556, 0, 0, 556, 556, 556, 278, 0, 0, 0, 0, 0, 0, 0, 667, 0, 722, 0, 0, 0, 0, 278, 0, 0, 556, 0, 722, 0, 0, 0, 0, 667, 0, 0, 0, 0, 667, 0, 0, 0, 0, 0, 0, 0, 0, 556, 0, 500, 556, 556, 0, 556, 556, 0, 0, 0, 0, 0, 556, 556, 556, 0, 0, 0, 278, 0, 0, 722]}, but is not installed. Consider installing fontTools if you encounter encoding problems.
+[DOGC] 2026-10-10
+[DOGC] 2026-10-11
+[DOGC] 2026-10-12
+[DOGC] 2026-10-13
+[DOGC] 2026-10-14
+Xref table not zero-indexed. ID numbers for objects will be corrected.
+fontTools is required to fully parse the encoding of a CFF Type1 font in font dictionary {'/BaseFont': '/PKIWUT+HelveticaLTStd-Bold', '/Encoding': '/WinAnsiEncoding', '/FirstChar': 32, '/FontDescriptor': IndirectObject(48, 0, 140020506169648), '/LastChar': 250, '/Subtype': '/Type1', '/Type': '/Font', '/Widths': [278, 0, 0, 0, 0, 0, 0, 0, 333, 333, 0, 0, 278, 333, 278, 278, 556, 556, 556, 556, 556, 556, 556, 556, 0, 556, 0, 0, 0, 0, 0, 0, 0, 722, 722, 722, 722, 667, 611, 778, 722, 278, 0, 722, 611, 833, 722, 778, 667, 0, 722, 667, 611, 722, 667, 944, 0, 0, 0, 0, 0, 0, 0, 0, 0, 556, 611, 556, 611, 556, 333, 611, 0, 278, 278, 556, 278, 889, 611, 611, 611, 611, 389, 556, 333, 611, 556, 0, 556, 556, 500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 278, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 278, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 778, 778, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 556, 0, 0, 0, 0, 278, 0, 0, 0, 0, 611, 611, 0, 0, 0, 0, 0, 0, 611]}, but is not installed. Consider installing fontTools if you encounter encoding problems.
+fontTools is required to fully parse the encoding of a CFF Type1 font in font dictionary {'/BaseFont': '/UKRVHJ+HelveticaLTStd-Roman', '/Encoding': '/WinAnsiEncoding', '/FirstChar': 32, '/FontDescriptor': IndirectObject(51, 0, 140020506169648), '/LastChar': 119, '/Subtype': '/Type1', '/Type': '/Font', '/Widths': [278, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 333, 278, 278, 556, 556, 556, 556, 556, 0, 0, 556, 556, 556, 278, 0, 0, 0, 0, 0, 0, 0, 667, 0, 722, 0, 0, 0, 0, 278, 0, 0, 556, 0, 722, 0, 0, 0, 0, 667, 0, 0, 0, 0, 667, 0, 0, 0, 0, 0, 0, 0, 0, 556, 0, 500, 556, 556, 0, 556, 556, 0, 0, 0, 0, 0, 556, 556, 556, 0, 0, 0, 278, 0, 0, 722]}, but is not installed. Consider installing fontTools if you encounter encoding problems.
+fontTools is required to fully parse the encoding of a CFF Type1 font in font dictionary {'/BaseFont': '/UKRVHJ+HelveticaLTStd-Roman', '/Encoding': '/WinAnsiEncoding', '/FirstChar': 32, '/FontDescriptor': IndirectObject(51, 0, 140020506169648), '/LastChar': 119, '/Subtype': '/Type1', '/Type': '/Font', '/Widths': [278, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 333, 278, 278, 556, 556, 556, 556, 556, 0, 0, 556, 556, 556, 278, 0, 0, 0, 0, 0, 0, 0, 667, 0, 722, 0, 0, 0, 0, 278, 0, 0, 556, 0, 722, 0, 0, 0, 0, 667, 0, 0, 0, 0, 667, 0, 0, 0, 0, 0, 0, 0, 0, 556, 0, 500, 556, 556, 0, 556, 556, 0, 0, 0, 0, 0, 556, 556, 556, 0, 0, 0, 278, 0, 0, 722]}, but is not installed. Consider installing fontTools if you encounter encoding problems.
+Xref table not zero-indexed. ID numbers for objects will be corrected.
+fontTools is required to fully parse the encoding of a CFF Type1 font in font dictionary {'/BaseFont': '/GODRZG+HelveticaLTStd-Bold', '/Encoding': '/WinAnsiEncoding', '/FirstChar': 32, '/FontDescriptor': IndirectObject(59, 0, 140020507549312), '/LastChar': 250, '/Subtype': '/Type1', '/Type': '/Font', '/Widths': [278, 0, 0, 0, 0, 0, 0, 0, 333, 333, 0, 0, 278, 333, 278, 0, 556, 556, 556, 556, 556, 556, 0, 556, 0, 0, 0, 0, 0, 0, 0, 0, 0, 722, 722, 722, 722, 667, 611, 778, 722, 278, 0, 0, 611, 833, 722, 778, 667, 0, 722, 667, 611, 722, 667, 944, 0, 0, 0, 0, 0, 0, 0, 0, 0, 556, 611, 556, 611, 556, 333, 611, 0, 278, 278, 556, 278, 889, 611, 611, 611, 611, 389, 556, 333, 611, 556, 0, 556, 0, 500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 278, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 278, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 778, 778, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 556, 0, 0, 0, 0, 278, 0, 0, 0, 0, 0, 611, 0, 0, 0, 0, 0, 0, 611]}, but is not installed. Consider installing fontTools if you encounter encoding problems.
+fontTools is required to fully parse the encoding of a CFF Type1 font in font dictionary {'/BaseFont': '/BROIHQ+HelveticaLTStd-Roman', '/Encoding': '/WinAnsiEncoding', '/FirstChar': 32, '/FontDescriptor': IndirectObject(62, 0, 140020507549312), '/LastChar': 119, '/Subtype': '/Type1', '/Type': '/Font', '/Widths': [278, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 333, 278, 278, 556, 556, 556, 556, 556, 0, 0, 556, 556, 556, 278, 0, 0, 0, 0, 0, 0, 0, 667, 0, 722, 0, 0, 0, 0, 278, 0, 0, 556, 0, 722, 0, 0, 0, 0, 667, 0, 0, 0, 0, 667, 0, 0, 0, 0, 0, 0, 0, 0, 556, 0, 500, 556, 556, 0, 556, 556, 0, 0, 0, 0, 0, 556, 556, 556, 0, 0, 0, 278, 0, 0, 722]}, but is not installed. Consider installing fontTools if you encounter encoding problems.
+fontTools is required to fully parse the encoding of a CFF Type1 font in font dictionary {'/BaseFont': '/BROIHQ+HelveticaLTStd-Roman', '/Encoding': '/WinAnsiEncoding', '/FirstChar': 32, '/FontDescriptor': IndirectObject(62, 0, 140020507549312), '/LastChar': 119, '/Subtype': '/Type1', '/Type': '/Font', '/Widths': [278, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 333, 278, 278, 556, 556, 556, 556, 556, 0, 0, 556, 556, 556, 278, 0, 0, 0, 0, 0, 0, 0, 667, 0, 722, 0, 0, 0, 0, 278, 0, 0, 556, 0, 722, 0, 0, 0, 0, 667, 0, 0, 0, 0, 667, 0, 0, 0, 0, 0, 0, 0, 0, 556, 0, 500, 556, 556, 0, 556, 556, 0, 0, 0, 0, 0, 556, 556, 556, 0, 0, 0, 278, 0, 0, 722]}, but is not installed. Consider installing fontTools if you encounter encoding problems.
+fontTools is required to fully parse the encoding of a CFF Type1 font in font dictionary {'/BaseFont': '/BROIHQ+HelveticaLTStd-Roman', '/Encoding': '/WinAnsiEncoding', '/FirstChar': 32, '/FontDescriptor': IndirectObject(62, 0, 140020507549312), '/LastChar': 119, '/Subtype': '/Type1', '/Type': '/Font', '/Widths': [278, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 333, 278, 278, 556, 556, 556, 556, 556, 0, 0, 556, 556, 556, 278, 0, 0, 0, 0, 0, 0, 0, 667, 0, 722, 0, 0, 0, 0, 278, 0, 0, 556, 0, 722, 0, 0, 0, 0, 667, 0, 0, 0, 0, 667, 0, 0, 0, 0, 0, 0, 0, 0, 556, 0, 500, 556, 556, 0, 556, 556, 0, 0, 0, 0, 0, 556, 556, 556, 0, 0, 0, 278, 0, 0, 722]}, but is not installed. Consider installing fontTools if you encounter encoding problems.
+[DOGV] 2026-10-08
+[DOGV] 2026-10-09
+[DOGV] 2026-10-10
+[DOGV] 2026-10-11
+[DOGV] 2026-10-12
+[DOGV] 2026-10-13
+[DOGV] 2026-10-14
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/runner/work/spain_renewables_radar/spain_renewables_radar/app/run_pipeline.py", line 204, in <module>
+    if __name__=="__main__":main()
+                            ^^^^^^
+  File "/home/runner/work/spain_renewables_radar/spain_renewables_radar/app/run_pipeline.py", line 90, in main
+    docm_repair=repair_docm_storage(conn)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/spain_renewables_radar/spain_renewables_radar/app/docm_storage.py", line 111, in repair_and_record
+    raise ValueError('Unreviewed DOCM legacy projection; no automatic correction')
+ValueError: Unreviewed DOCM legacy projection; no automatic correction

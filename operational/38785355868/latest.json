@@ -1,0 +1,12 @@
+{
+  "status": "REPAIRED",
+  "backup_path": "/home/runner/work/spain_renewables_radar/spain_renewables_radar/reports/operational/runs/2026-10-15T182442.871874+0000-344c61f3/migrations/pre_identity_v2_20261015T182444057151Z.sqlite",
+  "projects_before": 257,
+  "projects_after": 255,
+  "events_before": 263,
+  "events_after": 261,
+  "quarantined_source_events": 2,
+  "identity_changes": [],
+  "split_groups": {},
+  "enrichment_rows_quarantined": 0
+}
