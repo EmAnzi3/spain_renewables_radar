@@ -10,20 +10,16 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Copy the exact published Pages artifact and status into probe-results
+      - name: Copy the exact published Pages artifact into probe-results
         env: {GH_TOKEN: '${{ github.token }}'}
         run: |
-          set -e
-          gh api repos/${{ github.repository }}/actions/artifacts/12014495285/zip > pages.zip
-          mkdir pages && cd pages && unzip -q ../pages.zip && tar -xf artifact.tar && ls -la && cd ..
-          gh api repos/${{ github.repository }}/actions/artifacts/12013174900/zip > nav.zip
-          mkdir nav && cd nav && unzip -q ../nav.zip 'reports/*' 'history_import.json' 2>/dev/null || unzip -q ../nav.zip -x 'site/*' '*.sqlite' ; cd ..
+          set +e
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898283+github-actions[bot]@users.noreply.github.com"
           git clone -q --depth 1 -b probe-results "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" pr
           d=pr/site/38820291492; mkdir -p $d
-          cp pages/index.html pages/data.json pages/build_receipt.json $d/ 2>/dev/null || true
-          find nav -name latest.json -path '*operational*' -maxdepth 4 -exec cp {} $d/operational_latest.json \;
-          find nav -name history_import.json -exec cp {} $d/ \;
-          ls -la $d
+          { gh api repos/${{ github.repository }}/actions/artifacts/12014495285/zip > pages.zip; ls -la pages.zip
+            mkdir pages; cd pages; unzip -o ../pages.zip; ls -la; for t in *.tar; do tar -xf "$t"; done; ls -la; cd ..
+            cp pages/index.html pages/build_receipt.json $d/; } > $d/export.log 2>&1
+          ls -la $d >> $d/export.log
           cd pr && git add -A && git commit -qm "published site 38820291492" && git push -q origin probe-results
