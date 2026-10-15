@@ -1,0 +1,39 @@
+name: export-historical-data
+on:
+  workflow_dispatch:
+    inputs:
+      from_month:
+        description: 'First month to export (YYYY-MM)'
+        default: '2024-10'
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: export-historical-data
+  cancel-in-progress: false
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Collect newest certified shard per source/month
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          python -u .github/scripts/export_historical_data.py
+          --repo "${{ github.repository }}"
+          --out "$RUNNER_TEMP/export"
+          --from-month "${{ inputs.from_month || '2024-10' }}"
+      - name: Publish to data-export branch (orphan, overwritten each run)
+        run: |
+          cd "$RUNNER_TEMP/export"
+          git init -q -b data-export
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Historical data export from run ${GITHUB_RUN_ID}"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" data-export
