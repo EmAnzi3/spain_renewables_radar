@@ -1,4 +1,4 @@
-name: .github/workflows/export-historical-data.yml
+name: export-historical-data
 on:
   workflow_dispatch:
     inputs:
