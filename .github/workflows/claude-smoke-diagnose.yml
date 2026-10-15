@@ -1,9 +1,10 @@
 name: claude-smoke-diagnose
-run-name: Live smoke diagnosis (${{ inputs.days }}d)
+run-name: Live smoke diagnosis (${{ inputs.days }}d) on ${{ inputs.code_ref }}
 on:
   workflow_dispatch:
     inputs:
       days: {description: 'Days ending yesterday (Europe/Madrid)', default: '3'}
+      code_ref: {description: 'Branch to test', default: 'main'}
 permissions:
   contents: write
 jobs:
@@ -12,6 +13,7 @@ jobs:
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
+        with: {ref: '${{ inputs.code_ref }}'}
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
       - run: pip install -r requirements.txt
