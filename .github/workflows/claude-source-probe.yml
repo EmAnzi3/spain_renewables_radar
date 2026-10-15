@@ -1,0 +1,27 @@
+name: claude-source-probe
+on:
+  workflow_dispatch:
+  push:
+    branches: ['claude/source-probes']
+    paths: ['.github/probes/**', '.github/workflows/claude-source-probe.yml']
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests
+      - run: python .github/probes/probe_urls.py .github/probes/urls.txt "$RUNNER_TEMP/probe.json"
+      - name: Publish results to probe-results branch
+        run: |
+          mkdir -p "$RUNNER_TEMP/pub" && cd "$RUNNER_TEMP/pub"
+          git init -q -b probe-results
+          cp "$RUNNER_TEMP/probe.json" "probe-${GITHUB_RUN_ID}.json"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -q -m "probe ${GITHUB_RUN_ID}"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" probe-results
