@@ -54,6 +54,9 @@ def repair_legacy_identities(conn, *, report_dir='reports/identity_repair', back
         if row['source_code'] in {'BOE','BOCYL','BOA','BOJA','DOCM','DOE','BORM','BOCM'}:
             parsed=parse_event(source_code=row['source_code'],external_id=row['external_id'],
                                publication_date=row['publication_date'],title=row['title'],url=row['url'],raw_text=row['raw_text'] or '')
+            if row['source_code']=='DOCM':
+                from app.docm_storage import project_storage
+                parsed=project_storage(parsed)
             row['project_key']=parsed.project_key;row['expediente']=parsed.expediente;name=parsed.project_name
             if row['project_key']!=source['project_key'] or row['expediente']!=source['expediente']:
                 changed.append({'source_code':row['source_code'],'external_id':row['external_id'],

@@ -155,3 +155,27 @@ class MigrationTests(unittest.TestCase):
         self.assertEqual(result['resolved'],1)
         self.assertEqual(self.conn.execute('SELECT province FROM projects').fetchone()[0],'Ciudad Real')
         self.assertIsNone(self.conn.execute('SELECT province FROM events').fetchone()[0])
+
+
+class IdentityRepairInteractionTests(unittest.TestCase):
+    """Regression: legacy identity repair must not undo the reviewed DOCM storage projection
+    (operational run 38785355868 stopped on 'Unreviewed DOCM legacy projection')."""
+    def setUp(self):
+        self.tmp=tempfile.TemporaryDirectory();self.root=Path(self.tmp.name)
+        self.conn=connect(str(self.root/'db.sqlite'))
+    def tearDown(self):
+        self.conn.close();self.tmp.cleanup()
+
+    def test_identity_repair_keeps_storage_projection(self):
+        from app.identity_migration import repair_legacy_identities
+        save_event(self.conn,project_storage(event()))
+        save_event(self.conn,parse_event(source_code='BOCM',external_id='BOCM-20250101-1',publication_date='2025-01-01',
+            title='Acuerdo de aprobación del plan especial de infraestructuras para planta fotovoltaica Test 10 MW',
+            url='https://www.bocm.es/x',raw_text='planta solar fotovoltaica Test de 10 MW en Madrid'))
+        self.conn.commit()
+        result=repair_legacy_identities(self.conn,report_dir=str(self.root/'id'),backup_dir=str(self.root/'bk'))
+        self.assertEqual(result['quarantined_source_events'],1)
+        p=self.conn.execute("SELECT * FROM projects WHERE latest_source_code='DOCM'").fetchone()
+        self.assertEqual((p['project_name'],p['power_mw'],p['technology']),('BESS Almagro I',7.2,'BESS'))
+        self.assertEqual(repair_and_record(self.conn,str(self.root/'repair'))['corrected_events'],0)
+        self.assertEqual(validate_docm_storage(self.conn)['source_scoped_events'],1)
