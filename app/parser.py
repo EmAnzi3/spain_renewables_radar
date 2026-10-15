@@ -20,6 +20,10 @@ EXPEDIENTE_RE=re.compile(
     re.I,
 )
 PROJECT_PATTERNS=[
+    # An official line-routing notice may name a PV plant directly before
+    # "infraestructuras de evacuación", without quotes or a comma.
+    re.compile(r"\bplanta\s+(?:solar\s+)?fotovoltaica\s+([A-ZÁÉÍÓÚÜÑ][A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9\s-]{2,70}?)\s+(?:e\s+)?infraestructuras?\s+de\s+evacuaci[oó]n\b", re.I),
+
     # A named single hybrid installation may be unquoted and followed by
     # a parenthetical technology specification (e.g. "híbrida Araña (eólica...").
     re.compile(r"(?:instalaci[oó]n|planta)\s+h[ií]brid[ao]\s+([A-ZÁÉÍÓÚÜÑ][^(),;:]{2,80}?)\s*\(\s*(?:e[oó]lic[oa]|solar|fotovoltaic[ao])",re.I),
