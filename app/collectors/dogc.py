@@ -99,8 +99,11 @@ class DOGCCollector:
                 self.records[candidate['document_id']]={'candidate':candidate,'classification':record,'pages_file':pages_file,
                     'pdf_file':'pdf_raw/'+acquired['sha256']+'.pdf','acquisition':acquired}
                 if record['category']=='REVIEW_REQUIRED':
+                    # Held for human review with its original PDF, pages and classification
+                    # (unresolved.json); it never becomes a project, and the day is not lost.
                     stats['review_required']+=1
-                    raise ValueError('DOGC new wording requires review: '+candidate['document_id'])
+                    stats.setdefault('review_documents',[]).append(candidate['document_id'])
+                    continue
                 if record['category']=='ENERGY_PROJECT':self._ensure_catalog()
                 projections=events_from_record(record,parsed['pages'],self.catalog or [])
                 if projections:
@@ -112,7 +115,7 @@ class DOGCCollector:
                 elif record['category']=='MUNICIPAL_PROJECT':stats['municipal_leads']+=1
                 elif record['category']=='CORRECTION':stats['corrections']+=1
                 elif record['category']=='OUT_OF_SCOPE':stats['excluded']+=1
-            if stats['title_candidates']!=sum(stats[k] for k in ('energy_documents','municipal_leads','corrections','excluded')):
+            if stats['title_candidates']!=sum(stats[k] for k in ('energy_documents','municipal_leads','corrections','excluded','review_required')):
                 raise ValueError('DOGC source documents not fully accounted for')
             self.metadata.update(metadata);self.projected.update({e.external_id:asdict(e) for e in events})
             self.days[stamp]=events;stats['status']='OK'
@@ -124,6 +127,7 @@ class DOGCCollector:
 
     def _save(self):
         self.audit['complete']=bool(self.audit['days']) and all(d['status']=='OK' for d in self.audit['days'].values())
+        self.audit['review_pending']=sorted({x for d in self.audit['days'].values() for x in d.get('review_documents',[])})
         self.audit['totals']={key:sum(day.get(key,0) for day in self.audit['days'].values()) for key in
              ('index_dispositions','title_candidates','energy_documents','energy_events','municipal_leads','corrections','excluded','review_required')}
         self.audit['updated_at']=datetime.now(timezone.utc).isoformat()

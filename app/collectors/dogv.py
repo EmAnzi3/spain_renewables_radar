@@ -17,7 +17,7 @@ from bs4 import BeautifulSoup
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-from app.parser import parse_event
+from app.parser import parse_event, build_project_key
 
 API = "https://dogv.gva.es/dogv-portal"
 PDF_BASE = "https://dogv.gva.es/datos"
@@ -35,6 +35,14 @@ EXCLUDE = re.compile(
     re.I,
 )
 SCOPE_SUFFIX = "\nComunitat Valenciana"
+# Valencian resolutions name plants as "... denominada FV Asprillas I, incluida ..." and
+# cite the energy file as "ATALFE/2021/24" without an "expediente" label.
+TITLE_NAME_RE = re.compile(
+    r"denominad[ao]\s+[«\"“]?(.{3,90}?)[»\"”]?"
+    r"(?=\s*,|\s+y\s+su|\s+incluid|\s+situad|\s+ubicad|\s+en\s+(?:el\s+)?t[ée]rmino|\s+de\s+\d|\.\s|\.$|$)",
+    re.I,
+)
+ATALFE_RE = re.compile(r"\bATALFE/\d{4}/\d+(?:/\d+)?\b", re.I)
 
 
 class DOGVCollector:
@@ -132,5 +140,21 @@ class DOGVCollector:
                                 publication_date=day.isoformat(), title=item["title"], url=url,
                                 raw_text=body + SCOPE_SUFFIX)
             if event.technology:
-                out.append(event)
+                out.append(self.refine_identity(event, item["title"], body))
         return out
+
+    @staticmethod
+    def refine_identity(event, title: str, body: str):
+        """DOGV-only: explicit plant name from the title and ATALFE file number (no inference)."""
+        m = TITLE_NAME_RE.search(title or "")
+        if m:
+            name = m.group(1).strip(" ,.;:«»\"“”")
+            if 3 <= len(name) <= 90:
+                event.project_name = name
+        if not event.expediente:
+            a = ATALFE_RE.search(title or "") or ATALFE_RE.search(body or "")
+            if a:
+                event.expediente = a.group(0).upper()
+        event.project_key = build_project_key(event.project_name, event.technology, event.province,
+                                              event.external_id, event.expediente)
+        return event

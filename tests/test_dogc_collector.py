@@ -79,11 +79,13 @@ class CollectorTests(unittest.TestCase):
             with self.assertRaises(ValueError):c.collect_day(DAY)
             self.assertFalse(c.audit['complete']);self.assertEqual(c.projected,{});c.close()
 
-    def test_unrecognized_semantics_fail_the_source_day(self):
+    def test_unrecognized_semantics_are_held_for_review_not_projected(self):
         with tempfile.TemporaryDirectory() as td:
             c=self.run_candidate(Path(td),'REVIEW_REQUIRED')
-            with self.assertRaises(ValueError):c.collect_day(DAY)
-            self.assertEqual(c.audit['totals']['review_required'],1);self.assertEqual(c.projected,{});c.close()
+            self.assertEqual(c.collect_day(DAY),[])
+            self.assertEqual(c.audit['totals']['review_required'],1);self.assertEqual(c.projected,{})
+            self.assertEqual(len(c.audit['review_pending']),1)
+            self.assertEqual(len(json.loads((c.generation/'unresolved.json').read_text())),1);c.close()
 
     def test_metadata_cannot_be_attached_to_an_unpersisted_event(self):
         with tempfile.TemporaryDirectory() as td:
