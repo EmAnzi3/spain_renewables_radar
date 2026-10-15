@@ -11,5 +11,6 @@ from .andalucia_public import AndaluciaPublicCollector
 from .gva_public import GVAPublicCollector
 from .dog import DOGCollector
 from .dogc import DOGCCollector
+from .dogv import DOGVCollector
 
-__all__ = ["BOECollector","BOCYLCollector","BOACollector","BOJACollector","DOCMCollector","DOECollector","BORMCollector","BOCMCollector","SABIACollector","AndaluciaPublicCollector","GVAPublicCollector","DOGCollector","DOGCCollector"]
+__all__ = ["BOECollector","BOCYLCollector","BOACollector","BOJACollector","DOCMCollector","DOECollector","BORMCollector","BOCMCollector","SABIACollector","AndaluciaPublicCollector","GVAPublicCollector","DOGCollector","DOGCCollector","DOGVCollector"]
