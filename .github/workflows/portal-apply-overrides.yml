@@ -6,8 +6,8 @@ run-name: Apply manual corrections to the portal (no source requests)
 on:
   workflow_dispatch:
   push:
-    branches: ['main', 'feat/review-flags-manual-overrides']
-    paths: ['config/manual_overrides.csv', '.github/workflows/portal-apply-overrides.yml']
+    branches: ['main']
+    paths: ['config/manual_overrides.csv']
 permissions:
   contents: read
   actions: read
@@ -29,7 +29,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: python -m scripts.portal_inputs
-      - name: Seed only if no operational state exists
+      - name: Seed only if no operational state exists (main restores the latest validated state)
         run: |
           if [ ! -f data/spain_renewables.sqlite ]; then python -m scripts.prepare_portal_seed --seed inputs/baseline; fi
           python -m app.valencian_alternatives --probe-root inputs/alternatives --output reports/alternative_sources.json
