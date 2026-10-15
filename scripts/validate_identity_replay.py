@@ -1,6 +1,7 @@
 """Replay immutable official artifacts to certify a safe legacy migration and source join."""
 import copy
 import json
+import re
 import shutil
 import sys
 from collections import Counter
@@ -22,8 +23,15 @@ def main():
     originals={r['id']:dict(r) for r in conn.execute('SELECT * FROM events')}
     repair=repair_legacy_identities(conn,report_dir=out)
     assert repair['projects_before']==106 and repair['events_before']==128,repair
-    assert repair['projects_after']==124 and repair['events_after']==125,repair
-    assert len(repair['split_groups'])==8 and repair['quarantined_source_events']==3,repair
+    # dd96ec4 (2026-10-12) added "plan especial de infraestructuras" to the BOCM
+    # scope exclusion; the legacy repair reuses collector scope rules, so the
+    # baseline's urban-planning notices are now quarantined (payloads preserved)
+    # instead of becoming projects. Expected counts follow that reviewed decision.
+    assert repair['projects_after']==122 and repair['events_after']==123,repair
+    assert len(repair['split_groups'])==8 and repair['quarantined_source_events']==5,repair
+    quarantined=[json.loads(r[0]) for r in conn.execute('SELECT payload_json FROM quarantined_source_events')]
+    planning=[q for q in quarantined if q['source_code']=='BOCM' and re.search(r'plan especial (?:de )?infraestructuras',q['title'],re.I)]
+    assert len(planning)==2,[(q['source_code'],q['external_id'],q['title'][:120]) for q in quarantined]
     assert Path(repair['backup_path']).exists()
     kept={r['id']:dict(r) for r in conn.execute('SELECT * FROM events')}
     for ident,row in kept.items():assert _source_fingerprint(row)==_source_fingerprint(originals[ident])
