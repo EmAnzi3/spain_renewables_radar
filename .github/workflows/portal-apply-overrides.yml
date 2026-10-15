@@ -1,0 +1,47 @@
+name: portal-apply-overrides
+run-name: Apply manual corrections to the portal (no source requests)
+# Fast path for manual data: restores the latest validated operational database,
+# applies config/manual_overrides.csv and re-renders the portal. It never calls
+# the official sources, so it takes minutes instead of a full collection run.
+on:
+  workflow_dispatch:
+  push:
+    branches: ['main', 'feat/review-flags-manual-overrides']
+    paths: ['config/manual_overrides.csv', '.github/workflows/portal-apply-overrides.yml']
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: portal-apply-overrides
+  cancel-in-progress: true
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -r requirements.txt
+      - name: Validate the corrections file
+        run: python -c "from app.manual_overrides import load; print(len(load()), 'manual corrections')"
+      - name: Restore the latest validated operational state (no source requests)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python -m scripts.portal_inputs
+      - name: Seed only if no operational state exists
+        run: |
+          if [ ! -f data/spain_renewables.sqlite ]; then python -m scripts.prepare_portal_seed --seed inputs/baseline; fi
+          python -m app.valencian_alternatives --probe-root inputs/alternatives --output reports/alternative_sources.json
+      - name: Apply manual corrections and write the review queue
+        run: python -m app.manual_overrides --db data/spain_renewables.sqlite --review-queue site/da_verificare.csv
+      - name: Render portal
+        run: >-
+          python -m app.web_portal --db data/spain_renewables.sqlite
+          --status reports/operational/latest.json --output site
+          --bopv inputs/bopv --alternatives reports/alternative_sources.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: radar-web-with-overrides
+          path: site/
+          if-no-files-found: error

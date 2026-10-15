@@ -45,7 +45,12 @@ def payload(database:Path,status:dict,*,bopv:Path|None=None,alternatives:Path|No
         if any(x['severity']=='ERROR' for x in issues):raise ValueError('Cannot publish structural quality errors')
         flags=defaultdict(list)
         for issue in issues:flags[issue['project_key']].append({k:issue[k] for k in ('severity','code','detail')})
+        manual=defaultdict(list)
+        if conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='manual_field_overrides'").fetchone():
+            for m in conn.execute('SELECT * FROM manual_field_overrides'):
+                manual[m['project_key']].append({k:m[k] for k in ('field','value','previous_value','evidence_url','note','author','date')})
         for row in rows:
+            row['manual_overrides']=manual[row['project_key']]
             row['events']=events[row['project_key']]
             row['source_codes']=sorted({e['source_code'] for e in row['events']});row['issues']=flags[row['project_key']]
             if not row['events']:raise ValueError('Project without original event')

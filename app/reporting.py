@@ -308,14 +308,18 @@ def write_quality_issues(conn,out_dir="reports"):
                     "La fonte raggruppa più progetti senza una denominazione individuale; il nome resta volutamente vuoto.",
                 )
             else:
-                add(p,"ERROR","MISSING_PROJECT_NAME","Nome progetto non estratto.")
+                # Not a structural defect: the record keeps its unique per-act identity
+                # (it cannot merge with another plant) and is published for review.
+                add(p,"WARN","MISSING_PROJECT_NAME",
+                    "Nome progetto non estratto: da verificare sull'atto e, se noto, inserire in config/manual_overrides.csv.")
         elif suspicious_name.search(name):
             add(p,"WARN","SUSPICIOUS_PROJECT_NAME","Nome probabilmente estratto da testo generico e da verificare.")
 
         if mw is None:
             add(p,"INFO","MISSING_POWER_MW","Potenza non presente o non estratta dalla fonte corrente.")
         elif mw <= 0:
-            add(p,"ERROR","INVALID_POWER_MW",f"Potenza non valida: {mw}.")
+            add(p,"WARN","INVALID_POWER_MW",
+                f"Potenza non valida ({mw}): da verificare sull'atto e correggere in config/manual_overrides.csv.")
         elif mw > 1000:
             add(p,"WARN","POWER_OUTLIER_GT_1000_MW",f"Potenza molto elevata ({mw} MW): verificare unità/decimali e progetto.")
 
