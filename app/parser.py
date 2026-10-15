@@ -160,7 +160,8 @@ def _clean_project_name(value:str)->str:
 
 SUSPICIOUS_PROJECT_NAME_RE=re.compile(
     r"^(?:bolet[ií]n oficial|existente\b|por bater[ií]as\b|estar[aá] sometida\b|"
-    r"a instancia de\b|de autoconsumo\b|fase\s+\d|y\s+\d|\(csfv\)$)", re.I,
+    r"a instancia de\b|de autoconsumo\b|fase\s+\d|y\s+\d|"
+    r"y\s+infraestructuras?\s+de\s+evacuaci[oó]n\b|\(csfv\)$)", re.I,
 )
 
 def _acceptable_project_name(value:str)->bool:
