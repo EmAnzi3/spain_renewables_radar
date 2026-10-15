@@ -67,7 +67,9 @@ def repair_database(conn,out_dir:Path)->dict:
     if all(project[k]==v for k,v in current.items()) and all(event[k]==v for k,v in expected_event.items()):return result
     if conn.execute('SELECT COUNT(*) FROM events WHERE project_key=?',(LEGACY_KEY,)).fetchone()[0]!=1:
         raise ValueError('Shared BOCYL project requires an explicit multi-event review')
-    if any(project[k]!=v for k,v in OLD.items()) or any(event[k]!=v for k,v in OLD.items() if k!='project_name'):
+    # Every field must be one of the two reviewed values. A mix (old name with corrected fields)
+    # is what the pre-fix legacy identity re-parse left in the state promoted by run 38797728706.
+    if any(project[k] not in (v,current[k]) for k,v in OLD.items()) or any(event[k] not in (v,current[k]) for k,v in OLD.items() if k!='project_name'):
         raise ValueError('Unexpected pre-repair BOCYL projection; no field overwritten')
     if event['event_type']!='PUBLIC_INFO' or event['commercial_stage']!='EARLY' or project['commercial_stage']!='EARLY':
         raise ValueError('Unreviewed BOCYL lifecycle; automatic repair rejected')
