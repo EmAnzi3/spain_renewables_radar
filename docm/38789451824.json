@@ -1,0 +1,24 @@
+[
+ {
+  "external_id": "DOCM-2026-7037",
+  "date": "2026-10-05",
+  "title": "Anuncio de 22/09/2026 , de la Delegación Provincial de Desarrollo Sostenible de Ciudad Real, por el que se somete a información pública la solicitud de autorización administrativa previa y autorización administrativa de ",
+  "key_matches": true,
+  "single_event_project": true,
+  "event": {
+   "technology": "BESS",
+   "power_mw": 7.2
+  },
+  "project": {
+   "project_name": "mediante baterías BESS Almagro I",
+   "technology": "BESS",
+   "power_mw": 7.2
+  },
+  "expected": {
+   "project_name": "BESS Almagro I",
+   "technology": "BESS",
+   "power_mw": 7.2
+  },
+  "reviewed_id": true
+ }
+]
