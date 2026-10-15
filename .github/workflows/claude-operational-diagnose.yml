@@ -1,0 +1,43 @@
+name: claude-operational-diagnose
+run-name: Operational refresh diagnosis (no publication)
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    env:
+      PYTHONUNBUFFERED: '1'
+      SABIA_WORKERS: '4'
+      SABIA_FORCE_LIVE_SAMPLE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -r requirements.txt
+      - name: Restore state exactly as radar-operational-web
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: python -m scripts.portal_inputs
+      - name: Seed if needed
+        run: if [ ! -f data/spain_renewables.sqlite ]; then python -m scripts.prepare_portal_seed --seed inputs/baseline; fi
+      - name: Operational refresh (captured)
+        run: |
+          set +e
+          python -u -m app.operational --db data/spain_renewables.sqlite --days 7 --cache-root inputs/baseline/data/sabia_cache > "$RUNNER_TEMP/op.log" 2>&1
+          echo "exit=$?" >> "$RUNNER_TEMP/op.log"; tail -5 "$RUNNER_TEMP/op.log"
+      - name: Publish diagnostics
+        if: always()
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git clone -q --depth 1 -b probe-results "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" "$RUNNER_TEMP/pr"
+          d="$RUNNER_TEMP/pr/operational/${GITHUB_RUN_ID}"; mkdir -p "$d"
+          tail -200 "$RUNNER_TEMP/op.log" > "$d/op_tail.log"
+          cp reports/operational/latest.json "$d/" 2>/dev/null || true
+          for f in reports/operational/runs/*/pipeline.log; do tail -250 "$f" > "$d/pipeline_tail.log"; done
+          for f in reports/operational/runs/*/reports/quality_issues_latest.csv; do grep -E "^(severity|ERROR)" "$f" > "$d/quality_errors.csv"; done
+          for f in reports/operational/runs/*/reports/coverage_latest.csv; do grep -v ",OK," "$f" > "$d/coverage_not_ok.csv"; done
+          cd "$RUNNER_TEMP/pr" && git add -A && git commit -qm "operational diag" && git push -q origin probe-results
