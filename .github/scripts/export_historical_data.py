@@ -70,8 +70,9 @@ def complete_with_flags(manifest: dict) -> bool:
     """Every source-day acquired, evidence inventory valid, only record-level quality ERRORs.
     Such shards are exported with an explicit status; certification is not claimed."""
     exp, ok = manifest.get("source_days_expected"), manifest.get("source_days_ok")
+    flagged = (manifest.get("quality") or {}).get("ERROR", 0) > 0 or manifest.get("legally_restricted_source_bodies", 0) > 0
     return bool(exp) and exp == ok and manifest.get("source_days_failed") == 0 \
-        and manifest.get("events") is not None and (manifest.get("quality") or {}).get("ERROR", 0) > 0
+        and manifest.get("pipeline_return_code") in (0, 1) and manifest.get("events") is not None and flagged
 
 
 def quality_errors(z, names):
@@ -123,7 +124,8 @@ def main() -> None:
                 break
             if fallback is None and complete_with_flags(manifest):
                 fallback = dict(meta, status="COMPLETE_WITH_QUALITY_FLAGS", z=z, man=man_name, db=db_name,
-                                quality_errors=quality_errors(z, names))
+                                quality_errors=quality_errors(z, names),
+                                restricted_bodies=manifest.get("legally_restricted_source_bodies", 0))
             reasons.append({"artifact": art["name"], "error": str(manifest.get("error", ""))[:200],
                             "source_days_failed": manifest.get("source_days_failed"),
                             "quality": manifest.get("quality")})
