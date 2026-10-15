@@ -52,7 +52,7 @@ def stage_evidence(events:list,stage:str|None)->dict|None:
         candidates=[e for e,s in ranked if STAGE_RANK.get(s,0)==best and s==stage] or [e for e,s in ranked if STAGE_RANK.get(s,0)==best]
     if not candidates:return None
     e=candidates[0]
-    return {k:e[k] for k in ('event_type','date','source_code','external_id','url','title')}
+    return {k:e[k] for k in ('event_type','date','source_code','external_id','url')}
 
 def payload(database:Path,status:dict,*,bopv:Path|None=None,alternatives:Path|None=None)->dict:
     with closing(sqlite3.connect(f'file:{database.resolve()}?mode=ro',uri=True)) as conn:
