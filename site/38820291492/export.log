@@ -1,0 +1,25 @@
+-rw-r--r-- 1 runner runner 4835462 Oct 15 23:33 pages.zip
+Archive:  ../pages.zip
+  inflating: artifact.tar            
+total 39548
+drwxr-xr-x 2 runner runner     4096 Oct 15 23:33 .
+drwxr-xr-x 4 runner runner     4096 Oct 15 23:33 ..
+-rw-r--r-- 1 runner runner 40488960 Oct 15 23:31 artifact.tar
+total 79096
+drwxr-xr-x 2 runner runner     4096 Oct 15 23:31 .
+drwxr-xr-x 4 runner runner     4096 Oct 15 23:33 ..
+-rw-r--r-- 1 runner runner        0 Oct 15 23:30 .nojekyll
+-rw-r--r-- 1 runner runner 40488960 Oct 15 23:31 artifact.tar
+-rw-r--r-- 1 runner runner      381 Oct 15 23:30 browser_receipt.json
+-rw-r--r-- 1 runner runner      296 Oct 15 23:30 build_receipt.json
+-rw-r--r-- 1 runner runner 20081350 Oct 15 23:30 data.json
+-rw-r--r-- 1 runner runner   150819 Oct 15 23:30 desktop.png
+-rw-r--r-- 1 runner runner 20172434 Oct 15 23:30 index.html
+-rw-r--r-- 1 runner runner    75843 Oct 15 23:30 mobile.png
+-rw-r--r-- 1 runner runner      177 Oct 15 23:31 pages_status.json
+total 19716
+drwxr-xr-x 2 runner runner     4096 Oct 15 23:33 .
+drwxr-xr-x 3 runner runner     4096 Oct 15 23:33 ..
+-rw-r--r-- 1 runner runner      296 Oct 15 23:33 build_receipt.json
+-rw-r--r-- 1 runner runner      977 Oct 15 23:33 export.log
+-rw-r--r-- 1 runner runner 20172434 Oct 15 23:33 index.html
