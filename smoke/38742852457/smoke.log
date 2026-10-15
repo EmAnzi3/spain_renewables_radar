@@ -1,0 +1,123 @@
+[BOE] 2026-10-12
+[BOE] 2026-10-13
+[BOE] 2026-10-14
+BOE_REVIEW_LEADS 0
+[BOCYL] 2026-10-12
+[BOCYL] 2026-10-13
+[BOCYL] 2026-10-14
+[BOA] 2026-10-12
+[BOA] 2026-10-13
+[BOA] 2026-10-14
+[BOJA] 2026-10-12
+[BOJA] 2026-10-13
+[BOJA] 2026-10-14
+BOJA_RESTRICTED_ARCHIVE_LEADS 0
+[DOCM] 2026-10-12
+[DOCM] 2026-10-13
+[DOCM] 2026-10-14
+[DOE] 2026-10-12
+[DOE] 2026-10-13
+[DOE] 2026-10-14
+[BORM] 2026-10-12
+[BORM] 2026-10-13
+[BORM] 2026-10-14
+[BOCM] 2026-10-12
+[BOCM] 2026-10-13
+[BOCM] 2026-10-14
+[AND_PUBLIC] 2026-10-12
+AND_PUBLIC snapshot=13659; dated=907; source gaps=25; acquisition=COMPLETE_ORDERED_PREFIX_SUFFIX
+[AND_PUBLIC] 2026-10-13
+[AND_PUBLIC] 2026-10-14
+[GVA_PUBLIC] 2026-10-12
+[GVA_PUBLIC] 2026-10-13
+[GVA_PUBLIC] 2026-10-14
+[MITECO_SABIA] 2026-10-12
+SABIA index FTV: 769 records
+SABIA index EOL: 434 records
+SABIA index EOM: 74 records
+SABIA index HIB: 343 records
+SABIA index ALM: 39 records
+SABIA details: 100/1659, errors=0
+SABIA details: 200/1659, errors=0
+SABIA details: 300/1659, errors=0
+SABIA details: 400/1659, errors=0
+SABIA details: 500/1659, errors=0
+SABIA details: 600/1659, errors=0
+SABIA details: 700/1659, errors=0
+SABIA details: 800/1659, errors=0
+SABIA details: 900/1659, errors=0
+SABIA details: 1000/1659, errors=0
+SABIA details: 1100/1659, errors=0
+SABIA details: 1200/1659, errors=0
+SABIA details: 1300/1659, errors=0
+SABIA details: 1400/1659, errors=0
+SABIA details: 1500/1659, errors=0
+SABIA details: 1600/1659, errors=0
+[MITECO_SABIA] 2026-10-13
+[MITECO_SABIA] 2026-10-14
+[DOG] 2026-10-12
+[DOG] 2026-10-13
+[DOG] 2026-10-14
+[DOGC] 2026-10-12
+[DOGC] 2026-10-13
+[DOGC] 2026-10-14
+Xref table not zero-indexed. ID numbers for objects will be corrected.
+fontTools is required to fully parse the encoding of a CFF Type1 font in font dictionary {'/BaseFont': '/PKIWUT+HelveticaLTStd-Bold', '/Encoding': '/WinAnsiEncoding', '/FirstChar': 32, '/FontDescriptor': IndirectObject(48, 0, 140340687526016), '/LastChar': 250, '/Subtype': '/Type1', '/Type': '/Font', '/Widths': [278, 0, 0, 0, 0, 0, 0, 0, 333, 333, 0, 0, 278, 333, 278, 278, 556, 556, 556, 556, 556, 556, 556, 556, 0, 556, 0, 0, 0, 0, 0, 0, 0, 722, 722, 722, 722, 667, 611, 778, 722, 278, 0, 722, 611, 833, 722, 778, 667, 0, 722, 667, 611, 722, 667, 944, 0, 0, 0, 0, 0, 0, 0, 0, 0, 556, 611, 556, 611, 556, 333, 611, 0, 278, 278, 556, 278, 889, 611, 611, 611, 611, 389, 556, 333, 611, 556, 0, 556, 556, 500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 278, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 278, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 778, 778, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 556, 0, 0, 0, 0, 278, 0, 0, 0, 0, 611, 611, 0, 0, 0, 0, 0, 0, 611]}, but is not installed. Consider installing fontTools if you encounter encoding problems.
+fontTools is required to fully parse the encoding of a CFF Type1 font in font dictionary {'/BaseFont': '/UKRVHJ+HelveticaLTStd-Roman', '/Encoding': '/WinAnsiEncoding', '/FirstChar': 32, '/FontDescriptor': IndirectObject(51, 0, 140340687526016), '/LastChar': 119, '/Subtype': '/Type1', '/Type': '/Font', '/Widths': [278, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 333, 278, 278, 556, 556, 556, 556, 556, 0, 0, 556, 556, 556, 278, 0, 0, 0, 0, 0, 0, 0, 667, 0, 722, 0, 0, 0, 0, 278, 0, 0, 556, 0, 722, 0, 0, 0, 0, 667, 0, 0, 0, 0, 667, 0, 0, 0, 0, 0, 0, 0, 0, 556, 0, 500, 556, 556, 0, 556, 556, 0, 0, 0, 0, 0, 556, 556, 556, 0, 0, 0, 278, 0, 0, 722]}, but is not installed. Consider installing fontTools if you encounter encoding problems.
+fontTools is required to fully parse the encoding of a CFF Type1 font in font dictionary {'/BaseFont': '/UKRVHJ+HelveticaLTStd-Roman', '/Encoding': '/WinAnsiEncoding', '/FirstChar': 32, '/FontDescriptor': IndirectObject(51, 0, 140340687526016), '/LastChar': 119, '/Subtype': '/Type1', '/Type': '/Font', '/Widths': [278, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 333, 278, 278, 556, 556, 556, 556, 556, 0, 0, 556, 556, 556, 278, 0, 0, 0, 0, 0, 0, 0, 667, 0, 722, 0, 0, 0, 0, 278, 0, 0, 556, 0, 722, 0, 0, 0, 0, 667, 0, 0, 0, 0, 667, 0, 0, 0, 0, 0, 0, 0, 0, 556, 0, 500, 556, 556, 0, 556, 556, 0, 0, 0, 0, 0, 556, 556, 556, 0, 0, 0, 278, 0, 0, 722]}, but is not installed. Consider installing fontTools if you encounter encoding problems.
+Xref table not zero-indexed. ID numbers for objects will be corrected.
+fontTools is required to fully parse the encoding of a CFF Type1 font in font dictionary {'/BaseFont': '/GODRZG+HelveticaLTStd-Bold', '/Encoding': '/WinAnsiEncoding', '/FirstChar': 32, '/FontDescriptor': IndirectObject(59, 0, 140340687507760), '/LastChar': 250, '/Subtype': '/Type1', '/Type': '/Font', '/Widths': [278, 0, 0, 0, 0, 0, 0, 0, 333, 333, 0, 0, 278, 333, 278, 0, 556, 556, 556, 556, 556, 556, 0, 556, 0, 0, 0, 0, 0, 0, 0, 0, 0, 722, 722, 722, 722, 667, 611, 778, 722, 278, 0, 0, 611, 833, 722, 778, 667, 0, 722, 667, 611, 722, 667, 944, 0, 0, 0, 0, 0, 0, 0, 0, 0, 556, 611, 556, 611, 556, 333, 611, 0, 278, 278, 556, 278, 889, 611, 611, 611, 611, 389, 556, 333, 611, 556, 0, 556, 0, 500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 278, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 278, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 778, 778, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 556, 0, 0, 0, 0, 278, 0, 0, 0, 0, 0, 611, 0, 0, 0, 0, 0, 0, 611]}, but is not installed. Consider installing fontTools if you encounter encoding problems.
+fontTools is required to fully parse the encoding of a CFF Type1 font in font dictionary {'/BaseFont': '/BROIHQ+HelveticaLTStd-Roman', '/Encoding': '/WinAnsiEncoding', '/FirstChar': 32, '/FontDescriptor': IndirectObject(62, 0, 140340687507760), '/LastChar': 119, '/Subtype': '/Type1', '/Type': '/Font', '/Widths': [278, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 333, 278, 278, 556, 556, 556, 556, 556, 0, 0, 556, 556, 556, 278, 0, 0, 0, 0, 0, 0, 0, 667, 0, 722, 0, 0, 0, 0, 278, 0, 0, 556, 0, 722, 0, 0, 0, 0, 667, 0, 0, 0, 0, 667, 0, 0, 0, 0, 0, 0, 0, 0, 556, 0, 500, 556, 556, 0, 556, 556, 0, 0, 0, 0, 0, 556, 556, 556, 0, 0, 0, 278, 0, 0, 722]}, but is not installed. Consider installing fontTools if you encounter encoding problems.
+fontTools is required to fully parse the encoding of a CFF Type1 font in font dictionary {'/BaseFont': '/BROIHQ+HelveticaLTStd-Roman', '/Encoding': '/WinAnsiEncoding', '/FirstChar': 32, '/FontDescriptor': IndirectObject(62, 0, 140340687507760), '/LastChar': 119, '/Subtype': '/Type1', '/Type': '/Font', '/Widths': [278, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 333, 278, 278, 556, 556, 556, 556, 556, 0, 0, 556, 556, 556, 278, 0, 0, 0, 0, 0, 0, 0, 667, 0, 722, 0, 0, 0, 0, 278, 0, 0, 556, 0, 722, 0, 0, 0, 0, 667, 0, 0, 0, 0, 667, 0, 0, 0, 0, 0, 0, 0, 0, 556, 0, 500, 556, 556, 0, 556, 556, 0, 0, 0, 0, 0, 556, 556, 556, 0, 0, 0, 278, 0, 0, 722]}, but is not installed. Consider installing fontTools if you encounter encoding problems.
+fontTools is required to fully parse the encoding of a CFF Type1 font in font dictionary {'/BaseFont': '/BROIHQ+HelveticaLTStd-Roman', '/Encoding': '/WinAnsiEncoding', '/FirstChar': 32, '/FontDescriptor': IndirectObject(62, 0, 140340687507760), '/LastChar': 119, '/Subtype': '/Type1', '/Type': '/Font', '/Widths': [278, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 333, 278, 278, 556, 556, 556, 556, 556, 0, 0, 556, 556, 556, 278, 0, 0, 0, 0, 0, 0, 0, 667, 0, 722, 0, 0, 0, 0, 278, 0, 0, 556, 0, 722, 0, 0, 0, 0, 667, 0, 0, 0, 0, 667, 0, 0, 0, 0, 0, 0, 0, 0, 556, 0, 500, 556, 556, 0, 556, 556, 0, 0, 0, 0, 0, 556, 556, 556, 0, 0, 0, 278, 0, 0, 722]}, but is not installed. Consider installing fontTools if you encounter encoding problems.
+[DOGV] 2026-10-12
+[DOGV] 2026-10-13
+[DOGV] 2026-10-14
+[FIELD_EVIDENCE] previous SQLite projection backed up to data/migrations/field-evidence-before-20261015T134957359144Z.sqlite
+[FIELD_EVIDENCE] repaired promoters 12 corrected MW 0
+[INE_MUNICIPALITIES] province missing=4; municipal evidence pending=22
+  INE geography: resolved=1 | multi-province=0 | unresolved=0
+  INE municipality context: {'documented': 13, 'conflicts': 1, 'unverified': 8, 'existing_preserved': 5}; original project provinces are retained
+[EPC_BOP] evidence=0 | projects=0 | confirmed=0 | candidate=0
+Nuovi eventi rilevati:
+  + BOE | 2026-10-12 | WIND | 52.8 MW | Muracais" | Lugo | PERMITTING | BOE-A-2026-21224
+  + BOE | 2026-10-12 | WIND | 180.54 MW | Alamoceiros | Pontevedra | PERMITTING | BOE-A-2026-21225
+  + BOE | 2026-10-12 | HYBRID | 21.56 MW | energético Mulhacén, con una potencia instalada | Toledo | PERMITTING | BOE-A-2026-21226
+  + BOE | 2026-10-12 | HYBRID | 68.51 MW | Azor Solar | Madrid | PERMITTING | BOE-A-2026-21227
+  + BOE | 2026-10-13 | HYBRID | 19.8 MW | BESS Tabernas II | Almería | AUTHORIZED | BOE-A-2026-21303
+  + BOE | 2026-10-14 | HYBRID | 19.96 MW | ALM Ictio Alcázar II | Ciudad Real | PERMITTING | BOE-A-2026-21433
+  + BOE | 2026-10-14 | HYBRID | 19.96 MW | ALM Ictio Alcázar III | Ciudad Real | PERMITTING | BOE-A-2026-21434
+  + BOE | 2026-10-14 | WIND | 9 MW | PE Anoia y Segarra II | Lleida | AUTHORIZED | BOE-B-2026-33451
+  + BOCYL | 2026-10-14 | PV | MW n.d. | FV Soto | Valladolid | PRECONSTRUCTION | BOCYL-D-14102026-199-33
+  + BOA | 2026-10-13 | PV | MW n.d. | Valdecañadilla | Zaragoza | AUTHORIZED | 007961668
+  + BOA | 2026-10-13 | WIND | MW n.d. | Bonastre 4 | Teruel | AUTHORIZED | 007961669
+  + BOA | 2026-10-13 | HYBRID | 10 MW | Elawan Fuendetodos I | Zaragoza | EARLY | 007961679
+  + BOA | 2026-10-13 | HYBRID | 31 MW | Fraga I | Huesca | EARLY | 007961680
+  + BOA | 2026-10-13 | HYBRID | 10 MW | Elawan Fuendetodos II | Zaragoza | EARLY | 007961681
+  + BOA | 2026-10-13 | HYBRID | MW n.d. | y sistema de almacenamiento | Zaragoza | EARLY | 007961682
+  + BOA | 2026-10-14 | PV | MW n.d. | Fontanales I | Teruel | AUTHORIZED | 007961711
+  + BOA | 2026-10-14 | PV | 0.003 MW | Gargallo I | Teruel | AUTHORIZED | 007961712
+  + BOA | 2026-10-14 | PV | MW n.d. | El Gilo | Teruel | AUTHORIZED | 007961713
+  + GVA_PUBLIC | 2026-10-14 | HYBRID | MW n.d. | CSF PUENTES | Alicante | EARLY | 416113036
+  + MITECO_SABIA | 2026-10-14 | WIND | 65.25 MW | ARLO | provincia n.d. | EARLY | 20260263:ENTRY:c055da02eadac12777e0
+  + MITECO_SABIA | 2026-10-14 | WIND | 110.9 MW | CÉFIRO | provincia n.d. | EARLY | 20260263:ENTRY:1c7fa5c24efddd94e84b
+  + MITECO_SABIA | 2026-10-14 | WIND | 63 MW | PAUCALI | provincia n.d. | EARLY | 20260263:ENTRY:fd575d9762ee499c5551
+  + DOGC | 2026-10-14 | BESS | 5.5 MW | PHFV CENTELLES | Barcelona | EARLY | 1056781
+  + DOGV | 2026-10-13 | PV | 5.485 MW | ISF El Fondo Benifaió Solar | Valencia | BLOCKED | DOGV-2026-29627
+  + DOGV | 2026-10-13 | HYBRID | 5 MW | Espioca Solar y BESS Espioca Power | provincia n.d. | EARLY | DOGV-2026-31305
+  + DOGV | 2026-10-13 | PV | 9.9 MW | FV Asprillas I | Alicante | AUTHORIZED | DOGV-2026-31952
+  + DOGV | 2026-10-14 | PV | 0.9 MW | FV Andilla | Valencia | BLOCKED | DOGV-2026-29807
+Quality issues: ERROR=0 | WARN=5 | INFO=31
+Eventi rilevanti letti: 27
+Nuovi eventi: 27 | nuovi progetti: 27 | progetti totali: 27 | source/day errori: 0
+Report: reports/change_reports/changes_latest.html
+Coverage: reports/coverage_latest.html
+Quality: reports/quality_issues_latest.html
+EPC/BoP: reports/epc_bop_evidence_latest.html
+Province view: reports/province_view_latest.html (14 province)
+Andalucia source gaps: reports/andalucia_public/source_gaps.html
+GVA source assertions: reports/gva_public/source_flags.html
+DOG original evidence: reports/dog/coverage.json; Galicia links: reports/dog/galicia_links.json
+DOGC original acts, municipal leads and corrections: reports/dogc/index.html; reports/dogc/coverage.json
+Dashboard: docs/index.html
+exit=0
