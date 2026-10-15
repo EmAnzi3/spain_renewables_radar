@@ -44,7 +44,7 @@ class ReportingQualityTests(unittest.TestCase):
             self.assertIn(("WARN","SOURCE_UNNAMED_MULTI_PROJECT"),codes)
             self.assertNotIn(("ERROR","MISSING_PROJECT_NAME"),codes)
 
-    def test_ordinary_missing_project_name_remains_error(self):
+    def test_ordinary_missing_project_name_is_review_warning_not_blocking(self):
         with tempfile.TemporaryDirectory() as tmp:
             conn=connect(str(Path(tmp)/"test.sqlite"))
             self._insert_project_and_event(
@@ -54,7 +54,8 @@ class ReportingQualityTests(unittest.TestCase):
             )
             issues,_,_=write_quality_issues(conn,out_dir=Path(tmp)/"reports")
             codes={(x["severity"],x["code"]) for x in issues}
-            self.assertIn(("ERROR","MISSING_PROJECT_NAME"),codes)
+            self.assertIn(("WARN","MISSING_PROJECT_NAME"),codes)
+            self.assertNotIn(("ERROR","MISSING_PROJECT_NAME"),codes)
 
 
 if __name__=="__main__":

@@ -172,6 +172,9 @@ def main():
             mw=f"{e.power_mw:g} MW" if e.power_mw is not None else "MW n.d."
             print(f"  + {e.source_code} | {e.publication_date} | {e.technology or '?'} | {mw} | {e.project_name or 'nome n.d.'} | {e.province or 'provincia n.d.'} | {e.commercial_stage} | {e.external_id}")
     write_changes(new_events);write_coverage(coverage)
+    from app.manual_overrides import apply as apply_manual_overrides
+    overrides=apply_manual_overrides(conn)
+    if overrides['rows']:print(f"[MANUAL_OVERRIDES] applied={overrides['applied']} | not yet present={len(overrides['unmatched'])}")
     quality_issues,_,_=write_quality_issues(conn)
     provinces,_,_=write_province_view(conn);rows=export_dashboard(conn);write_dashboard()
     q_error=sum(x["severity"]=="ERROR" for x in quality_issues)
