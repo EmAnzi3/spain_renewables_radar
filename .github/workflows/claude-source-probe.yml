@@ -16,7 +16,7 @@ jobs:
         with: {python-version: '3.12'}
       - run: pip install requests
       - run: python .github/probes/probe_urls.py .github/probes/urls.txt "$RUNNER_TEMP/probe.json"
-      - run: python .github/probes/js_grep.py "$RUNNER_TEMP/js.json" https://dogv.gva.es/dogv-portal-frontend/es/sumari
+      - run: echo "{}" > "$RUNNER_TEMP/js.json"
       - name: Publish results to probe-results branch
         run: |
           mkdir -p "$RUNNER_TEMP/pub" && cd "$RUNNER_TEMP/pub"

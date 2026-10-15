@@ -1,1 +1,5 @@
-https://www.borm.es/services/boletin/ultimo
+https://dogv.gva.es/dogv-portal/dogv/latest?lang=es
+https://dogv.gva.es/dogv-portal/dogv/calendar?startDate=2025-10-01&endDate=2025-10-31
+https://dogv.gva.es/dogv-portal/dogv/calendar?startDate=01/10/2025&endDate=31/10/2025
+https://dogv.gva.es/dogv-portal/dogv?date=2025-10-01&lang=es
+https://dogv.gva.es/dogv-portal/dogv?date=01/10/2025&lang=es
