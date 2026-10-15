@@ -3,14 +3,17 @@ import json, re, sys
 from urllib.parse import urljoin
 import requests
 UA = "SpainRenewablesRadar/0.1 (+https://github.com/EmAnzi3/spain_renewables_radar)"
-PAT = re.compile(r"templateUrl|\.json|\.csv|\.xml|/api/|/rest|services/|backend|baseUrl|apiUrl|endpoint|sumari|datos|dades", re.I)
+PAT = re.compile(r"https?://[a-z0-9.-]+/[a-z0-9/_-]*(?:api|backend|rest|services)[a-z0-9/_-]*|environment|apiUrl|urlBase|backend|\.json|\.csv|\.xml|/api/|/rest|services/|backend|baseUrl|apiUrl|endpoint|sumari|datos|dades", re.I)
 out = {}
 for page in sys.argv[2:]:
     res = {"scripts": {}}
     try:
         html = requests.get(page, headers={"User-Agent": UA}, timeout=60).text
         res["page_hits"] = sorted(set(m.strip()[:300] for m in re.findall(r"[^\n]*(?:%s)[^\n]*" % PAT.pattern, html, re.I)))[:80]
-        srcs = [urljoin(page, s) for s in re.findall(r'''<script[^>]+src=["']([^"']+)''', html)]
+        base = re.search(r'<base href="([^"]+)"', html)
+        root = urljoin(page, base.group(1)) if base else page
+        srcs = [urljoin(root, s) for s in re.findall(r'''<script[^>]*\bsrc=["']?([^"' >]+)''', html)]
+        res["srcs"] = srcs
         for s in srcs[:60]:
             if "googleapis" in s or "fontawesome" in s: continue
             try:
