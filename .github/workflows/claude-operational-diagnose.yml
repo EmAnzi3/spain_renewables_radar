@@ -35,9 +35,11 @@ jobs:
           git config --global user.email "41898283+github-actions[bot]@users.noreply.github.com"
           git clone -q --depth 1 -b probe-results "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" "$RUNNER_TEMP/pr"
           d="$RUNNER_TEMP/pr/operational/${GITHUB_RUN_ID}"; mkdir -p "$d"
+          set +e
           tail -200 "$RUNNER_TEMP/op.log" > "$d/op_tail.log"
-          cp reports/operational/latest.json "$d/" 2>/dev/null || true
-          for f in reports/operational/runs/*/pipeline.log; do tail -250 "$f" > "$d/pipeline_tail.log"; done
-          for f in reports/operational/runs/*/reports/quality_issues_latest.csv; do grep -E "^(severity|ERROR)" "$f" > "$d/quality_errors.csv"; done
-          for f in reports/operational/runs/*/reports/coverage_latest.csv; do grep -v ",OK," "$f" > "$d/coverage_not_ok.csv"; done
+          find reports data -maxdepth 6 \( -name latest.json -o -name status.json \) -path '*operational*' -exec cp --backup=numbered {} "$d/" \;
+          f=$(find reports data -name pipeline.log -path '*operational*' | head -1); [ -n "$f" ] && tail -300 "$f" > "$d/pipeline_tail.log"
+          f=$(find reports data -name quality_issues_latest.csv -path '*runs*' | head -1); [ -n "$f" ] && grep -E "^(.?severity|ERROR)" "$f" > "$d/quality_errors.csv"
+          f=$(find reports data -name coverage_latest.csv -path '*runs*' | head -1); [ -n "$f" ] && grep -v ",OK," "$f" > "$d/coverage_not_ok.csv"
+          find reports data -path '*operational*' -maxdepth 5 | head -80 > "$d/tree.txt"
           cd "$RUNNER_TEMP/pr" && git add -A && git commit -qm "operational diag" && git push -q origin probe-results
