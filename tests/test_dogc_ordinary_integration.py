@@ -20,7 +20,7 @@ from app.dogc_projection import event_from_record
 class OrdinaryDOGCTests(unittest.TestCase):
     def test_thirteen_collectors_are_consistent_without_counting_enrichments(self):
         result=validate_source_registry(SOURCES)
-        self.assertEqual(result['discovery_collectors'],13)
+        self.assertEqual(result['discovery_collectors'],14)
         self.assertIn('DOGC',result['source_codes'])
         self.assertNotIn('REE_ACCESS',result['source_codes'])
         self.assertIs(COLLECTOR_CLASSES['DOGC'],DOGCCollector)
@@ -31,7 +31,7 @@ class OrdinaryDOGCTests(unittest.TestCase):
 
     def test_pre_existing_source_membership_is_preserved(self):
         old={'BOE','BOCYL','BOA','BOJA','DOCM','DOE','BORM','BOCM','AND_PUBLIC','GVA_PUBLIC','MITECO_SABIA','DOG'}
-        self.assertEqual(set(COLLECTOR_CLASSES)-{'DOGC'},old)
+        self.assertEqual(set(COLLECTOR_CLASSES)-{'DOGC','DOGV'},old)
 
     def test_environmental_screening_stays_permitting_not_dia_or_authorized(self):
         self.assertEqual(commercial_stage('ENVIRONMENTAL_SCREENING'),'PERMITTING')
