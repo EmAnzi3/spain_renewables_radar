@@ -124,3 +124,18 @@ class BOJAHistoricalCoverageTests(unittest.TestCase):
     self.assertEqual(report['restricted_document_count'],1)
     self.assertEqual(report['restricted_leads'][0]['raw_text'],body)
    finally:os.chdir(old)
+
+ def test_official_multiple_edition_day_is_not_a_zero_day(self):
+  from app.collectors.boja import MONTHS_ES
+  pieces=[]
+  for month,name in enumerate(MONTHS_ES,1):
+   rows=''.join(f'<td class="dia-boja"><a href="/eboja/2024/{month*100+n}/index.html">{n}</a></td>' for n in range(4,22))
+   if month==10:
+    rows+='<td class="dia-boja varios"><a href="/eboja/20241023.html">23</a></td>'
+   pieces.append(f'<table class="calendario_tabla"><caption>{name}</caption>{rows}</table>')
+  found=BOJACollector.parse_official_calendar(''.join(pieces),2024)
+  self.assertEqual(found[date(2024,10,23)],'MULTIPLE_OFFICIAL_EDITIONS')
+  collector=BOJACollector()
+  collector._official_year_calendars[2024]=found
+  with self.assertRaisesRegex(ValueError,'official edition'):
+   collector._verified_nonpublication_day(date(2024,10,23))
