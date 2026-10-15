@@ -115,6 +115,11 @@ def scalar_capacity(record, technology):
     return None, {'status':'NO_UNAMBIGUOUS_PROJECT_HEADLINE_POWER'}
 
 
+class IdentityReviewRequired(ValueError):
+    """An energy act whose plant identity, technology or current dossier is not explicit in the source.
+    It is held for human review with its original evidence; nothing is inferred and no project is created."""
+
+
 def event_from_record(record, pages, catalog):
     """Return (event or None, evidence). Non-energy records remain audited leads."""
     if record.get('named_asset_group'):
@@ -128,13 +133,13 @@ def event_from_record(record, pages, catalog):
         raise ValueError('DOGC event has no validated lifecycle mapping')
     name=(record.get('project_name') or {}).get('value')
     if not name or not record['technologies']:
-        raise ValueError('Energy act lacks evidenced plant identity or technology')
+        raise IdentityReviewRequired('Energy act lacks evidenced plant identity or technology')
     references=sorted({x['value'] for x in record['primary_references']})
     fue=[ref for ref in references if re.fullmatch(r'FUE-\d{4}-\d{8}',ref)]
     fallback=[ref for ref in references if re.fullmatch(r'OTA[A-Z]{3}\d{8}|\d{4}/\d{6}/[A-Z]',ref)]
     chosen=fue or fallback
     if not chosen:
-        raise ValueError('No reliable current administrative reference; retain for identity review')
+        raise IdentityReviewRequired('No reliable current administrative reference; retain for identity review')
     technologies=record['technologies']
     existing_pv=any(c['role']=='EXISTING_PV_CONTEXT' for c in record['components'])
     technology='BESS' if existing_pv and 'BESS' in technologies else technologies[0] if len(technologies)==1 else 'HYBRID'
