@@ -65,6 +65,7 @@ REGIONAL_SOURCE_SCOPE={
     "DOCM":("Castilla-La Mancha",{"Albacete","Ciudad Real","Cuenca","Guadalajara","Toledo"}),
     "DOE":("Extremadura",{"Badajoz","Cáceres"}),
     "BORM":("Murcia",{"Murcia"}),
+    "DOGV":("Comunitat Valenciana",{"Alicante","Alicante/Alacant","Castellón","Castelló","Valencia","València"}),
 }
 
 PROMOTER_PATTERNS=[

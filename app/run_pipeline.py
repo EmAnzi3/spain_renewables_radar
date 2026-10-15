@@ -2,7 +2,7 @@ from __future__ import annotations
 import argparse
 import os
 from datetime import date,timedelta
-from app.collectors import BOECollector,BOCYLCollector,BOACollector,BOJACollector,DOCMCollector,DOECollector,BORMCollector,BOCMCollector,SABIACollector,AndaluciaPublicCollector,GVAPublicCollector,DOGCollector,DOGCCollector
+from app.collectors import BOECollector,BOCYLCollector,BOACollector,BOJACollector,DOCMCollector,DOECollector,BORMCollector,BOCMCollector,SABIACollector,AndaluciaPublicCollector,GVAPublicCollector,DOGCollector,DOGCCollector,DOGVCollector
 from app.dashboard import write_dashboard
 from app.db import connect
 from app.enrichment import (
@@ -24,6 +24,12 @@ COLLECTOR_CLASSES={
     "DOCM":DOCMCollector,"DOE":DOECollector,"BORM":BORMCollector,"BOCM":BOCMCollector,
     "MITECO_SABIA":SABIACollector,"AND_PUBLIC":AndaluciaPublicCollector,"GVA_PUBLIC":GVAPublicCollector,
     "DOG":DOGCollector,"DOGC":DOGCCollector,
+}
+# Collectors available only on explicit request (e.g. --sources DOGV or a
+# historical shard) until live validation promotes them into the certified
+# ordinary set above, the source registry and the default launcher list.
+EXPERIMENTAL_COLLECTOR_CLASSES={
+    "DOGV":DOGVCollector,
 }
 
 def daterange(start:date,end:date):
@@ -49,10 +55,11 @@ def main():
     end=date.fromisoformat(args.until) if args.until else today
     start=date.fromisoformat(args.since) if args.since else end-timedelta(days=max(args.days-1,0))
     wanted=[x.strip().upper() for x in args.sources.split(",") if x.strip()]
-    unknown=[x for x in wanted if x not in COLLECTOR_CLASSES]
+    available={**COLLECTOR_CLASSES,**EXPERIMENTAL_COLLECTOR_CLASSES}
+    unknown=[x for x in wanted if x not in available]
     if unknown:raise SystemExit(f"Sorgenti non implementate: {', '.join(unknown)}")
     timeout=int(os.getenv("HTTP_TIMEOUT","30"));user_agent=os.getenv("USER_AGENT","SpainRenewablesRadar/0.1")
-    collectors=[COLLECTOR_CLASSES[code](timeout=timeout,user_agent=user_agent) for code in wanted]
+    collectors=[available[code](timeout=timeout,user_agent=user_agent) for code in wanted]
     conn=connect(args.db)
     source_repair=repair_bocyl_external_ids(conn)
     if source_repair["changed"]:print("BOCYL source-id repair:",source_repair,flush=True)
