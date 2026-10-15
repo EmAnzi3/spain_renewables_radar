@@ -31,6 +31,14 @@ def _source_fingerprint(row: dict) -> str:
     return hashlib.sha256(json.dumps(immutable,ensure_ascii=False,sort_keys=True).encode()).hexdigest()
 
 
+def source_projections()->dict:
+    """Reviewed per-source projections that collectors apply after parse_event.
+    The identity re-parse must apply the same ones, or it silently undoes them."""
+    from app.docm_storage import project_storage
+    from app.bocyl_storage import project_event
+    return {'DOCM':project_storage,'BOCYL':project_event}
+
+
 def repair_legacy_identities(conn, *, report_dir='reports/identity_repair', backup_dir=None):
     rows=[dict(r) for r in conn.execute('SELECT * FROM events ORDER BY publication_date,id')]
     invalid_keys={r['project_key'] for r in rows if r['source_code'] in {'BOE','BOCYL','BOA','BOJA','DOCM','DOE','BORM','BOCM'} and r['expediente'] and not valid_expediente(r['expediente'])}
@@ -54,9 +62,8 @@ def repair_legacy_identities(conn, *, report_dir='reports/identity_repair', back
         if row['source_code'] in {'BOE','BOCYL','BOA','BOJA','DOCM','DOE','BORM','BOCM'}:
             parsed=parse_event(source_code=row['source_code'],external_id=row['external_id'],
                                publication_date=row['publication_date'],title=row['title'],url=row['url'],raw_text=row['raw_text'] or '')
-            if row['source_code']=='DOCM':
-                from app.docm_storage import project_storage
-                parsed=project_storage(parsed)
+            reviewed=source_projections().get(row['source_code'])
+            if reviewed:parsed=reviewed(parsed)
             row['project_key']=parsed.project_key;row['expediente']=parsed.expediente;name=parsed.project_name
             if row['project_key']!=source['project_key'] or row['expediente']!=source['expediente']:
                 changed.append({'source_code':row['source_code'],'external_id':row['external_id'],

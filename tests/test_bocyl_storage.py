@@ -60,3 +60,29 @@ class MigrationTests(unittest.TestCase):
         with patch('app.bocyl_storage.source_fingerprint',side_effect=['before','changed']):
             with self.assertRaises(ValueError):repair_database(self.c,self.root/'audit')
         self.assertEqual(dict(self.c.execute('SELECT * FROM projects').fetchone()),before)
+
+
+class IdentityRepairInteractionTests(unittest.TestCase):
+    """Run 38818390168: the state promoted by 38797728706 held the old name with corrected fields."""
+    def setUp(self):
+        self.temp=tempfile.TemporaryDirectory();self.root=Path(self.temp.name);self.c=connect(str(self.root/'db.sqlite'))
+        save_event(self.c,project_event(original_event()))
+        save_event(self.c,parse_event(source_code='BOCM',external_id='BOCM-x',publication_date='2025-01-01',
+            title='Acuerdo de aprobación del plan especial de infraestructuras para planta fotovoltaica Test 10 MW',
+            url='https://www.bocm.es/x',raw_text='planta solar fotovoltaica Test de 10 MW en Madrid'));self.c.commit()
+    def tearDown(self):self.c.close();self.temp.cleanup()
+    def project(self):
+        return tuple(self.c.execute('SELECT project_name,technology,power_mw,promoter FROM projects WHERE project_key=?',(LEGACY_KEY,)).fetchone())
+    def test_identity_repair_keeps_reviewed_battery_projection(self):
+        from app.identity_migration import repair_legacy_identities
+        self.assertEqual(repair_legacy_identities(self.c,report_dir=str(self.root/'id'),backup_dir=str(self.root/'bk'))['status'],'REPAIRED')
+        self.assertEqual(self.project(),('BESS Cistérniga','BESS',2.1,'Soluciones de Ingeniería Industrial II, S.L.'))
+        self.assertEqual(repair_database(self.c,self.root/'audit')['changed_projects'],0)
+    def test_published_mixed_state_is_repaired_not_rejected(self):
+        self.c.execute("UPDATE projects SET project_name='SII La Cistérniga II' WHERE project_key=?",(LEGACY_KEY,));self.c.commit()
+        before=source_fingerprint(self.c)
+        self.assertEqual(repair_database(self.c,self.root/'audit')['changed_projects'],1)
+        self.assertEqual(self.project()[0],'BESS Cistérniga');self.assertEqual(source_fingerprint(self.c),before)
+    def test_unknown_third_value_still_rejected(self):
+        self.c.execute("UPDATE projects SET promoter='Someone Else' WHERE project_key=?",(LEGACY_KEY,));self.c.commit()
+        with self.assertRaises(ValueError):repair_database(self.c,self.root/'audit')
