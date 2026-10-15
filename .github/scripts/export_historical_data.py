@@ -66,6 +66,22 @@ def certified(manifest: dict) -> bool:
         and not (manifest.get("quality") or {}).get("ERROR")
 
 
+def complete_with_flags(manifest: dict) -> bool:
+    """Every source-day acquired, evidence inventory valid, only record-level quality ERRORs.
+    Such shards are exported with an explicit status; certification is not claimed."""
+    exp, ok = manifest.get("source_days_expected"), manifest.get("source_days_ok")
+    return bool(exp) and exp == ok and manifest.get("source_days_failed") == 0 \
+        and manifest.get("events") is not None and (manifest.get("quality") or {}).get("ERROR", 0) > 0
+
+
+def quality_errors(z, names):
+    q = next((n for n in names if n.endswith("quality_issues_latest.csv")), None)
+    if not q:
+        return []
+    rows = csv.DictReader(io.StringIO(z.read(q).decode("utf-8-sig")))
+    return [{k: r.get(k) for k in ("code", "project_key", "detail")} for r in rows if r.get("severity") == "ERROR"]
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--repo", required=True)
@@ -86,7 +102,7 @@ def main() -> None:
 
     index = []
     for (source, month), arts in sorted(groups.items()):
-        chosen = None
+        chosen, fallback, reasons = None, None, []
         for art in sorted(arts, key=lambda x: x["created_at"], reverse=True):
             try:
                 z = download(a.repo, art["id"])
@@ -96,21 +112,32 @@ def main() -> None:
             man_name = next((n for n in names if n.endswith("manifest.json") and n.count("/") <= 1), None)
             db_name = next((n for n in names if n.endswith("historical.sqlite")), None)
             if not man_name or not db_name:
+                reasons.append({"artifact": art["name"], "reason": "no manifest or database"})
                 continue
             manifest = json.loads(z.read(man_name))
-            if not certified(manifest):
-                continue
+            meta = {"source": source, "month": month, "artifact_id": art["id"],
+                    "artifact_name": art["name"], "created_at": art["created_at"],
+                    "run_id": (art.get("workflow_run") or {}).get("id"), "events": manifest.get("events")}
+            if certified(manifest):
+                chosen = dict(meta, status="CERTIFIED", z=z, man=man_name, db=db_name)
+                break
+            if fallback is None and complete_with_flags(manifest):
+                fallback = dict(meta, status="COMPLETE_WITH_QUALITY_FLAGS", z=z, man=man_name, db=db_name,
+                                quality_errors=quality_errors(z, names))
+            reasons.append({"artifact": art["name"], "error": str(manifest.get("error", ""))[:200],
+                            "source_days_failed": manifest.get("source_days_failed"),
+                            "quality": manifest.get("quality")})
+        pick = chosen or fallback
+        if pick:
             dest = out / "shards" / source / month
             dest.mkdir(parents=True, exist_ok=True)
-            (dest / "manifest.json").write_bytes(z.read(man_name))
-            (dest / "historical.sqlite").write_bytes(z.read(db_name))
-            chosen = {"source": source, "month": month, "artifact_id": art["id"],
-                      "artifact_name": art["name"], "created_at": art["created_at"],
-                      "run_id": (art.get("workflow_run") or {}).get("id"),
-                      "events": manifest.get("events")}
-            break
-        index.append(chosen or {"source": source, "month": month, "status": "NO_CERTIFIED_SHARD",
-                                "candidates": [x["name"] for x in arts]})
+            (dest / "manifest.json").write_bytes(pick["z"].read(pick["man"]))
+            (dest / "historical.sqlite").write_bytes(pick["z"].read(pick["db"]))
+            chosen = {k: v for k, v in pick.items() if k not in ("z", "man", "db")}
+        else:
+            chosen = None
+        index.append(chosen or {"source": source, "month": month, "status": "NO_USABLE_SHARD",
+                                "attempts": reasons})
 
     # Flat, human-readable views: one row per original event and per shard project.
     with (out / "events.csv").open("w", newline="", encoding="utf-8-sig") as fe, \
@@ -135,7 +162,8 @@ def main() -> None:
         "shards": index,
     }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     ok = sum("artifact_id" in r for r in index)
-    print(f"EXPORT shards_certified={ok} shards_missing={len(index) - ok}")
+    flagged = sum(r.get("status") == "COMPLETE_WITH_QUALITY_FLAGS" for r in index)
+    print(f"EXPORT shards_usable={ok} (with_quality_flags={flagged}) shards_missing={len(index) - ok}")
 
 
 if __name__ == "__main__":
