@@ -62,7 +62,7 @@ def main():
         'events':after,'idempotent_replay':before==after,
         'quality':dict(Counter(i['severity'] for i in issues)),
     }
-    assert metrics['projects']==130 and metrics['events']==133,metrics
+    assert metrics['projects']==128 and metrics['events']==131,metrics  # baseline minus the 2 quarantined planning notices
     assert new_projects==6 and len(events)==8 and before==after,metrics
     assert not metrics['quality'].get('ERROR'),metrics
     assert not conn.execute('PRAGMA foreign_key_check').fetchall()
