@@ -20,6 +20,8 @@ RELEVANT=re.compile(
 EXCLUDE=re.compile(
     r"contrataci[oó]n|licitaci[oó]n|adjudicaci[oó]n|autoconsumo|"
     r"plaza de personal cient[ií]fico-investigador.*almacenamiento energ[eé]tico|" 
+    r"procesos\\s+selectivos|oferta\\s+de\\s+trabajo|"
+    r"residuos\\s+de\\s+construcci[oó]n\\s+y\\s+demolici[oó]n|"
     r"instalaci[oó]n\s+de\s+paneles\s+fotovoltaicos\s+en\s+(?:edificios|cubiertas)|"
     r"centro\s+(?:autorizado\s+)?de\s+(?:tratamiento|reciclaje)|reciclaje\s+de\s+paneles\s+fotovoltaicos|"
     r"almacenamiento\s+de\s+residuos|veh[ií]culos\s+al\s+final\s+de\s+su\s+vida",
