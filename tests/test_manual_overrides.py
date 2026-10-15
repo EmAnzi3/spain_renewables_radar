@@ -56,3 +56,20 @@ class ManualOverridesTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ManualOverridesCLITests(unittest.TestCase):
+    def test_cli_applies_and_writes_review_queue(self):
+        import subprocess, sys, csv as _csv
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td); conn = connect(str(root / "t.sqlite"))
+            save_event(conn, parse_event(source_code="BOA", external_id="1", publication_date="2026-10-08",
+                                         title="Información pública de una instalación híbrida de 28 MW en Zaragoza.",
+                                         url="https://www.boa.aragon.es/x", raw_text="x")); conn.close()
+            (root / "o.csv").write_text(HEADER, encoding="utf-8")
+            r = subprocess.run([sys.executable, "-m", "app.manual_overrides", "--db", str(root / "t.sqlite"),
+                                "--overrides", str(root / "o.csv"), "--review-queue", str(root / "site" / "q.csv")],
+                               capture_output=True, text=True, cwd=Path(__file__).resolve().parents[1])
+            self.assertEqual(r.returncode, 0, r.stderr)
+            rows = list(_csv.DictReader((root / "site" / "q.csv").open(encoding="utf-8-sig")))
+            self.assertEqual([(x["selector"], x["field"]) for x in rows], [("BOA:1", "project_name")])
