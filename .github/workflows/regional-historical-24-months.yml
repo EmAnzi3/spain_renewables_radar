@@ -1,0 +1,150 @@
+name: regional-historical-24-months
+run-name: Regional 24-month backfill - verified pilots then automatic continuation
+on:
+  workflow_dispatch:
+  push:
+    branches: ['feat/national-historical-backfill']
+    paths:
+      - '.github/workflows/regional-historical-24-months.yml'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: regional-historical-24m
+  cancel-in-progress: false
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Entire regression suite before live historical acquisition
+        run: python -m unittest discover -s tests
+
+  pilots:
+    needs: tests
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        source: [BOA, BOCYL, DOCM, DOE, BORM, BOCM, DOG, DOGC]
+        month: ['2024-10', '2026-09']
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Acquire oldest and newest approved month from each regional source
+        env:
+          HTTP_TIMEOUT: '35'
+          PYTHONUNBUFFERED: '1'
+        run: >-
+          python -u -m scripts.historical_month
+          --source '${{ matrix.source }}' --month '${{ matrix.month }}'
+          --timeout-seconds 1800
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: regional-historical-${{ matrix.source }}-${{ matrix.month }}-attempt-${{ github.run_attempt }}
+          path: reports/historical_shards/${{ matrix.source }}/${{ matrix.month }}/
+          retention-days: 90
+          if-no-files-found: error
+
+  plan:
+    needs: [tests, pilots]
+    if: ${{ always() && needs.tests.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      has_work: ${{ steps.plan.outputs.has_work }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: regional-historical-*
+          path: campaign-pilots
+          merge-multiple: false
+      - name: Verify original DB, reports, dates and provenance before expanding each source
+        id: plan
+        run: >-
+          python -m scripts.regional_historical_campaign plan
+          --artifacts campaign-pilots --output reports/regional_campaign_plan.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: regional-campaign-plan-attempt-${{ github.run_attempt }}
+          path: reports/regional_campaign_plan.json
+          retention-days: 90
+          if-no-files-found: error
+
+  months:
+    needs: plan
+    if: ${{ always() && needs.plan.result == 'success' && needs.plan.outputs.has_work == 'true' }}
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Automatically acquire remaining source-month without touching operational data
+        env:
+          HTTP_TIMEOUT: '35'
+          PYTHONUNBUFFERED: '1'
+        run: >-
+          python -u -m scripts.historical_month
+          --source '${{ matrix.source }}' --month '${{ matrix.month }}'
+          --timeout-seconds 3300
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: regional-historical-${{ matrix.source }}-${{ matrix.month }}-attempt-${{ github.run_attempt }}
+          path: reports/historical_shards/${{ matrix.source }}/${{ matrix.month }}/
+          retention-days: 90
+          if-no-files-found: error
+
+  audit:
+    needs: [tests, pilots, plan, months]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: regional-historical-*
+          path: campaign-all
+          merge-multiple: false
+      - name: Audit all 192 planned source-months and fail explicitly on gaps
+        if: always()
+        run: >-
+          python -m scripts.regional_historical_campaign audit
+          --artifacts campaign-all --output reports/regional_campaign_audit.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: regional-campaign-audit-attempt-${{ github.run_attempt }}
+          path: reports/regional_campaign_audit.json
+          retention-days: 90
+          if-no-files-found: error
