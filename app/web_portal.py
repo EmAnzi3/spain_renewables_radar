@@ -32,6 +32,15 @@ def load_bopv(folder:Path|None)->list[dict]:
             if d.get(key)!=value:raise ValueError('BOPV classification differs from its original: '+key)
     return documents
 
+# The page carries an excerpt of each original act; the complete text stays in the SQLite
+# evidence and at the official source URL. Embedding thousands of full acts made the page
+# >100 MB once the 24-month certified history was imported.
+RAW_EXCERPT_CHARS=900
+
+def raw_excerpt(text:str|None)->dict:
+    text=text or ''
+    return {'raw_text':text[:RAW_EXCERPT_CHARS],'raw_text_chars':len(text),'raw_text_truncated':len(text)>RAW_EXCERPT_CHARS}
+
 def payload(database:Path,status:dict,*,bopv:Path|None=None,alternatives:Path|None=None)->dict:
     with closing(sqlite3.connect(f'file:{database.resolve()}?mode=ro',uri=True)) as conn:
         conn.row_factory=sqlite3.Row;rows=build_commercial_rows(conn);events=defaultdict(list)
@@ -40,7 +49,7 @@ def payload(database:Path,status:dict,*,bopv:Path|None=None,alternatives:Path|No
             if e['source_code']=='MITECO_SABIA':basis='ENTRY_DATE' if ':ENTRY' in e['external_id'] else 'CONSULTATION_START'
             events[e['project_key']].append({'source_code':e['source_code'],'external_id':e['external_id'],
                 'date':e['publication_date'],'date_basis':basis,'event_type':e['event_type'],
-                'title':e['title'],'url':e['url'],'raw_text':e['raw_text']})
+                'title':e['title'],'url':e['url'],**raw_excerpt(e['raw_text'])})
         with tempfile.TemporaryDirectory() as temp:issues,_,_=write_quality_issues(conn,temp)
         if any(x['severity']=='ERROR' for x in issues):raise ValueError('Cannot publish structural quality errors')
         flags=defaultdict(list)

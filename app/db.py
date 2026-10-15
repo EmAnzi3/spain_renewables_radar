@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS events (
   FOREIGN KEY(project_key) REFERENCES projects(project_key)
 );
 CREATE INDEX IF NOT EXISTS idx_events_date ON events(publication_date);
+CREATE INDEX IF NOT EXISTS idx_events_project ON events(project_key);
 CREATE INDEX IF NOT EXISTS idx_projects_geo ON projects(ccaa,province);
 CREATE INDEX IF NOT EXISTS idx_projects_stage ON projects(commercial_stage,technology);
 CREATE INDEX IF NOT EXISTS idx_projects_expediente ON projects(expediente);
