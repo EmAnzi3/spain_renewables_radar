@@ -1,0 +1,65 @@
+name: claude-targeted-backfill
+run-name: Targeted backfill ${{ inputs.pairs }}
+on:
+  workflow_dispatch:
+    inputs:
+      pairs:
+        description: 'JSON list of {"source":"BOCYL","month":"2025-09"}'
+        required: true
+      timeout:
+        description: 'Per-shard timeout seconds (120-3600)'
+        default: '3300'
+      code_ref:
+        description: 'Branch whose collector code is used'
+        default: 'feat/national-historical-backfill'
+permissions:
+  contents: write
+concurrency:
+  group: claude-targeted-backfill
+  cancel-in-progress: false
+jobs:
+  shard:
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        include: ${{ fromJSON(inputs.pairs) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.code_ref }}
+      - uses: actions/checkout@v4
+        with:
+          path: tooling
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -r requirements.txt
+      - name: Acquire one official source-month
+        env:
+          HTTP_TIMEOUT: '35'
+          PYTHONUNBUFFERED: '1'
+        run: >-
+          python -u -m scripts.historical_month
+          --source '${{ matrix.source }}' --month '${{ matrix.month }}'
+          --timeout-seconds ${{ inputs.timeout }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: regional-historical-${{ matrix.source }}-${{ matrix.month }}-attempt-${{ github.run_id }}
+          path: reports/historical_shards/${{ matrix.source }}/${{ matrix.month }}/
+          retention-days: 90
+      - name: Publish diagnostics to git (probe-results branch)
+        if: always()
+        run: |
+          python tooling/.github/probes/shard_diagnostics.py reports/historical_shards "$RUNNER_TEMP/diag"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          for i in 1 2 3 4 5; do
+            rm -rf "$RUNNER_TEMP/pr" && git clone -q --depth 1 -b probe-results "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" "$RUNNER_TEMP/pr" || exit 0
+            mkdir -p "$RUNNER_TEMP/pr/diag/${GITHUB_RUN_ID}" && cp "$RUNNER_TEMP"/diag/*.json "$RUNNER_TEMP/pr/diag/${GITHUB_RUN_ID}/" 2>/dev/null || true
+            cd "$RUNNER_TEMP/pr" && git add -A && git commit -qm "diag ${{ matrix.source }} ${{ matrix.month }}" || exit 0
+            git push -q origin probe-results && exit 0
+            cd - >/dev/null; sleep $((RANDOM % 20 + 5))
+          done
