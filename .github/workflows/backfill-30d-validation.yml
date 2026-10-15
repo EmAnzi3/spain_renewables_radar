@@ -1,14 +1,10 @@
 name: backfill-30d-validation
 on:
+  # Live certification against 14 external official sources: run on demand or
+  # weekly, not on every code push (code is covered by tests/identity-replay).
   workflow_dispatch:
-  push:
-    branches: ['main', 'fix/dogc-index-reconciliation']
-    paths:
-      - '.github/workflows/backfill-30d-validation.yml'
-      - 'app/**'
-      - 'tests/**'
-      - 'scripts/**'
-      - 'config/**'
+  schedule:
+    - cron: '41 4 * * 1'
 permissions:
   contents: read
   actions: read
