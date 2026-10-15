@@ -31,11 +31,25 @@ def event_fingerprints(conn)->dict:
         result[values[:2]]=hashlib.sha256(json.dumps(values,ensure_ascii=False).encode()).hexdigest()
     return result
 
+def quarantined_fingerprints(conn)->dict:
+    """Fingerprints of source events removed by the reviewed identity repair (app.identity_migration)."""
+    if not conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='quarantined_source_events'").fetchone():
+        return {}
+    result={}
+    for source_code,external_id,payload in conn.execute('SELECT source_code,external_id,payload_json FROM quarantined_source_events'):
+        row=json.loads(payload);values=tuple(row.get(k) for k in IMMUTABLE)
+        if values[:2]==(source_code,external_id):
+            result[values[:2]]=hashlib.sha256(json.dumps(values,ensure_ascii=False).encode()).hexdigest()
+    return result
+
 def validate_database(conn,before:dict)->None:
     if conn.execute('PRAGMA integrity_check').fetchone()[0]!='ok' or conn.execute('PRAGMA foreign_key_check').fetchall():
         raise ValueError('SQLite structural integrity failed')
-    after=event_fingerprints(conn)
-    if any(after.get(key)!=digest for key,digest in before.items()):
+    after=event_fingerprints(conn);quarantined=quarantined_fingerprints(conn)
+    for key,digest in before.items():
+        if after.get(key)==digest:continue
+        # A removal is legitimate only when it is an audited quarantine of the identical source payload.
+        if key not in after and quarantined.get(key)==digest:continue
         raise ValueError('An existing immutable source event disappeared or changed')
     missing=conn.execute('''SELECT COUNT(*) FROM events e LEFT JOIN projects p USING(project_key)
         WHERE p.project_key IS NULL OR e.source_code IS NULL OR e.external_id IS NULL

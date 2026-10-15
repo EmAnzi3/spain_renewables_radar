@@ -81,3 +81,28 @@ class StagingTests(unittest.TestCase):
         lock=self.db.with_suffix('.sqlite.operational.lock');lock.touch()
         with self.assertRaises(FileExistsError):run_update(self.db,self.root/'reports',days=1,until=DAY,pipeline_runner=self.fake())
         self.assertTrue(lock.exists())
+
+
+class QuarantineTests(unittest.TestCase):
+    """Run 38792599918: identity repair quarantines out-of-scope BOCM events; that audited
+    removal must not be confused with silent loss, while any other removal still blocks."""
+    def setUp(self):
+        from app.operational import validate_database
+        self.validate=validate_database
+        self.temp=tempfile.TemporaryDirectory();self.c=connect(str(Path(self.temp.name)/'db.sqlite'))
+        save_event(self.c,event('BOCM','Q1'));self.c.commit();self.before=event_fingerprints(self.c)
+        self.row=dict(self.c.execute("SELECT * FROM events WHERE external_id='Q1'").fetchone())
+        self.c.execute('''CREATE TABLE quarantined_source_events (source_code TEXT NOT NULL, external_id TEXT NOT NULL,
+            reason TEXT NOT NULL, payload_json TEXT NOT NULL, quarantined_at TEXT NOT NULL, PRIMARY KEY(source_code,external_id))''')
+    def tearDown(self):self.c.close();self.temp.cleanup()
+    def quarantine(self,row):
+        self.c.execute('INSERT INTO quarantined_source_events VALUES (?,?,?,?,?)',('BOCM','Q1','OUTSIDE_COLLECTOR_SCOPE_AFTER_SOURCE_REVIEW',json.dumps(row),'t'))
+        self.c.execute("DELETE FROM events WHERE external_id='Q1'");self.c.commit()
+    def test_audited_identical_quarantine_is_accepted(self):
+        self.quarantine(self.row);self.validate(self.c,self.before)
+    def test_quarantine_with_altered_payload_is_rejected(self):
+        self.quarantine(dict(self.row,raw_text='altered'))
+        with self.assertRaises(ValueError):self.validate(self.c,self.before)
+    def test_unaudited_removal_is_rejected(self):
+        self.c.execute("DELETE FROM events WHERE external_id='Q1'");self.c.commit()
+        with self.assertRaises(ValueError):self.validate(self.c,self.before)
