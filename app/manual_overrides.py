@@ -103,9 +103,6 @@ def main():
             print("REVIEW_QUEUE", review_queue(conn, Path(a.review_queue)))
 
 
-if __name__ == "__main__":
-    main()
-
 
 def review_queue(conn: sqlite3.Connection, out: Path) -> int:
     """CSV of records awaiting manual data, with a ready-to-paste selector."""
@@ -130,3 +127,7 @@ def review_queue(conn: sqlite3.Connection, out: Path) -> int:
                                           "technology", "power_mw", "province", "title"])
         w.writeheader(); w.writerows(rows)
     return len(rows)
+
+
+if __name__ == "__main__":
+    main()
