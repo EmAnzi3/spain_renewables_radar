@@ -16,7 +16,7 @@ import uuid
 from zoneinfo import ZoneInfo
 
 from app.catalunya_inventory import atomic_json
-from app.dogc_projection import events_from_record
+from app.dogc_projection import events_from_record, IdentityReviewRequired
 from app.dogc_semantics import classify_document
 from app.enrichment.ine_municipalities import INE_MUNICIPALITIES_URL, parse_ine_municipalities
 from scripts.acquire_dogc_bodies import BodyClient, extract_pages
@@ -105,7 +105,14 @@ class DOGCCollector:
                     stats.setdefault('review_documents',[]).append(candidate['document_id'])
                     continue
                 if record['category']=='ENERGY_PROJECT':self._ensure_catalog()
-                projections=events_from_record(record,parsed['pages'],self.catalog or [])
+                try:projections=events_from_record(record,parsed['pages'],self.catalog or [])
+                except IdentityReviewRequired as exc:
+                    # Same policy as REVIEW_REQUIRED: preserved with its original PDF and pages,
+                    # listed in identity_review.json, never projected, and the day is not lost.
+                    self.records[candidate['document_id']]['review_reason']=str(exc)
+                    stats['review_required']+=1
+                    stats.setdefault('review_documents',[]).append(candidate['document_id'])
+                    continue
                 if projections:
                     stats['energy_documents']+=1
                     for event,evidence in projections:
@@ -136,6 +143,8 @@ class DOGCCollector:
         atomic_json(self.generation/'projected_events.json',list(self.projected.values()))
         atomic_json(self.generation/'event_metadata.json',self.metadata)
         categories={'municipal_leads':'MUNICIPAL_PROJECT','corrections':'CORRECTION','excluded':'OUT_OF_SCOPE','unresolved':'REVIEW_REQUIRED'}
+        atomic_json(self.generation/'identity_review.json',[dict(r['classification'],review_reason=r['review_reason'])
+                    for r in self.records.values() if r.get('review_reason')])
         for filename,category in categories.items():
             atomic_json(self.generation/(filename+'.json'),[r['classification'] for r in self.records.values() if r['classification']['category']==category])
         self._render()

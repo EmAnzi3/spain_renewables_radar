@@ -87,6 +87,27 @@ class CollectorTests(unittest.TestCase):
             self.assertEqual(len(c.audit['review_pending']),1)
             self.assertEqual(len(json.loads((c.generation/'unresolved.json').read_text())),1);c.close()
 
+    def test_energy_act_without_explicit_identity_is_held_not_failing_the_day(self):
+        # DOGC 2025-06-25 stopped a whole historical month (run 38802702024).
+        from app.dogc_projection import IdentityReviewRequired
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td);c=self.run_candidate(root)
+            with patch('app.collectors.dogc.events_from_record',side_effect=IdentityReviewRequired('Energy act lacks evidenced plant identity or technology')):
+                self.assertEqual(c.collect_day(DAY),[])
+            self.assertEqual(c.audit['days'][str(DAY)]['status'],'OK');self.assertEqual(c.projected,{})
+            self.assertEqual(c.audit['totals']['review_required'],1);self.assertEqual(c.audit['review_pending'],['1'])
+            held=json.loads((c.generation/'identity_review.json').read_text())
+            self.assertEqual(len(held),1);self.assertIn('lacks evidenced',held[0]['review_reason'])
+            conn=connect(str(root/'test.sqlite'));c.persist_metadata(conn)
+            self.assertEqual(conn.execute('SELECT count(*) FROM projects').fetchone()[0],0);conn.close();c.close()
+
+    def test_other_projection_errors_still_fail_the_day(self):
+        with tempfile.TemporaryDirectory() as td:
+            c=self.run_candidate(Path(td))
+            with patch('app.collectors.dogc.events_from_record',side_effect=ValueError('DOGC event has no validated lifecycle mapping')):
+                with self.assertRaises(ValueError):c.collect_day(DAY)
+            self.assertEqual(c.audit['days'][str(DAY)]['status'],'ERROR');c.close()
+
     def test_metadata_cannot_be_attached_to_an_unpersisted_event(self):
         with tempfile.TemporaryDirectory() as td:
             root=Path(td);c=self.run_candidate(root);c.collect_day(DAY);conn=connect(str(root/'test.sqlite'))
