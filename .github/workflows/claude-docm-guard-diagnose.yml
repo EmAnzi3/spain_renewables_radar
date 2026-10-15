@@ -4,7 +4,7 @@ permissions: {contents: write, actions: read}
 jobs:
   diag:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -12,7 +12,12 @@ jobs:
       - run: pip install -r requirements.txt
       - env: {GH_TOKEN: '${{ github.token }}'}
         run: python -m scripts.portal_inputs
-      - run: PYTHONPATH=. python .github/probes/docm_guard_diag.py data/spain_renewables.sqlite "$RUNNER_TEMP/docm.json"
+      - name: Collect DOCM last 7 days on a copy (failure allowed)
+        run: |
+          cp data/spain_renewables.sqlite data/docm_copy.sqlite
+          set +e; UNTIL=$(TZ=Europe/Madrid date -d yesterday +%F)
+          python -m app.run_pipeline --days 7 --until "$UNTIL" --sources DOCM --db data/docm_copy.sqlite --skip-ree --skip-miteco > "$RUNNER_TEMP/docm_run.log" 2>&1; tail -3 "$RUNNER_TEMP/docm_run.log"; exit 0
+      - run: PYTHONPATH=. python .github/probes/docm_guard_diag.py data/docm_copy.sqlite "$RUNNER_TEMP/docm.json"
       - if: always()
         run: |
           git config --global user.name "github-actions[bot]"
