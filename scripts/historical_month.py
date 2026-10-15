@@ -85,6 +85,16 @@ def coverage_summary(path,source,first,last):
             'discovered_candidates':sum(int(r['candidates']) for r in rows),
             'newly_inserted_source_events':sum(int(r['inserted']) for r in rows)}
 def validate_annual_index_scope(audit,first,last):
+    # Days outside the current annual index are acquired one by one through the
+    # official daily REST services; each such day is recorded in daily_rest.
+    rest={x.get('date') for x in audit.get('daily_rest',[]) if x.get('http_status') in (200,404)}
+    if rest:
+        expected={(first.fromordinal(first.toordinal()+n)).isoformat() for n in range((last-first).days+1)}
+        lo=audit.get('min_publication_date') or '9999';hi=audit.get('max_publication_date') or '0000'
+        missing=[d for d in expected if d not in rest and not (lo<=d<=hi)]
+        if missing:
+            raise ValueError('BORM_DAILY_REST_DID_NOT_COVER_REQUESTED_HISTORICAL_MONTH')
+        return {'earliest':min(rest|({lo} if lo!='9999' else set())),'latest':max(rest|({hi} if hi!='0000' else set())),'mode':'DAILY_REST'}
     earliest=audit.get('min_publication_date')
     latest=audit.get('max_publication_date')
     if not earliest or not latest or earliest>str(first) or latest<str(last):

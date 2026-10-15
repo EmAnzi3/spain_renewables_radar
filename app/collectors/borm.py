@@ -9,11 +9,17 @@ from pathlib import Path
 from datetime import date, datetime, timezone
 
 import requests
+from xml.etree import ElementTree as ET
 
 from app.parser import parse_event
 from app.run_snapshot import load_run_snapshot, save_run_snapshot
 
 INDEX_JSON="https://transparencia.carm.es/rest-services/services/restFile/BORMIndice.json"
+# Official daily REST services of the BORM electronic office (used by www.borm.es).
+# Used only for days the current annual index does not cover (historical months).
+REST_SUMARIO="https://www.borm.es/services/boletin/fecha/{fecha}/sumario"
+REST_TXT="https://www.borm.es/services/anuncio/{id}/txt"
+NO_BULLETIN_MARKER="errorBusqueda"
 
 RELEVANT=re.compile(
     r"fotovolta|parque\s+e[oó]lico|instalaci[oó]n\s+e[oó]lica|"
@@ -200,7 +206,68 @@ class BORMCollector:
         )
         return event if event.technology else None
 
+    # ---------- historical daily REST mode
+    def _index_covers(self,day:date)->bool:
+        rows=self._rows()
+        lo=self.audit.get("min_publication_date");hi=self.audit.get("max_publication_date")
+        return bool(lo and hi and lo<=day.isoformat()<=hi)
+
+    @staticmethod
+    def parse_rest_sumario(xml_text:str,day:date)->list[dict]:
+        root=ET.fromstring(xml_text)
+        want=day.strftime("%d-%m-%Y")
+        if (root.findtext("fechaPublicacion") or "").strip()!=want:
+            raise ValueError("BORM REST summary date mismatch")
+        out=[]
+        for node in root.iter("anunciosBoletin"):
+            if node.find("id") is None:
+                continue
+            item={k:(node.findtext(k) or "").strip() for k in ("id","sumario","numero","ano","anunciante","apartado","categoriaCompleta","fechaPublicacion")}
+            if item["fechaPublicacion"]!=want or not item["id"] or not item["numero"]:
+                continue
+            out.append(item)
+        return out
+
+    def _rest_day(self,day:date):
+        fecha=day.strftime("%d-%m-%Y")
+        r=self.session.get(REST_SUMARIO.format(fecha=fecha),headers={"Accept":"application/xml"},timeout=(8,max(self.timeout,60)))
+        rec={"date":day.isoformat(),"http_status":r.status_code}
+        self.audit.setdefault("daily_rest",[]).append(rec)
+        if r.status_code==404 and NO_BULLETIN_MARKER in r.text:
+            rec["bulletin"]=False;self._write_audit();return []
+        r.raise_for_status()
+        if "xml" not in (r.headers.get("content-type") or ""):
+            raise ValueError("BORM REST summary is not XML")
+        items=self.parse_rest_sumario(r.content,day)
+        rec.update(bulletin=True,announcements=len(items));self._write_audit()
+        out=[]
+        for it in items:
+            title=" ".join(it["sumario"].split())
+            if not title or not RELEVANT.search(title) or EXCLUDE.search(title):
+                continue
+            t=self.session.get(REST_TXT.format(id=it["id"]),timeout=(8,max(self.timeout,60)))
+            t.raise_for_status()
+            body=t.content.decode("utf-8",errors="replace")
+            npe=f"A-{day.strftime('%d%m%y')}-{it['numero']}"
+            event=parse_event(source_code=self.code,external_id=npe,publication_date=day.isoformat(),
+                              title=title,url=f"https://www.borm.es/#/home/anuncio/{fecha}/{it['numero']}",
+                              raw_text=body or title)
+            if event.technology:out.append(event)
+        return out
+
+    def _record_rest_window(self):
+        days=[x["date"] for x in self.audit.get("daily_rest",[]) if x.get("http_status") in (200,404)]
+        if days:
+            self.audit.update(rest_min_date=min(days),rest_max_date=max(days))
+            self._write_audit()
+
     def collect_day(self,day:date):
+        # An unavailable annual index still fails closed (RuntimeError); only a
+        # valid index whose observed window excludes the day switches to REST.
+        if not self._index_covers(day):
+            events=self._rest_day(day)
+            self._record_rest_window()
+            return events
         out=[]
         for row in self._rows():
             if self._date_text(row)!=day.isoformat():
