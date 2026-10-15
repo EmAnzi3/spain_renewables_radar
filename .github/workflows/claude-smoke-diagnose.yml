@@ -1,0 +1,33 @@
+name: claude-smoke-diagnose
+run-name: Live smoke diagnosis (${{ inputs.days }}d)
+on:
+  workflow_dispatch:
+    inputs:
+      days: {description: 'Days ending yesterday (Europe/Madrid)', default: '3'}
+permissions:
+  contents: write
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -r requirements.txt
+      - name: Smoke all ordinary sources (non-fatal, captured)
+        run: |
+          set +e
+          UNTIL=$(TZ=Europe/Madrid date -d yesterday +%F)
+          python -m app.run_pipeline --days ${{ inputs.days }} --until "$UNTIL" --db data/smoke.sqlite --skip-ree --skip-miteco --strict-coverage > "$RUNNER_TEMP/smoke.log" 2>&1
+          echo "exit=$?" >> "$RUNNER_TEMP/smoke.log"
+          tail -40 "$RUNNER_TEMP/smoke.log"
+      - name: Publish
+        if: always()
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git clone -q --depth 1 -b probe-results "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" "$RUNNER_TEMP/pr"
+          d="$RUNNER_TEMP/pr/smoke/${GITHUB_RUN_ID}"; mkdir -p "$d"
+          cp "$RUNNER_TEMP/smoke.log" "$d/"; cp reports/coverage_latest.csv "$d/" 2>/dev/null || true
+          cd "$RUNNER_TEMP/pr" && git add -A && git commit -qm "smoke diag" && git push -q origin probe-results
