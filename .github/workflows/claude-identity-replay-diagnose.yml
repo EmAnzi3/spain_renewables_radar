@@ -1,0 +1,40 @@
+name: claude-identity-replay-diagnose
+run-name: Identity replay diagnosis on ${{ inputs.code_ref }}
+on:
+  workflow_dispatch:
+    inputs:
+      code_ref:
+        description: 'Branch to diagnose'
+        required: true
+permissions:
+  contents: write
+  actions: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ inputs.code_ref }}'}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -r requirements.txt
+      - uses: actions/download-artifact@v4
+        with: {github-token: '${{ github.token }}', run-id: 37158247411, name: backfill-30d-output, path: replay-input/baseline}
+      - uses: actions/download-artifact@v4
+        with: {github-token: '${{ github.token }}', run-id: 37159334281, name: andalucia-public-validation, path: replay-input/andalucia}
+      - name: Replay (capture output)
+        run: |
+          set +e
+          python scripts/validate_identity_replay.py > "$RUNNER_TEMP/replay.log" 2>&1
+          echo "exit=$?" >> "$RUNNER_TEMP/replay.log"
+          tail -60 "$RUNNER_TEMP/replay.log"
+      - name: Publish log and reports
+        if: always()
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git clone -q --depth 1 -b probe-results "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" "$RUNNER_TEMP/pr"
+          d="$RUNNER_TEMP/pr/replay/${GITHUB_RUN_ID}"; mkdir -p "$d"
+          cp "$RUNNER_TEMP/replay.log" "$d/"; cp -r reports/identity_replay "$d/" 2>/dev/null || true
+          cd "$RUNNER_TEMP/pr" && git add -A && git commit -qm "replay diag ${{ inputs.code_ref }}" && git push -q origin probe-results
