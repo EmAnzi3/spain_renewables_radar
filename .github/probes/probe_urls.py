@@ -14,7 +14,7 @@ def probe(url):
         r.update(status=resp.status_code, final_url=resp.url, content_type=resp.headers.get("content-type"),
                  bytes=len(body), sha256=hashlib.sha256(body).hexdigest(), seconds=round(time.time() - t0, 1))
         txt = body[:400000].decode(resp.encoding or "utf-8", errors="replace")
-        r["head"] = txt[:20000]
+        r["head"] = txt[:400000]
         if "html" in (r["content_type"] or ""):
             links = sorted({urljoin(resp.url, h) for h in re.findall(r'''(?:href|src|action)=["']([^"'#]+)''', txt) if KEY.search(h)})
             r["links"] = links[:200]
