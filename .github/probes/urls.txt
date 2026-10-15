@@ -1,24 +1,2 @@
-# BORM historical index candidates
-https://transparencia.carm.es/rest-services/services/restFile/BORMIndice.json
-https://transparencia.carm.es/rest-services/services/restFile/BORMIndice2025.json
-https://transparencia.carm.es/rest-services/services/restFile/BORMIndice_2025.json
-https://transparencia.carm.es/rest-services/services/restFile/BORMIndice-2025.json
-https://transparencia.carm.es/rest-services/services/restFile/BORMIndice2024.json
-https://transparencia.carm.es/rest-services/services/restFile/
-https://www.borm.es/services/boletin/ano/2025/numero/100
-https://www.borm.es/services/boletin/fecha/2025-05-02
-https://www.borm.es/services/sumario/fecha/2025-05-02
-https://www.borm.es/
-https://datosabiertos.regiondemurcia.es/catalogo/api/3/action/package_search?q=BORM
-https://datosabiertos.regiondemurcia.es/catalogo/api/3/action/package_search?q=boletin
-# DOGV
-https://dogv.gva.es/
-https://dogv.gva.es/es/inici
-https://dogv.gva.es/es/sumari
-https://dogv.gva.es/es/dogv-sumari?data=2025-10-01
-https://dogv.gva.es/es/sumario-dogv?fecha=2025-10-01
-https://dogv.gva.es/es/web/dogv/dades-obertes
-https://dogv.gva.es/datos/
-https://dogv.gva.es/es/resultat-dogv
-https://dadesobertes.gva.es/api/3/action/package_search?q=dogv
-https://dadesobertes.gva.es/api/3/action/package_search?q=diari%20oficial
+# minimal re-check
+https://dogv.gva.es/dogv-portal-frontend/es/sumari

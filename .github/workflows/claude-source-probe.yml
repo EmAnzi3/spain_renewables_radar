@@ -16,11 +16,13 @@ jobs:
         with: {python-version: '3.12'}
       - run: pip install requests
       - run: python .github/probes/probe_urls.py .github/probes/urls.txt "$RUNNER_TEMP/probe.json"
+      - run: python .github/probes/js_grep.py "$RUNNER_TEMP/js.json" https://www.borm.es/ https://dogv.gva.es/dogv-portal-frontend/es/sumari
       - name: Publish results to probe-results branch
         run: |
           mkdir -p "$RUNNER_TEMP/pub" && cd "$RUNNER_TEMP/pub"
           git init -q -b probe-results
           cp "$RUNNER_TEMP/probe.json" "probe-${GITHUB_RUN_ID}.json"
+          cp "$RUNNER_TEMP/js.json" "js-${GITHUB_RUN_ID}.json"
           git config user.name "github-actions[bot]"
           git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
           git add -A && git commit -q -m "probe ${GITHUB_RUN_ID}"
