@@ -23,6 +23,7 @@ jobs:
           git init -q -b probe-results
           cp "$RUNNER_TEMP/probe.json" "probe-${GITHUB_RUN_ID}.json"
           cp "$RUNNER_TEMP/js.json" "js-${GITHUB_RUN_ID}.json"
+          for u in $(python -c "import json;d=json.load(open('$RUNNER_TEMP/js.json'));print(' '.join(s for r in d.values() for s in r.get('srcs',[]) if 'main' in s))"); do curl -sSL -A "SpainRenewablesRadar/0.1" "$u" -o "bundle-${GITHUB_RUN_ID}-$(basename $u)"; done
           git config user.name "github-actions[bot]"
           git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
           git add -A && git commit -q -m "probe ${GITHUB_RUN_ID}"
