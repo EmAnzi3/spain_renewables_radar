@@ -54,7 +54,9 @@ class BOACollector:
             raise RuntimeError("BOA OpenData did not return JSON")
         try:rows=json.loads(body)
         except json.JSONDecodeError:
-            repaired=re.sub(r'\\(?!["\\/bfnrtu])',r'\\\\',body)
+            # Escape stray backslashes, including "\u" not followed by four hex digits
+            # (seen in the official OpenData feed on 2025-06-25).
+            repaired=re.sub(r'\\(?!["\\/bfnrt]|u[0-9a-fA-F]{4})',r'\\\\',body)
             rows=json.loads(repaired)
         return rows if isinstance(rows,list) else []
 
