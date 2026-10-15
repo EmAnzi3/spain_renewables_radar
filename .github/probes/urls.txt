@@ -1,2 +1,6 @@
-# minimal re-check
+https://www.borm.es/services/boletin/fecha/02-05-2025/sumario
+https://www.borm.es/services/boletin/fecha/2025-05-02/sumario
+https://www.borm.es/services/boletin/fecha/02052025/sumario
+https://www.borm.es/services/boletin/ultimo
 https://dogv.gva.es/dogv-portal-frontend/es/sumari
+https://dogv.gva.es/dogv-portal-frontend/
