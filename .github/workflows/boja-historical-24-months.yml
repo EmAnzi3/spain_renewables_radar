@@ -1,5 +1,5 @@
 name: boja-historical-24-months
-run-name: BOJA 24 months - corrected multi-edition calendar (2024-10 through 2026-09)
+run-name: BOJA 24 months - strict original bodies and bounded retries (2024-10 through 2026-09)
 on:
   workflow_dispatch:
   push:
@@ -17,7 +17,8 @@ jobs:
       fail-fast: false
       max-parallel: 2
       matrix:
-        # Recheck ALL months: the pre-fix calendar could incorrectly certify a zero day.
+        # Calendar and original-detail fixes require all months to be revalidated.
+        # The same concurrency group queues this after any older active campaign.
         month: ['2024-10', '2024-11', '2024-12', '2025-01', '2025-02', '2025-03', '2025-04', '2025-05', '2025-06', '2025-07', '2025-08', '2025-09', '2025-10', '2025-11', '2025-12', '2026-01', '2026-02', '2026-03', '2026-04', '2026-05', '2026-06', '2026-07', '2026-08', '2026-09']
     runs-on: ubuntu-latest
     timeout-minutes: 65
@@ -64,7 +65,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: boja-historical-${{ matrix.month }}
+          name: boja-historical-${{ matrix.month }}-attempt-${{ github.run_attempt }}
           path: reports/historical_shards/BOJA/${{ matrix.month }}/
           retention-days: 90
           if-no-files-found: error
