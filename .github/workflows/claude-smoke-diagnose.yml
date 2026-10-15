@@ -5,12 +5,13 @@ on:
     inputs:
       days: {description: 'Days ending yesterday (Europe/Madrid)', default: '3'}
       code_ref: {description: 'Branch to test', default: 'main'}
+      enrich: {description: 'Include REE/MITECO enrichments (true/false)', default: 'false'}
 permissions:
   contents: write
 jobs:
   smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
         with: {ref: '${{ inputs.code_ref }}'}
@@ -21,7 +22,7 @@ jobs:
         run: |
           set +e
           UNTIL=$(TZ=Europe/Madrid date -d yesterday +%F)
-          python -m app.run_pipeline --days ${{ inputs.days }} --until "$UNTIL" --db data/smoke.sqlite --skip-ree --skip-miteco --strict-coverage > "$RUNNER_TEMP/smoke.log" 2>&1
+          python -m app.run_pipeline --days ${{ inputs.days }} --until "$UNTIL" --db data/smoke.sqlite $([ "${{ inputs.enrich }}" = "true" ] || echo "--skip-ree --skip-miteco") --strict-coverage > "$RUNNER_TEMP/smoke.log" 2>&1
           echo "exit=$?" >> "$RUNNER_TEMP/smoke.log"
           tail -40 "$RUNNER_TEMP/smoke.log"
       - name: Publish
