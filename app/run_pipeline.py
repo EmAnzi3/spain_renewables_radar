@@ -94,6 +94,9 @@ def main():
     from app.power_repair import repair_power
     power=repair_power(conn)
     if power["events_changed"]:print("[POWER_RULE] stored power re-read:",power,flush=True)
+    from app.project_dedup import merge_duplicate_projects
+    merged=merge_duplicate_projects(conn)
+    if merged["merged_cards"]:print("[PROJECT_DEDUP] same plant, several cards merged:",merged,flush=True)
     if docm_repair["status"]!="NOT_NEEDED":print("DOCM storage evidence:",docm_repair,flush=True)
     # Evidence-based field repairs are projection-only. Save the previous
     # database before changing a published project field.
