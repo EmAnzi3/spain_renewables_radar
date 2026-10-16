@@ -1,0 +1,4802 @@
+{
+"documents": 1136,
+"changed": 198,
+"diff": {
+"1030353": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "GRANT_NOT_CONFIRMED_IN_OPERATIVE_BODY",
+"name": "PSFV Garcia",
+"events": null,
+"title": "Resolució TER/4286/2025, de 10 de novembre, per la qual s'atorga a l'empresa Blue Viking Isabella, SL, la modificació de l'autorització administrativa prèvia i ",
+"date": "2025-11-27"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "PSFV Garcia",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"PSFV Garcia",
+20.0,
+"f94c6565962f88d0f995"
+]
+],
+"title": "Resolució TER/4286/2025, de 10 de novembre, per la qual s'atorga a l'empresa Blue Viking Isabella, SL, la modificació de l'autorització administrativa prèvia i ",
+"date": "2025-11-27"
+}
+},
+"1030690": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "GRANT_NOT_CONFIRMED_IN_OPERATIVE_BODY",
+"name": "“PSFV Pobla de Massaluca Sol”",
+"events": null,
+"title": "Resolució TER/4362/2025, de 7 d'octubre, per la qual s'atorga a Akira Fotovoltaica, SL, l'autorització administrativa prèvia, autorització administrativa de con",
+"date": "2025-12-01"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AUTH_ONLY",
+"name": "PSFV Pobla de Massaluca Sol",
+"events": [
+[
+"PRIOR_AUTH",
+"PERMITTING",
+"PSFV Pobla de Massaluca Sol",
+3.29,
+"b02ffc07ecd8b18725ab"
+]
+],
+"title": "Resolució TER/4362/2025, de 7 d'octubre, per la qual s'atorga a Akira Fotovoltaica, SL, l'autorització administrativa prèvia, autorització administrativa de con",
+"date": "2025-12-01"
+}
+},
+"1008609": {
+"old": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+"name": null,
+"events": null,
+"title": "Anunci sobre aprovació definitiva del Projecte executiu per a una instal·lació fotovoltaica al teatre El Jardí de Figueres (exp. GSUR2024000168)",
+"date": "2025-03-11"
+},
+"new": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+"name": "al teatre El Jardí de Figueres",
+"events": null,
+"title": "Anunci sobre aprovació definitiva del Projecte executiu per a una instal·lació fotovoltaica al teatre El Jardí de Figueres (exp. GSUR2024000168)",
+"date": "2025-03-11"
+}
+},
+"1051287": {
+"old": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+"name": null,
+"events": null,
+"title": "Anunci sobre aprovació definitiva del Projecte executiu d'actualització de preus de la instal·lació fotovoltaica d'autoconsum col·lectiu de 60 kWn a l'edifici d",
+"date": "2026-07-29"
+},
+"new": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+"name": "d'autoconsum col·lectiu",
+"events": null,
+"title": "Anunci sobre aprovació definitiva del Projecte executiu d'actualització de preus de la instal·lació fotovoltaica d'autoconsum col·lectiu de 60 kWn a l'edifici d",
+"date": "2026-07-29"
+}
+},
+"1011253": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": null,
+"events": null,
+"title": "Anunci sobre aprovació definitiva del Projecte executiu d'una instal·lació fotovoltaica en el dipòsit salí (exp. Gestiona 605/2024)",
+"date": "2025-04-09"
+},
+"new": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": "en el dipòsit salí",
+"events": null,
+"title": "Anunci sobre aprovació definitiva del Projecte executiu d'una instal·lació fotovoltaica en el dipòsit salí (exp. Gestiona 605/2024)",
+"date": "2025-04-09"
+}
+},
+"1022768": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_SUBJECT",
+"name": null,
+"events": null,
+"title": "Resolució TER/3152/2025, de 8 d'agost, d'informe d'impacte ambiental del Projecte per a la implantació dels sistemes d'emmagatzematge d'energia elèctrica stand-",
+"date": "2025-08-18"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": null,
+"events": "IDENTITY_HELD",
+"title": "Resolució TER/3152/2025, de 8 d'agost, d'informe d'impacte ambiental del Projecte per a la implantació dels sistemes d'emmagatzematge d'energia elèctrica stand-",
+"date": "2025-08-18"
+}
+},
+"1053133": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": null,
+"events": null,
+"title": "Resolució ACC/4960/2024, de 4 de juliol, per la qual s'emet l'informe ambiental estratègic de la modificació puntual del Pla d'ordenació urbanística municipal d",
+"date": "2026-08-25"
+},
+"new": {
+"category": "OUT_OF_SCOPE",
+"event": "URBAN_PLANNING_NOT_PLANT",
+"name": null,
+"events": null,
+"title": "Resolució ACC/4960/2024, de 4 de juliol, per la qual s'emet l'informe ambiental estratègic de la modificació puntual del Pla d'ordenació urbanística municipal d",
+"date": "2026-08-25"
+}
+},
+"998573": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": null,
+"events": "IDENTITY_HELD",
+"title": "RESOLUCIÓ TER/3818/2024, de 21 d'octubre, per la qual es fa públic l'Acord d'informe d'impacte ambiental del Projecte de planta solar fotovoltaica de 25 MWp Els",
+"date": "2024-11-04"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": "Els Rasos",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"Els Rasos",
+25.0,
+"9c991a78291e28d7a029"
+]
+],
+"title": "RESOLUCIÓ TER/3818/2024, de 21 d'octubre, per la qual es fa públic l'Acord d'informe d'impacte ambiental del Projecte de planta solar fotovoltaica de 25 MWp Els",
+"date": "2024-11-04"
+}
+},
+"1022069": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "stand-alone anomenada Guixeres II de 14.976 kW al terme municipal de Montgat",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"stand-alone anomenada Guixeres II de 14.976 kW al terme municipal de Montgat",
+14.976,
+"ffd0a4df8a71f70a8fb8"
+]
+],
+"title": "Resolució TER/3029/2025, de 8 de juliol, per la qual s'atorga l'autorització administrativa prèvia i l'autorització administrativa de construcció del projecte d",
+"date": "2025-08-08"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "Guixeres II de 14.976 kW al terme municipal de Montgat",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"Guixeres II de 14.976 kW al terme municipal de Montgat",
+14.976,
+"ffd0a4df8a71f70a8fb8"
+]
+],
+"title": "Resolució TER/3029/2025, de 8 de juliol, per la qual s'atorga l'autorització administrativa prèvia i l'autorització administrativa de construcció del projecte d",
+"date": "2025-08-08"
+}
+},
+"1025717": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": null,
+"events": null,
+"title": "Resolució TER/3537/2025, de 29 de setembre, d'informe d'impacte ambiental del Projecte per a la implantació de les plantes d'emmagatzematge d'energia elèctrica ",
+"date": "2025-10-06"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": null,
+"events": "IDENTITY_HELD",
+"title": "Resolució TER/3537/2025, de 29 de setembre, d'informe d'impacte ambiental del Projecte per a la implantació de les plantes d'emmagatzematge d'energia elèctrica ",
+"date": "2025-10-06"
+}
+},
+"1013959": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": "PE Les Alzinetes",
+"events": null,
+"title": "Resolució TER/1667/2025, de 25 d'abril, per la qual es denega a l'empresa Energía Inagotable de Cassiopea, SL, l'autorització administrativa prèvia i de constru",
+"date": "2025-05-15"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "AUTHORIZATION_DENIED",
+"name": "PE Les Alzinetes",
+"events": [
+[
+"DENIED",
+"BLOCKED",
+"PE Les Alzinetes",
+12.2,
+"f8f76ae7f721b065142c"
+]
+],
+"title": "Resolució TER/1667/2025, de 25 d'abril, per la qual es denega a l'empresa Energía Inagotable de Cassiopea, SL, l'autorització administrativa prèvia i de constru",
+"date": "2025-05-15"
+}
+},
+"1051273": {
+"old": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+"name": null,
+"events": null,
+"title": "Anunci sobre aprovació definitiva del Projecte executiu d'actualització de preus de la instal·lació fotovoltaica d'autoconsum col·lectiu de 25 kWn a l'edifici d",
+"date": "2026-07-29"
+},
+"new": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+"name": "d'autoconsum col·lectiu",
+"events": null,
+"title": "Anunci sobre aprovació definitiva del Projecte executiu d'actualització de preus de la instal·lació fotovoltaica d'autoconsum col·lectiu de 25 kWn a l'edifici d",
+"date": "2026-07-29"
+}
+},
+"1006355": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "GRANT_NOT_CONFIRMED_IN_OPERATIVE_BODY",
+"name": "Els Palous",
+"events": null,
+"title": "Resolució TER/340/2025, de 4 de febrer, de la Direcció General d'Energia, per la qual s'atorga a Les Quadres Planta Fotovoltaica, SL, l'autorització administrat",
+"date": "2025-02-13"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AUTH_ONLY",
+"name": "Els Palous",
+"events": [
+[
+"PRIOR_AUTH",
+"PERMITTING",
+"Els Palous",
+2.16,
+"ff667815c62146fafd6f"
+]
+],
+"title": "Resolució TER/340/2025, de 4 de febrer, de la Direcció General d'Energia, per la qual s'atorga a Les Quadres Planta Fotovoltaica, SL, l'autorització administrat",
+"date": "2025-02-13"
+}
+},
+"1015273": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": "PS Rascon Solar",
+"events": null,
+"title": "Anunci pel qual es fa pública la convocatòria per a la redacció de les actes prèvies a l'ocupació i, si s'escau, d'actes d'ocupació definitiva dels béns i/o dre",
+"date": "2025-05-29"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "EXPROPRIATION_PRIOR_SURVEY",
+"name": "PS Rascon Solar",
+"events": [
+[
+"EXPROPRIATION",
+"PRECONSTRUCTION",
+"PS Rascon Solar",
+null,
+"c9ffeac1b835a6a7c5b5"
+]
+],
+"title": "Anunci pel qual es fa pública la convocatòria per a la redacció de les actes prèvies a l'ocupació i, si s'escau, d'actes d'ocupació definitiva dels béns i/o dre",
+"date": "2025-05-29"
+}
+},
+"1023322": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": null,
+"events": null,
+"title": "Resolució TER/3217/2025, de 21 de maig, per la qual s'emet l'informe ambiental estratègic de la modificació puntual del Pla d'ordenació urbanística municipal de",
+"date": "2025-08-28"
+},
+"new": {
+"category": "OUT_OF_SCOPE",
+"event": "URBAN_PLANNING_NOT_PLANT",
+"name": null,
+"events": null,
+"title": "Resolució TER/3217/2025, de 21 de maig, per la qual s'emet l'informe ambiental estratègic de la modificació puntual del Pla d'ordenació urbanística municipal de",
+"date": "2025-08-28"
+}
+},
+"998560": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": null,
+"events": null,
+"title": "RESOLUCIÓ TER/3815/2024, de 21 d'octubre, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte de planta solar fotovoltaica de 50 MWp",
+"date": "2024-11-04"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_DIA_FAVORABLE",
+"name": "El Juncar",
+"events": [
+[
+"DIA",
+"PERMITTING",
+"El Juncar",
+50.0,
+"860b23a460cd3d8e5f9c"
+]
+],
+"title": "RESOLUCIÓ TER/3815/2024, de 21 d'octubre, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte de planta solar fotovoltaica de 50 MWp",
+"date": "2024-11-04"
+}
+},
+"1053697": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": "PSFV La Selva 22",
+"events": null,
+"title": "Resolució TER/3081/2026, de 27 d'agost, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte d'instal·lació solar fotovoltaica PSFV L",
+"date": "2026-09-04"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_DIA_FAVORABLE",
+"name": "PSFV La Selva 22",
+"events": [
+[
+"DIA",
+"PERMITTING",
+"PSFV La Selva 22",
+4.9,
+"2ee8be719b1a6b9e340a"
+]
+],
+"title": "Resolució TER/3081/2026, de 27 d'agost, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte d'instal·lació solar fotovoltaica PSFV L",
+"date": "2026-09-04"
+}
+},
+"1043776": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": null,
+"events": null,
+"title": "Resolució ACC/4933/2024, de 10 de juny, per la qual es formula la declaració ambiental estratègica de la Modificació puntual de les Normes de planejament urbaní",
+"date": "2026-05-08"
+},
+"new": {
+"category": "OUT_OF_SCOPE",
+"event": "URBAN_PLANNING_NOT_PLANT",
+"name": null,
+"events": null,
+"title": "Resolució ACC/4933/2024, de 10 de juny, per la qual es formula la declaració ambiental estratègica de la Modificació puntual de les Normes de planejament urbaní",
+"date": "2026-05-08"
+}
+},
+"1047624": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "stand-alone anomenada PHFV Penedès",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"stand-alone anomenada PHFV Penedès",
+5.5,
+"41c092dad03e07f5edd5"
+]
+],
+"title": "Resolució TER/1930/2026, de 12 de juny, de la Direcció General d'Energia, per la qual s'atorguen l'autorització administrativa prèvia, l'autorització administra",
+"date": "2026-06-19"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "PHFV Penedès",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"PHFV Penedès",
+5.5,
+"41c092dad03e07f5edd5"
+]
+],
+"title": "Resolució TER/1930/2026, de 12 de juny, de la Direcció General d'Energia, per la qual s'atorguen l'autorització administrativa prèvia, l'autorització administra",
+"date": "2026-06-19"
+}
+},
+"1041880": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "GRANT_NOT_CONFIRMED_IN_OPERATIVE_BODY",
+"name": "Parc Solar Agrovoltaic sense excedents per autoconsum de 900 kWn i 645 kWh",
+"events": null,
+"title": "Resolució TER/1062/2026, de 2 d'abril, per la qual s'atorga a l'empresa SAT N 1596 Nufri RL l'autorització administrativa prèvia i de construcció del projecte d",
+"date": "2026-04-15"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AUTH_ONLY",
+"name": "Parc Solar Agrovoltaic sense excedents per autoconsum de 900 kWn i 645 kWh",
+"events": [
+[
+"PRIOR_AUTH",
+"PERMITTING",
+"Parc Solar Agrovoltaic sense excedents per autoconsum de 900 kWn i 645 kWh",
+null,
+"a7012fefc4b5c3af5bb8"
+]
+],
+"title": "Resolució TER/1062/2026, de 2 d'abril, per la qual s'atorga a l'empresa SAT N 1596 Nufri RL l'autorització administrativa prèvia i de construcció del projecte d",
+"date": "2026-04-15"
+}
+},
+"1033424": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "stand-alone anomenada Bess Can Magí",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"stand-alone anomenada Bess Can Magí",
+24.0,
+"e0e27b00f00c3369dfc2"
+]
+],
+"title": "Resolució TER/4754/2025, de 14 de novembre, de la Direcció General d'Energia, per la qual s'atorga l'autorització administrativa prèvia i l'autorització adminis",
+"date": "2025-12-31"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "Bess Can Magí",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"Bess Can Magí",
+24.0,
+"e0e27b00f00c3369dfc2"
+]
+],
+"title": "Resolució TER/4754/2025, de 14 de novembre, de la Direcció General d'Energia, per la qual s'atorga l'autorització administrativa prèvia i l'autorització adminis",
+"date": "2025-12-31"
+}
+},
+"1002417": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "GRANT_NOT_CONFIRMED_IN_OPERATIVE_BODY",
+"name": "Les Quadres",
+"events": null,
+"title": "RESOLUCIÓ TER/4504/2024, de 10 de desembre, per la qual s'atorga a Les Quadres Planta Fotovoltaica, SL, l'autorització administrativa prèvia, autorització admin",
+"date": "2024-12-20"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "Les Quadres",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"Les Quadres",
+0.92,
+"2e9623db90e05abfb1a7"
+]
+],
+"title": "RESOLUCIÓ TER/4504/2024, de 10 de desembre, per la qual s'atorga a Les Quadres Planta Fotovoltaica, SL, l'autorització administrativa prèvia, autorització admin",
+"date": "2024-12-20"
+}
+},
+"1020201": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_SUBJECT",
+"name": null,
+"events": null,
+"title": "Resolució TER/2748/2025, de 14 de juliol, d'informe d'impacte ambiental del Projecte en sòl no urbanitzable per a la implantació del sistema d'emmagatzematge d'",
+"date": "2025-07-22"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": "PB Narsil Palau 1",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"PB Narsil Palau 1",
+null,
+"303848b336d63ab1b826"
+]
+],
+"title": "Resolució TER/2748/2025, de 14 de juliol, d'informe d'impacte ambiental del Projecte en sòl no urbanitzable per a la implantació del sistema d'emmagatzematge d'",
+"date": "2025-07-22"
+}
+},
+"998585": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": null,
+"events": null,
+"title": "ANUNCI sobre aprovació definitiva del Projecte executiu d'instal·lació fotovoltaica 100 kWn limitat a 90 kWn a la coberta de l'escola d'adults - escola bressol ",
+"date": "2024-11-04"
+},
+"new": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": "100 kWn limitat a 90 kWn a la coberta de l'escola d'adults - escola bressol Petit Estel",
+"events": null,
+"title": "ANUNCI sobre aprovació definitiva del Projecte executiu d'instal·lació fotovoltaica 100 kWn limitat a 90 kWn a la coberta de l'escola d'adults - escola bressol ",
+"date": "2024-11-04"
+}
+},
+"1011837": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_SUBJECT",
+"name": null,
+"events": null,
+"title": "Resolució TER/1305/2025, de 9 d'abril, d'informe d'impacte ambiental del Projecte en sòl no urbanitzable per a la implantació del sistema d'emmagatzematge elèct",
+"date": "2025-04-16"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": "FRV Palau",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"FRV Palau",
+null,
+"eb9299e9b16270af3732"
+]
+],
+"title": "Resolució TER/1305/2025, de 9 d'abril, d'informe d'impacte ambiental del Projecte en sòl no urbanitzable per a la implantació del sistema d'emmagatzematge elèct",
+"date": "2025-04-16"
+}
+},
+"1014216": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": "PS Volans Solar 1",
+"events": null,
+"title": "Anunci pel qual es fa pública la convocatòria per a la redacció de les actes prèvies a l'ocupació i, si s'escau, de les actes d'ocupació definitiva dels béns i/",
+"date": "2025-05-19"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "EXPROPRIATION_PRIOR_SURVEY",
+"name": "PS Volans Solar 1",
+"events": [
+[
+"EXPROPRIATION",
+"PRECONSTRUCTION",
+"PS Volans Solar 1",
+null,
+"0bcc83186ec33e2fb084"
+]
+],
+"title": "Anunci pel qual es fa pública la convocatòria per a la redacció de les actes prèvies a l'ocupació i, si s'escau, de les actes d'ocupació definitiva dels béns i/",
+"date": "2025-05-19"
+}
+},
+"1002480": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "PUBLIC_INFO_AUTHORIZATION_REQUEST",
+"name": "“Planta solar fotovoltaica Riba-roja”",
+"events": [
+[
+"PUBLIC_INFO",
+"EARLY",
+"“Planta solar fotovoltaica Riba-roja”",
+4.95,
+"5d32591abfc641225ac7"
+]
+],
+"title": "ANUNCI complementari pel qual se sotmet a informació pública la sol·licitud d'autorització administrativa prèvia, autorització administrativa de construcció, de",
+"date": "2024-12-20"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PUBLIC_INFO_AUTHORIZATION_REQUEST",
+"name": "Planta solar fotovoltaica Riba-roja",
+"events": [
+[
+"PUBLIC_INFO",
+"EARLY",
+"Planta solar fotovoltaica Riba-roja",
+4.95,
+"5d32591abfc641225ac7"
+]
+],
+"title": "ANUNCI complementari pel qual se sotmet a informació pública la sol·licitud d'autorització administrativa prèvia, autorització administrativa de construcció, de",
+"date": "2024-12-20"
+}
+},
+"1036379": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "GRANT_NOT_CONFIRMED_IN_OPERATIVE_BODY",
+"name": "stand-alone anomenada PB Sonora Subirats 1",
+"events": null,
+"title": "Resolució TER/288/2026, de 2 de febrer, per la qual s'atorguen l'autorització administrativa prèvia, l'autorització administrativa de construcció i la declaraci",
+"date": "2026-02-11"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "PB Sonora Subirats 1",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"PB Sonora Subirats 1",
+23.49,
+"7e12f78840889a92cb52"
+]
+],
+"title": "Resolució TER/288/2026, de 2 de febrer, per la qual s'atorguen l'autorització administrativa prèvia, l'autorització administrativa de construcció i la declaraci",
+"date": "2026-02-11"
+}
+},
+"1020964": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": "Hospitalet I i BESS Hospitalet II",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"Hospitalet I i BESS Hospitalet II",
+null,
+"7986fa88000e74332d35"
+]
+],
+"title": "Resolució TER/2901/2025, de 23 de juliol, d'informe d'impacte ambiental del Projecte per implantar el sistema d'emmagatzematge d'energia amb bateries stand-alon",
+"date": "2025-07-30"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": null,
+"events": "IDENTITY_HELD",
+"title": "Resolució TER/2901/2025, de 23 de juliol, d'informe d'impacte ambiental del Projecte per implantar el sistema d'emmagatzematge d'energia amb bateries stand-alon",
+"date": "2025-07-30"
+}
+},
+"1017475": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_SUBJECT",
+"name": null,
+"events": null,
+"title": "Resolució TER/2267/2025, de 16 de juny, d'informe d'impacte ambiental del Projecte en sòl no urbanitzable per a la implantació del sistema d'emmagatzematge d'en",
+"date": "2025-06-23"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": "PB Babor 29",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"PB Babor 29",
+null,
+"2c686d8b1602e0193110"
+]
+],
+"title": "Resolució TER/2267/2025, de 16 de juny, d'informe d'impacte ambiental del Projecte en sòl no urbanitzable per a la implantació del sistema d'emmagatzematge d'en",
+"date": "2025-06-23"
+}
+},
+"1047373": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": null,
+"events": "IDENTITY_HELD",
+"title": "Resolució TER/1860/2026, d'1 d'abril, d'informe d'impacte ambiental del Projecte d'instal·lació d'emmagatzematge BESS PHFV Manresa de 4,80 MW, de tipus stand-al",
+"date": "2026-06-17"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": "PHFV Manresa",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"PHFV Manresa",
+4.8,
+"e66ebab59745ceb14ea5"
+]
+],
+"title": "Resolució TER/1860/2026, d'1 d'abril, d'informe d'impacte ambiental del Projecte d'instal·lació d'emmagatzematge BESS PHFV Manresa de 4,80 MW, de tipus stand-al",
+"date": "2026-06-17"
+}
+},
+"1024499": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "GRANT_NOT_CONFIRMED_IN_OPERATIVE_BODY",
+"name": "PS Fonollosa",
+"events": null,
+"title": "Resolució TER/3331/2025, de 2 de setembre, de la Direcció General d'Energia, per la qual s'atorga a l'empresa Estabanell Generació, SLU, la modificació de l'aut",
+"date": "2025-09-17"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "PS Fonollosa",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"PS Fonollosa",
+4.985,
+"6e6cf0fb6918ecec0ed7"
+]
+],
+"title": "Resolució TER/3331/2025, de 2 de setembre, de la Direcció General d'Energia, per la qual s'atorga a l'empresa Estabanell Generació, SLU, la modificació de l'aut",
+"date": "2025-09-17"
+}
+},
+"1005185": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": "PE Les Basses Roges 3",
+"events": null,
+"title": "Resolució TER/4789/2024, de 2 de desembre, per la qual es denega a l'empresa Energías Renovables De Hades, SL, l'autorització administrativa prèvia i de constru",
+"date": "2025-01-31"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "AUTHORIZATION_DENIED",
+"name": "PE Les Basses Roges 3",
+"events": [
+[
+"DENIED",
+"BLOCKED",
+"PE Les Basses Roges 3",
+null,
+"7bdaf391426b4b4f68d3"
+]
+],
+"title": "Resolució TER/4789/2024, de 2 de desembre, per la qual es denega a l'empresa Energías Renovables De Hades, SL, l'autorització administrativa prèvia i de constru",
+"date": "2025-01-31"
+}
+},
+"1001770": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "GRANT_NOT_CONFIRMED_IN_OPERATIVE_BODY",
+"name": "Parsosy las Piedras FV4",
+"events": null,
+"title": "RESOLUCIÓ TER/4439/2024, de 10 de desembre, per la qual s'atorga a Parsosy las Piedras, SL, l'autorització administrativa prèvia i autorització administrativa d",
+"date": "2024-12-13"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "Parsosy las Piedras FV4",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"Parsosy las Piedras FV4",
+4.95,
+"c81cff1d70837a69d742"
+]
+],
+"title": "RESOLUCIÓ TER/4439/2024, de 10 de desembre, per la qual s'atorga a Parsosy las Piedras, SL, l'autorització administrativa prèvia i autorització administrativa d",
+"date": "2024-12-13"
+}
+},
+"1020387": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_SUBJECT",
+"name": null,
+"events": null,
+"title": "Resolució TER/2774/2025, de 16 de juliol, d'informe d'impacte ambiental del Projecte en sòl no urbanitzable per a la implantació del sistema d'emmagatzematge d'",
+"date": "2025-07-23"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": "FRV Guixeres",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"FRV Guixeres",
+null,
+"525c5212e85aa2590961"
+]
+],
+"title": "Resolució TER/2774/2025, de 16 de juliol, d'informe d'impacte ambiental del Projecte en sòl no urbanitzable per a la implantació del sistema d'emmagatzematge d'",
+"date": "2025-07-23"
+}
+},
+"1028440": {
+"old": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+"name": null,
+"events": null,
+"title": "Anunci sobre aprovació definitiva del Projecte modificat d'una instal·lació fotovoltaica al pavelló municipal (exp. 3359-2022)",
+"date": "2025-11-04"
+},
+"new": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+"name": "al pavelló municipal",
+"events": null,
+"title": "Anunci sobre aprovació definitiva del Projecte modificat d'una instal·lació fotovoltaica al pavelló municipal (exp. 3359-2022)",
+"date": "2025-11-04"
+}
+},
+"997095": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "GRANT_NOT_CONFIRMED_IN_OPERATIVE_BODY",
+"name": "PSFV Morellols",
+"events": null,
+"title": "RESOLUCIÓ TER/3574/2024, de 4 d'octubre, per la qual s'atorga a Energía Inagotable de Leda, SL, l'autorització administrativa prèvia i de construcció del projec",
+"date": "2024-10-15"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "PSFV Morellols",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"PSFV Morellols",
+42.0,
+"c91c8879e011b70a64a3"
+]
+],
+"title": "RESOLUCIÓ TER/3574/2024, de 4 d'octubre, per la qual s'atorga a Energía Inagotable de Leda, SL, l'autorització administrativa prèvia i de construcció del projec",
+"date": "2024-10-15"
+}
+},
+"1001603": {
+"old": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_INITIAL_PROJECT_APPROVAL",
+"name": null,
+"events": null,
+"title": "ANUNCI sobre aprovació inicial del Projecte executiu d'instal·lació fotovoltaica en el dipòsit salí (exp. Gestiona 605/2024).",
+"date": "2024-12-12"
+},
+"new": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_INITIAL_PROJECT_APPROVAL",
+"name": "en el dipòsit salí",
+"events": null,
+"title": "ANUNCI sobre aprovació inicial del Projecte executiu d'instal·lació fotovoltaica en el dipòsit salí (exp. Gestiona 605/2024).",
+"date": "2024-12-12"
+}
+},
+"1052388": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": "Sant Roc",
+"events": null,
+"title": "Resolució TER/2839/2026, de 4 d'agost, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte híbrid Sant Roc: parc eòlic Sant Roc, de ",
+"date": "2026-08-11"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_DIA_FAVORABLE",
+"name": "Sant Roc",
+"events": [
+[
+"DIA",
+"PERMITTING",
+"Sant Roc",
+null,
+"c035725f0af942722b99"
+]
+],
+"title": "Resolució TER/2839/2026, de 4 d'agost, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte híbrid Sant Roc: parc eòlic Sant Roc, de ",
+"date": "2026-08-11"
+}
+},
+"1007181": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "PUBLIC_INFO_AUTHORIZATION_REQUEST",
+"name": "“PS Eguzki Alt Empordà”",
+"events": [
+[
+"PUBLIC_INFO",
+"EARLY",
+"“PS Eguzki Alt Empordà”",
+4.95,
+"fa6064fae148f49f0bab"
+]
+],
+"title": "Anunci pel qual se sotmet a informació pública la sol·licitud d'autorització administrativa prèvia, autorització administrativa de construcció, autorització del",
+"date": "2025-02-24"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PUBLIC_INFO_AUTHORIZATION_REQUEST",
+"name": "PS Eguzki Alt Empordà",
+"events": [
+[
+"PUBLIC_INFO",
+"EARLY",
+"PS Eguzki Alt Empordà",
+4.95,
+"fa6064fae148f49f0bab"
+]
+],
+"title": "Anunci pel qual se sotmet a informació pública la sol·licitud d'autorització administrativa prèvia, autorització administrativa de construcció, autorització del",
+"date": "2025-02-24"
+}
+},
+"1037297": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_SUBJECT",
+"name": null,
+"events": null,
+"title": "Anunci sobre aprovació inicial de la modificació del Pla d'ordenació urbanística municipal per a la regulació de les instal·lacions d'emmagatzematge d'energia e",
+"date": "2026-02-19"
+},
+"new": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_INITIAL_PROJECT_APPROVAL",
+"name": null,
+"events": null,
+"title": "Anunci sobre aprovació inicial de la modificació del Pla d'ordenació urbanística municipal per a la regulació de les instal·lacions d'emmagatzematge d'energia e",
+"date": "2026-02-19"
+}
+},
+"1047612": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": null,
+"events": null,
+"title": "Resolució TER/1913/2026, de 25 de febrer, d'informe d'impacte ambiental dels projectes d'instal·lació d'emmagatzematge BESS Brugen I, II, III i IV, de 4,99 MW c",
+"date": "2026-06-19"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": null,
+"events": "IDENTITY_HELD",
+"title": "Resolució TER/1913/2026, de 25 de febrer, d'informe d'impacte ambiental dels projectes d'instal·lació d'emmagatzematge BESS Brugen I, II, III i IV, de 4,99 MW c",
+"date": "2026-06-19"
+}
+},
+"1035861": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": "Anoia i Segarra III",
+"events": null,
+"title": "Resolució TER/199/2026, de 27 de gener, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte de parc eòlic Anoia i Segarra III, promo",
+"date": "2026-02-04"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_DIA_FAVORABLE",
+"name": "Anoia i Segarra III",
+"events": [
+[
+"DIA",
+"PERMITTING",
+"Anoia i Segarra III",
+null,
+"0b36c6309f808f9d4ac7"
+]
+],
+"title": "Resolució TER/199/2026, de 27 de gener, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte de parc eòlic Anoia i Segarra III, promo",
+"date": "2026-02-04"
+}
+},
+"1051867": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_SUBJECT",
+"name": null,
+"events": null,
+"title": "Resolució TER/2683/2026, de 28 de juliol, d'informe d'impacte ambiental del Projecte de sistemes d'emmagatzematge d'energia en bateries anomenat la Selva, tipus",
+"date": "2026-08-04"
+},
+"new": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": null,
+"events": null,
+"title": "Resolució TER/2683/2026, de 28 de juliol, d'informe d'impacte ambiental del Projecte de sistemes d'emmagatzematge d'energia en bateries anomenat la Selva, tipus",
+"date": "2026-08-04"
+}
+},
+"1028340": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "“Planta solar fotovoltaica Les Planetes”",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"“Planta solar fotovoltaica Les Planetes”",
+4.95,
+"2e63b2922df6108e73b6"
+]
+],
+"title": "Resolució TER/3942/2025, de 8 d'octubre, per la qual s'atorga a Blue Viking Samara, SL, l'autorització administrativa prèvia i autorització administrativa de co",
+"date": "2025-11-03"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "Planta solar fotovoltaica Les Planetes",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"Planta solar fotovoltaica Les Planetes",
+4.95,
+"2e63b2922df6108e73b6"
+]
+],
+"title": "Resolució TER/3942/2025, de 8 d'octubre, per la qual s'atorga a Blue Viking Samara, SL, l'autorització administrativa prèvia i autorització administrativa de co",
+"date": "2025-11-03"
+}
+},
+"1052475": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": null,
+"events": "IDENTITY_HELD",
+"title": "Resolució TER/2851/2026, de 30 de juliol, d'informe d'impacte ambiental del Projecte per a la implantació del sistema d'emmagatzematge d'energia elèctrica stand",
+"date": "2026-08-12"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": "Mena",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"Mena",
+16.65,
+"a818ab70c7ce394d4554"
+]
+],
+"title": "Resolució TER/2851/2026, de 30 de juliol, d'informe d'impacte ambiental del Projecte per a la implantació del sistema d'emmagatzematge d'energia elèctrica stand",
+"date": "2026-08-12"
+}
+},
+"997243": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": "Sant Joan",
+"events": null,
+"title": "RESOLUCIÓ TER/3611/2024, de 8 d'octubre, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte de parc eòlic Sant Joan i la seva infra",
+"date": "2024-10-16"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_DIA_FAVORABLE",
+"name": "Sant Joan",
+"events": [
+[
+"DIA",
+"PERMITTING",
+"Sant Joan",
+null,
+"54baa83a710bc94bea35"
+]
+],
+"title": "RESOLUCIÓ TER/3611/2024, de 8 d'octubre, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte de parc eòlic Sant Joan i la seva infra",
+"date": "2024-10-16"
+}
+},
+"998572": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": "Anoia i Segarra II",
+"events": null,
+"title": "RESOLUCIÓ TER/3814/2024, de 21 d'octubre, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte de parc eòlic Anoia i Segarra II, prom",
+"date": "2024-11-04"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_DIA_FAVORABLE",
+"name": "Anoia i Segarra II",
+"events": [
+[
+"DIA",
+"PERMITTING",
+"Anoia i Segarra II",
+null,
+"9723c9af8b93606e042d"
+]
+],
+"title": "RESOLUCIÓ TER/3814/2024, de 21 d'octubre, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte de parc eòlic Anoia i Segarra II, prom",
+"date": "2024-11-04"
+}
+},
+"1028726": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": "Les Planetes",
+"events": null,
+"title": "Resolució TER/4017/2025, de 31 d'octubre, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte de la planta solar fotovoltaica Les Pl",
+"date": "2025-11-07"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_DIA_FAVORABLE",
+"name": "Les Planetes",
+"events": [
+[
+"DIA",
+"PERMITTING",
+"Les Planetes",
+null,
+"2e63b2922df6108e73b6"
+]
+],
+"title": "Resolució TER/4017/2025, de 31 d'octubre, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte de la planta solar fotovoltaica Les Pl",
+"date": "2025-11-07"
+}
+},
+"1035648": {
+"old": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_INITIAL_PROJECT_APPROVAL",
+"name": null,
+"events": null,
+"title": "Anunci sobre aprovació inicial del Projecte executiu d'instal·lació fotovoltaica d'autoconsum col·lectiu amb excedents acollits a compensació - FV EDAR Riumar (",
+"date": "2026-02-02"
+},
+"new": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_INITIAL_PROJECT_APPROVAL",
+"name": "d'autoconsum col·lectiu amb excedents acollits a compensació - FV EDAR Riumar",
+"events": null,
+"title": "Anunci sobre aprovació inicial del Projecte executiu d'instal·lació fotovoltaica d'autoconsum col·lectiu amb excedents acollits a compensació - FV EDAR Riumar (",
+"date": "2026-02-02"
+}
+},
+"1051181": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": "sobre terreny connectada a la xarxa elèctrica PSF Vilobí",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"sobre terreny connectada a la xarxa elèctrica PSF Vilobí",
+null,
+"872366c5d329e33a3200"
+]
+],
+"title": "Resolució TER/2581/2026, de 21 de juliol, per la qual es fa públic l'Acord d'informe d'impacte ambiental del Projecte de planta solar fotovoltaica sobre terreny",
+"date": "2026-07-28"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": "connectada a la xarxa elèctrica PSF Vilobí",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"connectada a la xarxa elèctrica PSF Vilobí",
+null,
+"872366c5d329e33a3200"
+]
+],
+"title": "Resolució TER/2581/2026, de 21 de juliol, per la qual es fa públic l'Acord d'informe d'impacte ambiental del Projecte de planta solar fotovoltaica sobre terreny",
+"date": "2026-07-28"
+}
+},
+"1029733": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": "sobre terreny",
+"events": null,
+"title": "Resolució TER/4187/2025, de 3 de juliol, d'arxivament d'expedient, relatiu a la sol·licitud d'autorització administrativa prèvia i de construcció d'un parc eòli",
+"date": "2025-11-20"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PROCEDURE_ARCHIVED",
+"name": null,
+"events": "IDENTITY_HELD",
+"title": "Resolució TER/4187/2025, de 3 de juliol, d'arxivament d'expedient, relatiu a la sol·licitud d'autorització administrativa prèvia i de construcció d'un parc eòli",
+"date": "2025-11-20"
+}
+},
+"1044582": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": null,
+"events": null,
+"title": "Edicte sobre aprovació definitiva del Projecte per a la instal·lació fotovoltaica al pavelló poliesportiu de Pals (exp. 1485/2024)",
+"date": "2026-05-19"
+},
+"new": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": "al pavelló poliesportiu de Pals",
+"events": null,
+"title": "Edicte sobre aprovació definitiva del Projecte per a la instal·lació fotovoltaica al pavelló poliesportiu de Pals (exp. 1485/2024)",
+"date": "2026-05-19"
+}
+},
+"1047069": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_SUBJECT",
+"name": null,
+"events": null,
+"title": "Resolució TER/1821/2026, de 21 de gener, d'informe d'impacte ambiental del Projecte executiu del sistema d'emmagatzematge en bateries Ebro Energy Juià i infraes",
+"date": "2026-06-15"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": "Ebro Energy Juià",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"Ebro Energy Juià",
+null,
+"3f73a0412d524bfde432"
+]
+],
+"title": "Resolució TER/1821/2026, de 21 de gener, d'informe d'impacte ambiental del Projecte executiu del sistema d'emmagatzematge en bateries Ebro Energy Juià i infraes",
+"date": "2026-06-15"
+}
+},
+"1044586": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "GRANT_NOT_CONFIRMED_IN_OPERATIVE_BODY",
+"name": "La Selva",
+"events": null,
+"title": "Resolució TER/1517/2026, de 10 d'abril, per la qual s'atorguen l'autorització administrativa prèvia i l'autorització administrativa de construcció del projecte ",
+"date": "2026-05-19"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "La Selva",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"La Selva",
+4.99,
+"77dd2f8b6d5392ca2298"
+]
+],
+"title": "Resolució TER/1517/2026, de 10 d'abril, per la qual s'atorguen l'autorització administrativa prèvia i l'autorització administrativa de construcció del projecte ",
+"date": "2026-05-19"
+}
+},
+"1037065": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": "La Romiguera amb la instal·lació de mòduls d'emmagatzematge",
+"events": null,
+"title": "Resolució TER/332/2026, de 10 de febrer, per la qual es fa públic l'Acord d'informe d'impacte ambiental del Projecte d'hibridació de la planta solar fotovoltaic",
+"date": "2026-02-17"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": "La Romiguera",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"La Romiguera",
+null,
+"2f06364f45ca789403aa"
+]
+],
+"title": "Resolució TER/332/2026, de 10 de febrer, per la qual es fa públic l'Acord d'informe d'impacte ambiental del Projecte d'hibridació de la planta solar fotovoltaic",
+"date": "2026-02-17"
+}
+},
+"1023857": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "GRANT_NOT_CONFIRMED_IN_OPERATIVE_BODY",
+"name": "PS Volans Solar 1",
+"events": null,
+"title": "Resolució TER/3285/2025, de 15 d'agost, de la Direcció General d'Energia, per la qual s'atorga a Solaria Promoción y Desarrollo Fotovoltaico, SL, la modificació",
+"date": "2025-09-08"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "PS Volans Solar 1",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"PS Volans Solar 1",
+49.97,
+"e30fe48b77a6758bf865"
+]
+],
+"title": "Resolució TER/3285/2025, de 15 d'agost, de la Direcció General d'Energia, per la qual s'atorga a Solaria Promoción y Desarrollo Fotovoltaico, SL, la modificació",
+"date": "2025-09-08"
+}
+},
+"1033555": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "“Planta solar fotovoltaica Flix-Ascó II”",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"“Planta solar fotovoltaica Flix-Ascó II”",
+16.06,
+"0057d4f12c34b26881ce"
+]
+],
+"title": "Resolució TER/4785/2025, d'11 de desembre, de la Direcció General d'Energia, per la qual s'atorga a Sanmad Sonne 3 Alcornoque, SL, l'autorització administrativa",
+"date": "2026-01-02"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "Planta solar fotovoltaica Flix-Ascó II",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"Planta solar fotovoltaica Flix-Ascó II",
+16.06,
+"0057d4f12c34b26881ce"
+]
+],
+"title": "Resolució TER/4785/2025, d'11 de desembre, de la Direcció General d'Energia, per la qual s'atorga a Sanmad Sonne 3 Alcornoque, SL, l'autorització administrativa",
+"date": "2026-01-02"
+}
+},
+"1020974": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "ORDINARY_EIA_REQUIRED",
+"name": null,
+"events": "IDENTITY_HELD",
+"title": "Resolució TER/2900/2025, de 23 de juliol, d'informe d'impacte ambiental del Projecte per implantar el sistema d'emmagatzematge d'energia elèctrica stand-alone B",
+"date": "2025-07-30"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ORDINARY_EIA_REQUIRED",
+"name": "BESS Franqueses",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"BESS Franqueses",
+null,
+"8452c75380a3c524e531"
+]
+],
+"title": "Resolució TER/2900/2025, de 23 de juliol, d'informe d'impacte ambiental del Projecte per implantar el sistema d'emmagatzematge d'energia elèctrica stand-alone B",
+"date": "2025-07-30"
+}
+},
+"1050292": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_SUBJECT",
+"name": null,
+"events": null,
+"title": "Resolució TER/2407/2026, de 21 de gener, d'informe d'impacte ambiental del Projecte en sòl no urbanitzable per a la implantació del sistema d'emmagatzematge d'e",
+"date": "2026-07-20"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": "PB Condor",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"PB Condor",
+null,
+"ce8a421511ec9ddeb8fc"
+]
+],
+"title": "Resolució TER/2407/2026, de 21 de gener, d'informe d'impacte ambiental del Projecte en sòl no urbanitzable per a la implantació del sistema d'emmagatzematge d'e",
+"date": "2026-07-20"
+}
+},
+"1017380": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_SUBJECT",
+"name": null,
+"events": null,
+"title": "Resolució TER/2236/2025, de 12 de juny, d'informe d'impacte ambiental del Projecte de sistema d'emmagatzematge d'energia en bateries tipus stand-alone anomenada",
+"date": "2025-06-20"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": "la Selva",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"la Selva",
+null,
+"36ac0ec1827eab3b5546"
+]
+],
+"title": "Resolució TER/2236/2025, de 12 de juny, d'informe d'impacte ambiental del Projecte de sistema d'emmagatzematge d'energia en bateries tipus stand-alone anomenada",
+"date": "2025-06-20"
+}
+},
+"1014797": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": "Can Magí",
+"events": null,
+"title": "Resolució TER/1820/2025, de 16 de maig, d'informe d'impacte ambiental del Projecte per a la implantació del sistema d'emmagatzematge d'energia amb bateries stan",
+"date": "2025-05-26"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": "Can Magí",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"Can Magí",
+null,
+"338fad54eeaad813f1c4"
+]
+],
+"title": "Resolució TER/1820/2025, de 16 de maig, d'informe d'impacte ambiental del Projecte per a la implantació del sistema d'emmagatzematge d'energia amb bateries stan",
+"date": "2025-05-26"
+}
+},
+"1011434": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_SUBJECT",
+"name": null,
+"events": null,
+"title": "Resolució TER/1254/2025, de 3 d'abril, d'informe d'impacte ambiental del Projecte executiu del sistema d'emmagatzematge en bateries Ebro Energy Juià i infraestr",
+"date": "2025-04-11"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": "Ebro Energy Juià",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"Ebro Energy Juià",
+null,
+"24f6749efab186a48607"
+]
+],
+"title": "Resolució TER/1254/2025, de 3 d'abril, d'informe d'impacte ambiental del Projecte executiu del sistema d'emmagatzematge en bateries Ebro Energy Juià i infraestr",
+"date": "2025-04-11"
+}
+},
+"1039684": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": null,
+"events": null,
+"title": "Edicte sobre aprovació inicial del Projecte per a una instal·lació fotovoltaica al pavelló poliesportiu de Pals (exp. 1485/2024)",
+"date": "2026-03-18"
+},
+"new": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": "al pavelló poliesportiu de Pals",
+"events": null,
+"title": "Edicte sobre aprovació inicial del Projecte per a una instal·lació fotovoltaica al pavelló poliesportiu de Pals (exp. 1485/2024)",
+"date": "2026-03-18"
+}
+},
+"1028739": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": "sobre terreny anomenada PS Onyar Solar",
+"events": null,
+"title": "Resolució TER/4051/2025, de 16 d'octubre, per la qual s'arxiva l'expedient relatiu a la sol·licitud d'autorització administrativa prèvia i de construcció de la ",
+"date": "2025-11-07"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PROCEDURE_ARCHIVED",
+"name": "PS Onyar Solar",
+"events": [
+[
+"PROCEDURE_ENDED",
+"BLOCKED",
+"PS Onyar Solar",
+null,
+"725f6ef7ae0bc68a68e3"
+]
+],
+"title": "Resolució TER/4051/2025, de 16 d'octubre, per la qual s'arxiva l'expedient relatiu a la sol·licitud d'autorització administrativa prèvia i de construcció de la ",
+"date": "2025-11-07"
+}
+},
+"1053387": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": null,
+"events": null,
+"title": "Resolució TER/3042/2026, de 21 d'agost, per la qual es fa públic l'Acord d'informe d'impacte ambiental del Projecte de camp fotovoltaic de generació distribuïda",
+"date": "2026-08-31"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": "Eguzki Alt Empordà",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"Eguzki Alt Empordà",
+null,
+"fa6064fae148f49f0bab"
+]
+],
+"title": "Resolució TER/3042/2026, de 21 d'agost, per la qual es fa públic l'Acord d'informe d'impacte ambiental del Projecte de camp fotovoltaic de generació distribuïda",
+"date": "2026-08-31"
+}
+},
+"1017972": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "PUBLIC_INFO_AUTHORIZATION_REQUEST",
+"name": "“PSF Miret”",
+"events": [
+[
+"PUBLIC_INFO",
+"EARLY",
+"“PSF Miret”",
+4.8,
+"60d49b55e050df18ae8d"
+]
+],
+"title": "Anunci pel qual se sotmet a informació pública la sol·licitud d'autorització administrativa prèvia i de construcció, autorització del projecte d'actuació especí",
+"date": "2025-06-27"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PUBLIC_INFO_AUTHORIZATION_REQUEST",
+"name": "PSF Miret",
+"events": [
+[
+"PUBLIC_INFO",
+"EARLY",
+"PSF Miret",
+4.8,
+"60d49b55e050df18ae8d"
+]
+],
+"title": "Anunci pel qual se sotmet a informació pública la sol·licitud d'autorització administrativa prèvia i de construcció, autorització del projecte d'actuació especí",
+"date": "2025-06-27"
+}
+},
+"1046895": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": null,
+"events": "IDENTITY_HELD",
+"title": "Resolució TER/4994/2025, de 29 de desembre, d'informe d'impacte ambiental del Projecte de sistema d'emmagatzematge d'energia en bateries anomenat BESS Arboç 2, ",
+"date": "2026-06-12"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": "BESS Arboç 2",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"BESS Arboç 2",
+null,
+"490faba2a3352649ab5e"
+]
+],
+"title": "Resolució TER/4994/2025, de 29 de desembre, d'informe d'impacte ambiental del Projecte de sistema d'emmagatzematge d'energia en bateries anomenat BESS Arboç 2, ",
+"date": "2026-06-12"
+}
+},
+"1051453": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": "Tivissa III i de les seves infraestructures d'evacuació",
+"events": null,
+"title": "Acord GOV/202/2026, de 28 de juliol, pel qual es declara la utilitat pública del Projecte del parc eòlic Tivissa III i de les seves infraestructures d'evacuació",
+"date": "2026-07-30"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PUBLIC_UTILITY_GRANTED",
+"name": "Tivissa III i de les seves infraestructures d'evacuació",
+"events": "IDENTITY_HELD",
+"title": "Acord GOV/202/2026, de 28 de juliol, pel qual es declara la utilitat pública del Projecte del parc eòlic Tivissa III i de les seves infraestructures d'evacuació",
+"date": "2026-07-30"
+}
+},
+"998583": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": "Serra de la Creu 5",
+"events": null,
+"title": "RESOLUCIÓ TER/3816/2024, de 21 d'octubre, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte de parc eòlic Serra de la Creu 5, prom",
+"date": "2024-11-04"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_DIA_MIXED",
+"name": "Serra de la Creu 5",
+"events": [
+[
+"DIA",
+"PERMITTING",
+"Serra de la Creu 5",
+null,
+"860aa6b2239cb030a771"
+]
+],
+"title": "RESOLUCIÓ TER/3816/2024, de 21 d'octubre, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte de parc eòlic Serra de la Creu 5, prom",
+"date": "2024-11-04"
+}
+},
+"1037181": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "stand-alone anomenada PB IM2 Vic",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"stand-alone anomenada PB IM2 Vic",
+6.3,
+"e85bd5169155e1000edd"
+]
+],
+"title": "Resolució TER/340/2026, de 20 de gener, per la qual s'atorguen l'autorització administrativa prèvia i l'autorització administrativa de construcció del projecte ",
+"date": "2026-02-18"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "PB IM2 Vic",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"PB IM2 Vic",
+6.3,
+"e85bd5169155e1000edd"
+]
+],
+"title": "Resolució TER/340/2026, de 20 de gener, per la qual s'atorguen l'autorització administrativa prèvia i l'autorització administrativa de construcció del projecte ",
+"date": "2026-02-18"
+}
+},
+"1033595": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "“Planta solar fotovoltaica Flix-Ascó III”",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"“Planta solar fotovoltaica Flix-Ascó III”",
+16.06,
+"2723d80744c31bf46ef5"
+]
+],
+"title": "Resolució TER/4770/2025, d'11 de desembre, de la Direcció General d'Energia, per la qual s'atorga a Sanmad Sonne 3 Sabina, SL, l'autorització administrativa prè",
+"date": "2026-01-02"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "Planta solar fotovoltaica Flix-Ascó III",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"Planta solar fotovoltaica Flix-Ascó III",
+16.06,
+"2723d80744c31bf46ef5"
+]
+],
+"title": "Resolució TER/4770/2025, d'11 de desembre, de la Direcció General d'Energia, per la qual s'atorga a Sanmad Sonne 3 Sabina, SL, l'autorització administrativa prè",
+"date": "2026-01-02"
+}
+},
+"996976": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": null,
+"events": "IDENTITY_HELD",
+"title": "RESOLUCIÓ ACC/3566/2024, de 9 de juliol, per la qual s'atorga a Merlot Solar, SL, l'autorització administrativa de construcció del projecte de la planta fotovol",
+"date": "2024-10-14"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "Merlot Solar",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"Merlot Solar",
+35.91,
+"24fba71329032ee40d1d"
+]
+],
+"title": "RESOLUCIÓ ACC/3566/2024, de 9 de juliol, per la qual s'atorga a Merlot Solar, SL, l'autorització administrativa de construcció del projecte de la planta fotovol",
+"date": "2024-10-14"
+}
+},
+"1047632": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_SUBJECT",
+"name": null,
+"events": null,
+"title": "Resolució TER/1912/2026, d'1 d'abril, d'informe d'impacte ambiental del Projecte en sòl no urbanitzable per a la implantació del sistema d'emmagatzematge d'ener",
+"date": "2026-06-19"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": "PB Babor 30",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"PB Babor 30",
+null,
+"1ac81d018d302e30aae2"
+]
+],
+"title": "Resolució TER/1912/2026, d'1 d'abril, d'informe d'impacte ambiental del Projecte en sòl no urbanitzable per a la implantació del sistema d'emmagatzematge d'ener",
+"date": "2026-06-19"
+}
+},
+"1047233": {
+"old": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_INITIAL_PROJECT_APPROVAL",
+"name": null,
+"events": null,
+"title": "Anunci relatiu al període d'informació pública corresponent a l'aprovació inicial del Projecte executiu d'una instal·lació fotovoltaica d'autoconsum col·lectiu ",
+"date": "2026-06-16"
+},
+"new": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_INITIAL_PROJECT_APPROVAL",
+"name": "d'autoconsum col·lectiu",
+"events": null,
+"title": "Anunci relatiu al període d'informació pública corresponent a l'aprovació inicial del Projecte executiu d'una instal·lació fotovoltaica d'autoconsum col·lectiu ",
+"date": "2026-06-16"
+}
+},
+"1005808": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_SUBJECT",
+"name": null,
+"events": null,
+"title": "Resolució TER/289/2025, de 13 de gener, d'informe d'impacte ambiental del Projecte de sistemes d'emmagatzematge d'energia en bateries anomenat Bellissens (2-8),",
+"date": "2025-02-10"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": null,
+"events": "IDENTITY_HELD",
+"title": "Resolució TER/289/2025, de 13 de gener, d'informe d'impacte ambiental del Projecte de sistemes d'emmagatzematge d'energia en bateries anomenat Bellissens (2-8),",
+"date": "2025-02-10"
+}
+},
+"1023174": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": "Galera Solar",
+"events": null,
+"title": "Resolució TER/3204/2025, de 18 d'agost, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte de la planta solar fotovoltaica Galera S",
+"date": "2025-08-26"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_DIA_MIXED",
+"name": "Galera Solar",
+"events": [
+[
+"DIA",
+"PERMITTING",
+"Galera Solar",
+47.16,
+"d8cd28bfab57adc1e9e2"
+]
+],
+"title": "Resolució TER/3204/2025, de 18 d'agost, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte de la planta solar fotovoltaica Galera S",
+"date": "2025-08-26"
+}
+},
+"1018768": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "PUBLIC_INFO_AUTHORIZATION_REQUEST",
+"name": "“PSF Abellar”",
+"events": [
+[
+"PUBLIC_INFO",
+"EARLY",
+"“PSF Abellar”",
+4.8,
+"f4f0ef5c9880acec1140"
+]
+],
+"title": "Anunci pel qual se sotmet a informació pública la sol·licitud d'autorització administrativa prèvia i de construcció, autorització del projecte d'actuació especí",
+"date": "2025-07-07"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PUBLIC_INFO_AUTHORIZATION_REQUEST",
+"name": "PSF Abellar",
+"events": [
+[
+"PUBLIC_INFO",
+"EARLY",
+"PSF Abellar",
+4.8,
+"f4f0ef5c9880acec1140"
+]
+],
+"title": "Anunci pel qual se sotmet a informació pública la sol·licitud d'autorització administrativa prèvia i de construcció, autorització del projecte d'actuació especí",
+"date": "2025-07-07"
+}
+},
+"1014807": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_SUBJECT",
+"name": null,
+"events": null,
+"title": "Resolució TER/1821/2025, de 16 de maig, d'informe d'impacte ambiental del Projecte per a la implantació del sistema d'emmagatzematge d'energia elèctrica stand-a",
+"date": "2025-05-26"
+},
+"new": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": "Can Jardí Almacena",
+"events": null,
+"title": "Resolució TER/1821/2025, de 16 de maig, d'informe d'impacte ambiental del Projecte per a la implantació del sistema d'emmagatzematge d'energia elèctrica stand-a",
+"date": "2025-05-26"
+}
+},
+"1047298": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_SUBJECT",
+"name": null,
+"events": null,
+"title": "Resolució TER/1864/2026, d'1 d'abril, d'informe d'impacte ambiental del Projecte en sòl no urbanitzable per a la implantació del sistema d'emmagatzematge d'ener",
+"date": "2026-06-17"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": "PB Babor 29",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"PB Babor 29",
+null,
+"8efeb23c01cb38971912"
+]
+],
+"title": "Resolució TER/1864/2026, d'1 d'abril, d'informe d'impacte ambiental del Projecte en sòl no urbanitzable per a la implantació del sistema d'emmagatzematge d'ener",
+"date": "2026-06-17"
+}
+},
+"1022479": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_SUBJECT",
+"name": null,
+"events": null,
+"title": "Resolució TER/3119/2025, de 26 de juny, d'informe d'impacte ambiental del Projecte en sòl no urbanitzable per a la implantació del sistema d'emmagatzematge d'en",
+"date": "2025-08-13"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": "PB Babor 30",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"PB Babor 30",
+null,
+"f7599748ae0b47c4ef08"
+]
+],
+"title": "Resolució TER/3119/2025, de 26 de juny, d'informe d'impacte ambiental del Projecte en sòl no urbanitzable per a la implantació del sistema d'emmagatzematge d'en",
+"date": "2025-08-13"
+}
+},
+"1011534": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_SUBJECT",
+"name": null,
+"events": null,
+"title": "Resolució TER/1253/2025, de 3 d'abril, d'informe d'impacte ambiental del Projecte per implantar el sistema d'emmagatzematge d'energia elèctrica stand-alone PB G",
+"date": "2025-04-11"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": null,
+"events": "IDENTITY_HELD",
+"title": "Resolució TER/1253/2025, de 3 d'abril, d'informe d'impacte ambiental del Projecte per implantar el sistema d'emmagatzematge d'energia elèctrica stand-alone PB G",
+"date": "2025-04-11"
+}
+},
+"1047092": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": null,
+"events": "IDENTITY_HELD",
+"title": "Resolució TER/4995/2025, d'11 de desembre, d'informe d'impacte ambiental del projecte d'instal·lació d'emmagatzematge Bess Stand Alone Folgueroles de 4,99 MW i ",
+"date": "2026-06-15"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": "Stand Alone Folgueroles",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"Stand Alone Folgueroles",
+null,
+"4143a29fd9d551cda6b2"
+]
+],
+"title": "Resolució TER/4995/2025, d'11 de desembre, d'informe d'impacte ambiental del projecte d'instal·lació d'emmagatzematge Bess Stand Alone Folgueroles de 4,99 MW i ",
+"date": "2026-06-15"
+}
+},
+"1000691": {
+"old": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+"name": null,
+"events": null,
+"title": "ANUNCI sobre aprovació definitiva del Projecte d'instal·lació fotovoltaica d'autoconsum col·lectiu de 40 kWP a la coberta del Sax Sala, de Sant Celoni.",
+"date": "2024-11-29"
+},
+"new": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+"name": "d'autoconsum col·lectiu",
+"events": null,
+"title": "ANUNCI sobre aprovació definitiva del Projecte d'instal·lació fotovoltaica d'autoconsum col·lectiu de 40 kWP a la coberta del Sax Sala, de Sant Celoni.",
+"date": "2024-11-29"
+}
+},
+"1012547": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "PUBLIC_INFO_AUTHORIZATION_REQUEST",
+"name": "“PSF El Pla”",
+"events": [
+[
+"PUBLIC_INFO",
+"EARLY",
+"“PSF El Pla”",
+4.8,
+"146dec0962a4c1d4dbd8"
+]
+],
+"title": "Anunci pel qual se sotmet a informació pública la sol·licitud d'autorització administrativa prèvia i de construcció, autorització del projecte d'actuació especí",
+"date": "2025-04-25"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PUBLIC_INFO_AUTHORIZATION_REQUEST",
+"name": "PSF El Pla",
+"events": [
+[
+"PUBLIC_INFO",
+"EARLY",
+"PSF El Pla",
+4.8,
+"146dec0962a4c1d4dbd8"
+]
+],
+"title": "Anunci pel qual se sotmet a informació pública la sol·licitud d'autorització administrativa prèvia i de construcció, autorització del projecte d'actuació especí",
+"date": "2025-04-25"
+}
+},
+"1023667": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "GRANT_NOT_CONFIRMED_IN_OPERATIVE_BODY",
+"name": "planta solar fotovoltaica anomenada “EB1 Flix – La Devesa. Ampliació”",
+"events": null,
+"title": "Resolució TER/3168/2025, de 6 d'agost, per la qual s'atorguen a la Comunitat de Regants Garrigues Sud l'autorització administrativa prèvia i l'autorització admi",
+"date": "2025-09-03"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AUTH_ONLY",
+"name": "EB1 Flix – La Devesa. Ampliació",
+"events": [
+[
+"PRIOR_AUTH",
+"PERMITTING",
+"EB1 Flix – La Devesa. Ampliació",
+1.0234,
+"6f8dea8b718714f5cb7a"
+]
+],
+"title": "Resolució TER/3168/2025, de 6 d'agost, per la qual s'atorguen a la Comunitat de Regants Garrigues Sud l'autorització administrativa prèvia i l'autorització admi",
+"date": "2025-09-03"
+}
+},
+"1000239": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "PUBLIC_INFO_AUTHORIZATION_REQUEST",
+"name": "“BAIX CAMP SOLAR ENERGY”",
+"events": [
+[
+"PUBLIC_INFO",
+"EARLY",
+"“BAIX CAMP SOLAR ENERGY”",
+3.0,
+"8b873818d9874f5fc0dc"
+]
+],
+"title": "ANUNCI pel qual se sotmet a informació pública la sol·licitud d'autorització administrativa prèvia, autorització administrativa de construcció i autorització de",
+"date": "2024-11-22"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PUBLIC_INFO_AUTHORIZATION_REQUEST",
+"name": "BAIX CAMP SOLAR ENERGY",
+"events": [
+[
+"PUBLIC_INFO",
+"EARLY",
+"BAIX CAMP SOLAR ENERGY",
+3.0,
+"8b873818d9874f5fc0dc"
+]
+],
+"title": "ANUNCI pel qual se sotmet a informació pública la sol·licitud d'autorització administrativa prèvia, autorització administrativa de construcció i autorització de",
+"date": "2024-11-22"
+}
+},
+"1012385": {
+"old": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_INITIAL_PROJECT_APPROVAL",
+"name": null,
+"events": null,
+"title": "Anunci sobre aprovació inicial del POMO, Projecte d'execució d'instal·lació fotovoltaica d'autoconsum compartit amb excedents, a la coberta de l'escola bressol ",
+"date": "2025-04-23"
+},
+"new": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_INITIAL_PROJECT_APPROVAL",
+"name": "d'autoconsum compartit amb excedents",
+"events": null,
+"title": "Anunci sobre aprovació inicial del POMO, Projecte d'execució d'instal·lació fotovoltaica d'autoconsum compartit amb excedents, a la coberta de l'escola bressol ",
+"date": "2025-04-23"
+}
+},
+"1052700": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": "Sant Roc",
+"events": null,
+"title": "Resolució TER/2887/2026, de 7 d'agost, per la qual es fa públic l'Acord pel qual es rectifica l'Acord de la Ponència d'Energies Renovables, celebrada el 19 de f",
+"date": "2026-08-14"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_DIA_FAVORABLE",
+"name": "Sant Roc",
+"events": [
+[
+"DIA",
+"PERMITTING",
+"Sant Roc",
+null,
+"c035725f0af942722b99"
+]
+],
+"title": "Resolució TER/2887/2026, de 7 d'agost, per la qual es fa públic l'Acord pel qual es rectifica l'Acord de la Ponència d'Energies Renovables, celebrada el 19 de f",
+"date": "2026-08-14"
+}
+},
+"1009233": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "GRANT_NOT_CONFIRMED_IN_OPERATIVE_BODY",
+"name": "Planta Solar Fotovoltaica La Femosa",
+"events": null,
+"title": "Resolució TER/4799/2024, de 16 de desembre, per la qual s'atorga a Univergy ES SPC 25, SL, l'autorització administrativa prèvia i de construcció del projecte de",
+"date": "2025-03-18"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "Planta Solar Fotovoltaica La Femosa",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"Planta Solar Fotovoltaica La Femosa",
+0.875,
+"0a59b4c97b225f750913"
+]
+],
+"title": "Resolució TER/4799/2024, de 16 de desembre, per la qual s'atorga a Univergy ES SPC 25, SL, l'autorització administrativa prèvia i de construcció del projecte de",
+"date": "2025-03-18"
+}
+},
+"1050601": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": null,
+"events": null,
+"title": "Resolució TER/2501/2026, de 15 de juliol, per la qual es fa públic l'Acord d'informe d'impacte ambiental dels projectes de parcs solars fotovoltaics anomenats S",
+"date": "2026-07-23"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": null,
+"events": "IDENTITY_HELD",
+"title": "Resolució TER/2501/2026, de 15 de juliol, per la qual es fa públic l'Acord d'informe d'impacte ambiental dels projectes de parcs solars fotovoltaics anomenats S",
+"date": "2026-07-23"
+}
+},
+"1030219": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_SUBJECT",
+"name": null,
+"events": null,
+"title": "Resolució TER/4277/2025, de 19 de novembre, d'informe d'impacte ambiental del Projecte per a la implantació del sistema d'emmagatzematge d'energia elèctrica sta",
+"date": "2025-11-26"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": "FRV Rubí",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"FRV Rubí",
+null,
+"f63db1c2fd8b625cbebe"
+]
+],
+"title": "Resolució TER/4277/2025, de 19 de novembre, d'informe d'impacte ambiental del Projecte per a la implantació del sistema d'emmagatzematge d'energia elèctrica sta",
+"date": "2025-11-26"
+}
+},
+"1051477": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "stand-alone anomenada PB Mateu",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"stand-alone anomenada PB Mateu",
+20.7,
+"216c919982a0292f8821"
+]
+],
+"title": "Resolució TER/2624/2026, de 20 de juliol, per la qual s'atorga l'autorització administrativa prèvia i l'autorització administrativa de construcció del projecte ",
+"date": "2026-07-30"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "PB Mateu",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"PB Mateu",
+20.7,
+"216c919982a0292f8821"
+]
+],
+"title": "Resolució TER/2624/2026, de 20 de juliol, per la qual s'atorga l'autorització administrativa prèvia i l'autorització administrativa de construcció del projecte ",
+"date": "2026-07-30"
+}
+},
+"1028760": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": null,
+"events": null,
+"title": "Resolució TER/4014/2025, de 31 d'octubre, per la qual es fa públic l'Acord d'informe d'impacte ambiental del Projecte d'instal·lació fotovoltaica Cassà 1, situa",
+"date": "2025-11-07"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": "Cassà 1",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"Cassà 1",
+null,
+"65d14152fcbd2cd6dc13"
+]
+],
+"title": "Resolució TER/4014/2025, de 31 d'octubre, per la qual es fa públic l'Acord d'informe d'impacte ambiental del Projecte d'instal·lació fotovoltaica Cassà 1, situa",
+"date": "2025-11-07"
+}
+},
+"1050646": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "GRANT_NOT_CONFIRMED_IN_OPERATIVE_BODY",
+"name": "FV Monclues",
+"events": null,
+"title": "Resolució TER/2507/2026, de 8 de juliol, per la qual s'atorga a Tarraco Eólica Les Garrigues, SL, l'autorització administrativa prèvia, autorització administrat",
+"date": "2026-07-23"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "FV Monclues",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"FV Monclues",
+11.0,
+"f2f7d5183f30b3c875d6"
+]
+],
+"title": "Resolució TER/2507/2026, de 8 de juliol, per la qual s'atorga a Tarraco Eólica Les Garrigues, SL, l'autorització administrativa prèvia, autorització administrat",
+"date": "2026-07-23"
+}
+},
+"995955": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "GRANT_NOT_CONFIRMED_IN_OPERATIVE_BODY",
+"name": "PS Variant Sud",
+"events": null,
+"title": "RESOLUCIÓ ACC/3457/2024, de 20 de juny, per la qual s'atorga a Borte Investments 2017, SL, l'autorització administrativa prèvia i de construcció del projecte de",
+"date": "2024-10-01"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "PS Variant Sud",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"PS Variant Sud",
+2.795,
+"55499bcc4d90b21f07ee"
+]
+],
+"title": "RESOLUCIÓ ACC/3457/2024, de 20 de juny, per la qual s'atorga a Borte Investments 2017, SL, l'autorització administrativa prèvia i de construcció del projecte de",
+"date": "2024-10-01"
+}
+},
+"1042010": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "GRANT_NOT_CONFIRMED_IN_OPERATIVE_BODY",
+"name": "PHFV Castellet",
+"events": null,
+"title": "Resolució TER/1098/2026, de 10 d'abril, per la qual s'atorguen l'autorització administrativa prèvia i l'autorització administrativa de construcció del projecte ",
+"date": "2026-04-16"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "PHFV Castellet",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"PHFV Castellet",
+4.99,
+"2ad0a6d4342a8074bf88"
+]
+],
+"title": "Resolució TER/1098/2026, de 10 d'abril, per la qual s'atorguen l'autorització administrativa prèvia i l'autorització administrativa de construcció del projecte ",
+"date": "2026-04-16"
+}
+},
+"997214": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": "Gandesa",
+"events": null,
+"title": "RESOLUCIÓ TER/3609/2024, de 8 d'octubre, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte de la planta solar fotovoltaica Gandesa",
+"date": "2024-10-16"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_DIA_FAVORABLE",
+"name": "Gandesa",
+"events": [
+[
+"DIA",
+"PERMITTING",
+"Gandesa",
+null,
+"36db76d0ddd87cbe57bd"
+]
+],
+"title": "RESOLUCIÓ TER/3609/2024, de 8 d'octubre, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte de la planta solar fotovoltaica Gandesa",
+"date": "2024-10-16"
+}
+},
+"997204": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": null,
+"events": null,
+"title": "RESOLUCIÓ TER/3613/2024, de 8 d'octubre, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte de planta solar fotovoltaica de 49,986 ",
+"date": "2024-10-16"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_DIA_FAVORABLE",
+"name": "Juno Solar 2",
+"events": [
+[
+"DIA",
+"PERMITTING",
+"Juno Solar 2",
+49.986,
+"7a4828dda08e32eedd64"
+]
+],
+"title": "RESOLUCIÓ TER/3613/2024, de 8 d'octubre, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte de planta solar fotovoltaica de 49,986 ",
+"date": "2024-10-16"
+}
+},
+"1023146": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_SUBJECT",
+"name": null,
+"events": null,
+"title": "Resolució TER/3201/2025, de 18 d'agost, d'informe d'impacte ambiental del Projecte per a la implantació dels sistemes d'emmagatzematge d'energia elèctrica stand",
+"date": "2025-08-26"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": null,
+"events": "IDENTITY_HELD",
+"title": "Resolució TER/3201/2025, de 18 d'agost, d'informe d'impacte ambiental del Projecte per a la implantació dels sistemes d'emmagatzematge d'energia elèctrica stand",
+"date": "2025-08-26"
+}
+},
+"1052147": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": null,
+"events": null,
+"title": "Anunci sobre aprovació definitiva del projecte executiu d'una instal·lació fotovoltaica d'autoconsum col·lectiu de 43 KW a la coberta del pavelló esportiu de Sa",
+"date": "2026-08-07"
+},
+"new": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": "d'autoconsum col·lectiu",
+"events": null,
+"title": "Anunci sobre aprovació definitiva del projecte executiu d'una instal·lació fotovoltaica d'autoconsum col·lectiu de 43 KW a la coberta del pavelló esportiu de Sa",
+"date": "2026-08-07"
+}
+},
+"1030239": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "“Planta solar fotovoltaica Flix-Ascó I”",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"“Planta solar fotovoltaica Flix-Ascó I”",
+16.06,
+"788dfe0689689c332bdd"
+]
+],
+"title": "Resolució TER/4279/2025, de 10 de novembre, per la qual s'atorga a Sanmad Sonne 3 Pinsapo, SL, l'autorització administrativa prèvia i autorització administrativ",
+"date": "2025-11-26"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "Planta solar fotovoltaica Flix-Ascó I",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"Planta solar fotovoltaica Flix-Ascó I",
+16.06,
+"788dfe0689689c332bdd"
+]
+],
+"title": "Resolució TER/4279/2025, de 10 de novembre, per la qual s'atorga a Sanmad Sonne 3 Pinsapo, SL, l'autorització administrativa prèvia i autorització administrativ",
+"date": "2025-11-26"
+}
+},
+"1051729": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": "El Pla",
+"events": null,
+"title": "Resolució TER/2658/2026, de 24 de juliol, per la qual es fa públic l'Acord d'informe d'impacte ambiental del Projecte de planta solar fotovoltaica El Pla, de 4,",
+"date": "2026-08-03"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": "El Pla",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"El Pla",
+4.8,
+"146dec0962a4c1d4dbd8"
+]
+],
+"title": "Resolució TER/2658/2026, de 24 de juliol, per la qual es fa públic l'Acord d'informe d'impacte ambiental del Projecte de planta solar fotovoltaica El Pla, de 4,",
+"date": "2026-08-03"
+}
+},
+"1014199": {
+"old": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+"name": null,
+"events": null,
+"title": "Anunci sobre aprovació definitiva del Projecte executiu d'instal·lació fotovoltaica d'autoconsum de 13,80 KWp a la llar d'infants l'Espígol",
+"date": "2025-05-19"
+},
+"new": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+"name": "d'autoconsum",
+"events": null,
+"title": "Anunci sobre aprovació definitiva del Projecte executiu d'instal·lació fotovoltaica d'autoconsum de 13,80 KWp a la llar d'infants l'Espígol",
+"date": "2025-05-19"
+}
+},
+"1047095": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": null,
+"events": "IDENTITY_HELD",
+"title": "Resolució TER/4999/2025, d'11 de desembre, d'informe d'impacte ambiental del projecte d'instal·lació d'emmagatzematge BESS PHFV Centelles de 4,99 MW, de tipus s",
+"date": "2026-06-15"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": "PHFV Centelles",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"PHFV Centelles",
+4.99,
+"8f4e48597ac3fca4b25e"
+]
+],
+"title": "Resolució TER/4999/2025, d'11 de desembre, d'informe d'impacte ambiental del projecte d'instal·lació d'emmagatzematge BESS PHFV Centelles de 4,99 MW, de tipus s",
+"date": "2026-06-15"
+}
+},
+"1030414": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": null,
+"events": null,
+"title": "Anunci pel qual es fa pública la convocatòria per a la redacció de les actes prèvies a l'ocupació i, si s'escau, d'actes d'ocupació definitiva dels béns i/o dre",
+"date": "2025-11-28"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "EXPROPRIATION_PRIOR_SURVEY",
+"name": null,
+"events": "IDENTITY_HELD",
+"title": "Anunci pel qual es fa pública la convocatòria per a la redacció de les actes prèvies a l'ocupació i, si s'escau, d'actes d'ocupació definitiva dels béns i/o dre",
+"date": "2025-11-28"
+}
+},
+"1051830": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": "Martí",
+"events": null,
+"title": "Resolució TER/2690/2026, de 28 de juliol, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte híbrid Martí: Parc eòlic Martí, de 37,",
+"date": "2026-08-04"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_DIA_FAVORABLE",
+"name": "Martí",
+"events": [
+[
+"DIA",
+"PERMITTING",
+"Martí",
+null,
+"b91d84f3f46687667ca7"
+]
+],
+"title": "Resolució TER/2690/2026, de 28 de juliol, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte híbrid Martí: Parc eòlic Martí, de 37,",
+"date": "2026-08-04"
+}
+},
+"1018316": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "PUBLIC_UTILITY_GRANTED",
+"name": null,
+"events": "IDENTITY_HELD",
+"title": "Resolució TER/2481/2025, de 13 de juny, de la Direcció General d'Energia, per la qual s'atorga a Merlot Solar, SL, la declaració d'utilitat pública del projecte",
+"date": "2025-07-02"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PUBLIC_UTILITY_GRANTED",
+"name": "Merlot Solar",
+"events": [
+[
+"PUBLIC_UTILITY",
+"AUTHORIZED",
+"Merlot Solar",
+35.91,
+"24fba71329032ee40d1d"
+]
+],
+"title": "Resolució TER/2481/2025, de 13 de juny, de la Direcció General d'Energia, per la qual s'atorga a Merlot Solar, SL, la declaració d'utilitat pública del projecte",
+"date": "2025-07-02"
+}
+},
+"1046184": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_SUBJECT",
+"name": null,
+"events": null,
+"title": "Anunci sobre aprovació inicial de la modificació puntual del Pla general d'ordenació urbana de Sentmenat per regular la implantació de les energies renovables i",
+"date": "2026-06-04"
+},
+"new": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_INITIAL_PROJECT_APPROVAL",
+"name": null,
+"events": null,
+"title": "Anunci sobre aprovació inicial de la modificació puntual del Pla general d'ordenació urbana de Sentmenat per regular la implantació de les energies renovables i",
+"date": "2026-06-04"
+}
+},
+"1021970": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "stand-alone anomenada Guixeres I de 19.968 kW al terme municipal de Montgat",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"stand-alone anomenada Guixeres I de 19.968 kW al terme municipal de Montgat",
+19.968,
+"83a32420b1542a1c3e49"
+]
+],
+"title": "Resolució TER/3008/2025, de 8 de juliol, per la qual s'atorga l'autorització administrativa prèvia i l'autorització administrativa de construcció del projecte d",
+"date": "2025-08-07"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "Guixeres I de 19.968 kW al terme municipal de Montgat",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"Guixeres I de 19.968 kW al terme municipal de Montgat",
+19.968,
+"83a32420b1542a1c3e49"
+]
+],
+"title": "Resolució TER/3008/2025, de 8 de juliol, per la qual s'atorga l'autorització administrativa prèvia i l'autorització administrativa de construcció del projecte d",
+"date": "2025-08-07"
+}
+},
+"1012198": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "GRANT_NOT_CONFIRMED_IN_OPERATIVE_BODY",
+"name": "PE La Comella",
+"events": null,
+"title": "Resolució TER/1366/2025, de 25 de març, per la qual s'atorga a Parque Eólico Muniesa, SL, l'autorització administrativa prèvia i de construcció del projecte del",
+"date": "2025-04-22"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "PE La Comella",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"PE La Comella",
+48.8,
+"5ccd5e5a46ac63524fba"
+]
+],
+"title": "Resolució TER/1366/2025, de 25 de març, per la qual s'atorga a Parque Eólico Muniesa, SL, l'autorització administrativa prèvia i de construcció del projecte del",
+"date": "2025-04-22"
+}
+},
+"1024529": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "EL PRAT DE LA PLANA",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"EL PRAT DE LA PLANA",
+2.8,
+"a73afac123fee246953a"
+]
+],
+"title": "Resolució TER/3332/2025, de 2 d'agost, de la Direcció General d'Energia, per la qual s'atorga a l'empresa Estabanell Generació, SLU, la modificació de l'autorit",
+"date": "2025-09-17"
+},
+"new": {
+"category": "OUT_OF_SCOPE",
+"event": "EVACUATION_INFRASTRUCTURE_ONLY_NOT_PLANT",
+"name": null,
+"events": null,
+"title": "Resolució TER/3332/2025, de 2 d'agost, de la Direcció General d'Energia, per la qual s'atorga a l'empresa Estabanell Generació, SLU, la modificació de l'autorit",
+"date": "2025-09-17"
+}
+},
+"998512": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": null,
+"events": "IDENTITY_HELD",
+"title": "RESOLUCIÓ TER/3810/2024, de 21 d'octubre, per la qual es fa públic l'Acord d'informe d'impacte ambiental del Projecte de la planta solar fotovoltaica de 49,9 MW",
+"date": "2024-11-04"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": "La Montsona 1",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"La Montsona 1",
+49.9,
+"df64ce74bb67ea05bc58"
+]
+],
+"title": "RESOLUCIÓ TER/3810/2024, de 21 d'octubre, per la qual es fa públic l'Acord d'informe d'impacte ambiental del Projecte de la planta solar fotovoltaica de 49,9 MW",
+"date": "2024-11-04"
+}
+},
+"1004470": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": null,
+"events": null,
+"title": "Edicte sobre aprovació definitiva del Projecte executiu d'una instal·lació fotovoltaica d'autoconsum a l'equipament de REDESSA-Cepid de Reus (CONOBR 344/24)",
+"date": "2025-01-22"
+},
+"new": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": "d'autoconsum a l'equipament de REDESSA-Cepid de Reus",
+"events": null,
+"title": "Edicte sobre aprovació definitiva del Projecte executiu d'una instal·lació fotovoltaica d'autoconsum a l'equipament de REDESSA-Cepid de Reus (CONOBR 344/24)",
+"date": "2025-01-22"
+}
+},
+"1031860": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_SUBJECT",
+"name": null,
+"events": null,
+"title": "Edicte de 3 de desembre de 2025, sobre el Projecte d'actuació específica (PAE) plurimunicipal per a la instal·lació d'emmagatzematge stand-alone Glauco Almacena",
+"date": "2025-12-12"
+},
+"new": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_SUBJECT",
+"name": "Glauco Almacena",
+"events": null,
+"title": "Edicte de 3 de desembre de 2025, sobre el Projecte d'actuació específica (PAE) plurimunicipal per a la instal·lació d'emmagatzematge stand-alone Glauco Almacena",
+"date": "2025-12-12"
+}
+},
+"1052287": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": null,
+"events": null,
+"title": "Resolució TER/2783/2026, de 23 d'abril, d'informe d'impacte ambiental dels projectes d'instal·lacions d'emmagatzematge d'energia en bateries BESS Ripoll I, II, ",
+"date": "2026-08-10"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": null,
+"events": "IDENTITY_HELD",
+"title": "Resolució TER/2783/2026, de 23 d'abril, d'informe d'impacte ambiental dels projectes d'instal·lacions d'emmagatzematge d'energia en bateries BESS Ripoll I, II, ",
+"date": "2026-08-10"
+}
+},
+"1028277": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "“Planta solar fotovoltaica Riba-roja”",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"“Planta solar fotovoltaica Riba-roja”",
+4.95,
+"5d32591abfc641225ac7"
+]
+],
+"title": "Resolució TER/3976/2025, de 8 d'octubre, per la qual s'atorga a Blue Viking Samara, SL, l'autorització administrativa prèvia i autorització administrativa de co",
+"date": "2025-11-03"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "Planta solar fotovoltaica Riba-roja",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"Planta solar fotovoltaica Riba-roja",
+4.95,
+"5d32591abfc641225ac7"
+]
+],
+"title": "Resolució TER/3976/2025, de 8 d'octubre, per la qual s'atorga a Blue Viking Samara, SL, l'autorització administrativa prèvia i autorització administrativa de co",
+"date": "2025-11-03"
+}
+},
+"1051416": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": "Tivissa IV i de les seves infraestructures d'evacuació",
+"events": null,
+"title": "Acord GOV/201/2026, de 28 de juliol, pel qual es declara la utilitat pública del Projecte del parc eòlic Tivissa IV i de les seves infraestructures d'evacuació,",
+"date": "2026-07-30"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PUBLIC_UTILITY_GRANTED",
+"name": "Tivissa IV i de les seves infraestructures d'evacuació",
+"events": "IDENTITY_HELD",
+"title": "Acord GOV/201/2026, de 28 de juliol, pel qual es declara la utilitat pública del Projecte del parc eòlic Tivissa IV i de les seves infraestructures d'evacuació,",
+"date": "2026-07-30"
+}
+},
+"1028435": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": "Pla de la Tallada I",
+"events": null,
+"title": "Anunci relatiu al Decret de convocatòria de la consulta popular no referendària d'iniciativa institucional sobre la instal·lació del parc eòlic Pla de la Tallad",
+"date": "2025-11-04"
+},
+"new": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": null,
+"events": null,
+"title": "Anunci relatiu al Decret de convocatòria de la consulta popular no referendària d'iniciativa institucional sobre la instal·lació del parc eòlic Pla de la Tallad",
+"date": "2025-11-04"
+}
+},
+"1004309": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "GRANT_NOT_CONFIRMED_IN_OPERATIVE_BODY",
+"name": "PS Sant Roc",
+"events": null,
+"title": "Resolució TER/4753/2024, de 17 de desembre, per la qual s'atorga a Energía Inagotable de Nox, SL, l'autorització administrativa prèvia i de construcció del proj",
+"date": "2025-01-21"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "PS Sant Roc",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"PS Sant Roc",
+43.39,
+"975ddf35d85de9c5dfbc"
+]
+],
+"title": "Resolució TER/4753/2024, de 17 de desembre, per la qual s'atorga a Energía Inagotable de Nox, SL, l'autorització administrativa prèvia i de construcció del proj",
+"date": "2025-01-21"
+}
+},
+"1004442": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "GRANT_NOT_CONFIRMED_IN_OPERATIVE_BODY",
+"name": "Els Plans Planta Fotovoltaica",
+"events": null,
+"title": "Resolució TER/58/2025, de 14 de gener, per la qual s'atorga a Els Plans Planta Fotovoltaica, SL, la segona modificació de l'autorització administrativa prèvia i",
+"date": "2025-01-22"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "Els Plans Planta Fotovoltaica",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"Els Plans Planta Fotovoltaica",
+2.16,
+"1ce969839cc934978589"
+]
+],
+"title": "Resolució TER/58/2025, de 14 de gener, per la qual s'atorga a Els Plans Planta Fotovoltaica, SL, la segona modificació de l'autorització administrativa prèvia i",
+"date": "2025-01-22"
+}
+},
+"998548": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": null,
+"events": null,
+"title": "ANUNCI sobre aprovació definitiva del Projecte constructiu d'instal·lació fotovoltaica d'autoconsum col·lectiu en magatzem municipal del polígon industrial La P",
+"date": "2024-11-04"
+},
+"new": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": "d'autoconsum col·lectiu en magatzem municipal del polígon industrial La Pobla de Súria",
+"events": null,
+"title": "ANUNCI sobre aprovació definitiva del Projecte constructiu d'instal·lació fotovoltaica d'autoconsum col·lectiu en magatzem municipal del polígon industrial La P",
+"date": "2024-11-04"
+}
+},
+"1029038": {
+"old": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+"name": null,
+"events": null,
+"title": "Anunci sobre aprovació definitiva del Projecte d'instal·lació fotovoltaica d'autoconsum compartit a la coberta de l'escola F. Platón i Sartí i l'annex d'actuali",
+"date": "2025-11-12"
+},
+"new": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+"name": "d'autoconsum compartit a la coberta de l'escola F. Platón i Sartí i l'annex d'actualització de preus i tipologia material",
+"events": null,
+"title": "Anunci sobre aprovació definitiva del Projecte d'instal·lació fotovoltaica d'autoconsum compartit a la coberta de l'escola F. Platón i Sartí i l'annex d'actuali",
+"date": "2025-11-12"
+}
+},
+"996353": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": "FV PARADÍS SOLAR",
+"events": null,
+"title": "RESOLUCIÓ TER/3483/2024, de 4 de setembre, per la qual es denega a l'empresa Energia Arrebol, SLU, l'autorització administrativa prèvia i de construcció de la p",
+"date": "2024-10-04"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "AUTHORIZATION_DENIED",
+"name": "FV PARADÍS SOLAR",
+"events": [
+[
+"DENIED",
+"BLOCKED",
+"FV PARADÍS SOLAR",
+null,
+"2766aa5d7d9989aaf02b"
+]
+],
+"title": "RESOLUCIÓ TER/3483/2024, de 4 de setembre, per la qual es denega a l'empresa Energia Arrebol, SLU, l'autorització administrativa prèvia i de construcció de la p",
+"date": "2024-10-04"
+}
+},
+"1021867": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": null,
+"events": null,
+"title": "Anunci sobre aprovació inicial del Projecte d'obra local ordinària per a la instal·lació fotovoltaica al Centre Cívic Municipal situat al carrer Delícies, númer",
+"date": "2025-08-06"
+},
+"new": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": "al Centre Cívic Municipal",
+"events": null,
+"title": "Anunci sobre aprovació inicial del Projecte d'obra local ordinària per a la instal·lació fotovoltaica al Centre Cívic Municipal situat al carrer Delícies, númer",
+"date": "2025-08-06"
+}
+},
+"1047557": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": null,
+"events": null,
+"title": "Edicte sobre aprovació definitiva del Projecte d'instal·lació fotovoltaica d'autoconsum col·lectiu amb compensació d'excedents, de 100 kW (115,2 kWp), preparada",
+"date": "2026-06-19"
+},
+"new": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": "d'autoconsum col·lectiu amb compensació d'excedents",
+"events": null,
+"title": "Edicte sobre aprovació definitiva del Projecte d'instal·lació fotovoltaica d'autoconsum col·lectiu amb compensació d'excedents, de 100 kW (115,2 kWp), preparada",
+"date": "2026-06-19"
+}
+},
+"1043924": {
+"old": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+"name": null,
+"events": null,
+"title": "Edicte sobre aprovació definitiva del Projecte tècnic per a l'obra d'instal·lació fotovoltaica al complex esportiu Puigverd (exp. 1379-2025/3599)",
+"date": "2026-05-11"
+},
+"new": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+"name": "al complex esportiu Puigverd",
+"events": null,
+"title": "Edicte sobre aprovació definitiva del Projecte tècnic per a l'obra d'instal·lació fotovoltaica al complex esportiu Puigverd (exp. 1379-2025/3599)",
+"date": "2026-05-11"
+}
+},
+"1023542": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "GRANT_NOT_CONFIRMED_IN_OPERATIVE_BODY",
+"name": "Parc Eòlic Tivissa III",
+"events": null,
+"title": "Resolució TER/3165/2025, de 28 de juliol, per la qual s'atorga a Desarrollos Eólicos Tivissa III, SLU, l'autorització administrativa prèvia i autorització admin",
+"date": "2025-09-01"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "Parc Eòlic Tivissa III",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"Parc Eòlic Tivissa III",
+43.2,
+"0202e5301a7591727c80"
+]
+],
+"title": "Resolució TER/3165/2025, de 28 de juliol, per la qual s'atorga a Desarrollos Eólicos Tivissa III, SLU, l'autorització administrativa prèvia i autorització admin",
+"date": "2025-09-01"
+}
+},
+"1047327": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": null,
+"events": null,
+"title": "Resolució ACC/4946/2024, de 19 de juny, per la qual s'emet l'informe ambiental estratègic de la Modificació puntual del Pla d'ordenació urbanística municipal de",
+"date": "2026-06-17"
+},
+"new": {
+"category": "OUT_OF_SCOPE",
+"event": "URBAN_PLANNING_NOT_PLANT",
+"name": null,
+"events": null,
+"title": "Resolució ACC/4946/2024, de 19 de juny, per la qual s'emet l'informe ambiental estratègic de la Modificació puntual del Pla d'ordenació urbanística municipal de",
+"date": "2026-06-17"
+}
+},
+"997286": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": "La Comella",
+"events": null,
+"title": "RESOLUCIÓ TER/3612/2024, de 8 d'octubre, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte de parc eòlic La Comella i la seva infr",
+"date": "2024-10-16"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_DIA_FAVORABLE",
+"name": "La Comella",
+"events": [
+[
+"DIA",
+"PERMITTING",
+"La Comella",
+null,
+"493d0b06e951d4555a29"
+]
+],
+"title": "RESOLUCIÓ TER/3612/2024, de 8 d'octubre, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte de parc eòlic La Comella i la seva infr",
+"date": "2024-10-16"
+}
+},
+"997423": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": null,
+"events": null,
+"title": "RESOLUCIÓ TER/3663/2024, d'11 d'octubre, per la qual es fa públic l'Acord de declaració d'informe d'impacte ambiental del Projecte de planta solar fotovoltaica ",
+"date": "2024-10-18"
+},
+"new": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": "Santa Llogaia 3",
+"events": null,
+"title": "RESOLUCIÓ TER/3663/2024, d'11 d'octubre, per la qual es fa públic l'Acord de declaració d'informe d'impacte ambiental del Projecte de planta solar fotovoltaica ",
+"date": "2024-10-18"
+}
+},
+"999783": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "“Planta solar fotovoltaica Aubals”",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"“Planta solar fotovoltaica Aubals”",
+9.87,
+"ae4a887fd6fa08c4fa5e"
+]
+],
+"title": "RESOLUCIÓ TER/3983/2024, de 8 de novembre, per la qual s'atorga a Astendong, SL, l'autorització administrativa prèvia i l'autorització administrativa de constru",
+"date": "2024-11-18"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "Planta solar fotovoltaica Aubals",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"Planta solar fotovoltaica Aubals",
+9.87,
+"ae4a887fd6fa08c4fa5e"
+]
+],
+"title": "RESOLUCIÓ TER/3983/2024, de 8 de novembre, per la qual s'atorga a Astendong, SL, l'autorització administrativa prèvia i l'autorització administrativa de constru",
+"date": "2024-11-18"
+}
+},
+"1050499": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "GRANT_NOT_CONFIRMED_IN_OPERATIVE_BODY",
+"name": "FRV Palau",
+"events": null,
+"title": "Resolució TER/2479/2026, de 6 de juliol, de la Direcció General d'Energia, per la qual s'atorguen l'autorització administrativa prèvia, l'autorització administr",
+"date": "2026-07-22"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "FRV Palau",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"FRV Palau",
+20.0,
+"b08e949148d74dd4f0d6"
+]
+],
+"title": "Resolució TER/2479/2026, de 6 de juliol, de la Direcció General d'Energia, per la qual s'atorguen l'autorització administrativa prèvia, l'autorització administr",
+"date": "2026-07-22"
+}
+},
+"1028091": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": null,
+"events": null,
+"title": "Resolució ACC/4876/2024, de 18 de març, per la qual s'emet l'informe ambiental estratègic de la Modificació puntual núm. 5 del Pla d'ordenació urbanística per a",
+"date": "2025-10-30"
+},
+"new": {
+"category": "OUT_OF_SCOPE",
+"event": "URBAN_PLANNING_NOT_PLANT",
+"name": null,
+"events": null,
+"title": "Resolució ACC/4876/2024, de 18 de març, per la qual s'emet l'informe ambiental estratègic de la Modificació puntual núm. 5 del Pla d'ordenació urbanística per a",
+"date": "2025-10-30"
+}
+},
+"1052817": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": null,
+"events": null,
+"title": "Resolució TER/2916/2026, de 10 d'agost, per la qual es fa públic l'Acord d'informe d'impacte ambiental dels projectes de parcs solars fotovoltaics anomenats Sol",
+"date": "2026-08-18"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": null,
+"events": "IDENTITY_HELD",
+"title": "Resolució TER/2916/2026, de 10 d'agost, per la qual es fa públic l'Acord d'informe d'impacte ambiental dels projectes de parcs solars fotovoltaics anomenats Sol",
+"date": "2026-08-18"
+}
+},
+"1032003": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "GRANT_NOT_CONFIRMED_IN_OPERATIVE_BODY",
+"name": "La Selva",
+"events": null,
+"title": "Resolució TER/4597/2025, de 5 de desembre, per la qual s'atorga a Abda Energía, SL, l'autorització administrativa prèvia i autorització administrativa de constr",
+"date": "2025-12-15"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AUTH_ONLY",
+"name": "La Selva",
+"events": [
+[
+"PRIOR_AUTH",
+"PERMITTING",
+"La Selva",
+4.99,
+"b38cb71dc7634c88df40"
+]
+],
+"title": "Resolució TER/4597/2025, de 5 de desembre, per la qual s'atorga a Abda Energía, SL, l'autorització administrativa prèvia i autorització administrativa de constr",
+"date": "2025-12-15"
+}
+},
+"997770": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "GRANT_NOT_CONFIRMED_IN_OPERATIVE_BODY",
+"name": "Sant Miquel Solar",
+"events": null,
+"title": "RESOLUCIÓ TER/3735/2024, de 16 de setembre, per la qual s'atorga a Parque Solar Energy 02, SL, l'autorització administrativa prèvia i de construcció i la declar",
+"date": "2024-10-23"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "Sant Miquel Solar",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"Sant Miquel Solar",
+33.998,
+"d04be9becf978b155cb4"
+]
+],
+"title": "RESOLUCIÓ TER/3735/2024, de 16 de setembre, per la qual s'atorga a Parque Solar Energy 02, SL, l'autorització administrativa prèvia i de construcció i la declar",
+"date": "2024-10-23"
+}
+},
+"998562": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": "Serra de la Creu 1",
+"events": null,
+"title": "RESOLUCIÓ TER/3817/2024, de 21 d'octubre, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte de parc eòlic Serra de la Creu 1, prom",
+"date": "2024-11-04"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_DIA_UNFAVOURABLE",
+"name": "Serra de la Creu 1",
+"events": [
+[
+"DIA_UNFAVOURABLE",
+"BLOCKED",
+"Serra de la Creu 1",
+null,
+"a18bbb5b3edecad40dfd"
+]
+],
+"title": "RESOLUCIÓ TER/3817/2024, de 21 d'octubre, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte de parc eòlic Serra de la Creu 1, prom",
+"date": "2024-11-04"
+}
+},
+"1045841": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "GRANT_NOT_CONFIRMED_IN_OPERATIVE_BODY",
+"name": "Instal·lació Autoconsum Bassa del Sector 2 d'ASG",
+"events": null,
+"title": "Resolució TER/1687/2026, d'11 de maig, de la Direcció General d'Energia, per la qual s'atorguen a Agriwater, SLU, l'autorització administrativa prèvia i l'autor",
+"date": "2026-06-02"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "Instal·lació Autoconsum Bassa del Sector 2 d'ASG",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"Instal·lació Autoconsum Bassa del Sector 2 d'ASG",
+0.1482,
+"4757715e8433ee193051"
+]
+],
+"title": "Resolució TER/1687/2026, d'11 de maig, de la Direcció General d'Energia, per la qual s'atorguen a Agriwater, SLU, l'autorització administrativa prèvia i l'autor",
+"date": "2026-06-02"
+}
+},
+"1028789": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": "Els Gorgs",
+"events": null,
+"title": "Resolució TER/4013/2025, de 31 d'octubre, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte del parc eòlic Els Gorgs, de 42,7 MW d",
+"date": "2025-11-07"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_DIA_FAVORABLE",
+"name": "Els Gorgs",
+"events": [
+[
+"DIA",
+"PERMITTING",
+"Els Gorgs",
+42.7,
+"9bd1ff6520ac070945de"
+]
+],
+"title": "Resolució TER/4013/2025, de 31 d'octubre, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte del parc eòlic Els Gorgs, de 42,7 MW d",
+"date": "2025-11-07"
+}
+},
+"1010472": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": "Tivissa III de 50 MW",
+"events": null,
+"title": "Resolució TER/1042/2025, de 24 de març, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte del parc eòlic Tivissa III de 50 MW, pro",
+"date": "2025-04-01"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_DIA_FAVORABLE",
+"name": "Tivissa III",
+"events": [
+[
+"DIA",
+"PERMITTING",
+"Tivissa III",
+50.0,
+"0202e5301a7591727c80"
+]
+],
+"title": "Resolució TER/1042/2025, de 24 de març, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte del parc eòlic Tivissa III de 50 MW, pro",
+"date": "2025-04-01"
+}
+},
+"1037202": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "stand-alone anomenada PB BESS Cova Solera",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"stand-alone anomenada PB BESS Cova Solera",
+50.0,
+"49c2eb14f42c1df230f3"
+]
+],
+"title": "Resolució TER/4970/2025, de 5 de desembre, per la qual s'atorguen l'autorització administrativa prèvia i l'autorització administrativa de construcció del projec",
+"date": "2026-02-18"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "PB BESS Cova Solera",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"PB BESS Cova Solera",
+50.0,
+"49c2eb14f42c1df230f3"
+]
+],
+"title": "Resolució TER/4970/2025, de 5 de desembre, per la qual s'atorguen l'autorització administrativa prèvia i l'autorització administrativa de construcció del projec",
+"date": "2026-02-18"
+}
+},
+"1019082": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_SUBJECT",
+"name": null,
+"events": null,
+"title": "Resolució TER/2522/2025, de 30 de juny, d'informe d'impacte ambiental del Projecte en sòl no urbanitzable per a la implantació del sistema d'emmagatzematge d'en",
+"date": "2025-07-09"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": "Sonora Subirats 1",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"Sonora Subirats 1",
+null,
+"b9c8641998aef11926be"
+]
+],
+"title": "Resolució TER/2522/2025, de 30 de juny, d'informe d'impacte ambiental del Projecte en sòl no urbanitzable per a la implantació del sistema d'emmagatzematge d'en",
+"date": "2025-07-09"
+}
+},
+"1033175": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": "PE Vilella",
+"events": null,
+"title": "Resolució TER/4726/2025, de 14 de novembre, d'arxivament de l'expedient FUE-2022-02805338, relatiu a la sol·licitud presentada per l'empresa Enel Green Power Es",
+"date": "2025-12-29"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PROCEDURE_ARCHIVED",
+"name": "PE Vilella",
+"events": [
+[
+"PROCEDURE_ENDED",
+"BLOCKED",
+"PE Vilella",
+36.75,
+"01b15232b8b8a864679e"
+]
+],
+"title": "Resolució TER/4726/2025, de 14 de novembre, d'arxivament de l'expedient FUE-2022-02805338, relatiu a la sol·licitud presentada per l'empresa Enel Green Power Es",
+"date": "2025-12-29"
+}
+},
+"996970": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": null,
+"events": "IDENTITY_HELD",
+"title": "RESOLUCIÓ ACC/3567/2024, de 9 de juliol, per la qual s'atorga a Almenara Solar, SL, l'autorització administrativa de construcció del projecte de la planta fotov",
+"date": "2024-10-14"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "Almenara Solar",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"Almenara Solar",
+48.29,
+"bc70dc7693acacdbbbd2"
+]
+],
+"title": "RESOLUCIÓ ACC/3567/2024, de 9 de juliol, per la qual s'atorga a Almenara Solar, SL, l'autorització administrativa de construcció del projecte de la planta fotov",
+"date": "2024-10-14"
+}
+},
+"1029594": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": null,
+"events": null,
+"title": "Resolució ACC/4896/2024, de 27 de maig, per la qual es formula la declaració ambiental estratègica de la Modificació puntual del Pla general d'ordenació per a l",
+"date": "2025-11-19"
+},
+"new": {
+"category": "OUT_OF_SCOPE",
+"event": "URBAN_PLANNING_NOT_PLANT",
+"name": null,
+"events": null,
+"title": "Resolució ACC/4896/2024, de 27 de maig, per la qual es formula la declaració ambiental estratègica de la Modificació puntual del Pla general d'ordenació per a l",
+"date": "2025-11-19"
+}
+},
+"1049345": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": null,
+"events": null,
+"title": "Resolució TER/2277/2026, de 27 de març, per la qual es formula la declaració ambiental estratègica de la Modificació puntual del Pla general d'ordenació per a l",
+"date": "2026-07-09"
+},
+"new": {
+"category": "OUT_OF_SCOPE",
+"event": "URBAN_PLANNING_NOT_PLANT",
+"name": null,
+"events": null,
+"title": "Resolució TER/2277/2026, de 27 de març, per la qual es formula la declaració ambiental estratègica de la Modificació puntual del Pla general d'ordenació per a l",
+"date": "2026-07-09"
+}
+},
+"1052534": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_SUBJECT",
+"name": null,
+"events": null,
+"title": "Anunci relatiu a la nova aprovació inicial de la modificació del Pla d'ordenació urbanística municipal (POUM) per regular instal·lacions d'emmagatzematge d'ener",
+"date": "2026-08-13"
+},
+"new": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": null,
+"events": null,
+"title": "Anunci relatiu a la nova aprovació inicial de la modificació del Pla d'ordenació urbanística municipal (POUM) per regular instal·lacions d'emmagatzematge d'ener",
+"date": "2026-08-13"
+}
+},
+"1019412": {
+"old": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+"name": null,
+"events": null,
+"title": "Edicte sobre aprovació definitiva del Projecte executiu d'una instal·lació fotovoltaica d'autoconsum a l'escola El Castellot de Castellví de la Marca (exp. 207/",
+"date": "2025-07-11"
+},
+"new": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+"name": "d'autoconsum a l'escola El Castellot de Castellví de la Marca",
+"events": null,
+"title": "Edicte sobre aprovació definitiva del Projecte executiu d'una instal·lació fotovoltaica d'autoconsum a l'escola El Castellot de Castellví de la Marca (exp. 207/",
+"date": "2025-07-11"
+}
+},
+"1004370": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "GRANT_NOT_CONFIRMED_IN_OPERATIVE_BODY",
+"name": "PS Els Vilars",
+"events": null,
+"title": "Resolució TER/4770/2024, de 17 de desembre, de la Direcció General d'Energia, per la qual s'atorga a Energía Inagotable de Patalena, SL, l'autorització administ",
+"date": "2025-01-21"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "PS Els Vilars",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"PS Els Vilars",
+38.61,
+"249be0f9e4be42919182"
+]
+],
+"title": "Resolució TER/4770/2024, de 17 de desembre, de la Direcció General d'Energia, per la qual s'atorga a Energía Inagotable de Patalena, SL, l'autorització administ",
+"date": "2025-01-21"
+}
+},
+"1028433": {
+"old": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+"name": null,
+"events": null,
+"title": "Anunci sobre aprovació definitiva del Projecte modificat d'una instal·lació fotovoltaica al camp de futbol (exp. 3357/2022)",
+"date": "2025-11-04"
+},
+"new": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+"name": "al camp de futbol",
+"events": null,
+"title": "Anunci sobre aprovació definitiva del Projecte modificat d'una instal·lació fotovoltaica al camp de futbol (exp. 3357/2022)",
+"date": "2025-11-04"
+}
+},
+"1019737": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": null,
+"events": "IDENTITY_HELD",
+"title": "Resolució TER/2651/2025, de 29 de maig, d'informe d'impacte ambiental del Projecte per a la implantació del sistema d'emmagatzematge d'energia elèctrica stand-a",
+"date": "2025-07-16"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": "PB BESS Cova Solera",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"PB BESS Cova Solera",
+null,
+"eb2f2baf7db9836ab340"
+]
+],
+"title": "Resolució TER/2651/2025, de 29 de maig, d'informe d'impacte ambiental del Projecte per a la implantació del sistema d'emmagatzematge d'energia elèctrica stand-a",
+"date": "2025-07-16"
+}
+},
+"1030222": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": "PE La Maçana",
+"events": null,
+"title": "Resolució TER/4284/2025, de 14 de novembre, d'arxivament de l'expedient FUE-2022-02726159, relatiu a la sol·licitud presentada per l'empresa Enel Green Power Es",
+"date": "2025-11-26"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PROCEDURE_ARCHIVED",
+"name": "PE La Maçana",
+"events": [
+[
+"PROCEDURE_ENDED",
+"BLOCKED",
+"PE La Maçana",
+50.0,
+"3d2e3fae117a0cafd5ec"
+]
+],
+"title": "Resolució TER/4284/2025, de 14 de novembre, d'arxivament de l'expedient FUE-2022-02726159, relatiu a la sol·licitud presentada per l'empresa Enel Green Power Es",
+"date": "2025-11-26"
+}
+},
+"1031925": {
+"old": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+"name": null,
+"events": null,
+"title": "Edicte sobre aprovació definitiva del Projecte tècnic per al subministrament i la instal·lació d'un sistema d'emmagatzematge de 44 kWh en una instal·lació fotov",
+"date": "2025-12-15"
+},
+"new": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+"name": "existent en autoconsum col·lectiu",
+"events": null,
+"title": "Edicte sobre aprovació definitiva del Projecte tècnic per al subministrament i la instal·lació d'un sistema d'emmagatzematge de 44 kWh en una instal·lació fotov",
+"date": "2025-12-15"
+}
+},
+"1015308": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "PUBLIC_INFO_AUTHORIZATION_REQUEST",
+"name": "“PSF Pinyol”",
+"events": [
+[
+"PUBLIC_INFO",
+"EARLY",
+"“PSF Pinyol”",
+4.8,
+"d9cfb1234bc58a433f0b"
+]
+],
+"title": "Anunci pel qual se sotmet a informació pública la sol·licitud d'autorització administrativa prèvia i de construcció, autorització del projecte d'actuació especí",
+"date": "2025-05-30"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PUBLIC_INFO_AUTHORIZATION_REQUEST",
+"name": "PSF Pinyol",
+"events": [
+[
+"PUBLIC_INFO",
+"EARLY",
+"PSF Pinyol",
+4.8,
+"d9cfb1234bc58a433f0b"
+]
+],
+"title": "Anunci pel qual se sotmet a informació pública la sol·licitud d'autorització administrativa prèvia i de construcció, autorització del projecte d'actuació especí",
+"date": "2025-05-30"
+}
+},
+"998540": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": null,
+"events": null,
+"title": "ANUNCI sobre aprovació definitiva del Projecte constructiu d'instal·lació fotovoltaica d'autoconsum col·lectiu en zona verda del polígon industrial La Pobla de ",
+"date": "2024-11-04"
+},
+"new": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": "d'autoconsum col·lectiu en zona verda del polígon industrial La Pobla de Súria",
+"events": null,
+"title": "ANUNCI sobre aprovació definitiva del Projecte constructiu d'instal·lació fotovoltaica d'autoconsum col·lectiu en zona verda del polígon industrial La Pobla de ",
+"date": "2024-11-04"
+}
+},
+"998544": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": "Rascón Solar",
+"events": null,
+"title": "RESOLUCIÓ TER/3811/2024, de 21 d'octubre, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte de les infraestructures d'evacuació d'",
+"date": "2024-11-04"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_DIA_FAVORABLE",
+"name": "Rascón Solar",
+"events": [
+[
+"DIA",
+"PERMITTING",
+"Rascón Solar",
+null,
+"c9ffeac1b835a6a7c5b5"
+]
+],
+"title": "RESOLUCIÓ TER/3811/2024, de 21 d'octubre, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte de les infraestructures d'evacuació d'",
+"date": "2024-11-04"
+}
+},
+"1028398": {
+"old": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+"name": null,
+"events": null,
+"title": "Anunci sobre aprovació definitiva del Projecte modificat d'una instal·lació fotovoltaica al centre aquàtic municipal (exp. 3358-2022)",
+"date": "2025-11-04"
+},
+"new": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+"name": "al centre aquàtic municipal",
+"events": null,
+"title": "Anunci sobre aprovació definitiva del Projecte modificat d'una instal·lació fotovoltaica al centre aquàtic municipal (exp. 3358-2022)",
+"date": "2025-11-04"
+}
+},
+"1020897": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_SUBJECT",
+"name": null,
+"events": null,
+"title": "Edicte sobre aprovació inicial del Projecte executiu d'un sistema d'emmagatzematge per a l'enllumenat públic de Sant Llorenç d'Hortons (X2025000767)",
+"date": "2025-07-29"
+},
+"new": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_SUBJECT",
+"name": "per a l'enllumenat públic de Sant Llorenç d'Hortons",
+"events": null,
+"title": "Edicte sobre aprovació inicial del Projecte executiu d'un sistema d'emmagatzematge per a l'enllumenat públic de Sant Llorenç d'Hortons (X2025000767)",
+"date": "2025-07-29"
+}
+},
+"996018": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": "Greentarraco 1",
+"events": null,
+"title": "RESOLUCIÓ TER/3459/2024, de 26 de setembre, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte de planta solar fotovoltaica Greenta",
+"date": "2024-10-01"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_DIA_UNFAVOURABLE",
+"name": "Greentarraco 1",
+"events": [
+[
+"DIA_UNFAVOURABLE",
+"BLOCKED",
+"Greentarraco 1",
+48.42,
+"040ee2bf6ffacead8ac7"
+]
+],
+"title": "RESOLUCIÓ TER/3459/2024, de 26 de setembre, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte de planta solar fotovoltaica Greenta",
+"date": "2024-10-01"
+}
+},
+"1055105": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "“Planta solar fotovoltaica Mas de Piquer”",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"“Planta solar fotovoltaica Mas de Piquer”",
+3.63,
+"7ac766523b047010a80a"
+]
+],
+"title": "Resolució TER/3202/2026, de 27 d'agost, de la Direcció General d'Energia, per la qual s'atorga a Blue Viking Samara, SL, l'autorització administrativa prèvia i ",
+"date": "2026-09-25"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "Planta solar fotovoltaica Mas de Piquer",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"Planta solar fotovoltaica Mas de Piquer",
+3.63,
+"7ac766523b047010a80a"
+]
+],
+"title": "Resolució TER/3202/2026, de 27 d'agost, de la Direcció General d'Energia, per la qual s'atorga a Blue Viking Samara, SL, l'autorització administrativa prèvia i ",
+"date": "2026-09-25"
+}
+},
+"1022941": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": null,
+"events": null,
+"title": "Resolució TER/3173/2025, de 13 d'agost, d'informe d'impacte ambiental del Projecte d'instal·lació d'emmagatzematge BESS PB IM2 Vic, de 5 MW, i centre de protecc",
+"date": "2025-08-21"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": "PB IM2 Vic",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"PB IM2 Vic",
+5.0,
+"3661abddf620b2e43b61"
+]
+],
+"title": "Resolució TER/3173/2025, de 13 d'agost, d'informe d'impacte ambiental del Projecte d'instal·lació d'emmagatzematge BESS PB IM2 Vic, de 5 MW, i centre de protecc",
+"date": "2025-08-21"
+}
+},
+"1028741": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": null,
+"events": null,
+"title": "Resolució TER/4015/2025, de 31 d'octubre, per la qual es fa públic l'Acord d'informe d'impacte ambiental del Projecte d'instal·lació fotovoltaica Cassà 2, situa",
+"date": "2025-11-07"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": "Cassà 2",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"Cassà 2",
+null,
+"b89bd338a51598bbee6c"
+]
+],
+"title": "Resolució TER/4015/2025, de 31 d'octubre, per la qual es fa públic l'Acord d'informe d'impacte ambiental del Projecte d'instal·lació fotovoltaica Cassà 2, situa",
+"date": "2025-11-07"
+}
+},
+"1043364": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "“Planta solar fotovoltaica Ametlla FV2”",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"“Planta solar fotovoltaica Ametlla FV2”",
+2.25,
+"b825103c3ebebd5c60f8"
+]
+],
+"title": "Resolució TER/4984/2025, de 31 de juliol, per la qual s'atorga a Clere Iberica 1, SL, l'autorització administrativa prèvia, autorització administrativa de const",
+"date": "2026-05-05"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "Planta solar fotovoltaica Ametlla FV2",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"Planta solar fotovoltaica Ametlla FV2",
+2.25,
+"b825103c3ebebd5c60f8"
+]
+],
+"title": "Resolució TER/4984/2025, de 31 de juliol, per la qual s'atorga a Clere Iberica 1, SL, l'autorització administrativa prèvia, autorització administrativa de const",
+"date": "2026-05-05"
+}
+},
+"1030907": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "GRANT_NOT_CONFIRMED_IN_OPERATIVE_BODY",
+"name": "Els Palous",
+"events": null,
+"title": "Resolució TER/4337/2025, de 24 de novembre, per la qual s'atorga a Les Quadres planta fotovoltaica, SL, la modificació no substancial de l'autorització administ",
+"date": "2025-12-02"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "Els Palous",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"Els Palous",
+2.16,
+"ff667815c62146fafd6f"
+]
+],
+"title": "Resolució TER/4337/2025, de 24 de novembre, per la qual s'atorga a Les Quadres planta fotovoltaica, SL, la modificació no substancial de l'autorització administ",
+"date": "2025-12-02"
+}
+},
+"1000574": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "GRANT_NOT_CONFIRMED_IN_OPERATIVE_BODY",
+"name": "PSFV Vilalba dels Arcs",
+"events": null,
+"title": "RESOLUCIÓ TER/4146/2024, de 13 de novembre, per la qual s'atorga a Delta Renovables, SA, l'autorització administrativa prèvia, autorització administrativa de co",
+"date": "2024-11-28"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "PSFV Vilalba dels Arcs",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"PSFV Vilalba dels Arcs",
+null,
+"035bdb408c4a985de302"
+]
+],
+"title": "RESOLUCIÓ TER/4146/2024, de 13 de novembre, per la qual s'atorga a Delta Renovables, SA, l'autorització administrativa prèvia, autorització administrativa de co",
+"date": "2024-11-28"
+}
+},
+"998576": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": "Lo Tossal",
+"events": null,
+"title": "RESOLUCIÓ TER/3813/2024, de 21 d'octubre, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte de la planta solar fotovoltaica Lo Tos",
+"date": "2024-11-04"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_DIA_FAVORABLE",
+"name": "Lo Tossal",
+"events": [
+[
+"DIA",
+"PERMITTING",
+"Lo Tossal",
+25.0,
+"206eabf99c844ee8f638"
+]
+],
+"title": "RESOLUCIÓ TER/3813/2024, de 21 d'octubre, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte de la planta solar fotovoltaica Lo Tos",
+"date": "2024-11-04"
+}
+},
+"1050420": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_SUBJECT",
+"name": null,
+"events": null,
+"title": "Resolució TER/2438/2026, de 13 de juliol, d'informe d'impacte ambiental del Projecte per a la implantació del sistema d'emmagatzematge d'energia elèctrica stand",
+"date": "2026-07-21"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": "FRV Rubí",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"FRV Rubí",
+null,
+"f63db1c2fd8b625cbebe"
+]
+],
+"title": "Resolució TER/2438/2026, de 13 de juliol, d'informe d'impacte ambiental del Projecte per a la implantació del sistema d'emmagatzematge d'energia elèctrica stand",
+"date": "2026-07-21"
+}
+},
+"996203": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "GRANT_NOT_CONFIRMED_IN_OPERATIVE_BODY",
+"name": "PS Matacan Solar",
+"events": null,
+"title": "RESOLUCIÓ ACC/3437/2024, de 24 de juliol, per la qual s'atorga a Matacan Solar, SL, l'autorització administrativa de construcció del projecte de la planta solar",
+"date": "2024-10-03"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "PS Matacan Solar",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"PS Matacan Solar",
+44.464,
+"5ea2a878c7a649a8f1bf"
+]
+],
+"title": "RESOLUCIÓ ACC/3437/2024, de 24 de juliol, per la qual s'atorga a Matacan Solar, SL, l'autorització administrativa de construcció del projecte de la planta solar",
+"date": "2024-10-03"
+}
+},
+"1006872": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": null,
+"events": null,
+"title": "Anunci sobre aprovació definitiva del Projecte bàsic i executiu per a la renovació de la coberta actual de fibrociment i instal·lació d'una planta fotovoltaica ",
+"date": "2025-02-20"
+},
+"new": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": "al pavelló d'esports municipal de Sant Pol de Mar",
+"events": null,
+"title": "Anunci sobre aprovació definitiva del Projecte bàsic i executiu per a la renovació de la coberta actual de fibrociment i instal·lació d'una planta fotovoltaica ",
+"date": "2025-02-20"
+}
+},
+"1051303": {
+"old": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+"name": null,
+"events": null,
+"title": "Anunci sobre aprovació definitiva del Projecte executiu refós de la instal·lació fotovoltaica d'autoconsum col·lectiu de 25 kWn amb sistema d'emmagatzematge d'e",
+"date": "2026-07-29"
+},
+"new": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+"name": "i punts de recàrrega per a vehicles elèctrics a l'edifici de la Policia Local",
+"events": null,
+"title": "Anunci sobre aprovació definitiva del Projecte executiu refós de la instal·lació fotovoltaica d'autoconsum col·lectiu de 25 kWn amb sistema d'emmagatzematge d'e",
+"date": "2026-07-29"
+}
+},
+"1032367": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "stand-alone anomenada FRV Guixeres",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"stand-alone anomenada FRV Guixeres",
+19.95,
+"06afa97fbc095cf9f395"
+]
+],
+"title": "Resolució TER/4645/2025, de 5 de desembre, per la qual s'atorguen l'autorització administrativa prèvia i l'autorització administrativa de construcció del projec",
+"date": "2025-12-18"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "FRV Guixeres",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"FRV Guixeres",
+19.95,
+"06afa97fbc095cf9f395"
+]
+],
+"title": "Resolució TER/4645/2025, de 5 de desembre, per la qual s'atorguen l'autorització administrativa prèvia i l'autorització administrativa de construcció del projec",
+"date": "2025-12-18"
+}
+},
+"1002884": {
+"old": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+"name": null,
+"events": null,
+"title": "EDICTE pel qual es fa pública l'aprovació definitiva del Projecte d'obra municipal d'instal·lació fotovoltaica d'autoconsum a l'Escola de la Valldan, de Berga (",
+"date": "2024-12-27"
+},
+"new": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+"name": "d'autoconsum a l'Escola de la Valldan",
+"events": null,
+"title": "EDICTE pel qual es fa pública l'aprovació definitiva del Projecte d'obra municipal d'instal·lació fotovoltaica d'autoconsum a l'Escola de la Valldan, de Berga (",
+"date": "2024-12-27"
+}
+},
+"1049405": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": null,
+"events": null,
+"title": "Resolució TER/2280/2026, de 13 de maig, per la qual es formula la declaració ambiental estratègica de la modificació puntual del Pla d'ordenació urbanística mun",
+"date": "2026-07-09"
+},
+"new": {
+"category": "OUT_OF_SCOPE",
+"event": "URBAN_PLANNING_NOT_PLANT",
+"name": null,
+"events": null,
+"title": "Resolució TER/2280/2026, de 13 de maig, per la qual es formula la declaració ambiental estratègica de la modificació puntual del Pla d'ordenació urbanística mun",
+"date": "2026-07-09"
+}
+},
+"1047098": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": null,
+"events": "IDENTITY_HELD",
+"title": "Resolució TER/4997/2025, d'11 de desembre, d'informe d'impacte ambiental del Projecte d'instal·lació d'emmagatzematge BESS PB IM2 Montserrat de 5 MW i del centr",
+"date": "2026-06-15"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": "PB IM2 Montserrat",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"PB IM2 Montserrat",
+5.0,
+"30b8c17a73dead4d261a"
+]
+],
+"title": "Resolució TER/4997/2025, d'11 de desembre, d'informe d'impacte ambiental del Projecte d'instal·lació d'emmagatzematge BESS PB IM2 Montserrat de 5 MW i del centr",
+"date": "2026-06-15"
+}
+},
+"1028779": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": "Riba-roja",
+"events": null,
+"title": "Resolució TER/4018/2025, de 31 d'octubre, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte de la planta solar fotovoltaica Riba-r",
+"date": "2025-11-07"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_DIA_FAVORABLE",
+"name": "Riba-roja",
+"events": [
+[
+"DIA",
+"PERMITTING",
+"Riba-roja",
+null,
+"5d32591abfc641225ac7"
+]
+],
+"title": "Resolució TER/4018/2025, de 31 d'octubre, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte de la planta solar fotovoltaica Riba-r",
+"date": "2025-11-07"
+}
+},
+"1007914": {
+"old": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+"name": null,
+"events": null,
+"title": "Edicte sobre aprovació definitiva del Projecte tècnic d'una instal·lació fotovoltaica al pavelló municipal de Llambilles (exp. X2024000444)",
+"date": "2025-03-04"
+},
+"new": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+"name": "al pavelló municipal de Llambilles",
+"events": null,
+"title": "Edicte sobre aprovació definitiva del Projecte tècnic d'una instal·lació fotovoltaica al pavelló municipal de Llambilles (exp. X2024000444)",
+"date": "2025-03-04"
+}
+},
+"1051314": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": null,
+"events": null,
+"title": "Edicte sobre aprovació definitiva del Projecte per a la instal·lació fotovoltaica d'autoconsum individual al Centre Cultural de la Roca del Vallès (exp. 210539Q",
+"date": "2026-07-29"
+},
+"new": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": "d'autoconsum individual al Centre Cultural de la Roca del Vallès",
+"events": null,
+"title": "Edicte sobre aprovació definitiva del Projecte per a la instal·lació fotovoltaica d'autoconsum individual al Centre Cultural de la Roca del Vallès (exp. 210539Q",
+"date": "2026-07-29"
+}
+},
+"1049466": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_SUBJECT",
+"name": null,
+"events": null,
+"title": "Resolució TER/2226/2026, de 5 de març, per la qual es formula la declaració ambiental estratègica de la Modificació puntual del Pla general d'ordenació per a la",
+"date": "2026-07-10"
+},
+"new": {
+"category": "OUT_OF_SCOPE",
+"event": "URBAN_PLANNING_NOT_PLANT",
+"name": null,
+"events": null,
+"title": "Resolució TER/2226/2026, de 5 de març, per la qual es formula la declaració ambiental estratègica de la Modificació puntual del Pla general d'ordenació per a la",
+"date": "2026-07-10"
+}
+},
+"1045234": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": null,
+"events": null,
+"title": "Edicte sobre correcció d'errades a l'Edicte publicat al BOPG relatiu a l'aprovació definitiva del Projecte per a la instal·lació fotovoltaica al pavelló poliesp",
+"date": "2026-05-27"
+},
+"new": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": "al pavelló poliesportiu de Pals",
+"events": null,
+"title": "Edicte sobre correcció d'errades a l'Edicte publicat al BOPG relatiu a l'aprovació definitiva del Projecte per a la instal·lació fotovoltaica al pavelló poliesp",
+"date": "2026-05-27"
+}
+},
+"1010523": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": "Tivissa II de 50 MW",
+"events": null,
+"title": "Resolució TER/1070/2025, de 24 de març, per la qual es fa públic l'Acord de declaració d'impacte ambiental del projecte del parc eòlic Tivissa II de 50 MW, prom",
+"date": "2025-04-01"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_DIA_UNFAVOURABLE",
+"name": "Tivissa II",
+"events": [
+[
+"DIA_UNFAVOURABLE",
+"BLOCKED",
+"Tivissa II",
+50.0,
+"dddbbaccfc5d182f1695"
+]
+],
+"title": "Resolució TER/1070/2025, de 24 de març, per la qual es fa públic l'Acord de declaració d'impacte ambiental del projecte del parc eòlic Tivissa II de 50 MW, prom",
+"date": "2025-04-01"
+}
+},
+"1028451": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "stand-alone anomenada Can Jardí Almacena",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"stand-alone anomenada Can Jardí Almacena",
+22.248,
+"8d160d6fe2994f8d18f3"
+]
+],
+"title": "Resolució TER/3995/2025, de 29 d'octubre, de la Direcció General d'Energia, per la qual s'atorga l'autorització administrativa prèvia i l'autorització administr",
+"date": "2025-11-04"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "Can Jardí Almacena",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"Can Jardí Almacena",
+22.248,
+"8d160d6fe2994f8d18f3"
+]
+],
+"title": "Resolució TER/3995/2025, de 29 d'octubre, de la Direcció General d'Energia, per la qual s'atorga l'autorització administrativa prèvia i l'autorització administr",
+"date": "2025-11-04"
+}
+},
+"1052417": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": null,
+"events": null,
+"title": "Resolució TER/2840/2026, de 4 d'agost, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte híbrid Gardeny, de 37,66 MW, hibridació f",
+"date": "2026-08-11"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_DIA_FAVORABLE",
+"name": null,
+"events": "IDENTITY_HELD",
+"title": "Resolució TER/2840/2026, de 4 d'agost, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte híbrid Gardeny, de 37,66 MW, hibridació f",
+"date": "2026-08-11"
+}
+},
+"1017495": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": null,
+"events": null,
+"title": "Resolució TER/2266/2025, de 13 de juny, d'informe d'impacte ambiental dels projectes en sòl no urbanitzable per a la implantació de les plantes d'emmagatzematge",
+"date": "2025-06-23"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": null,
+"events": "IDENTITY_HELD",
+"title": "Resolució TER/2266/2025, de 13 de juny, d'informe d'impacte ambiental dels projectes en sòl no urbanitzable per a la implantació de les plantes d'emmagatzematge",
+"date": "2025-06-23"
+}
+},
+"1048539": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": "d'energia amb bateries Mateu",
+"events": null,
+"title": "Resolució TER/2120/2026, d'1 d'abril, de declaració d'impacte ambiental del projecte de la planta d'emmagatzematge d'energia amb bateries Mateu, de 68,29 MWh DC",
+"date": "2026-07-01"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_DIA_FAVORABLE",
+"name": "Mateu",
+"events": [
+[
+"DIA",
+"PERMITTING",
+"Mateu",
+null,
+"216c919982a0292f8821"
+]
+],
+"title": "Resolució TER/2120/2026, d'1 d'abril, de declaració d'impacte ambiental del projecte de la planta d'emmagatzematge d'energia amb bateries Mateu, de 68,29 MWh DC",
+"date": "2026-07-01"
+}
+},
+"1029175": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": "La Ribera I",
+"events": null,
+"title": "Resolució TER/4127/2025, de 7 de novembre, per la qual es fa pública la convocatòria per a la redacció de les actes prèvies a l'ocupació de les finques afectade",
+"date": "2025-11-13"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "EXPROPRIATION_PRIOR_SURVEY",
+"name": "La Ribera I",
+"events": [
+[
+"EXPROPRIATION",
+"PRECONSTRUCTION",
+"La Ribera I",
+15.0,
+"adecf5aa8abb55ff6bd9"
+]
+],
+"title": "Resolució TER/4127/2025, de 7 de novembre, per la qual es fa pública la convocatòria per a la redacció de les actes prèvies a l'ocupació de les finques afectade",
+"date": "2025-11-13"
+}
+},
+"1002934": {
+"old": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+"name": null,
+"events": null,
+"title": "EDICTE pel qual es fa pública l'aprovació definitiva del Projecte d'obra municipal d'instal·lació fotovoltaica d'autoconsum compartit a l'Espai de Reserva del M",
+"date": "2024-12-27"
+},
+"new": {
+"category": "MUNICIPAL_PROJECT",
+"event": "MUNICIPAL_FINAL_PROJECT_APPROVAL",
+"name": "d'autoconsum compartit a l'Espai de Reserva del Museu Municipal",
+"events": null,
+"title": "EDICTE pel qual es fa pública l'aprovació definitiva del Projecte d'obra municipal d'instal·lació fotovoltaica d'autoconsum compartit a l'Espai de Reserva del M",
+"date": "2024-12-27"
+}
+},
+"998575": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": "Batea",
+"events": null,
+"title": "RESOLUCIÓ TER/3812/2024, de 21 d'octubre, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte de la planta solar fotovoltaica Batea,",
+"date": "2024-11-04"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_DIA_FAVORABLE",
+"name": "Batea",
+"events": [
+[
+"DIA",
+"PERMITTING",
+"Batea",
+null,
+"6bf77041abee47d9031a"
+]
+],
+"title": "RESOLUCIÓ TER/3812/2024, de 21 d'octubre, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte de la planta solar fotovoltaica Batea,",
+"date": "2024-11-04"
+}
+},
+"1010481": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": "Tivissa IV de 50 MW",
+"events": null,
+"title": "Resolució TER/1043/2025, de 24 de març, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte del parc eòlic Tivissa IV de 50 MW, prom",
+"date": "2025-04-01"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_DIA_FAVORABLE",
+"name": "Tivissa IV",
+"events": [
+[
+"DIA",
+"PERMITTING",
+"Tivissa IV",
+50.0,
+"e0b834e5f7412567de89"
+]
+],
+"title": "Resolució TER/1043/2025, de 24 de març, per la qual es fa públic l'Acord de declaració d'impacte ambiental del Projecte del parc eòlic Tivissa IV de 50 MW, prom",
+"date": "2025-04-01"
+}
+},
+"1023343": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": null,
+"events": null,
+"title": "Resolució TER/3216/2025, de 21 de maig, per la qual s'emet l'informe ambiental estratègic de la modificació puntual del Pla general d'ordenació urbana per regul",
+"date": "2025-08-28"
+},
+"new": {
+"category": "OUT_OF_SCOPE",
+"event": "URBAN_PLANNING_NOT_PLANT",
+"name": null,
+"events": null,
+"title": "Resolució TER/3216/2025, de 21 de maig, per la qual s'emet l'informe ambiental estratègic de la modificació puntual del Pla general d'ordenació urbana per regul",
+"date": "2025-08-28"
+}
+},
+"1035621": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": "PS General d'Olis i Derivats",
+"events": null,
+"title": "Resolució TER/185/2026, de 23 de gener, per la qual es denega a l'empresa General d'Olis i Derivats, SL, l'autorització administrativa prèvia i de construcció d",
+"date": "2026-02-02"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "AUTHORIZATION_DENIED",
+"name": "PS General d'Olis i Derivats",
+"events": [
+[
+"DENIED",
+"BLOCKED",
+"PS General d'Olis i Derivats",
+null,
+"374f94ed075b4549f39c"
+]
+],
+"title": "Resolució TER/185/2026, de 23 de gener, per la qual es denega a l'empresa General d'Olis i Derivats, SL, l'autorització administrativa prèvia i de construcció d",
+"date": "2026-02-02"
+}
+},
+"1038618": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "GRANT_NOT_CONFIRMED_IN_OPERATIVE_BODY",
+"name": "PS Els Mallols",
+"events": null,
+"title": "Resolució TER/469/2026, de 24 de febrer, per la qual s'atorga a Talavera Solar, SL, l'autorització administrativa prèvia i de construcció del projecte de la lín",
+"date": "2026-03-05"
+},
+"new": {
+"category": "OUT_OF_SCOPE",
+"event": "EVACUATION_INFRASTRUCTURE_ONLY_NOT_PLANT",
+"name": null,
+"events": null,
+"title": "Resolució TER/469/2026, de 24 de febrer, per la qual s'atorga a Talavera Solar, SL, l'autorització administrativa prèvia i de construcció del projecte de la lín",
+"date": "2026-03-05"
+}
+},
+"1001768": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "GRANT_NOT_CONFIRMED_IN_OPERATIVE_BODY",
+"name": "Parsosy Alyce FV1",
+"events": null,
+"title": "RESOLUCIÓ TER/4436/2024, de 10 de desembre, per la qual s'atorga a Parsosy Alyce, SL, l'autorització administrativa prèvia i autorització administrativa de cons",
+"date": "2024-12-13"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "Parsosy Alyce FV1",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"Parsosy Alyce FV1",
+4.5,
+"50b5509ab4d5828d4810"
+]
+],
+"title": "RESOLUCIÓ TER/4436/2024, de 10 de desembre, per la qual s'atorga a Parsosy Alyce, SL, l'autorització administrativa prèvia i autorització administrativa de cons",
+"date": "2024-12-13"
+}
+},
+"1019955": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": null,
+"events": null,
+"title": "Anunci sobre aprovació definitiva del Projecte executiu d'instal·lació fotovoltaica d'autoconsum col·lectiu a la coberta de l'escola Roc Blanc (exp. X2025001368",
+"date": "2025-07-18"
+},
+"new": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_OPERATIVE_ACT",
+"name": "d'autoconsum col·lectiu a la coberta de l'escola Roc Blanc",
+"events": null,
+"title": "Anunci sobre aprovació definitiva del Projecte executiu d'instal·lació fotovoltaica d'autoconsum col·lectiu a la coberta de l'escola Roc Blanc (exp. X2025001368",
+"date": "2025-07-18"
+}
+},
+"1014629": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "UNRECOGNIZED_SUBJECT",
+"name": null,
+"events": null,
+"title": "Resolució TER/1782/2025, de 25 d'abril, d'informe d'impacte ambiental del Projecte en sòl no urbanitzable per a la implantació del sistema d'emmagatzematge d'en",
+"date": "2025-05-22"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": "PB Condor",
+"events": [
+[
+"ENVIRONMENTAL_SCREENING",
+"PERMITTING",
+"PB Condor",
+null,
+"c1bf8f87278fd2cfecc4"
+]
+],
+"title": "Resolució TER/1782/2025, de 25 d'abril, d'informe d'impacte ambiental del Projecte en sòl no urbanitzable per a la implantació del sistema d'emmagatzematge d'en",
+"date": "2025-05-22"
+}
+},
+"1023732": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "GRANT_NOT_CONFIRMED_IN_OPERATIVE_BODY",
+"name": "TORRENT DE VINYOLES",
+"events": null,
+"title": "Resolució TER/3264/2025, de 2 d'agost, de la Direcció General d'Energia, per la qual s'atorguen a Estabanell Generació, SLU, l'autorització administrativa prèvi",
+"date": "2025-09-04"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "TORRENT DE VINYOLES",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"TORRENT DE VINYOLES",
+3.63,
+"0fa45d6bd0018367bad9"
+]
+],
+"title": "Resolució TER/3264/2025, de 2 d'agost, de la Direcció General d'Energia, per la qual s'atorguen a Estabanell Generació, SLU, l'autorització administrativa prèvi",
+"date": "2025-09-04"
+}
+},
+"1033581": {
+"old": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "“Planta solar fotovoltaica Flix-Ascó IV”",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"“Planta solar fotovoltaica Flix-Ascó IV”",
+16.06,
+"4171bc6131d05bb22efd"
+]
+],
+"title": "Resolució TER/4771/2025, d'11 de desembre, de la Direcció General d'Energia, per la qual s'atorga a Sanmad Sonne 3 Roble, SL, l'autorització administrativa prèv",
+"date": "2026-01-02"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "PRIOR_AND_CONSTRUCTION_AUTH",
+"name": "Planta solar fotovoltaica Flix-Ascó IV",
+"events": [
+[
+"CONSTRUCTION_AUTH",
+"AUTHORIZED",
+"Planta solar fotovoltaica Flix-Ascó IV",
+16.06,
+"4171bc6131d05bb22efd"
+]
+],
+"title": "Resolució TER/4771/2025, d'11 de desembre, de la Direcció General d'Energia, per la qual s'atorga a Sanmad Sonne 3 Roble, SL, l'autorització administrativa prèv",
+"date": "2026-01-02"
+}
+},
+"1035789": {
+"old": {
+"category": "REVIEW_REQUIRED",
+"event": "ENVIRONMENTAL_DECISION_UNRESOLVED",
+"name": null,
+"events": null,
+"title": "Resolució TER/4941/2025, d'11 de desembre, d'informe d'impacte ambiental dels projectes d'instal·lacions d'emmagatzematge BESS Vic 1, 2, 3, 4, 5 i 6 0,69/25 kV,",
+"date": "2026-02-03"
+},
+"new": {
+"category": "ENERGY_PROJECT",
+"event": "ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA",
+"name": null,
+"events": "IDENTITY_HELD",
+"title": "Resolució TER/4941/2025, d'11 de desembre, d'informe d'impacte ambiental dels projectes d'instal·lacions d'emmagatzematge BESS Vic 1, 2, 3, 4, 5 i 6 0,69/25 kV,",
+"date": "2026-02-03"
+}
+}
+}
+}
