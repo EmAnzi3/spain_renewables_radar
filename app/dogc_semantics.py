@@ -18,8 +18,9 @@ TRANSLATE = str.maketrans({'’': "'", '‘': "'", '“': '"', '”': '"'})
 RENEWABLE = re.compile(r"fotovolta|panells solars|parc eòlic|bateries stand-alone|BESS|planta d.emmagatzematge|"
                        r"emmagatzematge (?:d'energia|elèctric|en bateries)|sistema d.emmagatzematge d'energia", re.I)
 # Running page header that can fall between 'Resolc:' and the operative verb.
-GAP = (r"(?:\s*DL B 38014-2007ISSN 1988-298X https://www\.gencat\.cat/dogc Núm\. \d+ - [\d .]+/\d+ "
-       r"Diari Oficial de la Generalitat de Catalunya CVE-DOGC-\S+)?\s*")
+HEADER = (r"DL B 38014-2007ISSN 1988-298X https://www\.gencat\.cat/dogc Núm\. \d+ - [\d .]+/\d+ "
+          r"Diari Oficial de la Generalitat de Catalunya CVE-DOGC-\S+")
+GAP = r"(?:\s*" + HEADER + r")?\s*"
 CLAUSE_END = re.compile(r"\s(?:[—–-]\s*)?2[.)]\s|Declarar la utilitat|Aquesta Resolució|Contra aquesta|Característiques principals|Descripció de", re.I)
 
 NUMBER = r'(?:\d{1,3}(?:\.\d{3})+(?:,\d+)?|\d+(?:[.,]\d+)?)'
@@ -154,7 +155,7 @@ def clause_from(doc: 'Document', start: int, limit: int = 900) -> tuple[int, str
 
 DIA_OUTCOME = re.compile(
     r"(?:formul[ao]|Formular|Emetre|emetre)\s*:?\s*(?:\d\.\d\s+|Primer\s+|[—–-]\s*)?(?:una |la )?[Dd]eclaració d'impacte ambiental"
-    r"(?: corresponent)?(?: amb caràcter (?P<a>favorable|desfavorable)|[^.]{0,700}?en sentit (?P<b>favorable|desfavorable))", re.I)
+    r"(?: corresponent)?(?: amb caràcter (?P<a>favorable|desfavorable)|(?:" + HEADER + r"|[^.]){0,800}?en sentit (?P<b>favorable|desfavorable))", re.I)
 
 
 def event_classification(doc: Document, title: str) -> tuple[str, str, dict | None, list[str], dict | None]:
