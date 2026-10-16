@@ -102,3 +102,29 @@ class SupersessionTests(unittest.TestCase):
     def test_mass_removal_is_refused(self):
         self.state(*[ev('x%d'%i) for i in range(12)]).close();self.helper.shard('DOGC','2025-06',[ev('x0')])
         with self.assertRaises(ValueError):import_history(str(self.root/'state.sqlite'),str(self.export),supersede_sources=('DOGC',))
+
+
+class ProvenanceKeyTests(unittest.TestCase):
+    """Run 38916278000: a DOGC act attached to an existing project kept the shard's key in its provenance row."""
+    def test_provenance_row_follows_the_stored_event_project(self):
+        tmp=tempfile.TemporaryDirectory();self.addCleanup(tmp.cleanup);root=Path(tmp.name);export=root/'export'
+        helper=ImportTests('test_additive_and_idempotent');helper.root=root;helper.export=export;helper.shards=[]
+        folder=helper.shard('DOGC','2025-06',[ev('new')])
+        with sqlite3.connect(folder/'historical.sqlite') as s:
+            s.execute('''CREATE TABLE regional_public_metadata (source_code TEXT NOT NULL,external_id TEXT NOT NULL,project_key TEXT NOT NULL,
+                web_publication_date TEXT NOT NULL,source_url TEXT NOT NULL,evidence_json TEXT NOT NULL,PRIMARY KEY(source_code,external_id))''')
+            s.execute("INSERT INTO regional_public_metadata VALUES ('DOGC','new','k-new','2025-06-10','https://dogc.gencat.cat/new','{\"quality_flags\":[]}')")
+        s=sqlite3.connect(folder/'historical.sqlite');s.execute('PRAGMA wal_checkpoint(TRUNCATE)');s.close()
+        import hashlib;m=json.loads((folder/'manifest.json').read_text());m['database_sha256']=hashlib.sha256((folder/'historical.sqlite').read_bytes()).hexdigest()
+        (folder/'manifest.json').write_text(json.dumps(m))
+        c=connect(str(root/'state.sqlite'));save_event(c,ev('old'))
+        c.execute('''CREATE TABLE regional_public_metadata (source_code TEXT NOT NULL,external_id TEXT NOT NULL,project_key TEXT NOT NULL,
+            web_publication_date TEXT NOT NULL,source_url TEXT NOT NULL,evidence_json TEXT NOT NULL,PRIMARY KEY(source_code,external_id),
+            FOREIGN KEY(project_key) REFERENCES projects(project_key))''')
+        from app.store import _ensure_aliases
+        _ensure_aliases(c);c.execute("INSERT INTO project_identity_aliases VALUES ('k-new','k-old','TEST','DOGC','old','{}')");c.commit();c.close()
+        import_history(str(root/'state.sqlite'),str(export))
+        with sqlite3.connect(root/'state.sqlite') as c:
+            ek=c.execute("SELECT project_key FROM events WHERE external_id='new'").fetchone()[0]
+            mk=c.execute("SELECT project_key FROM regional_public_metadata WHERE external_id='new'").fetchone()[0]
+            self.assertEqual((ek,mk),('k-old','k-old'));self.assertEqual(c.execute('PRAGMA foreign_key_check').fetchall(),[])
