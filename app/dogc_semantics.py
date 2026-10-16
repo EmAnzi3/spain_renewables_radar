@@ -13,9 +13,15 @@ import hashlib
 import re
 from typing import Any
 
-VERSION = 'dogc-semantic-v1'
+VERSION = 'dogc-semantic-v2'
 TRANSLATE = str.maketrans({'’': "'", '‘': "'", '“': '"', '”': '"'})
-RENEWABLE = re.compile(r'fotovolta|panells solars|parc eòlic|bateries stand-alone|BESS|planta d.emmagatzematge', re.I)
+RENEWABLE = re.compile(r"fotovolta|panells solars|parc eòlic|bateries stand-alone|BESS|planta d.emmagatzematge|"
+                       r"emmagatzematge (?:d'energia|elèctric|en bateries)|sistema d.emmagatzematge d'energia", re.I)
+# Running page header that can fall between 'Resolc:' and the operative verb.
+GAP = (r"(?:\s*DL B 38014-2007ISSN 1988-298X https://www\.gencat\.cat/dogc Núm\. \d+ - [\d .]+/\d+ "
+       r"Diari Oficial de la Generalitat de Catalunya CVE-DOGC-\S+)?\s*")
+CLAUSE_END = re.compile(r"\s(?:[—–-]\s*)?2[.)]\s|Declarar la utilitat|Aquesta Resolució|Contra aquesta|Característiques principals|Descripció de", re.I)
+
 NUMBER = r'(?:\d{1,3}(?:\.\d{3})+(?:,\d+)?|\d+(?:[.,]\d+)?)'
 QUANTITY = re.compile(r'(?<![\w.,])(?P<number>' + NUMBER + r')\s*(?P<unit>(?:MW|kW)(?:h|p|n)?)(?![\w])')
 REFERENCE = re.compile(r'FUE-\s*\d{4}-\s*\d{5,12}|OTA[A-Z]{3}\d{8}|\b\d{4}/\d{6}/[A-Z]\b')
@@ -134,6 +140,23 @@ def verify_evidence(record: dict, pages: list[dict]) -> int:
     return count
 
 
+def operative(doc: 'Document', verb: str, after: int = 0):
+    """First operative clause 'Resolc: [1.] <verb> ...' (page headers tolerated)."""
+    return doc.find(r"(?:Resolc|RESOLC)\s*:?" + GAP + r"(?:[—–-]\s*)?(?:(?:\d+|ÚNIC)[.)]?-?\s*)?" + GAP + verb, after)
+
+
+def clause_from(doc: 'Document', start: int, limit: int = 900) -> tuple[int, str]:
+    text = doc.text[start:start + limit]
+    end = CLAUSE_END.search(text, 40)
+    text = text[:end.start()] if end else text
+    return start + len(text), text
+
+
+DIA_OUTCOME = re.compile(
+    r"(?:formul[ao]|Formular|Emetre|emetre)\s*:?\s*(?:\d\.\d\s+|Primer\s+|[—–-]\s*)?(?:una |la )?[Dd]eclaració d'impacte ambiental"
+    r"(?: corresponent)?(?: amb caràcter (?P<a>favorable|desfavorable)|[^.]{0,700}?en sentit (?P<b>favorable|desfavorable))", re.I)
+
+
 def event_classification(doc: Document, title: str) -> tuple[str, str, dict | None, list[str], dict | None]:
     """Return category, current event, operative evidence, flags and correction."""
     title = normalized(title)
@@ -168,27 +191,75 @@ def event_classification(doc: Document, title: str) -> tuple[str, str, dict | No
         return 'REVIEW_REQUIRED', 'UNPARSED_CORRECTION', None, ['CORRECTION_TEXT_MISSING'], None
     if "d'informe d'impacte ambiental" in title or "de declaració d'impacte ambiental" in title:
         # Start only at the operative body; historical consultations cannot pass.
-        marker = doc.find(r"(?:Ponència d'Energies Renovables acorda:?|s'acorda:)\s*Primer")
+        marker = doc.find(r"(?:Ponència d'Energies Renovables acorda:?|s'acorda:|acorda:)" + GAP + r"Primer")
         if not marker:
-            marker = doc.find(r"Resolc:\s*Primer\s+Emetre l'informe d'impacte ambiental")
+            marker = doc.find(r"Resolc:" + GAP + r"Primer" + GAP + r"Emetre (?:l'|un )?informe d'impacte ambiental")
         if marker:
             end = min(len(doc.text), marker.end() + 1800)
-            decision = doc.find(r"(?:no s'ha de sotmetre|no cal sotmetre).{0,180}?avaluació d'impacte ambiental ordinària", marker.end(), end)
+            decision = doc.find(r"(?:no s'ha(?:n)? de sotmetre|no cal sotmetre).{0,180}?avaluació d'impacte ambiental ordinària", marker.end(), end)
             if decision:
                 proof = doc.evidence(marker.start(), decision.end())
                 return 'ENERGY_PROJECT', 'ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA', {'value': 'ENVIRONMENTAL_SCREENING_NO_ORDINARY_EIA', 'evidence': proof}, ['ENVIRONMENTAL_ACT_IS_NOT_CONSTRUCTION_AUTH'], None
             decision = doc.find(r'ambientalment compatible', marker.end(), end)
             if decision and "declaració d'impacte ambiental" in title:
                 return 'ENERGY_PROJECT', 'ENVIRONMENTAL_DIA_COMPATIBLE', {'value': 'ENVIRONMENTAL_DIA_COMPATIBLE', 'evidence': doc.evidence(marker.start(), decision.end())}, ['ENVIRONMENTAL_ACT_IS_NOT_CONSTRUCTION_AUTH'], None
-            decision = doc.find(r"(?:s'ha de sotmetre|cal sotmetre).{0,180}?avaluació d'impacte ambiental ordinària", marker.end(), end)
+            decision = doc.find(r"(?:(?<!no )s'ha(?:n)? de sotmetre|(?<!no )cal sotmetre).{0,180}?avaluació d'impacte ambiental ordinària", marker.end(), end)
             if decision:
                 return 'ENERGY_PROJECT', 'ORDINARY_EIA_REQUIRED', {'value':'ORDINARY_EIA_REQUIRED','evidence':doc.evidence(marker.start(),decision.end())}, ['ORDINARY_EIA_REQUIRED_IS_NOT_PERMIT_DENIAL'], None
+        if "declaració d'impacte ambiental" in title:
+            # The Ponència's operative formula: '... formula (la) declaració d'impacte ambiental
+            # amb caràcter favorable|desfavorable' or 'Emetre la declaració ... en sentit ...'.
+            found = list(DIA_OUTCOME.finditer(doc.text))
+            outcomes = {(m['a'] or m['b']).lower() for m in found}
+            if found:
+                first = found[0]
+                proof = {'value': None, 'evidence': doc.evidence(*first.span())}
+                if outcomes == {'favorable'}:
+                    proof['value'] = 'ENVIRONMENTAL_DIA_FAVORABLE'
+                    return 'ENERGY_PROJECT', 'ENVIRONMENTAL_DIA_FAVORABLE', proof, ['ENVIRONMENTAL_ACT_IS_NOT_CONSTRUCTION_AUTH'], None
+                if outcomes == {'desfavorable'}:
+                    proof['value'] = 'ENVIRONMENTAL_DIA_UNFAVOURABLE'
+                    return 'ENERGY_PROJECT', 'ENVIRONMENTAL_DIA_UNFAVOURABLE', proof, ['UNFAVOURABLE_DIA_BLOCKS_PROJECT_AS_SUBMITTED'], None
+                proof['value'] = 'ENVIRONMENTAL_DIA_MIXED'
+                return 'ENERGY_PROJECT', 'ENVIRONMENTAL_DIA_MIXED', proof, ['DIA_FAVOURABLE_ONLY_FOR_PART_OF_PROJECT', 'ENVIRONMENTAL_ACT_IS_NOT_CONSTRUCTION_AUTH'], None
         return 'REVIEW_REQUIRED', 'ENVIRONMENTAL_DECISION_UNRESOLVED', None, ['OPERATIVE_ENVIRONMENTAL_DECISION_NOT_FOUND'], None
-    if re.search(r"s'atorg(?:a|uen).*autorització administrativa.*construcció", title, re.I):
-        match = doc.find(r"Resolc:\s*(?:[—–-]\s*)?(?:\d+[.)]?\s*)?Atorgar.{0,600}?autorització administrativa de construcció.{0,700}?(?=Descripció|Les característiques|Aquesta Resolució|DL B|$)")
+    if re.search(r"s'atorg(?:a|uen).*autorització administrativa", title, re.I):
+        match = operative(doc, r"Atorgar\b")
         if match:
-            return 'ENERGY_PROJECT', 'PRIOR_AND_CONSTRUCTION_AUTH', doc.value('PRIOR_AND_CONSTRUCTION_AUTH', match), ['AUTHORIZATION_IS_NOT_WORK_STARTED'], None
+            end, clause = clause_from(doc, match.start())
+            proof = lambda value: {'value': value, 'evidence': doc.evidence(match.start(), end)}
+            grant_flags = ['AUTHORIZATION_IS_NOT_WORK_STARTED']
+            if re.search(r"\bmodificació\b", clause[:320], re.I):
+                grant_flags.append('MODIFICATION_OF_EXISTING_AUTHORIZATION')
+            if re.search(r"construcció,?\s+(?:del projecte\s+)?(?:de (?:la|les)\s+|dels?\s+)?(?:línia|línies|linia|subestació|infraestructures?|SET)\b", clause, re.I):
+                return 'OUT_OF_SCOPE', 'EVACUATION_INFRASTRUCTURE_ONLY_NOT_PLANT', proof('EVACUATION_INFRASTRUCTURE_ONLY_NOT_PLANT'), ['GRID_INFRASTRUCTURE_IS_NOT_A_NEW_PLANT'], None
+            if re.search(r"(?:autorització administrativa (?:prèvia )?(?:i (?:l')?(?:autorització administrativa )?)?de construcció|prèvia i de construcció)", clause, re.I):
+                return 'ENERGY_PROJECT', 'PRIOR_AND_CONSTRUCTION_AUTH', proof('PRIOR_AND_CONSTRUCTION_AUTH'), grant_flags, None
+            if re.search(r"autorització administrativa prèvia", clause, re.I):
+                return 'ENERGY_PROJECT', 'PRIOR_AUTH_ONLY', proof('PRIOR_AUTH_ONLY'), ['PRIOR_AUTH_IS_NOT_CONSTRUCTION_AUTH'] + grant_flags[1:], None
         return 'REVIEW_REQUIRED', 'GRANT_NOT_CONFIRMED_IN_OPERATIVE_BODY', None, ['GRANT_EVIDENCE_MISSING'], None
+    if re.search(r"es deneg(?:a|uen)\b", title, re.I):
+        match = operative(doc, r"Denegar\b")
+        if match:
+            end, _ = clause_from(doc, match.start(), 700)
+            return 'ENERGY_PROJECT', 'AUTHORIZATION_DENIED', {'value': 'AUTHORIZATION_DENIED', 'evidence': doc.evidence(match.start(), end)}, ['AUTHORIZATION_DENIED_BY_OPERATIVE_ACT'], None
+    if re.search(r"arxiv(?:a|ament)\b|s'arxiva|desistiment", title, re.I):
+        match = operative(doc, r"(?:Acceptar el desistiment|Declarar l'arxiu|Arxivar|Declarar arxivat)")
+        if match:
+            end, _ = clause_from(doc, match.start(), 700)
+            return 'ENERGY_PROJECT', 'PROCEDURE_ARCHIVED', {'value': 'PROCEDURE_ARCHIVED', 'evidence': doc.evidence(match.start(), end)}, ['PROCEDURE_ENDED_WITHOUT_AUTHORIZATION'], None
+    if re.search(r"actes prèvies a l.ocupació", title, re.I):
+        match = (operative(doc, r"Convocar\b") or doc.find(r"(?:convoca|es convoca)[^.]{0,300}?actes prèvies a l.ocupació"))
+        if match:
+            return 'ENERGY_PROJECT', 'EXPROPRIATION_PRIOR_SURVEY', doc.value('EXPROPRIATION_PRIOR_SURVEY', match), ['LAND_OCCUPATION_SURVEY_IS_NOT_WORK_STARTED'], None
+    if re.search(r"es declara la utilitat pública", title, re.I):
+        matches = list(re.finditer(r"Declarar la utilitat pública", doc.text))
+        if matches:
+            return 'ENERGY_PROJECT', 'PUBLIC_UTILITY_GRANTED', doc.value('PUBLIC_UTILITY_GRANTED', matches[-1]), ['PUBLIC_UTILITY_IS_NOT_WORK_STARTED'], None
+    if re.search(r"(?:informe|declaració) ambiental estratègic[a]? d", title, re.I) and re.search(r"Pla |POUM|planejament|Normes", title):
+        match = doc.find(r"(?:Emetre|Formular) (?:l'informe|la declaració) ambiental estratègic")
+        if match:
+            return 'OUT_OF_SCOPE', 'URBAN_PLANNING_NOT_PLANT', doc.value('URBAN_PLANNING_NOT_PLANT', match), ['PLANNING_RULES_ARE_NOT_A_PROJECT'], None
     if re.search(r"s'atorga.*declaració d'utilitat pública", title, re.I):
         match = doc.find(r"Resolc:\s*(?:[—–-]?\s*\d+[.)]?\s*)?(?:Declarar|Atorgar).{0,700}?utilitat pública.{0,450}?(?=Aquesta|Contra|\s[—–-]?\s*2[.)]|$)")
         if match:
@@ -218,13 +289,24 @@ def event_classification(doc: Document, title: str) -> tuple[str, str, dict | No
     return 'REVIEW_REQUIRED', 'UNRECOGNIZED_OPERATIVE_ACT', None, ['DOCUMENT_RETAINED_FOR_REVIEW'], None
 
 
+NAME_PREFIX = re.compile(r"^(?:(?:stand-alone|anomenad[ao]s?|anomenat|sobre terreny|d'energia amb bateries|de tipus|"
+                         r"planta solar fotovoltaica anomenada)\s+)+", re.I)
+
+
+def clean_name(value: str) -> str:
+    """Strip heading words around an explicit name; never add or infer text."""
+    value = NAME_PREFIX.sub('', value.strip()).strip(' "“”«»\'')
+    value = re.sub(r"\s+de [\d.,]+\s*MW[pn]?$", '', value)
+    return re.split(r" amb la instal·lació", value)[0].strip()
+
+
 def project_name(doc: Document, title: str) -> dict | None:
     # Prefer an explicit labelled name, never an applicant or an inferred filename.
     for page in doc.pages[:4]:
         raw = re.search(r'(?im)^\s*Nom\s+(?:de la\s+)?instal·lació\s*:\s*([^\n]+)', page.raw)
         if raw:
-            value = raw[1].strip().rstrip('.')
-            match = doc.find(re.escape(normalized(value)), page.start)
+            value = clean_name(raw[1].strip().rstrip('.'))
+            match = doc.find(re.escape(normalized(value)), page.start) if value else None
             if match:
                 return doc.value(value, match)
     title = normalized(title)
@@ -232,12 +314,21 @@ def project_name(doc: Document, title: str) -> dict | None:
         r'instal·lació híbrida anomenada (.+?)(?=,| sobre terreny)',
         r'(?:planta solar fotovoltaica|instal·lació solar fotovoltaica|parc eòlic|planta d.emmagatzematge)(?: \(PSFV\))?(?: anomen(?:ada|at))? (?!de \d)(.+?)(?=, de | \(| i l[ae]s? (?:seva|infraestructura)|,(?!\d)| sobre terreny)',
         r'bateries stand-alone (?:BESS )?(.+?)(?=,)',
+        # Single named storage / PV assets in environmental and grant headings.
+        r"sistema d.emmagatzematge (?:d'energia )?(?:elèctrica |elèctric |en bateries )?(?:tipus )?(?:stand-alone )?(?:\(BESS\) )?(?:anomenad[ao] )?(?!d'|de \d)(.+?)(?=,| de \d| \(| i (?:la seva|les seves|infraestructur)| als? termes?| tipus| promogut)",
+        r"instal·lació d.emmagatzematge (?:d'energia )?(?:BESS )?(?!d'|de \d)(.+?)(?=,| de \d| \(| i (?:la seva|les seves|infraestructur)| als? termes?| tipus| promogut)",
+        r"(?:planta fotovoltaica|instal·lació fotovoltaica|camp fotovoltaic(?: de generació distribuïda)?) (?!de \d|per a |sobre |a l)(.+?)(?=,| de \d| \(| i (?:la seva|les seves|infraestructur)| sobre terreny| situat| als? termes?)",
+        r"planta solar fotovoltaica de [\d.,]+ MWp? (.+?)(?=,| \(| i (?:la seva|les seves|infraestructur)| promogut| als? termes?)",
     ]
     for pattern in patterns:
         found = re.search(pattern, title, re.I)
         if found:
-            value = found[1].strip().strip('"')
-            if len(value) < 2 or len(value) > 150 or value.lower().startswith(('de ', 'amb ', 'en autoconsum')):
+            value = clean_name(found[1])
+            # 'Brugen I, II, III i IV' or 'PB Guixeres I i PB Guixeres II' are several plants.
+            if re.match(r"\s*(?:,|i)\s*(?:[IVX]+|\d+)\b", title[found.end(1):]) or re.search(r" i (?:PB|BESS|PS|PE|FV|PSFV|PHFV) ", value):
+                continue
+            if not value or value.lower() in ('sobre terreny',) or (len(value) < 2 or len(value) > 150 or value.lower().startswith(('de ', 'amb ', 'en autoconsum'))
+                    or re.search(r"\b(?:[IVX]+|\d+), (?:[IVX]+|\d+)\b| i (?:[IVX]+|\d+)\b|\([IVX, i]+\)", value)):
                 continue
             proof = doc.find(re.escape(value))
             if proof:
@@ -253,7 +344,7 @@ def technical_ranges(doc: Document, event: str) -> list[tuple[int,int]]:
             return []
         end = doc.find(r'(?:[—–-]\s*)?4[.)]?\s+(?:Consultes|Informació pública|Consideracions|Descripció|Avaluació|Anàlisi)', match.end())
         return [(match.start(), end.start() if end else min(len(doc.text), match.start()+7500))]
-    if event == 'PRIOR_AND_CONSTRUCTION_AUTH':
+    if event in ('PRIOR_AND_CONSTRUCTION_AUTH', 'PRIOR_AUTH_ONLY'):
         match = doc.find(r'Resolc:')
         if match:
             end = doc.find(r'Aquesta Resolució es dicta|se sotmet a les condicions', match.end())
