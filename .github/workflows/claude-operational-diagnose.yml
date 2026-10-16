@@ -1,41 +1,67 @@
 name: claude-operational-diagnose
-run-name: Export DOGC held-for-review originals (pages text) to probe-results (read-only)
+run-name: DOGC semantics v1 vs v2 replay on all certified originals (read-only)
 on:
   workflow_dispatch:
 permissions:
   contents: write
   actions: read
 jobs:
-  export:
+  replay:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     steps:
-      - name: Extract pages of DOGC held acts from certified shard artifacts
+      - uses: actions/checkout@v4
+        with: {ref: main, path: old}
+      - uses: actions/checkout@v4
+        with: {ref: fix/dogc-decision-semantics, path: new}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -r new/requirements.txt
+      - name: Replay every acquired DOGC document with v1 and v2
         env: {GH_TOKEN: '${{ github.token }}'}
         run: |
           set +e
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898283+github-actions[bot]@users.noreply.github.com"
-          git clone -q --depth 1 -b probe-results "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" pr
-          out=pr/dogc_review; rm -rf $out; mkdir -p $out
-          cat > x.py <<'PY'
-          import json,sys,glob,os
-          aid,out=sys.argv[1],sys.argv[2]
-          held=[]
-          for f in glob.glob('a/**/unresolved.json',recursive=True)+glob.glob('a/**/identity_review.json',recursive=True):
-              try:held+=json.load(open(f))
-              except Exception as e:print('bad',f,e)
-          pages={os.path.basename(f).split('.')[0]:f for f in glob.glob('a/**/*.pages.json',recursive=True)}
-          n=0
-          for r in held:
-              did=str(r.get('document_id'));p=pages.get(did);n+=bool(p)
-              json.dump({'record':r,'pages':json.load(open(p)) if p else None},open(os.path.join(out,did+'.json'),'w'),ensure_ascii=False)
-          print(aid,'held',len(held),'with_pages',n,'pages_files',len(pages))
+          cat > replay.py <<'PY'
+          import json,glob,os,sys,importlib
+          root,which,out=sys.argv[1],sys.argv[2],sys.argv[3]
+          sys.path.insert(0,os.path.abspath(which))
+          from app.dogc_semantics import classify_document
+          from app.dogc_projection import events_from_record,IdentityReviewRequired
+          res={}
+          for docs in glob.glob(root+'/**/documents.json',recursive=True):
+              base=os.path.dirname(docs)
+              for d in json.load(open(docs)):
+                  c=d['candidate'];pf=os.path.join(base,d['pages_file'])
+                  if not os.path.exists(pf):continue
+                  pages=json.load(open(pf))['pages']
+                  try:r=classify_document(c,pages)
+                  except Exception as e:res[c['document_id']]={'error':str(e)[:120]};continue
+                  ev=None
+                  if r['category']=='ENERGY_PROJECT':
+                      try:ev=[(e.event_type,e.commercial_stage,e.project_name,e.power_mw,e.project_key) for e,_ in events_from_record(r,pages,[])]
+                      except IdentityReviewRequired as e:ev='IDENTITY_HELD'
+                      except Exception as e:ev='ERR '+str(e)[:80]
+                  res[c['document_id']]={'category':r['category'],'event':r['event'],'name':(r.get('project_name') or {}).get('value'),'events':ev,'title':c['title'][:160],'date':c['publication_date']}
+          json.dump(res,open(out,'w'),ensure_ascii=False)
+          print(which,len(res))
           PY
+          mkdir -p all
           for id in 12007175662 12006970232 12006725881 12006696709 12006675683 12006546293 12006376485 12006255927 12006147061 12006073410 12005950452 12005804491 12005759097 12005698183 12005624743 12005618767 12005346890 12005319302 12005317237 12005304731 12005238086 12005197981 12004354843 12004528837; do
             rm -rf a a.zip; mkdir a
             gh api repos/${{ github.repository }}/actions/artifacts/$id/zip > a.zip && (cd a && unzip -q ../a.zip)
-            if [ "$id" = "12007175662" ]; then (cd a && find . -type f | sed -E 's/[0-9a-f]{64}/HASH/;s/[0-9]{5,}/N/g' | sort | uniq -c | sort -rn | head -80) > $out/tree_sample.txt; fi
-            python3 x.py "$id" "$out"
-          done > $out/export.log 2>&1
-          cd pr && git add -A && git commit -qm "dogc held-for-review originals" && git push -q origin probe-results
+            python3 replay.py a old old_$id.json; python3 replay.py a new new_$id.json
+          done > replay.log 2>&1
+          python3 - <<'PY'
+          import json,glob
+          old={};new={}
+          for f in glob.glob('old_*.json'):old.update(json.load(open(f)))
+          for f in glob.glob('new_*.json'):new.update(json.load(open(f)))
+          diff={k:{'old':old.get(k),'new':new.get(k)} for k in set(old)|set(new) if old.get(k)!=new.get(k)}
+          json.dump({'documents':len(new),'changed':len(diff),'diff':diff},open('diff.json','w'),ensure_ascii=False,indent=0)
+          print('documents',len(new),'changed',len(diff))
+          PY
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git clone -q --depth 1 -b probe-results "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" pr
+          mkdir -p pr/dogc_replay && cp diff.json replay.log pr/dogc_replay/
+          cd pr && git add -A && git commit -qm "dogc v1 vs v2 replay" && git push -q origin probe-results
