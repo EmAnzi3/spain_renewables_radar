@@ -292,7 +292,7 @@ def event_classification(doc: Document, title: str) -> tuple[str, str, dict | No
 
 NAME_PREFIX = re.compile(r"^(?:(?:stand-alone|anomenad[ao]s?|anomenat|sobre terreny|d'energia amb bateries|de tipus|"
                          r"connectada a la xarxa elèctrica|planta solar fotovoltaica anomenada)\s+)+", re.I)
-NOT_A_NAME = re.compile(r"^(?:d'|de |del |al |als |a la |a l'|en |per |sobre |amb |\d)", re.I)
+NOT_A_NAME = re.compile(r"^(?:d'|de |del |al |als |a la |a l'|en |per |sobre |amb |i |existent|\(|\d[\d.,]*\s)", re.I)
 
 
 def clean_name(value: str) -> str:

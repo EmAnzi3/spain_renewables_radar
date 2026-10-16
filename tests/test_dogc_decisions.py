@@ -26,6 +26,15 @@ class DecisionTests(unittest.TestCase):
         self.expect('prior_auth_only_els_palous','ENERGY_PROJECT','PRIOR_AUTH_ONLY',('PRIOR_AUTH','PERMITTING'))
     def test_evacuation_line_grant_is_not_a_new_plant(self):
         self.expect('grant_evacuation_line_only','OUT_OF_SCOPE','EVACUATION_INFRASTRUCTURE_ONLY_NOT_PLANT')
+    def test_evacuation_line_modification_does_not_authorise_the_plant(self):
+        # Previously projected as CONSTRUCTION_AUTH/AUTHORIZED for the plant.
+        self.expect('line_modification_el_prat_de_la_plana','OUT_OF_SCOPE','EVACUATION_INFRASTRUCTURE_ONLY_NOT_PLANT')
+    def test_names_keep_codes_but_reject_heading_words(self):
+        from app.dogc_semantics import clean_name
+        self.assertEqual(clean_name('22CER'),'22CER')
+        for junk in ("d'autoconsum col·lectiu",'al pavelló municipal','(autoconsum-injecció zero)','5 MW de bateries'):self.assertEqual(clean_name(junk),'')
+        self.assertEqual(clean_name('stand-alone anomenada PB Mateu'),'PB Mateu')
+        self.assertEqual(clean_name('Guixeres I de 19.968 kW al terme municipal de Montgat'),'Guixeres I')
     def test_denial(self):
         self.expect('denial_paradis','ENERGY_PROJECT','AUTHORIZATION_DENIED',('DENIED','BLOCKED'),'FV PARADÍS SOLAR')
     def test_unfavourable_dia_blocks(self):
