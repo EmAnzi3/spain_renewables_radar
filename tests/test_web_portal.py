@@ -35,6 +35,18 @@ class PortalTests(unittest.TestCase):
             self.assertEqual(len(ev['raw_text']),RAW_EXCERPT_CHARS);self.assertTrue(ev['raw_text_truncated'])
             self.assertEqual(ev['raw_text_chars'],len(raw));self.assertEqual(ev['url'],'https://www.boe.es/long')
             with sqlite3.connect(db) as c:self.assertEqual(c.execute('SELECT raw_text FROM events').fetchone()[0],raw)
+    def test_template_has_three_complete_languages_and_one_number_formatter(self):
+        import re
+        tpl=(Path(__file__).resolve().parents[1]/'web/portal.html').read_text(encoding='utf-8')
+        self.assertIn('<select id="lang"',tpl)
+        for lang in ('it','es','en'):self.assertIn('<option value="%s">'%lang,tpl)
+        self.assertNotIn("Intl.NumberFormat('it-IT'",tpl)
+        block=tpl[tpl.index('const I18N={'):tpl.index('const EVENT_L=')]
+        parts=dict(re.findall(r'\n(it|es|en):\{(.*?)\}(?=,\n(?:es|en):\{|\};)',block,re.S))
+        keys={lang:set(re.findall(r"(?:^|,)([A-Za-z_0-9]+):",parts[lang])) for lang in ('it','es','en')}
+        self.assertGreater(len(keys['it']),150)
+        self.assertEqual(keys['it'],keys['es']);self.assertEqual(keys['it'],keys['en'])
+        for k in set(re.findall(r'data-i18n(?:-ph|-aria)?="([^"]+)"',tpl)):self.assertIn(k,keys['it'])
     def test_structural_quality_error_is_not_published(self):
         with tempfile.TemporaryDirectory() as td:
             root=Path(td);db=root/'demo.sqlite';connect(str(db)).close()
