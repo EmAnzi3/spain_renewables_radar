@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "source": "BOCM",
+  "month": "2024-11",
+  "window_start": "2024-11-01",
+  "window_end": "2024-11-30",
+  "mode": "ONE_SOURCE_ONE_MONTH_OFFICIAL_ONLY",
+  "completeness_claim": "IMPLEMENTED_SOURCE_ONLY_NOT_ALL_SPANISH_REGIONS",
+  "non_implemented_regions_are_not_zero_opportunities": true,
+  "inventory_source_warning": false,
+  "run_id": "38696867124",
+  "head_sha": "b28874221a7f32fac67ffc4a64a9e4cbdb777b87",
+  "started_at": "2026-10-15T10:53:13.410931+00:00",
+  "certified": true,
+  "command_scope": {
+    "source": "BOCM",
+    "since": "2024-11-01",
+    "until": "2024-11-30",
+    "skip_live_network_enrichments": true
+  },
+  "pipeline_return_code": 0,
+  "events": 0,
+  "source_scoped_projects": 0,
+  "original_evidence_digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "source_days_expected": 30,
+  "source_days_ok": 30,
+  "source_days_failed": 0,
+  "source_failures": [],
+  "discovered_candidates": 0,
+  "newly_inserted_source_events": 0,
+  "quality": {
+    "ERROR": 0,
+    "WARN": 0,
+    "INFO": 0
+  },
+  "structural_errors": [],
+  "database_sha256": "691173a5123cb26b6c8890fb3f45e29a20534fca0e31859935af72ec25681f38",
+  "original_report_sha256": {
+    "reports/quality_issues_latest.html": "2a2e4eaec616c9747d9fe7908d8080c21a79386f95d2e092f0f968f5d44dec39",
+    "reports/epc_bop_evidence_latest.csv": "18c4c60501e7cbbf115ad34be4b9f282990d88aa8859c57e2de38ac9ec147ad6",
+    "reports/province_view_latest.csv": "4b317cce79eb07b70874f2ab47a6c19a919f684d2555739c725e079eeede303e",
+    "reports/coverage_latest.csv": "c46746a96fcaf4846f4fa6aa7aa530d8dfb1a895499bce3045eb52bc51e62873",
+    "reports/coverage_latest.html": "953a356ac628c20025312c7e26851e9c7752c1becfc756d19f4ed9a08d3406dd",
+    "reports/province_view_latest.html": "3aea88119ae6de7947541e6360ed9f837b6cdb57cd97b4ffc1b26cba16b62e3b",
+    "reports/epc_bop_evidence_latest.html": "5c28feb414a82dc39a56520155b28e4491c4e48fc1fe099665e020094b65fa9d",
+    "reports/quality_issues_latest.csv": "f2da6c3cf3118f14d608510ce38da6762eb041cf6937f62585737e8b4fc78a88",
+    "reports/field_integrity/latest.json": "611869b2f79d1d3d1401c23291421b18eae537a81e144e74ad64d1cc4fc94489",
+    "reports/change_reports/changes_latest.html": "2896cde01adec830cc2820a8268541691fa671427ff1d1d08722612924b9b46d",
+    "reports/change_reports/changes_latest.csv": "8791c9098bd1aa8e9ea70cbef3cadf767e6d2187b0865a3a4fcc1fbd6633385a"
+  },
+  "completed_at": "2026-10-15T10:55:22.477806+00:00"
+}

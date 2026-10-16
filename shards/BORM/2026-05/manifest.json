@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "source": "BORM",
+  "month": "2026-05",
+  "window_start": "2026-05-01",
+  "window_end": "2026-05-31",
+  "mode": "ONE_SOURCE_ONE_MONTH_OFFICIAL_ONLY",
+  "completeness_claim": "IMPLEMENTED_SOURCE_ONLY_NOT_ALL_SPANISH_REGIONS",
+  "non_implemented_regions_are_not_zero_opportunities": true,
+  "inventory_source_warning": false,
+  "run_id": "38717666379",
+  "head_sha": "944f7869840f04b08627c4d911f7c5ff143c1322",
+  "started_at": "2026-10-15T10:40:32.532063+00:00",
+  "certified": true,
+  "command_scope": {
+    "source": "BORM",
+    "since": "2026-05-01",
+    "until": "2026-05-31",
+    "skip_live_network_enrichments": true
+  },
+  "pipeline_return_code": 0,
+  "events": 8,
+  "source_scoped_projects": 8,
+  "original_evidence_digest": "db8bcaac1147da20843bebb94b5a872821cffa8ba72370b9cc712b7b863aa349",
+  "source_days_expected": 31,
+  "source_days_ok": 31,
+  "source_days_failed": 0,
+  "source_failures": [],
+  "discovered_candidates": 8,
+  "newly_inserted_source_events": 8,
+  "quality": {
+    "ERROR": 0,
+    "WARN": 0,
+    "INFO": 15
+  },
+  "structural_errors": [],
+  "database_sha256": "29b9da548a1ca968ed8b4f8e545640197d82f6b28a5d8b67b12af5358fb81601",
+  "source_index_window": {
+    "earliest": "2026-01-02",
+    "latest": "2026-10-15"
+  },
+  "original_report_sha256": {
+    "reports/quality_issues_latest.html": "440ba3eebc82d301c9f4c3572165ddc91845b498c6e0dfee7a38201ffc7cdae3",
+    "reports/epc_bop_evidence_latest.csv": "18c4c60501e7cbbf115ad34be4b9f282990d88aa8859c57e2de38ac9ec147ad6",
+    "reports/province_view_latest.csv": "232d59e63a9cffcb329dee97cb1df0b854ee04f14a2aef6146d16ca4def471c9",
+    "reports/coverage_latest.csv": "2604871b65e686f7394849894d8c0610d428cecbeaa1980656d4cb2a124f11a1",
+    "reports/coverage_latest.html": "9c6508a59ee9525723af3e2f5277a6731bf3cbedb01ebbc5c89cbe6701a3f793",
+    "reports/province_view_latest.html": "9d98f0a491ebc5ae10c4798b753ba258e90006bfa84f874bda488c6e8e8e051a",
+    "reports/epc_bop_evidence_latest.html": "5c28feb414a82dc39a56520155b28e4491c4e48fc1fe099665e020094b65fa9d",
+    "reports/quality_issues_latest.csv": "b4956fdbdc7f7c881bd149ffd9fce08ee0a3e1e3dea648ceacf4872791746de7",
+    "reports/field_integrity/latest.json": "71daeef83564f75d7a74a39660124c1d6da6aea50a8322fb64ed2ae7c1156b9b",
+    "reports/field_integrity/municipal_context.json": "c354c7364a346005020cac76c0ba9120f9680fe6eaab1f099fb2bf1f3123044c",
+    "reports/borm/index_raw.json": "09cbb00d1b640fd8e37eef5c3e8ee00bbcb1948467d4880fdc8d4d6044aad639",
+    "reports/borm/index_acquisition.json": "ddbfe8e382370da385665e20d58af963e34f2ee82fc47d07946a643af832ff90",
+    "reports/change_reports/changes_latest.html": "73d768266882e6d1d430ed1c6e9468816dde93d100c57a2f7d8b73e093d13963",
+    "reports/change_reports/changes_latest.csv": "15fed53905ca6940304adabfd48ad8f9dd9a88ceb75a8db0018039b6af93d97d"
+  },
+  "completed_at": "2026-10-15T10:42:24.461097+00:00"
+}

@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "source": "DOE",
+  "month": "2025-10",
+  "window_start": "2025-10-01",
+  "window_end": "2025-10-31",
+  "mode": "ONE_SOURCE_ONE_MONTH_OFFICIAL_ONLY",
+  "completeness_claim": "IMPLEMENTED_SOURCE_ONLY_NOT_ALL_SPANISH_REGIONS",
+  "non_implemented_regions_are_not_zero_opportunities": true,
+  "inventory_source_warning": false,
+  "run_id": "38717666379",
+  "head_sha": "944f7869840f04b08627c4d911f7c5ff143c1322",
+  "started_at": "2026-10-15T10:33:30.409221+00:00",
+  "certified": false,
+  "command_scope": {
+    "source": "DOE",
+    "since": "2025-10-01",
+    "until": "2025-10-31",
+    "skip_live_network_enrichments": true
+  },
+  "pipeline_return_code": 1,
+  "events": 5,
+  "source_scoped_projects": 5,
+  "original_evidence_digest": "be469b107909789aff8f479fa605f3f6209e1e4b31d3cedd31589c4b9aa336f7",
+  "source_days_expected": 31,
+  "source_days_ok": 31,
+  "source_days_failed": 0,
+  "source_failures": [],
+  "discovered_candidates": 5,
+  "newly_inserted_source_events": 5,
+  "quality": {
+    "ERROR": 1,
+    "WARN": 1,
+    "INFO": 6
+  },
+  "structural_errors": [
+    {
+      "code": "MISSING_PROJECT_NAME",
+      "project_key": "38ff08fdd02beab0432c"
+    }
+  ],
+  "database_sha256": "64dbabc56ecbd9a4b4247f0b40cb7bc87e3547707c8aa9611976665c6b5d52a3",
+  "original_report_sha256": {
+    "reports/quality_issues_latest.html": "3e01b21e53741c5d43f7eb3d4d8be75d8feb40c0ca2268715ccc90e446d97183",
+    "reports/epc_bop_evidence_latest.csv": "18c4c60501e7cbbf115ad34be4b9f282990d88aa8859c57e2de38ac9ec147ad6",
+    "reports/province_view_latest.csv": "e510964e8f7a827cffbe6b4ecf3c09a0a1866aff63a681ec7f00c987b7ca5197",
+    "reports/coverage_latest.csv": "8fd45a8101f86baf735972976351a4c05180e1e241a5a830501fc0a4f377b32c",
+    "reports/coverage_latest.html": "adadfe81b9c97c8a504dfc201a256c933222aa550175dd4f5877d1bffc0b2073",
+    "reports/province_view_latest.html": "1625ba761d2c464e8c8bcf56710145df6d4b6a5c39b7cd980cee01cce5b3cc37",
+    "reports/epc_bop_evidence_latest.html": "5c28feb414a82dc39a56520155b28e4491c4e48fc1fe099665e020094b65fa9d",
+    "reports/quality_issues_latest.csv": "0b4d170629157841d4234c7f3d29c3e4d08eacab5e7c93a6d3910398744b6865",
+    "reports/field_integrity/latest.json": "49d194c87c14314dbc8a2c83db5151d4185aabf7dde013ed39af404852b6921d",
+    "reports/field_integrity/municipal_context.json": "620b400014b6ba8dbef005bcb63108a47a92b4df56defaacd9580f7c25a97d3e",
+    "reports/change_reports/changes_latest.html": "fa7bc695413d5f23ba0104060260e7b4bb1350138dc57bccd272f8629fc97c45",
+    "reports/change_reports/changes_latest.csv": "3b6a33cf294d840bcded4fa75073a8c84bb32c7fb7aa8125ff272b186283452e"
+  },
+  "error_type": "RuntimeError",
+  "error": "Shard quality or source-day coverage incomplete",
+  "completed_at": "2026-10-15T10:35:23.817098+00:00"
+}

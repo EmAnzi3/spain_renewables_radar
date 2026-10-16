@@ -1,0 +1,3480 @@
+{
+  "generated": "2026-10-16",
+  "repo": "EmAnzi3/spain_renewables_radar",
+  "run_id": "38911860835",
+  "note": "Raw certified shards, not merged; uncovered source/months are not zero projects.",
+  "shards": [
+    {
+      "source": "BOA",
+      "month": "2024-10",
+      "artifact_id": 11954826603,
+      "artifact_name": "regional-historical-BOA-2024-10-attempt-1",
+      "created_at": "2026-10-15T07:12:34Z",
+      "run_id": 38696867124,
+      "events": 67,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOA",
+      "month": "2024-11",
+      "artifact_id": 11963054172,
+      "artifact_name": "regional-historical-BOA-2024-11-attempt-2",
+      "created_at": "2026-10-15T10:03:23Z",
+      "run_id": 38696867124,
+      "events": 32,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOA",
+      "month": "2024-12",
+      "artifact_id": 11963950045,
+      "artifact_name": "regional-historical-BOA-2024-12-attempt-2",
+      "created_at": "2026-10-15T10:03:31Z",
+      "run_id": 38696867124,
+      "events": 31,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOA",
+      "month": "2025-01",
+      "artifact_id": 11964520297,
+      "artifact_name": "regional-historical-BOA-2025-01-attempt-38717666379",
+      "created_at": "2026-10-15T10:09:53Z",
+      "run_id": 38717666379,
+      "events": 28,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "a7310044fd0f36fd7439",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "BOA",
+      "month": "2025-02",
+      "artifact_id": 11963436471,
+      "artifact_name": "regional-historical-BOA-2025-02-attempt-2",
+      "created_at": "2026-10-15T10:06:25Z",
+      "run_id": 38696867124,
+      "events": 44,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOA",
+      "month": "2025-03",
+      "artifact_id": 11964375549,
+      "artifact_name": "regional-historical-BOA-2025-03-attempt-2",
+      "created_at": "2026-10-15T10:08:53Z",
+      "run_id": 38696867124,
+      "events": 33,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOA",
+      "month": "2025-04",
+      "artifact_id": 11963821098,
+      "artifact_name": "regional-historical-BOA-2025-04-attempt-2",
+      "created_at": "2026-10-15T10:09:08Z",
+      "run_id": 38696867124,
+      "events": 57,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOA",
+      "month": "2025-05",
+      "artifact_id": 11964006479,
+      "artifact_name": "regional-historical-BOA-2025-05-attempt-2",
+      "created_at": "2026-10-15T10:11:28Z",
+      "run_id": 38696867124,
+      "events": 47,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOA",
+      "month": "2025-06",
+      "status": "NO_USABLE_SHARD",
+      "attempts": [
+        {
+          "artifact": "regional-historical-BOA-2025-06-attempt-38807591465",
+          "error": "Command '['/opt/hostedtoolcache/Python/3.12.15/x64/bin/python', '-m', 'app.run_pipeline', '--since', '2025-06-01', '--until', '2025-06-30', '--sources', 'BOA', '--db', '/home/runner/work/spain_renewab",
+          "source_days_failed": null,
+          "quality": null
+        },
+        {
+          "artifact": "regional-historical-BOA-2025-06-attempt-38718611754",
+          "error": "Shard quality or source-day coverage incomplete",
+          "source_days_failed": 1,
+          "quality": {
+            "ERROR": 0,
+            "WARN": 4,
+            "INFO": 41
+          }
+        },
+        {
+          "artifact": "regional-historical-BOA-2025-06-attempt-2",
+          "error": "Shard quality or source-day coverage incomplete",
+          "source_days_failed": 1,
+          "quality": {
+            "ERROR": 0,
+            "WARN": 4,
+            "INFO": 41
+          }
+        },
+        {
+          "artifact": "regional-historical-BOA-2025-06-attempt-38717666379",
+          "error": "Shard quality or source-day coverage incomplete",
+          "source_days_failed": 1,
+          "quality": {
+            "ERROR": 0,
+            "WARN": 4,
+            "INFO": 41
+          }
+        },
+        {
+          "artifact": "regional-historical-BOA-2025-06-attempt-1",
+          "error": "Shard quality or source-day coverage incomplete",
+          "source_days_failed": 1,
+          "quality": {
+            "ERROR": 0,
+            "WARN": 4,
+            "INFO": 41
+          }
+        }
+      ]
+    },
+    {
+      "source": "BOA",
+      "month": "2025-07",
+      "artifact_id": 11964326581,
+      "artifact_name": "regional-historical-BOA-2025-07-attempt-2",
+      "created_at": "2026-10-15T10:14:19Z",
+      "run_id": 38696867124,
+      "events": 19,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOA",
+      "month": "2025-08",
+      "artifact_id": 11963323404,
+      "artifact_name": "regional-historical-BOA-2025-08-attempt-2",
+      "created_at": "2026-10-15T10:14:27Z",
+      "run_id": 38696867124,
+      "events": 23,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "038c929e50057be81a01",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "BOA",
+      "month": "2025-09",
+      "artifact_id": 11963627694,
+      "artifact_name": "regional-historical-BOA-2025-09-attempt-2",
+      "created_at": "2026-10-15T10:17:02Z",
+      "run_id": 38696867124,
+      "events": 27,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOA",
+      "month": "2025-10",
+      "artifact_id": 11964166794,
+      "artifact_name": "regional-historical-BOA-2025-10-attempt-2",
+      "created_at": "2026-10-15T10:17:29Z",
+      "run_id": 38696867124,
+      "events": 43,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "bdc55867f40658c4cb87",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "BOA",
+      "month": "2025-11",
+      "artifact_id": 11963922863,
+      "artifact_name": "regional-historical-BOA-2025-11-attempt-2",
+      "created_at": "2026-10-15T10:20:04Z",
+      "run_id": 38696867124,
+      "events": 32,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOA",
+      "month": "2025-12",
+      "artifact_id": 11964562221,
+      "artifact_name": "regional-historical-BOA-2025-12-attempt-2",
+      "created_at": "2026-10-15T10:20:39Z",
+      "run_id": 38696867124,
+      "events": 22,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOA",
+      "month": "2026-01",
+      "artifact_id": 11964780755,
+      "artifact_name": "regional-historical-BOA-2026-01-attempt-2",
+      "created_at": "2026-10-15T10:22:30Z",
+      "run_id": 38696867124,
+      "events": 7,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOA",
+      "month": "2026-02",
+      "artifact_id": 11963499448,
+      "artifact_name": "regional-historical-BOA-2026-02-attempt-2",
+      "created_at": "2026-10-15T10:23:37Z",
+      "run_id": 38696867124,
+      "events": 29,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOA",
+      "month": "2026-03",
+      "artifact_id": 11963668504,
+      "artifact_name": "regional-historical-BOA-2026-03-attempt-2",
+      "created_at": "2026-10-15T10:24:47Z",
+      "run_id": 38696867124,
+      "events": 26,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "dc1203d9cc39362181cb",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "BOA",
+      "month": "2026-04",
+      "artifact_id": 11964149219,
+      "artifact_name": "regional-historical-BOA-2026-04-attempt-2",
+      "created_at": "2026-10-15T10:26:53Z",
+      "run_id": 38696867124,
+      "events": 27,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOA",
+      "month": "2026-05",
+      "artifact_id": 11964438902,
+      "artifact_name": "regional-historical-BOA-2026-05-attempt-2",
+      "created_at": "2026-10-15T10:27:22Z",
+      "run_id": 38696867124,
+      "events": 19,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOA",
+      "month": "2026-06",
+      "artifact_id": 11964389229,
+      "artifact_name": "regional-historical-BOA-2026-06-attempt-2",
+      "created_at": "2026-10-15T10:29:22Z",
+      "run_id": 38696867124,
+      "events": 20,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOA",
+      "month": "2026-07",
+      "artifact_id": 11964845821,
+      "artifact_name": "regional-historical-BOA-2026-07-attempt-2",
+      "created_at": "2026-10-15T10:29:54Z",
+      "run_id": 38696867124,
+      "events": 28,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOA",
+      "month": "2026-08",
+      "artifact_id": 11965095492,
+      "artifact_name": "regional-historical-BOA-2026-08-attempt-2",
+      "created_at": "2026-10-15T10:31:48Z",
+      "run_id": 38696867124,
+      "events": 13,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOA",
+      "month": "2026-09",
+      "artifact_id": 11954741543,
+      "artifact_name": "regional-historical-BOA-2026-09-attempt-1",
+      "created_at": "2026-10-15T07:12:21Z",
+      "run_id": 38696867124,
+      "events": 20,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCM",
+      "month": "2024-10",
+      "artifact_id": 11954963892,
+      "artifact_name": "regional-historical-BOCM-2024-10-attempt-1",
+      "created_at": "2026-10-15T07:24:20Z",
+      "run_id": 38696867124,
+      "events": 4,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCM",
+      "month": "2024-11",
+      "artifact_id": 11966643651,
+      "artifact_name": "regional-historical-BOCM-2024-11-attempt-2",
+      "created_at": "2026-10-15T10:55:23Z",
+      "run_id": 38696867124,
+      "events": 0,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCM",
+      "month": "2024-12",
+      "artifact_id": 11967490420,
+      "artifact_name": "regional-historical-BOCM-2024-12-attempt-2",
+      "created_at": "2026-10-15T10:59:08Z",
+      "run_id": 38696867124,
+      "events": 4,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCM",
+      "month": "2025-01",
+      "artifact_id": 11966519660,
+      "artifact_name": "regional-historical-BOCM-2025-01-attempt-2",
+      "created_at": "2026-10-15T10:59:23Z",
+      "run_id": 38696867124,
+      "events": 6,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCM",
+      "month": "2025-02",
+      "artifact_id": 11967059958,
+      "artifact_name": "regional-historical-BOCM-2025-02-attempt-2",
+      "created_at": "2026-10-15T11:03:24Z",
+      "run_id": 38696867124,
+      "events": 3,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCM",
+      "month": "2025-03",
+      "artifact_id": 11967870299,
+      "artifact_name": "regional-historical-BOCM-2025-03-attempt-2",
+      "created_at": "2026-10-15T11:03:52Z",
+      "run_id": 38696867124,
+      "events": 4,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCM",
+      "month": "2025-04",
+      "artifact_id": 11968330614,
+      "artifact_name": "regional-historical-BOCM-2025-04-attempt-2",
+      "created_at": "2026-10-15T11:07:27Z",
+      "run_id": 38696867124,
+      "events": 9,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCM",
+      "month": "2025-05",
+      "artifact_id": 11967855977,
+      "artifact_name": "regional-historical-BOCM-2025-05-attempt-2",
+      "created_at": "2026-10-15T11:07:51Z",
+      "run_id": 38696867124,
+      "events": 7,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "a5755340250d4a996996",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "BOCM",
+      "month": "2025-06",
+      "artifact_id": 11968196526,
+      "artifact_name": "regional-historical-BOCM-2025-06-attempt-2",
+      "created_at": "2026-10-15T11:11:34Z",
+      "run_id": 38696867124,
+      "events": 3,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCM",
+      "month": "2025-07",
+      "artifact_id": 11968146618,
+      "artifact_name": "regional-historical-BOCM-2025-07-attempt-2",
+      "created_at": "2026-10-15T11:11:53Z",
+      "run_id": 38696867124,
+      "events": 7,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCM",
+      "month": "2025-08",
+      "artifact_id": 11968362197,
+      "artifact_name": "regional-historical-BOCM-2025-08-attempt-2",
+      "created_at": "2026-10-15T11:15:37Z",
+      "run_id": 38696867124,
+      "events": 7,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCM",
+      "month": "2025-09",
+      "artifact_id": 11968507222,
+      "artifact_name": "regional-historical-BOCM-2025-09-attempt-2",
+      "created_at": "2026-10-15T11:15:44Z",
+      "run_id": 38696867124,
+      "events": 7,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCM",
+      "month": "2025-10",
+      "artifact_id": 11967349079,
+      "artifact_name": "regional-historical-BOCM-2025-10-attempt-2",
+      "created_at": "2026-10-15T11:19:46Z",
+      "run_id": 38696867124,
+      "events": 10,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCM",
+      "month": "2025-11",
+      "artifact_id": 11968058164,
+      "artifact_name": "regional-historical-BOCM-2025-11-attempt-2",
+      "created_at": "2026-10-15T11:20:11Z",
+      "run_id": 38696867124,
+      "events": 13,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "a6d8bfc80e63a40071f3",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "BOCM",
+      "month": "2025-12",
+      "artifact_id": 11967968898,
+      "artifact_name": "regional-historical-BOCM-2025-12-attempt-2",
+      "created_at": "2026-10-15T11:23:47Z",
+      "run_id": 38696867124,
+      "events": 6,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCM",
+      "month": "2026-01",
+      "artifact_id": 11967824146,
+      "artifact_name": "regional-historical-BOCM-2026-01-attempt-2",
+      "created_at": "2026-10-15T11:24:15Z",
+      "run_id": 38696867124,
+      "events": 14,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCM",
+      "month": "2026-02",
+      "artifact_id": 11968294392,
+      "artifact_name": "regional-historical-BOCM-2026-02-attempt-2",
+      "created_at": "2026-10-15T11:27:40Z",
+      "run_id": 38696867124,
+      "events": 9,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCM",
+      "month": "2026-03",
+      "artifact_id": 11968484632,
+      "artifact_name": "regional-historical-BOCM-2026-03-attempt-2",
+      "created_at": "2026-10-15T11:28:56Z",
+      "run_id": 38696867124,
+      "events": 5,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "aca04468d491776e1291",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "8ee0c2bbe9edcd3bd99f",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "BOCM",
+      "month": "2026-04",
+      "artifact_id": 11969580388,
+      "artifact_name": "regional-historical-BOCM-2026-04-attempt-2",
+      "created_at": "2026-10-15T11:31:59Z",
+      "run_id": 38696867124,
+      "events": 8,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCM",
+      "month": "2026-05",
+      "artifact_id": 11969300715,
+      "artifact_name": "regional-historical-BOCM-2026-05-attempt-2",
+      "created_at": "2026-10-15T11:33:03Z",
+      "run_id": 38696867124,
+      "events": 8,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCM",
+      "month": "2026-06",
+      "artifact_id": 11969970796,
+      "artifact_name": "regional-historical-BOCM-2026-06-attempt-2",
+      "created_at": "2026-10-15T11:35:56Z",
+      "run_id": 38696867124,
+      "events": 8,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCM",
+      "month": "2026-07",
+      "artifact_id": 11969031735,
+      "artifact_name": "regional-historical-BOCM-2026-07-attempt-2",
+      "created_at": "2026-10-15T11:36:29Z",
+      "run_id": 38696867124,
+      "events": 6,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCM",
+      "month": "2026-08",
+      "artifact_id": 11969491740,
+      "artifact_name": "regional-historical-BOCM-2026-08-attempt-2",
+      "created_at": "2026-10-15T11:39:24Z",
+      "run_id": 38696867124,
+      "events": 13,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCM",
+      "month": "2026-09",
+      "artifact_id": 11955173965,
+      "artifact_name": "regional-historical-BOCM-2026-09-attempt-1",
+      "created_at": "2026-10-15T07:25:14Z",
+      "run_id": 38696867124,
+      "events": 2,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCYL",
+      "month": "2024-10",
+      "artifact_id": 11954526652,
+      "artifact_name": "regional-historical-BOCYL-2024-10-attempt-1",
+      "created_at": "2026-10-15T07:14:40Z",
+      "run_id": 38696867124,
+      "events": 37,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCYL",
+      "month": "2024-11",
+      "artifact_id": 11964627872,
+      "artifact_name": "regional-historical-BOCYL-2024-11-attempt-2",
+      "created_at": "2026-10-15T10:32:23Z",
+      "run_id": 38696867124,
+      "events": 49,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCYL",
+      "month": "2024-12",
+      "artifact_id": 11965230671,
+      "artifact_name": "regional-historical-BOCYL-2024-12-attempt-2",
+      "created_at": "2026-10-15T10:34:02Z",
+      "run_id": 38696867124,
+      "events": 39,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCYL",
+      "month": "2025-01",
+      "artifact_id": 11964916434,
+      "artifact_name": "regional-historical-BOCYL-2025-01-attempt-2",
+      "created_at": "2026-10-15T10:34:33Z",
+      "run_id": 38696867124,
+      "events": 25,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCYL",
+      "month": "2025-02",
+      "artifact_id": 11964946583,
+      "artifact_name": "regional-historical-BOCYL-2025-02-attempt-2",
+      "created_at": "2026-10-15T10:36:13Z",
+      "run_id": 38696867124,
+      "events": 22,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCYL",
+      "month": "2025-03",
+      "artifact_id": 11966915106,
+      "artifact_name": "regional-historical-BOCYL-2025-03-attempt-2",
+      "created_at": "2026-10-15T10:36:50Z",
+      "run_id": 38696867124,
+      "events": 38,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCYL",
+      "month": "2025-04",
+      "artifact_id": 11966945308,
+      "artifact_name": "regional-historical-BOCYL-2025-04-attempt-2",
+      "created_at": "2026-10-15T10:38:02Z",
+      "run_id": 38696867124,
+      "events": 28,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCYL",
+      "month": "2025-05",
+      "artifact_id": 11965582130,
+      "artifact_name": "regional-historical-BOCYL-2025-05-attempt-2",
+      "created_at": "2026-10-15T10:39:05Z",
+      "run_id": 38696867124,
+      "events": 36,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCYL",
+      "month": "2025-06",
+      "artifact_id": 11966895656,
+      "artifact_name": "regional-historical-BOCYL-2025-06-attempt-2",
+      "created_at": "2026-10-15T10:39:53Z",
+      "run_id": 38696867124,
+      "events": 13,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCYL",
+      "month": "2025-07",
+      "artifact_id": 11965902427,
+      "artifact_name": "regional-historical-BOCYL-2025-07-attempt-2",
+      "created_at": "2026-10-15T10:41:22Z",
+      "run_id": 38696867124,
+      "events": 21,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCYL",
+      "month": "2025-08",
+      "artifact_id": 11967006075,
+      "artifact_name": "regional-historical-BOCYL-2025-08-attempt-2",
+      "created_at": "2026-10-15T10:42:10Z",
+      "run_id": 38696867124,
+      "events": 39,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "0b2eb81cb602296683e2",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "BOCYL",
+      "month": "2025-09",
+      "artifact_id": 11965527899,
+      "artifact_name": "regional-historical-BOCYL-2025-09-attempt-2",
+      "created_at": "2026-10-15T10:43:21Z",
+      "run_id": 38696867124,
+      "events": 23,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "03c6f1ef23226545354c",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "BOCYL",
+      "month": "2025-10",
+      "artifact_id": 11965857931,
+      "artifact_name": "regional-historical-BOCYL-2025-10-attempt-2",
+      "created_at": "2026-10-15T10:44:33Z",
+      "run_id": 38696867124,
+      "events": 52,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "INVALID_POWER_MW",
+          "project_key": "55364dff0879ce0934ca",
+          "detail": "Potenza non valida: 0.0."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "BOCYL",
+      "month": "2025-11",
+      "artifact_id": 11967126541,
+      "artifact_name": "regional-historical-BOCYL-2025-11-attempt-2",
+      "created_at": "2026-10-15T10:45:18Z",
+      "run_id": 38696867124,
+      "events": 43,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCYL",
+      "month": "2025-12",
+      "artifact_id": 11966397172,
+      "artifact_name": "regional-historical-BOCYL-2025-12-attempt-2",
+      "created_at": "2026-10-15T10:46:46Z",
+      "run_id": 38696867124,
+      "events": 36,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "INVALID_POWER_MW",
+          "project_key": "a376a42bbf28f8d8c8e7",
+          "detail": "Potenza non valida: 0.0."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "BOCYL",
+      "month": "2026-01",
+      "artifact_id": 11965903458,
+      "artifact_name": "regional-historical-BOCYL-2026-01-attempt-2",
+      "created_at": "2026-10-15T10:47:10Z",
+      "run_id": 38696867124,
+      "events": 20,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "11d8a660eb88952c850b",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "BOCYL",
+      "month": "2026-02",
+      "artifact_id": 11967202016,
+      "artifact_name": "regional-historical-BOCYL-2026-02-attempt-2",
+      "created_at": "2026-10-15T10:48:43Z",
+      "run_id": 38696867124,
+      "events": 26,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCYL",
+      "month": "2026-03",
+      "artifact_id": 11966882426,
+      "artifact_name": "regional-historical-BOCYL-2026-03-attempt-2",
+      "created_at": "2026-10-15T10:49:18Z",
+      "run_id": 38696867124,
+      "events": 39,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCYL",
+      "month": "2026-04",
+      "artifact_id": 11965878975,
+      "artifact_name": "regional-historical-BOCYL-2026-04-attempt-2",
+      "created_at": "2026-10-15T10:50:43Z",
+      "run_id": 38696867124,
+      "events": 40,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCYL",
+      "month": "2026-05",
+      "artifact_id": 11965934156,
+      "artifact_name": "regional-historical-BOCYL-2026-05-attempt-2",
+      "created_at": "2026-10-15T10:51:24Z",
+      "run_id": 38696867124,
+      "events": 39,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCYL",
+      "month": "2026-06",
+      "artifact_id": 11965569515,
+      "artifact_name": "regional-historical-BOCYL-2026-06-attempt-2",
+      "created_at": "2026-10-15T10:52:44Z",
+      "run_id": 38696867124,
+      "events": 28,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCYL",
+      "month": "2026-07",
+      "artifact_id": 11966973030,
+      "artifact_name": "regional-historical-BOCYL-2026-07-attempt-2",
+      "created_at": "2026-10-15T10:53:03Z",
+      "run_id": 38696867124,
+      "events": 40,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCYL",
+      "month": "2026-08",
+      "artifact_id": 11966793514,
+      "artifact_name": "regional-historical-BOCYL-2026-08-attempt-2",
+      "created_at": "2026-10-15T10:54:46Z",
+      "run_id": 38696867124,
+      "events": 19,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOCYL",
+      "month": "2026-09",
+      "artifact_id": 11954976795,
+      "artifact_name": "regional-historical-BOCYL-2026-09-attempt-1",
+      "created_at": "2026-10-15T07:14:48Z",
+      "run_id": 38696867124,
+      "events": 37,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOE",
+      "month": "2024-10",
+      "artifact_id": 11969512950,
+      "artifact_name": "boe-historical-2024-10",
+      "created_at": "2026-10-15T11:45:31Z",
+      "run_id": 38729356413,
+      "events": 103,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOE",
+      "month": "2024-11",
+      "artifact_id": 11969488023,
+      "artifact_name": "boe-historical-2024-11",
+      "created_at": "2026-10-15T11:45:55Z",
+      "run_id": 38729356413,
+      "events": 66,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOE",
+      "month": "2024-12",
+      "artifact_id": 11969088447,
+      "artifact_name": "boe-historical-2024-12",
+      "created_at": "2026-10-15T11:47:38Z",
+      "run_id": 38729356413,
+      "events": 111,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOE",
+      "month": "2025-01",
+      "artifact_id": 11969673315,
+      "artifact_name": "boe-historical-2025-01",
+      "created_at": "2026-10-15T11:48:22Z",
+      "run_id": 38729356413,
+      "events": 56,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOE",
+      "month": "2025-02",
+      "artifact_id": 11968804065,
+      "artifact_name": "boe-historical-2025-02",
+      "created_at": "2026-10-15T11:49:35Z",
+      "run_id": 38729356413,
+      "events": 57,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOE",
+      "month": "2025-03",
+      "artifact_id": 11969763764,
+      "artifact_name": "boe-historical-2025-03",
+      "created_at": "2026-10-15T11:50:57Z",
+      "run_id": 38729356413,
+      "events": 68,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOE",
+      "month": "2025-04",
+      "artifact_id": 11969584108,
+      "artifact_name": "boe-historical-2025-04",
+      "created_at": "2026-10-15T11:51:35Z",
+      "run_id": 38729356413,
+      "events": 41,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOE",
+      "month": "2025-05",
+      "artifact_id": 11968779938,
+      "artifact_name": "boe-historical-2025-05",
+      "created_at": "2026-10-15T11:53:30Z",
+      "run_id": 38729356413,
+      "events": 58,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOE",
+      "month": "2025-06",
+      "artifact_id": 11969959164,
+      "artifact_name": "boe-historical-2025-06",
+      "created_at": "2026-10-15T11:53:45Z",
+      "run_id": 38729356413,
+      "events": 78,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOE",
+      "month": "2025-07",
+      "artifact_id": 11970630019,
+      "artifact_name": "boe-historical-2025-07",
+      "created_at": "2026-10-15T11:56:00Z",
+      "run_id": 38729356413,
+      "events": 83,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOE",
+      "month": "2025-08",
+      "artifact_id": 11970004671,
+      "artifact_name": "boe-historical-2025-08",
+      "created_at": "2026-10-15T11:55:51Z",
+      "run_id": 38729356413,
+      "events": 58,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOE",
+      "month": "2025-09",
+      "artifact_id": 11970059794,
+      "artifact_name": "boe-historical-2025-09",
+      "created_at": "2026-10-15T11:57:57Z",
+      "run_id": 38729356413,
+      "events": 66,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOE",
+      "month": "2025-10",
+      "artifact_id": 11970935344,
+      "artifact_name": "boe-historical-2025-10",
+      "created_at": "2026-10-15T11:58:12Z",
+      "run_id": 38729356413,
+      "events": 60,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOE",
+      "month": "2025-11",
+      "artifact_id": 11970525941,
+      "artifact_name": "boe-historical-2025-11",
+      "created_at": "2026-10-15T12:00:33Z",
+      "run_id": 38729356413,
+      "events": 64,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOE",
+      "month": "2025-12",
+      "artifact_id": 11970485800,
+      "artifact_name": "boe-historical-2025-12",
+      "created_at": "2026-10-15T12:00:14Z",
+      "run_id": 38729356413,
+      "events": 56,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOE",
+      "month": "2026-01",
+      "artifact_id": 11970476298,
+      "artifact_name": "boe-historical-2026-01",
+      "created_at": "2026-10-15T12:02:32Z",
+      "run_id": 38729356413,
+      "events": 30,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOE",
+      "month": "2026-02",
+      "artifact_id": 11970906076,
+      "artifact_name": "boe-historical-2026-02",
+      "created_at": "2026-10-15T12:03:10Z",
+      "run_id": 38729356413,
+      "events": 81,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOE",
+      "month": "2026-03",
+      "artifact_id": 11971500998,
+      "artifact_name": "boe-historical-2026-03",
+      "created_at": "2026-10-15T12:04:51Z",
+      "run_id": 38729356413,
+      "events": 48,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOE",
+      "month": "2026-04",
+      "artifact_id": 11970866607,
+      "artifact_name": "boe-historical-2026-04",
+      "created_at": "2026-10-15T12:05:22Z",
+      "run_id": 38729356413,
+      "events": 54,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOE",
+      "month": "2026-05",
+      "artifact_id": 11970986843,
+      "artifact_name": "boe-historical-2026-05",
+      "created_at": "2026-10-15T12:07:03Z",
+      "run_id": 38729356413,
+      "events": 51,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOE",
+      "month": "2026-06",
+      "artifact_id": 11971072109,
+      "artifact_name": "boe-historical-2026-06",
+      "created_at": "2026-10-15T12:07:42Z",
+      "run_id": 38729356413,
+      "events": 72,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOE",
+      "month": "2026-07",
+      "artifact_id": 11970152430,
+      "artifact_name": "boe-historical-2026-07",
+      "created_at": "2026-10-15T12:09:02Z",
+      "run_id": 38729356413,
+      "events": 45,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOE",
+      "month": "2026-08",
+      "artifact_id": 11971007564,
+      "artifact_name": "boe-historical-2026-08",
+      "created_at": "2026-10-15T12:10:07Z",
+      "run_id": 38729356413,
+      "events": 51,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOE",
+      "month": "2026-09",
+      "artifact_id": 11970742867,
+      "artifact_name": "boe-historical-2026-09",
+      "created_at": "2026-10-15T12:11:15Z",
+      "run_id": 38729356413,
+      "events": 38,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOJA",
+      "month": "2024-10",
+      "artifact_id": 11740685033,
+      "artifact_name": "boja-historical-2024-10",
+      "created_at": "2026-10-12T10:15:03Z",
+      "run_id": 38234843557,
+      "events": 7,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOJA",
+      "month": "2024-11",
+      "artifact_id": 11964036747,
+      "artifact_name": "regional-historical-BOJA-2024-11-attempt-38718622911",
+      "created_at": "2026-10-15T10:15:42Z",
+      "run_id": 38718622911,
+      "events": 6,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [],
+      "restricted_bodies": 3
+    },
+    {
+      "source": "BOJA",
+      "month": "2024-12",
+      "artifact_id": 11962589446,
+      "artifact_name": "boja-historical-2024-12-attempt-2",
+      "created_at": "2026-10-15T09:59:42Z",
+      "run_id": 38698193489,
+      "events": 8,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [],
+      "restricted_bodies": 6
+    },
+    {
+      "source": "BOJA",
+      "month": "2025-01",
+      "artifact_id": 11962549762,
+      "artifact_name": "boja-historical-2025-01-attempt-2",
+      "created_at": "2026-10-15T09:59:41Z",
+      "run_id": 38698193489,
+      "events": 10,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [],
+      "restricted_bodies": 5
+    },
+    {
+      "source": "BOJA",
+      "month": "2025-02",
+      "artifact_id": 11963435704,
+      "artifact_name": "boja-historical-2025-02-attempt-2",
+      "created_at": "2026-10-15T10:02:36Z",
+      "run_id": 38698193489,
+      "events": 5,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "81fbe6faa58ea84f7138",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "BOJA",
+      "month": "2025-03",
+      "artifact_id": 11962889518,
+      "artifact_name": "boja-historical-2025-03-attempt-2",
+      "created_at": "2026-10-15T10:02:46Z",
+      "run_id": 38698193489,
+      "events": 4,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "7354be21f56310bdfc5d",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 1
+    },
+    {
+      "source": "BOJA",
+      "month": "2025-04",
+      "artifact_id": 11963611010,
+      "artifact_name": "boja-historical-2025-04-attempt-2",
+      "created_at": "2026-10-15T10:06:08Z",
+      "run_id": 38698193489,
+      "events": 1,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [],
+      "restricted_bodies": 4
+    },
+    {
+      "source": "BOJA",
+      "month": "2025-05",
+      "artifact_id": 11964340322,
+      "artifact_name": "boja-historical-2025-05-attempt-2",
+      "created_at": "2026-10-15T10:06:47Z",
+      "run_id": 38698193489,
+      "events": 4,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "721faeef890a14406be1",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 4
+    },
+    {
+      "source": "BOJA",
+      "month": "2025-06",
+      "artifact_id": 11964157062,
+      "artifact_name": "regional-historical-BOJA-2025-06-attempt-38718622911",
+      "created_at": "2026-10-15T10:15:23Z",
+      "run_id": 38718622911,
+      "events": 4,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [],
+      "restricted_bodies": 3
+    },
+    {
+      "source": "BOJA",
+      "month": "2025-07",
+      "artifact_id": 11964110668,
+      "artifact_name": "boja-historical-2025-07-attempt-2",
+      "created_at": "2026-10-15T10:09:21Z",
+      "run_id": 38698193489,
+      "events": 6,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "9173441d653b323249f3",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "BOJA",
+      "month": "2025-08",
+      "artifact_id": 11964036150,
+      "artifact_name": "boja-historical-2025-08-attempt-2",
+      "created_at": "2026-10-15T10:11:44Z",
+      "run_id": 38698193489,
+      "events": 4,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [],
+      "restricted_bodies": 2
+    },
+    {
+      "source": "BOJA",
+      "month": "2025-09",
+      "artifact_id": 11964081548,
+      "artifact_name": "boja-historical-2025-09-attempt-2",
+      "created_at": "2026-10-15T10:12:06Z",
+      "run_id": 38698193489,
+      "events": 3,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [],
+      "restricted_bodies": 2
+    },
+    {
+      "source": "BOJA",
+      "month": "2025-10",
+      "artifact_id": 11956472536,
+      "artifact_name": "boja-historical-2025-10-attempt-1",
+      "created_at": "2026-10-15T07:52:07Z",
+      "run_id": 38698193489,
+      "events": 1,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOJA",
+      "month": "2025-11",
+      "artifact_id": 11964226693,
+      "artifact_name": "boja-historical-2025-11-attempt-2",
+      "created_at": "2026-10-15T10:14:03Z",
+      "run_id": 38698193489,
+      "events": 1,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [],
+      "restricted_bodies": 2
+    },
+    {
+      "source": "BOJA",
+      "month": "2025-12",
+      "artifact_id": 11963392973,
+      "artifact_name": "boja-historical-2025-12-attempt-2",
+      "created_at": "2026-10-15T10:14:30Z",
+      "run_id": 38698193489,
+      "events": 1,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [],
+      "restricted_bodies": 1
+    },
+    {
+      "source": "BOJA",
+      "month": "2026-01",
+      "artifact_id": 11963647908,
+      "artifact_name": "boja-historical-2026-01-attempt-2",
+      "created_at": "2026-10-15T10:16:32Z",
+      "run_id": 38698193489,
+      "events": 2,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "bb35f890cdfe87ab87d9",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 1
+    },
+    {
+      "source": "BOJA",
+      "month": "2026-02",
+      "artifact_id": 11741481891,
+      "artifact_name": "boja-historical-2026-02",
+      "created_at": "2026-10-12T10:35:22Z",
+      "run_id": 38234843557,
+      "events": 7,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOJA",
+      "month": "2026-03",
+      "artifact_id": 11741811056,
+      "artifact_name": "boja-historical-2026-03",
+      "created_at": "2026-10-12T10:36:14Z",
+      "run_id": 38234843557,
+      "events": 3,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOJA",
+      "month": "2026-04",
+      "artifact_id": 11956738324,
+      "artifact_name": "boja-historical-2026-04-attempt-1",
+      "created_at": "2026-10-15T08:00:03Z",
+      "run_id": 38698193489,
+      "events": 2,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOJA",
+      "month": "2026-05",
+      "artifact_id": 11956354390,
+      "artifact_name": "boja-historical-2026-05-attempt-1",
+      "created_at": "2026-10-15T08:01:03Z",
+      "run_id": 38698193489,
+      "events": 7,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOJA",
+      "month": "2026-06",
+      "artifact_id": 11964557111,
+      "artifact_name": "boja-historical-2026-06-attempt-2",
+      "created_at": "2026-10-15T10:20:15Z",
+      "run_id": 38698193489,
+      "events": 4,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "d561daa443c92a15cfbe",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "bbc33aff1b8a68f3fef4",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "BOJA",
+      "month": "2026-07",
+      "artifact_id": 11957281417,
+      "artifact_name": "boja-historical-2026-07-attempt-1",
+      "created_at": "2026-10-15T08:03:37Z",
+      "run_id": 38698193489,
+      "events": 7,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOJA",
+      "month": "2026-08",
+      "artifact_id": 11957221776,
+      "artifact_name": "boja-historical-2026-08-attempt-1",
+      "created_at": "2026-10-15T08:05:03Z",
+      "run_id": 38698193489,
+      "events": 2,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BOJA",
+      "month": "2026-09",
+      "artifact_id": 11956897609,
+      "artifact_name": "boja-historical-2026-09-attempt-1",
+      "created_at": "2026-10-15T08:06:17Z",
+      "run_id": 38698193489,
+      "events": 9,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BORM",
+      "month": "2024-10",
+      "status": "NO_USABLE_SHARD",
+      "attempts": [
+        {
+          "artifact": "regional-historical-BORM-2024-10-attempt-38718417023",
+          "error": "BORM_DAILY_REST_DID_NOT_COVER_REQUESTED_HISTORICAL_MONTH",
+          "source_days_failed": 30,
+          "quality": {
+            "ERROR": 0,
+            "WARN": 0,
+            "INFO": 0
+          }
+        },
+        {
+          "artifact": "regional-historical-BORM-2024-10-attempt-2",
+          "error": "BORM_CURRENT_ANNUAL_INDEX_DOES_NOT_COVER_REQUESTED_HISTORICAL_MONTH",
+          "source_days_failed": 0,
+          "quality": {
+            "ERROR": 0,
+            "WARN": 0,
+            "INFO": 0
+          }
+        },
+        {
+          "artifact": "regional-historical-BORM-2024-10-attempt-1",
+          "error": "BORM_CURRENT_ANNUAL_INDEX_DOES_NOT_COVER_REQUESTED_HISTORICAL_MONTH",
+          "source_days_failed": 0,
+          "quality": {
+            "ERROR": 0,
+            "WARN": 0,
+            "INFO": 0
+          }
+        }
+      ]
+    },
+    {
+      "source": "BORM",
+      "month": "2025-06",
+      "status": "NO_USABLE_SHARD",
+      "attempts": [
+        {
+          "artifact": "regional-historical-BORM-2025-06-attempt-38718417023",
+          "error": "BORM_DAILY_REST_DID_NOT_COVER_REQUESTED_HISTORICAL_MONTH",
+          "source_days_failed": 29,
+          "quality": {
+            "ERROR": 0,
+            "WARN": 0,
+            "INFO": 0
+          }
+        }
+      ]
+    },
+    {
+      "source": "BORM",
+      "month": "2026-01",
+      "status": "NO_USABLE_SHARD",
+      "attempts": [
+        {
+          "artifact": "regional-historical-BORM-2026-01-attempt-38717666379",
+          "error": "BORM_CURRENT_ANNUAL_INDEX_DOES_NOT_COVER_REQUESTED_HISTORICAL_MONTH",
+          "source_days_failed": 0,
+          "quality": {
+            "ERROR": 0,
+            "WARN": 4,
+            "INFO": 14
+          }
+        }
+      ]
+    },
+    {
+      "source": "BORM",
+      "month": "2026-02",
+      "artifact_id": 11966775992,
+      "artifact_name": "regional-historical-BORM-2026-02-attempt-38717666379",
+      "created_at": "2026-10-15T10:41:27Z",
+      "run_id": 38717666379,
+      "events": 3,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "cf8ddae29a1491a5fd2e",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "BORM",
+      "month": "2026-03",
+      "artifact_id": 11966751139,
+      "artifact_name": "regional-historical-BORM-2026-03-attempt-38717666379",
+      "created_at": "2026-10-15T10:42:00Z",
+      "run_id": 38717666379,
+      "events": 1,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BORM",
+      "month": "2026-04",
+      "artifact_id": 11966077445,
+      "artifact_name": "regional-historical-BORM-2026-04-attempt-38717666379",
+      "created_at": "2026-10-15T10:42:32Z",
+      "run_id": 38717666379,
+      "events": 7,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BORM",
+      "month": "2026-05",
+      "artifact_id": 11966861159,
+      "artifact_name": "regional-historical-BORM-2026-05-attempt-38717666379",
+      "created_at": "2026-10-15T10:42:25Z",
+      "run_id": 38717666379,
+      "events": 8,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BORM",
+      "month": "2026-06",
+      "artifact_id": 11965587862,
+      "artifact_name": "regional-historical-BORM-2026-06-attempt-38717666379",
+      "created_at": "2026-10-15T10:43:45Z",
+      "run_id": 38717666379,
+      "events": 3,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BORM",
+      "month": "2026-07",
+      "artifact_id": 11965782843,
+      "artifact_name": "regional-historical-BORM-2026-07-attempt-38717666379",
+      "created_at": "2026-10-15T10:44:13Z",
+      "run_id": 38717666379,
+      "events": 3,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BORM",
+      "month": "2026-08",
+      "artifact_id": 11966087524,
+      "artifact_name": "regional-historical-BORM-2026-08-attempt-38717666379",
+      "created_at": "2026-10-15T10:42:45Z",
+      "run_id": 38717666379,
+      "events": 0,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "BORM",
+      "month": "2026-09",
+      "artifact_id": 11955093237,
+      "artifact_name": "regional-historical-BORM-2026-09-attempt-1",
+      "created_at": "2026-10-15T07:21:59Z",
+      "run_id": 38696867124,
+      "events": 7,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOCM",
+      "month": "2024-10",
+      "artifact_id": 11964331961,
+      "artifact_name": "regional-historical-DOCM-2024-10-attempt-38717666379",
+      "created_at": "2026-10-15T10:15:57Z",
+      "run_id": 38717666379,
+      "events": 25,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "dc026f92e51bfe29400e",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOCM",
+      "month": "2024-11",
+      "artifact_id": 11963537873,
+      "artifact_name": "regional-historical-DOCM-2024-11-attempt-38717666379",
+      "created_at": "2026-10-15T10:17:04Z",
+      "run_id": 38717666379,
+      "events": 32,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "710741447c3f940d4108",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOCM",
+      "month": "2024-12",
+      "artifact_id": 11963652745,
+      "artifact_name": "regional-historical-DOCM-2024-12-attempt-38717666379",
+      "created_at": "2026-10-15T10:17:24Z",
+      "run_id": 38717666379,
+      "events": 28,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "b2ef69195401408b7967",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "aee5a9dc0ce8ded0e3bb",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOCM",
+      "month": "2025-01",
+      "artifact_id": 11964032839,
+      "artifact_name": "regional-historical-DOCM-2025-01-attempt-38717666379",
+      "created_at": "2026-10-15T10:18:26Z",
+      "run_id": 38717666379,
+      "events": 21,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOCM",
+      "month": "2025-02",
+      "artifact_id": 11964591493,
+      "artifact_name": "regional-historical-DOCM-2025-02-attempt-38717666379",
+      "created_at": "2026-10-15T10:18:36Z",
+      "run_id": 38717666379,
+      "events": 41,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "07ac055e015867ba1d37",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "dcf8007ea8b05296ac99",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "dfe18138a0e438906466",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOCM",
+      "month": "2025-03",
+      "artifact_id": 11964780171,
+      "artifact_name": "regional-historical-DOCM-2025-03-attempt-38717666379",
+      "created_at": "2026-10-15T10:19:06Z",
+      "run_id": 38717666379,
+      "events": 44,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "ab7396d8f8d1bb9f5b5b",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOCM",
+      "month": "2025-04",
+      "artifact_id": 11963513746,
+      "artifact_name": "regional-historical-DOCM-2025-04-attempt-38717666379",
+      "created_at": "2026-10-15T10:19:45Z",
+      "run_id": 38717666379,
+      "events": 37,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "855e55f19bb9bf413f60",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "1abf2f49bd9353053e64",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "51eea674d5ff5f391dfb",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "6e469c011b7554c6f181",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "1c22b17433dfe4bba54a",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOCM",
+      "month": "2025-05",
+      "artifact_id": 11963548729,
+      "artifact_name": "regional-historical-DOCM-2025-05-attempt-38717666379",
+      "created_at": "2026-10-15T10:20:51Z",
+      "run_id": 38717666379,
+      "events": 44,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "f92b6556a9f9bc151a46",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "d96ab056b9dcb4472366",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "e9cb6284d61da5c4883d",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "1abf2f49bd9353053e64",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOCM",
+      "month": "2025-06",
+      "artifact_id": 11964127349,
+      "artifact_name": "regional-historical-DOCM-2025-06-attempt-38717666379",
+      "created_at": "2026-10-15T10:20:34Z",
+      "run_id": 38717666379,
+      "events": 45,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "64236b8b409a5568aa7d",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "a3811957b63a11e842db",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "09de5eccf91bbf29c5fc",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "33342e9345961758f320",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "07f2e66251ae1e256d32",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOCM",
+      "month": "2025-07",
+      "artifact_id": 11964158123,
+      "artifact_name": "regional-historical-DOCM-2025-07-attempt-38717666379",
+      "created_at": "2026-10-15T10:21:20Z",
+      "run_id": 38717666379,
+      "events": 26,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "45c987ca6f651842af54",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "2886b8567f30f7db6847",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "9a3de4e562ce372dab66",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOCM",
+      "month": "2025-08",
+      "artifact_id": 11963394367,
+      "artifact_name": "regional-historical-DOCM-2025-08-attempt-38717666379",
+      "created_at": "2026-10-15T10:21:59Z",
+      "run_id": 38717666379,
+      "events": 9,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "93e442e2d5454f206bfb",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOCM",
+      "month": "2025-09",
+      "artifact_id": 11964103461,
+      "artifact_name": "regional-historical-DOCM-2025-09-attempt-38717666379",
+      "created_at": "2026-10-15T10:22:48Z",
+      "run_id": 38717666379,
+      "events": 25,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "51eea674d5ff5f391dfb",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOCM",
+      "month": "2025-10",
+      "artifact_id": 11963668269,
+      "artifact_name": "regional-historical-DOCM-2025-10-attempt-38717666379",
+      "created_at": "2026-10-15T10:23:16Z",
+      "run_id": 38717666379,
+      "events": 31,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "b488ed352d7ef6ffffa3",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOCM",
+      "month": "2025-11",
+      "artifact_id": 11964750307,
+      "artifact_name": "regional-historical-DOCM-2025-11-attempt-38717666379",
+      "created_at": "2026-10-15T10:23:46Z",
+      "run_id": 38717666379,
+      "events": 24,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOCM",
+      "month": "2025-12",
+      "artifact_id": 11963863923,
+      "artifact_name": "regional-historical-DOCM-2025-12-attempt-38717666379",
+      "created_at": "2026-10-15T10:24:18Z",
+      "run_id": 38717666379,
+      "events": 24,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOCM",
+      "month": "2026-01",
+      "artifact_id": 11963984070,
+      "artifact_name": "regional-historical-DOCM-2026-01-attempt-38717666379",
+      "created_at": "2026-10-15T10:25:06Z",
+      "run_id": 38717666379,
+      "events": 14,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "8711f57128de203e1787",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "5f7156b97472aef447ab",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "024efec2795672b2524a",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOCM",
+      "month": "2026-02",
+      "artifact_id": 11963569294,
+      "artifact_name": "regional-historical-DOCM-2026-02-attempt-38717666379",
+      "created_at": "2026-10-15T10:25:31Z",
+      "run_id": 38717666379,
+      "events": 20,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "9ccd949cf4a6d6eb8718",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "bdf8cffa73b42e9f68d6",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "36ddffd98e5f1208725b",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "019a08c935baf0edc8ea",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOCM",
+      "month": "2026-03",
+      "artifact_id": 11964258942,
+      "artifact_name": "regional-historical-DOCM-2026-03-attempt-38717666379",
+      "created_at": "2026-10-15T10:26:04Z",
+      "run_id": 38717666379,
+      "events": 28,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "de2bd15507b5481ee51f",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOCM",
+      "month": "2026-04",
+      "artifact_id": 11963993339,
+      "artifact_name": "regional-historical-DOCM-2026-04-attempt-38717666379",
+      "created_at": "2026-10-15T10:26:04Z",
+      "run_id": 38717666379,
+      "events": 19,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "aea21e8250ff82ab6510",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "8298ff9ea23f93996962",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOCM",
+      "month": "2026-05",
+      "artifact_id": 11963659362,
+      "artifact_name": "regional-historical-DOCM-2026-05-attempt-38717666379",
+      "created_at": "2026-10-15T10:27:02Z",
+      "run_id": 38717666379,
+      "events": 34,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "152bfcb70254400271a3",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOCM",
+      "month": "2026-06",
+      "artifact_id": 11963684890,
+      "artifact_name": "regional-historical-DOCM-2026-06-attempt-38717666379",
+      "created_at": "2026-10-15T10:27:55Z",
+      "run_id": 38717666379,
+      "events": 71,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "adb50287affc2afeb377",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "a783b86292360c080afb",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOCM",
+      "month": "2026-07",
+      "artifact_id": 11965820091,
+      "artifact_name": "regional-historical-DOCM-2026-07-attempt-38717666379",
+      "created_at": "2026-10-15T10:27:51Z",
+      "run_id": 38717666379,
+      "events": 19,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOCM",
+      "month": "2026-08",
+      "artifact_id": 11963704991,
+      "artifact_name": "regional-historical-DOCM-2026-08-attempt-38717666379",
+      "created_at": "2026-10-15T10:28:36Z",
+      "run_id": 38717666379,
+      "events": 28,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "4fc6997f5456f829ccf0",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "91a6c43c1fc77c6f08cb",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "8b7823e4e4b7e8e435c3",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOCM",
+      "month": "2026-09",
+      "artifact_id": 11955007281,
+      "artifact_name": "regional-historical-DOCM-2026-09-attempt-1",
+      "created_at": "2026-10-15T07:17:07Z",
+      "run_id": 38696867124,
+      "events": 19,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOE",
+      "month": "2024-10",
+      "artifact_id": 11964840764,
+      "artifact_name": "regional-historical-DOE-2024-10-attempt-38717666379",
+      "created_at": "2026-10-15T10:29:05Z",
+      "run_id": 38717666379,
+      "events": 10,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOE",
+      "month": "2024-11",
+      "artifact_id": 11963959991,
+      "artifact_name": "regional-historical-DOE-2024-11-attempt-38717666379",
+      "created_at": "2026-10-15T10:29:32Z",
+      "run_id": 38717666379,
+      "events": 4,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOE",
+      "month": "2024-12",
+      "artifact_id": 11963979729,
+      "artifact_name": "regional-historical-DOE-2024-12-attempt-38717666379",
+      "created_at": "2026-10-15T10:29:59Z",
+      "run_id": 38717666379,
+      "events": 9,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOE",
+      "month": "2025-01",
+      "artifact_id": 11964259665,
+      "artifact_name": "regional-historical-DOE-2025-01-attempt-38717666379",
+      "created_at": "2026-10-15T10:30:16Z",
+      "run_id": 38717666379,
+      "events": 13,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "7ab3c05c05c2330fe573",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "489ddd8d3ac41a278498",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOE",
+      "month": "2025-02",
+      "artifact_id": 11966135475,
+      "artifact_name": "regional-historical-DOE-2025-02-attempt-38717666379",
+      "created_at": "2026-10-15T10:31:08Z",
+      "run_id": 38717666379,
+      "events": 11,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOE",
+      "month": "2025-03",
+      "artifact_id": 11966025631,
+      "artifact_name": "regional-historical-DOE-2025-03-attempt-38717666379",
+      "created_at": "2026-10-15T10:31:38Z",
+      "run_id": 38717666379,
+      "events": 3,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOE",
+      "month": "2025-04",
+      "artifact_id": 11965835795,
+      "artifact_name": "regional-historical-DOE-2025-04-attempt-38717666379",
+      "created_at": "2026-10-15T10:32:00Z",
+      "run_id": 38717666379,
+      "events": 5,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "b6f7c008d43c58e120d1",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOE",
+      "month": "2025-05",
+      "artifact_id": 11964564240,
+      "artifact_name": "regional-historical-DOE-2025-05-attempt-38717666379",
+      "created_at": "2026-10-15T10:31:56Z",
+      "run_id": 38717666379,
+      "events": 20,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "227de9a01dd98bfb510e",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOE",
+      "month": "2025-06",
+      "artifact_id": 11964657852,
+      "artifact_name": "regional-historical-DOE-2025-06-attempt-38717666379",
+      "created_at": "2026-10-15T10:33:12Z",
+      "run_id": 38717666379,
+      "events": 12,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "1d8f5347fd5659753729",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "5906859d05fb7612e503",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOE",
+      "month": "2025-07",
+      "artifact_id": 11964717502,
+      "artifact_name": "regional-historical-DOE-2025-07-attempt-38717666379",
+      "created_at": "2026-10-15T10:33:51Z",
+      "run_id": 38717666379,
+      "events": 18,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "fae67dde6506b3c80df4",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "ae3049d8685a5be20e6a",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOE",
+      "month": "2025-08",
+      "artifact_id": 11965566220,
+      "artifact_name": "regional-historical-DOE-2025-08-attempt-38717666379",
+      "created_at": "2026-10-15T10:33:42Z",
+      "run_id": 38717666379,
+      "events": 5,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "80e1f55b15b52e906ac4",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOE",
+      "month": "2025-09",
+      "artifact_id": 11965881050,
+      "artifact_name": "regional-historical-DOE-2025-09-attempt-38717666379",
+      "created_at": "2026-10-15T10:33:44Z",
+      "run_id": 38717666379,
+      "events": 5,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "fae67dde6506b3c80df4",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "da155dc493a0e7ef3d0e",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "950dd264d2a6c881e747",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "7ee68872952373dbeab2",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOE",
+      "month": "2025-10",
+      "artifact_id": 11964817091,
+      "artifact_name": "regional-historical-DOE-2025-10-attempt-38717666379",
+      "created_at": "2026-10-15T10:35:24Z",
+      "run_id": 38717666379,
+      "events": 5,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "38ff08fdd02beab0432c",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOE",
+      "month": "2025-11",
+      "artifact_id": 11964896878,
+      "artifact_name": "regional-historical-DOE-2025-11-attempt-38717666379",
+      "created_at": "2026-10-15T10:35:51Z",
+      "run_id": 38717666379,
+      "events": 11,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "674182105d5d350cece7",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOE",
+      "month": "2025-12",
+      "artifact_id": 11964861954,
+      "artifact_name": "regional-historical-DOE-2025-12-attempt-38717666379",
+      "created_at": "2026-10-15T10:35:53Z",
+      "run_id": 38717666379,
+      "events": 13,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "2795c2cc4b73f1c2b039",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "783388ba72c4686bb573",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "a8f9288cc6388a1744e8",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOE",
+      "month": "2026-01",
+      "artifact_id": 11965851395,
+      "artifact_name": "regional-historical-DOE-2026-01-attempt-38717666379",
+      "created_at": "2026-10-15T10:35:36Z",
+      "run_id": 38717666379,
+      "events": 13,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "40885b6e5c2331b8b584",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "dc9a0fd9d958ee1760d9",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOE",
+      "month": "2026-02",
+      "artifact_id": 11965721798,
+      "artifact_name": "regional-historical-DOE-2026-02-attempt-38717666379",
+      "created_at": "2026-10-15T10:37:05Z",
+      "run_id": 38717666379,
+      "events": 7,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "45a0dcf3680cd632c0c7",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOE",
+      "month": "2026-03",
+      "artifact_id": 11966905277,
+      "artifact_name": "regional-historical-DOE-2026-03-attempt-38717666379",
+      "created_at": "2026-10-15T10:37:44Z",
+      "run_id": 38717666379,
+      "events": 11,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOE",
+      "month": "2026-04",
+      "artifact_id": 11966700448,
+      "artifact_name": "regional-historical-DOE-2026-04-attempt-38717666379",
+      "created_at": "2026-10-15T10:38:03Z",
+      "run_id": 38717666379,
+      "events": 15,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "69a7a3201b21c7b8fed3",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOE",
+      "month": "2026-05",
+      "artifact_id": 11966695439,
+      "artifact_name": "regional-historical-DOE-2026-05-attempt-38717666379",
+      "created_at": "2026-10-15T10:37:59Z",
+      "run_id": 38717666379,
+      "events": 3,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOE",
+      "month": "2026-06",
+      "artifact_id": 11966965546,
+      "artifact_name": "regional-historical-DOE-2026-06-attempt-38717666379",
+      "created_at": "2026-10-15T10:39:11Z",
+      "run_id": 38717666379,
+      "events": 6,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOE",
+      "month": "2026-07",
+      "artifact_id": 11965702216,
+      "artifact_name": "regional-historical-DOE-2026-07-attempt-38717666379",
+      "created_at": "2026-10-15T10:39:48Z",
+      "run_id": 38717666379,
+      "events": 1,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOE",
+      "month": "2026-08",
+      "artifact_id": 11966835818,
+      "artifact_name": "regional-historical-DOE-2026-08-attempt-38717666379",
+      "created_at": "2026-10-15T10:40:14Z",
+      "run_id": 38717666379,
+      "events": 18,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOE",
+      "month": "2026-09",
+      "artifact_id": 11954748236,
+      "artifact_name": "regional-historical-DOE-2026-09-attempt-1",
+      "created_at": "2026-10-15T07:19:40Z",
+      "run_id": 38696867124,
+      "events": 7,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOG",
+      "month": "2024-10",
+      "artifact_id": 11955388382,
+      "artifact_name": "regional-historical-DOG-2024-10-attempt-1",
+      "created_at": "2026-10-15T07:26:50Z",
+      "run_id": 38696867124,
+      "events": 2,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOG",
+      "month": "2024-11",
+      "artifact_id": 11969211981,
+      "artifact_name": "regional-historical-DOG-2024-11-attempt-2",
+      "created_at": "2026-10-15T11:38:49Z",
+      "run_id": 38696867124,
+      "events": 4,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOG",
+      "month": "2024-12",
+      "artifact_id": 11969926591,
+      "artifact_name": "regional-historical-DOG-2024-12-attempt-2",
+      "created_at": "2026-10-15T11:39:19Z",
+      "run_id": 38696867124,
+      "events": 0,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOG",
+      "month": "2025-01",
+      "artifact_id": 11969671969,
+      "artifact_name": "regional-historical-DOG-2025-01-attempt-2",
+      "created_at": "2026-10-15T11:41:33Z",
+      "run_id": 38696867124,
+      "events": 2,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOG",
+      "month": "2025-02",
+      "artifact_id": 11969312258,
+      "artifact_name": "regional-historical-DOG-2025-02-attempt-2",
+      "created_at": "2026-10-15T11:41:25Z",
+      "run_id": 38696867124,
+      "events": 2,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOG",
+      "month": "2025-03",
+      "artifact_id": 11970097000,
+      "artifact_name": "regional-historical-DOG-2025-03-attempt-2",
+      "created_at": "2026-10-15T11:43:15Z",
+      "run_id": 38696867124,
+      "events": 6,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOG",
+      "month": "2025-04",
+      "status": "NO_USABLE_SHARD",
+      "attempts": [
+        {
+          "artifact": "regional-historical-DOG-2025-04-attempt-38807591465",
+          "error": "Shard quality or source-day coverage incomplete",
+          "source_days_failed": 1,
+          "quality": {
+            "ERROR": 0,
+            "WARN": 0,
+            "INFO": 2
+          }
+        },
+        {
+          "artifact": "regional-historical-DOG-2025-04-attempt-2",
+          "error": "Shard quality or source-day coverage incomplete",
+          "source_days_failed": 1,
+          "quality": {
+            "ERROR": 0,
+            "WARN": 0,
+            "INFO": 2
+          }
+        },
+        {
+          "artifact": "regional-historical-DOG-2025-04-attempt-38717666379",
+          "error": "Shard quality or source-day coverage incomplete",
+          "source_days_failed": 1,
+          "quality": {
+            "ERROR": 0,
+            "WARN": 0,
+            "INFO": 2
+          }
+        },
+        {
+          "artifact": "regional-historical-DOG-2025-04-attempt-1",
+          "error": "Shard quality or source-day coverage incomplete",
+          "source_days_failed": 1,
+          "quality": {
+            "ERROR": 0,
+            "WARN": 0,
+            "INFO": 2
+          }
+        }
+      ]
+    },
+    {
+      "source": "DOG",
+      "month": "2025-05",
+      "artifact_id": 11968783468,
+      "artifact_name": "regional-historical-DOG-2025-05-attempt-2",
+      "created_at": "2026-10-15T11:45:34Z",
+      "run_id": 38696867124,
+      "events": 3,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOG",
+      "month": "2025-06",
+      "artifact_id": 11969762741,
+      "artifact_name": "regional-historical-DOG-2025-06-attempt-2",
+      "created_at": "2026-10-15T11:45:40Z",
+      "run_id": 38696867124,
+      "events": 1,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOG",
+      "month": "2025-07",
+      "artifact_id": 11969563365,
+      "artifact_name": "regional-historical-DOG-2025-07-attempt-2",
+      "created_at": "2026-10-15T11:48:01Z",
+      "run_id": 38696867124,
+      "events": 1,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOG",
+      "month": "2025-08",
+      "artifact_id": 11969518357,
+      "artifact_name": "regional-historical-DOG-2025-08-attempt-2",
+      "created_at": "2026-10-15T11:47:37Z",
+      "run_id": 38696867124,
+      "events": 1,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOG",
+      "month": "2025-09",
+      "artifact_id": 11969094082,
+      "artifact_name": "regional-historical-DOG-2025-09-attempt-2",
+      "created_at": "2026-10-15T11:49:56Z",
+      "run_id": 38696867124,
+      "events": 1,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOG",
+      "month": "2025-10",
+      "artifact_id": 11968819223,
+      "artifact_name": "regional-historical-DOG-2025-10-attempt-2",
+      "created_at": "2026-10-15T11:50:34Z",
+      "run_id": 38696867124,
+      "events": 6,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOG",
+      "month": "2025-11",
+      "artifact_id": 11968989386,
+      "artifact_name": "regional-historical-DOG-2025-11-attempt-2",
+      "created_at": "2026-10-15T11:51:54Z",
+      "run_id": 38696867124,
+      "events": 2,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOG",
+      "month": "2025-12",
+      "artifact_id": 11969594248,
+      "artifact_name": "regional-historical-DOG-2025-12-attempt-2",
+      "created_at": "2026-10-15T11:52:56Z",
+      "run_id": 38696867124,
+      "events": 8,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOG",
+      "month": "2026-01",
+      "artifact_id": 11969889379,
+      "artifact_name": "regional-historical-DOG-2026-01-attempt-2",
+      "created_at": "2026-10-15T11:54:18Z",
+      "run_id": 38696867124,
+      "events": 3,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOG",
+      "month": "2026-02",
+      "artifact_id": 11970185107,
+      "artifact_name": "regional-historical-DOG-2026-02-attempt-2",
+      "created_at": "2026-10-15T11:54:55Z",
+      "run_id": 38696867124,
+      "events": 2,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOG",
+      "month": "2026-03",
+      "artifact_id": 11969644865,
+      "artifact_name": "regional-historical-DOG-2026-03-attempt-2",
+      "created_at": "2026-10-15T11:56:32Z",
+      "run_id": 38696867124,
+      "events": 9,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOG",
+      "month": "2026-04",
+      "artifact_id": 11970365322,
+      "artifact_name": "regional-historical-DOG-2026-04-attempt-2",
+      "created_at": "2026-10-15T11:57:11Z",
+      "run_id": 38696867124,
+      "events": 3,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOG",
+      "month": "2026-05",
+      "artifact_id": 11970315608,
+      "artifact_name": "regional-historical-DOG-2026-05-attempt-2",
+      "created_at": "2026-10-15T11:58:25Z",
+      "run_id": 38696867124,
+      "events": 3,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOG",
+      "month": "2026-06",
+      "status": "NO_USABLE_SHARD",
+      "attempts": [
+        {
+          "artifact": "regional-historical-DOG-2026-06-attempt-38807591465",
+          "error": "Shard quality or source-day coverage incomplete",
+          "source_days_failed": 1,
+          "quality": {
+            "ERROR": 0,
+            "WARN": 1,
+            "INFO": 8
+          }
+        },
+        {
+          "artifact": "regional-historical-DOG-2026-06-attempt-2",
+          "error": "Shard quality or source-day coverage incomplete",
+          "source_days_failed": 1,
+          "quality": {
+            "ERROR": 0,
+            "WARN": 1,
+            "INFO": 8
+          }
+        },
+        {
+          "artifact": "regional-historical-DOG-2026-06-attempt-1",
+          "error": "Shard quality or source-day coverage incomplete",
+          "source_days_failed": 1,
+          "quality": {
+            "ERROR": 0,
+            "WARN": 1,
+            "INFO": 8
+          }
+        }
+      ]
+    },
+    {
+      "source": "DOG",
+      "month": "2026-07",
+      "artifact_id": 11970226015,
+      "artifact_name": "regional-historical-DOG-2026-07-attempt-2",
+      "created_at": "2026-10-15T12:00:21Z",
+      "run_id": 38696867124,
+      "events": 1,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOG",
+      "month": "2026-08",
+      "artifact_id": 11970686197,
+      "artifact_name": "regional-historical-DOG-2026-08-attempt-2",
+      "created_at": "2026-10-15T12:01:51Z",
+      "run_id": 38696867124,
+      "events": 3,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOG",
+      "month": "2026-09",
+      "artifact_id": 11955084220,
+      "artifact_name": "regional-historical-DOG-2026-09-attempt-1",
+      "created_at": "2026-10-15T07:27:33Z",
+      "run_id": 38696867124,
+      "events": 5,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOGC",
+      "month": "2024-10",
+      "artifact_id": 12050060569,
+      "artifact_name": "regional-historical-DOGC-2024-10-attempt-38908484419",
+      "created_at": "2026-10-16T13:36:14Z",
+      "run_id": 38908484419,
+      "events": 41,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOGC",
+      "month": "2024-11",
+      "artifact_id": 12050050238,
+      "artifact_name": "regional-historical-DOGC-2024-11-attempt-38908484419",
+      "created_at": "2026-10-16T13:35:22Z",
+      "run_id": 38908484419,
+      "events": 33,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOGC",
+      "month": "2024-12",
+      "artifact_id": 12049620866,
+      "artifact_name": "regional-historical-DOGC-2024-12-attempt-38908484419",
+      "created_at": "2026-10-16T13:35:18Z",
+      "run_id": 38908484419,
+      "events": 20,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOGC",
+      "month": "2025-01",
+      "artifact_id": 12049530835,
+      "artifact_name": "regional-historical-DOGC-2025-01-attempt-38908484419",
+      "created_at": "2026-10-16T13:33:47Z",
+      "run_id": 38908484419,
+      "events": 10,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOGC",
+      "month": "2025-02",
+      "artifact_id": 12049257742,
+      "artifact_name": "regional-historical-DOGC-2025-02-attempt-38908484419",
+      "created_at": "2026-10-16T13:37:59Z",
+      "run_id": 38908484419,
+      "events": 17,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOGC",
+      "month": "2025-03",
+      "artifact_id": 12049472591,
+      "artifact_name": "regional-historical-DOGC-2025-03-attempt-38908484419",
+      "created_at": "2026-10-16T13:39:03Z",
+      "run_id": 38908484419,
+      "events": 15,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOGC",
+      "month": "2025-04",
+      "artifact_id": 12049940910,
+      "artifact_name": "regional-historical-DOGC-2025-04-attempt-38908484419",
+      "created_at": "2026-10-16T13:38:56Z",
+      "run_id": 38908484419,
+      "events": 20,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOGC",
+      "month": "2025-05",
+      "artifact_id": 12049014169,
+      "artifact_name": "regional-historical-DOGC-2025-05-attempt-38908484419",
+      "created_at": "2026-10-16T13:40:23Z",
+      "run_id": 38908484419,
+      "events": 24,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOGC",
+      "month": "2025-06",
+      "artifact_id": 12050426066,
+      "artifact_name": "regional-historical-DOGC-2025-06-attempt-38908484419",
+      "created_at": "2026-10-16T13:41:51Z",
+      "run_id": 38908484419,
+      "events": 29,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOGC",
+      "month": "2025-07",
+      "artifact_id": 12049069649,
+      "artifact_name": "regional-historical-DOGC-2025-07-attempt-38908484419",
+      "created_at": "2026-10-16T13:43:09Z",
+      "run_id": 38908484419,
+      "events": 36,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOGC",
+      "month": "2025-08",
+      "artifact_id": 12049343724,
+      "artifact_name": "regional-historical-DOGC-2025-08-attempt-38908484419",
+      "created_at": "2026-10-16T13:43:22Z",
+      "run_id": 38908484419,
+      "events": 12,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOGC",
+      "month": "2025-09",
+      "artifact_id": 12049722247,
+      "artifact_name": "regional-historical-DOGC-2025-09-attempt-38908484419",
+      "created_at": "2026-10-16T13:44:43Z",
+      "run_id": 38908484419,
+      "events": 25,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOGC",
+      "month": "2025-10",
+      "artifact_id": 12049553336,
+      "artifact_name": "regional-historical-DOGC-2025-10-attempt-38908484419",
+      "created_at": "2026-10-16T13:45:48Z",
+      "run_id": 38908484419,
+      "events": 27,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOGC",
+      "month": "2025-11",
+      "artifact_id": 12049518828,
+      "artifact_name": "regional-historical-DOGC-2025-11-attempt-38908484419",
+      "created_at": "2026-10-16T13:47:46Z",
+      "run_id": 38908484419,
+      "events": 46,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOGC",
+      "month": "2025-12",
+      "artifact_id": 12050715215,
+      "artifact_name": "regional-historical-DOGC-2025-12-attempt-38908484419",
+      "created_at": "2026-10-16T13:47:46Z",
+      "run_id": 38908484419,
+      "events": 19,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOGC",
+      "month": "2026-01",
+      "artifact_id": 12049993175,
+      "artifact_name": "regional-historical-DOGC-2026-01-attempt-38908484419",
+      "created_at": "2026-10-16T13:48:26Z",
+      "run_id": 38908484419,
+      "events": 12,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOGC",
+      "month": "2026-02",
+      "artifact_id": 12049373697,
+      "artifact_name": "regional-historical-DOGC-2026-02-attempt-38908484419",
+      "created_at": "2026-10-16T13:48:22Z",
+      "run_id": 38908484419,
+      "events": 15,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOGC",
+      "month": "2026-03",
+      "artifact_id": 12049608768,
+      "artifact_name": "regional-historical-DOGC-2026-03-attempt-38908484419",
+      "created_at": "2026-10-16T13:51:52Z",
+      "run_id": 38908484419,
+      "events": 9,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOGC",
+      "month": "2026-04",
+      "artifact_id": 12049973268,
+      "artifact_name": "regional-historical-DOGC-2026-04-attempt-38908484419",
+      "created_at": "2026-10-16T13:50:20Z",
+      "run_id": 38908484419,
+      "events": 14,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOGC",
+      "month": "2026-05",
+      "artifact_id": 12050456693,
+      "artifact_name": "regional-historical-DOGC-2026-05-attempt-38908484419",
+      "created_at": "2026-10-16T13:52:11Z",
+      "run_id": 38908484419,
+      "events": 20,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOGC",
+      "month": "2026-06",
+      "artifact_id": 12049873849,
+      "artifact_name": "regional-historical-DOGC-2026-06-attempt-38908484419",
+      "created_at": "2026-10-16T13:52:37Z",
+      "run_id": 38908484419,
+      "events": 32,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOGC",
+      "month": "2026-07",
+      "artifact_id": 12049858533,
+      "artifact_name": "regional-historical-DOGC-2026-07-attempt-38908484419",
+      "created_at": "2026-10-16T13:54:49Z",
+      "run_id": 38908484419,
+      "events": 47,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOGC",
+      "month": "2026-08",
+      "artifact_id": 12050128560,
+      "artifact_name": "regional-historical-DOGC-2026-08-attempt-38908484419",
+      "created_at": "2026-10-16T13:56:34Z",
+      "run_id": 38908484419,
+      "events": 26,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOGC",
+      "month": "2026-09",
+      "artifact_id": 12050776550,
+      "artifact_name": "regional-historical-DOGC-2026-09-attempt-38908484419",
+      "created_at": "2026-10-16T13:56:44Z",
+      "run_id": 38908484419,
+      "events": 35,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOGV",
+      "month": "2024-10",
+      "artifact_id": 11963347511,
+      "artifact_name": "regional-historical-DOGV-2024-10-attempt-38718120382",
+      "created_at": "2026-10-15T10:10:53Z",
+      "run_id": 38718120382,
+      "events": 13,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "c2d328e3e202738b70ec",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "253f3f997f09dc23298d",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOGV",
+      "month": "2024-11",
+      "artifact_id": 11963662408,
+      "artifact_name": "regional-historical-DOGV-2024-11-attempt-38718461294",
+      "created_at": "2026-10-15T10:13:52Z",
+      "run_id": 38718461294,
+      "events": 18,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "a5ef13c5e2a151563ad6",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "98181bf89bd65ce6c023",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOGV",
+      "month": "2024-12",
+      "artifact_id": 11964590537,
+      "artifact_name": "regional-historical-DOGV-2024-12-attempt-38718461294",
+      "created_at": "2026-10-15T10:13:42Z",
+      "run_id": 38718461294,
+      "events": 17,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOGV",
+      "month": "2025-01",
+      "artifact_id": 11963991424,
+      "artifact_name": "regional-historical-DOGV-2025-01-attempt-38718461294",
+      "created_at": "2026-10-15T10:13:44Z",
+      "run_id": 38718461294,
+      "events": 35,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOGV",
+      "month": "2025-02",
+      "artifact_id": 11963986374,
+      "artifact_name": "regional-historical-DOGV-2025-02-attempt-38718461294",
+      "created_at": "2026-10-15T10:13:16Z",
+      "run_id": 38718461294,
+      "events": 16,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOGV",
+      "month": "2025-03",
+      "artifact_id": 11963592601,
+      "artifact_name": "regional-historical-DOGV-2025-03-attempt-38718461294",
+      "created_at": "2026-10-15T10:16:00Z",
+      "run_id": 38718461294,
+      "events": 21,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "dc201d09130b1db6ddc7",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "74b289114e9c4a6c3c0f",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "b7a42fd4c477a276732c",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "97fc365c64797a319e88",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOGV",
+      "month": "2025-04",
+      "artifact_id": 11963502614,
+      "artifact_name": "regional-historical-DOGV-2025-04-attempt-38718461294",
+      "created_at": "2026-10-15T10:15:48Z",
+      "run_id": 38718461294,
+      "events": 13,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "159ef7024add6c2ba1c9",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "ad00fc32c3e3166bfa41",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "144d86cd856b1ea3e3a5",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOGV",
+      "month": "2025-05",
+      "artifact_id": 11963447990,
+      "artifact_name": "regional-historical-DOGV-2025-05-attempt-38718461294",
+      "created_at": "2026-10-15T10:16:28Z",
+      "run_id": 38718461294,
+      "events": 25,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "605b8e749077a0d30aa7",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "c74fd0d502d2c8bbc924",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOGV",
+      "month": "2025-06",
+      "artifact_id": 11963932510,
+      "artifact_name": "regional-historical-DOGV-2025-06-attempt-38718461294",
+      "created_at": "2026-10-15T10:16:32Z",
+      "run_id": 38718461294,
+      "events": 19,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOGV",
+      "month": "2025-07",
+      "artifact_id": 11964372267,
+      "artifact_name": "regional-historical-DOGV-2025-07-attempt-38718461294",
+      "created_at": "2026-10-15T10:18:27Z",
+      "run_id": 38718461294,
+      "events": 14,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "6c0f997ae6f91770d006",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOGV",
+      "month": "2025-08",
+      "artifact_id": 11964805063,
+      "artifact_name": "regional-historical-DOGV-2025-08-attempt-38718461294",
+      "created_at": "2026-10-15T10:18:42Z",
+      "run_id": 38718461294,
+      "events": 14,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "fd3cfc7d962141ff8f6a",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOGV",
+      "month": "2025-09",
+      "artifact_id": 11964137746,
+      "artifact_name": "regional-historical-DOGV-2025-09-attempt-38718461294",
+      "created_at": "2026-10-15T10:18:52Z",
+      "run_id": 38718461294,
+      "events": 20,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "02060b3603e6b76f11f1",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "286b227fbf71ae111202",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "671cd39d6e43c5a4ab7f",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "a78fe6fd783a4842d822",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "ddddec37934dcca0f3cc",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOGV",
+      "month": "2025-10",
+      "artifact_id": 11964382328,
+      "artifact_name": "regional-historical-DOGV-2025-10-attempt-38718461294",
+      "created_at": "2026-10-15T10:19:09Z",
+      "run_id": 38718461294,
+      "events": 18,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "dd1a3c4075e471e51f92",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOGV",
+      "month": "2025-11",
+      "artifact_id": 11963983329,
+      "artifact_name": "regional-historical-DOGV-2025-11-attempt-38718461294",
+      "created_at": "2026-10-15T10:21:10Z",
+      "run_id": 38718461294,
+      "events": 20,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "b1041e1a7d6cc4e28d20",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "f4e80c1816a3022c33ed",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOGV",
+      "month": "2025-12",
+      "artifact_id": 11963597911,
+      "artifact_name": "regional-historical-DOGV-2025-12-attempt-38718461294",
+      "created_at": "2026-10-15T10:21:16Z",
+      "run_id": 38718461294,
+      "events": 20,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "510fcb7aeaf079a58808",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOGV",
+      "month": "2026-01",
+      "artifact_id": 11963548767,
+      "artifact_name": "regional-historical-DOGV-2026-01-attempt-38718461294",
+      "created_at": "2026-10-15T10:21:01Z",
+      "run_id": 38718461294,
+      "events": 26,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "65263388abcbfbd2c9e0",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "a70cfd552581e18e1bc1",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOGV",
+      "month": "2026-02",
+      "artifact_id": 11963593441,
+      "artifact_name": "regional-historical-DOGV-2026-02-attempt-38718461294",
+      "created_at": "2026-10-15T10:21:11Z",
+      "run_id": 38718461294,
+      "events": 20,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOGV",
+      "month": "2026-03",
+      "artifact_id": 11963464616,
+      "artifact_name": "regional-historical-DOGV-2026-03-attempt-38718461294",
+      "created_at": "2026-10-15T10:23:38Z",
+      "run_id": 38718461294,
+      "events": 17,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "8f004c8ca52894c7be6b",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOGV",
+      "month": "2026-04",
+      "artifact_id": 11964795907,
+      "artifact_name": "regional-historical-DOGV-2026-04-attempt-38718461294",
+      "created_at": "2026-10-15T10:23:29Z",
+      "run_id": 38718461294,
+      "events": 41,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "fc4f7e4e0dc4d4c78f09",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "3be55ad73fe80ffe3f1f",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOGV",
+      "month": "2026-05",
+      "artifact_id": 11964298531,
+      "artifact_name": "regional-historical-DOGV-2026-05-attempt-38718461294",
+      "created_at": "2026-10-15T10:23:51Z",
+      "run_id": 38718461294,
+      "events": 28,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "93c48930fc50eb1a0695",
+          "detail": "Nome progetto non estratto."
+        },
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "0b35d210ec701447d7cc",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOGV",
+      "month": "2026-06",
+      "artifact_id": 11964208626,
+      "artifact_name": "regional-historical-DOGV-2026-06-attempt-38718461294",
+      "created_at": "2026-10-15T10:24:04Z",
+      "run_id": 38718461294,
+      "events": 20,
+      "status": "COMPLETE_WITH_QUALITY_FLAGS",
+      "quality_errors": [
+        {
+          "code": "MISSING_PROJECT_NAME",
+          "project_key": "e8c72db640f17138b364",
+          "detail": "Nome progetto non estratto."
+        }
+      ],
+      "restricted_bodies": 0
+    },
+    {
+      "source": "DOGV",
+      "month": "2026-07",
+      "artifact_id": 11964770502,
+      "artifact_name": "regional-historical-DOGV-2026-07-attempt-38718461294",
+      "created_at": "2026-10-15T10:25:57Z",
+      "run_id": 38718461294,
+      "events": 8,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOGV",
+      "month": "2026-08",
+      "artifact_id": 11964448628,
+      "artifact_name": "regional-historical-DOGV-2026-08-attempt-38718461294",
+      "created_at": "2026-10-15T10:25:53Z",
+      "run_id": 38718461294,
+      "events": 5,
+      "status": "CERTIFIED"
+    },
+    {
+      "source": "DOGV",
+      "month": "2026-09",
+      "artifact_id": 11970679385,
+      "artifact_name": "regional-historical-DOGV-2026-09-attempt-38733405247",
+      "created_at": "2026-10-15T12:18:54Z",
+      "run_id": 38733405247,
+      "events": 19,
+      "status": "CERTIFIED"
+    }
+  ]
+}
