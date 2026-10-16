@@ -71,7 +71,7 @@ def _table_exists(conn, name: str) -> bool:
     return conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", (name,)).fetchone() is not None
 
 
-def _copy_rows(src, dst, table: str, where: str, params: tuple, replace: bool = False) -> int:
+def _copy_rows(src, dst, table: str, where: str, params: tuple, replace: bool = False, overrides: dict | None = None) -> int:
     if not (_table_exists(src, table) and _table_exists(dst, table)):
         return 0
     rows = src.execute(f"SELECT * FROM {table} WHERE {where}", params).fetchall()
@@ -83,7 +83,7 @@ def _copy_rows(src, dst, table: str, where: str, params: tuple, replace: bool = 
     sql = f"INSERT OR {'REPLACE' if replace else 'IGNORE'} INTO {table} ({','.join(cols)}) VALUES ({','.join('?' for _ in cols)})"
     before = dst.total_changes
     for r in rows:
-        dst.execute(sql, tuple(r[c] for c in cols))
+        dst.execute(sql, tuple((overrides or {}).get(c, r[c]) for c in cols))
     return dst.total_changes - before
 
 
@@ -179,8 +179,11 @@ def import_history(db: str, export: str, report: str | None = None, supersede_so
                     key = conn.execute("SELECT project_key FROM events WHERE source_code=? AND external_id=?",
                                        (row["source_code"], row["external_id"])).fetchone()[0]
                     for table in EVENT_SCOPED:
+                        # The stored event may have been attached to an existing project (identity alias):
+                        # its provenance row must point to the same project as the event, not the shard's key.
                         summary["evidence_rows_copied"] += _copy_rows(src, conn, table, "source_code=? AND external_id=?",
-                                                                      (row["source_code"], row["external_id"]))
+                                                                      (row["source_code"], row["external_id"]),
+                                                                      overrides={"project_key": key})
                     for table in DOCUMENT_SCOPED:
                         summary["evidence_rows_copied"] += _copy_rows(src, conn, table, "external_id=?", (row["external_id"],))
                     for table in PROJECT_SCOPED:
