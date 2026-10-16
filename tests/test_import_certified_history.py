@@ -65,3 +65,40 @@ class ImportTests(unittest.TestCase):
     def test_event_outside_month_rejected(self):
         self.shard('DOGC','2025-06',[ev('late',date='2025-07-01')])
         with self.assertRaises(ValueError):import_history(self.db(),str(self.export))
+
+
+class SupersessionTests(unittest.TestCase):
+    """A re-classified certified month removes acts it no longer projects (quarantined, project rebuilt)."""
+    def setUp(self):
+        self.tmp=tempfile.TemporaryDirectory();self.root=Path(self.tmp.name);self.export=self.root/'export';self.shards=[]
+        self.helper=ImportTests('test_additive_and_idempotent');self.helper.tmp=self.tmp;self.helper.root=self.root
+        self.helper.export=self.export;self.helper.shards=self.shards
+    def tearDown(self):self.tmp.cleanup()
+    def state(self,*events):
+        c=connect(str(self.root/'state.sqlite'))
+        for e in events:save_event(c,e)
+        c.commit();return c
+    def test_act_dropped_by_reclassification_is_quarantined_and_project_rebuilt(self):
+        from dataclasses import replace
+        keep=ev('a');wrong=replace(ev('b'),project_key=keep.project_key,event_type='CONSTRUCTION_AUTH',commercial_stage='AUTHORIZED',publication_date='2025-06-20')
+        c=self.state(keep,wrong);self.assertEqual(c.execute('SELECT commercial_stage FROM projects').fetchone()[0],'AUTHORIZED');c.close()
+        self.helper.shard('DOGC','2025-06',[ev('a')])
+        got=import_history(str(self.root/'state.sqlite'),str(self.export),supersede_sources=('DOGC',))
+        self.assertEqual(len(got['superseded']),1);self.assertIn('AUTHORIZED_TO_EARLY',got['superseded'][0]['outcome'])
+        with sqlite3.connect(self.root/'state.sqlite') as c:
+            self.assertEqual(c.execute("SELECT external_id FROM events").fetchall(),[('a',)])
+            self.assertEqual(c.execute('SELECT commercial_stage FROM projects').fetchone()[0],'EARLY')
+            q=c.execute('SELECT reason,payload_json FROM quarantined_source_events').fetchone()
+            self.assertEqual(q[0],'SUPERSEDED_BY_CERTIFIED_RECLASSIFICATION');self.assertEqual(json.loads(q[1])['external_id'],'b')
+    def test_project_without_remaining_acts_is_removed(self):
+        self.state(ev('a'),ev('gone')).close();self.helper.shard('DOGC','2025-06',[ev('a')])
+        got=import_history(str(self.root/'state.sqlite'),str(self.export),supersede_sources=('DOGC',))
+        self.assertEqual(got['superseded'][0]['outcome'],'REMOVED_NO_REMAINING_EVENT')
+        with sqlite3.connect(self.root/'state.sqlite') as c:self.assertEqual(c.execute('SELECT count(*) FROM projects').fetchone()[0],1)
+    def test_without_opt_in_nothing_is_removed(self):
+        self.state(ev('a'),ev('gone')).close();self.helper.shard('DOGC','2025-06',[ev('a')])
+        self.assertEqual(import_history(str(self.root/'state.sqlite'),str(self.export))['superseded'],[])
+        with sqlite3.connect(self.root/'state.sqlite') as c:self.assertEqual(c.execute('SELECT count(*) FROM events').fetchone()[0],2)
+    def test_mass_removal_is_refused(self):
+        self.state(*[ev('x%d'%i) for i in range(12)]).close();self.helper.shard('DOGC','2025-06',[ev('x0')])
+        with self.assertRaises(ValueError):import_history(str(self.root/'state.sqlite'),str(self.export),supersede_sources=('DOGC',))

@@ -69,7 +69,7 @@ jobs:
           git fetch --no-tags --depth 1 origin data-export
           mkdir -p "$RUNNER_TEMP/history"
           git archive FETCH_HEAD | tar -x -C "$RUNNER_TEMP/history"
-          python -m scripts.import_certified_history --db data/spain_renewables.sqlite --export "$RUNNER_TEMP/history" --report reports/history_import.json
+          python -m scripts.import_certified_history --db data/spain_renewables.sqlite --export "$RUNNER_TEMP/history" --report reports/history_import.json --supersede DOGC
       - name: Build a browsable snapshot before making any new source requests
         run: >-
           python -m app.web_portal --db data/spain_renewables.sqlite
