@@ -104,9 +104,9 @@ def repair_and_record(conn, report_dir='reports/docm_storage'):
         stale = any(row[k] != expected[k] for k in ('technology','power_mw')) or (one and any(project[k] != v for k,v in expected.items()))
         if stale:
             if (row['external_id'] != REVIEWED_ID or digest(row['raw_text']) != REVIEWED_RAW_SHA or not one
-                    or row['technology'] != 'HYBRID' or row['power_mw'] != 7.4
+                    or row['technology'] != 'HYBRID' or row['power_mw'] not in (7.4, 7.2)
                     or project['project_name'] != 'mediante baterías BESS Almagro I'
-                    or project['technology'] != 'HYBRID' or project['power_mw'] != 7.4
+                    or project['technology'] != 'HYBRID' or project['power_mw'] not in (7.4, 7.2)
                     or projected.power_mw != 7.2 or projected.project_name != 'BESS Almagro I'):
                 raise ValueError('Unreviewed DOCM legacy projection; no automatic correction')
             changes.append((row, project, expected))

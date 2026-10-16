@@ -91,6 +91,9 @@ def main():
     from app.dia_repair import repair_unfavourable_dia
     dia=repair_unfavourable_dia(conn)
     if dia["reclassified_events"]:print("[DIA_OUTCOME] unfavourable DIA reclassified:",dia,flush=True)
+    from app.power_repair import repair_power
+    power=repair_power(conn)
+    if power["events_changed"]:print("[POWER_RULE] stored power re-read:",power,flush=True)
     if docm_repair["status"]!="NOT_NEEDED":print("DOCM storage evidence:",docm_repair,flush=True)
     # Evidence-based field repairs are projection-only. Save the previous
     # database before changing a published project field.
