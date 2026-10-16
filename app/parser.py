@@ -107,6 +107,18 @@ def normalize_text(s:str)->str:
     s=re.sub(r"[^a-zA-Z0-9]+"," ",s).strip().lower()
     return re.sub(r"\s+"," ",s)
 
+# Acts about energy-storage *topics* that are not a generation/storage plant: agreements, grants,
+# R&D centres, battery or cathode factories, boreholes, waste storage, nuclear rules.
+NON_PLANT_SUBJECT=re.compile(
+    r"\b(?:convenios?|ayudas?|subvencion(?:es)?|bases reguladoras|premios?|proceso selectivo|oposiciones|"
+    r"centro (?:nacional |iberico )?de investigacion|actividades de i d i|"
+    r"fabricacion de (?:materiales para catodos de |celdas de )?(?:baterias|celdas)|gigafactor\w*|"
+    r"bateria de sondeos|sondeos de investigacion|almacenamiento (?:temporal )?de residuos|gestion de residuos|"
+    r"consejo de seguridad nuclear)\b")
+
+def non_plant_subject(title:str)->bool:
+    return bool(NON_PLANT_SUBJECT.search(normalize_text(title)))
+
 def detect_technology(text:str)->str|None:
     t=normalize_text(text)
     has_pv=any(k in t for k in ("fotovolta","solar pv")) or bool(re.search(r"\b(?:psfv|pfv|fv)\b",t))
@@ -194,7 +206,7 @@ def build_project_key(name,technology,province,external_id,expediente=None)->str
     return hashlib.sha1(base.encode("utf-8")).hexdigest()[:20]
 
 def parse_event(*,source_code,external_id,publication_date,title,url,raw_text)->ParsedEvent:
-    technology=detect_technology(title) or detect_technology(raw_text)
+    technology=None if non_plant_subject(title) else (detect_technology(title) or detect_technology(raw_text))
     power_mw=extract_power_mw(title)
     if power_mw is None:power_mw=extract_power_mw(raw_text)
     project_name=extract_project_name(title) or extract_project_name(raw_text)

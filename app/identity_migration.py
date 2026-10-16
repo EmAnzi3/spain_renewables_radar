@@ -22,6 +22,8 @@ def excluded_reason(row: dict) -> str | None:
     from app.collectors.bocm import EXCLUDE as BOCM_EXCLUDE
     rule={'BOA':BOA_EXCLUDE,'BOCM':BOCM_EXCLUDE}.get(row['source_code'])
     if rule and rule.search(row['title']):return 'OUTSIDE_COLLECTOR_SCOPE_AFTER_SOURCE_REVIEW'
+    from app.parser import non_plant_subject
+    if non_plant_subject(row['title']):return 'NON_PLANT_SUBJECT_NOT_A_PROJECT'
     return None
 
 
