@@ -291,14 +291,16 @@ def event_classification(doc: Document, title: str) -> tuple[str, str, dict | No
 
 
 NAME_PREFIX = re.compile(r"^(?:(?:stand-alone|anomenad[ao]s?|anomenat|sobre terreny|d'energia amb bateries|de tipus|"
-                         r"planta solar fotovoltaica anomenada)\s+)+", re.I)
+                         r"connectada a la xarxa elèctrica|planta solar fotovoltaica anomenada)\s+)+", re.I)
+NOT_A_NAME = re.compile(r"^(?:d'|de |del |al |als |a la |a l'|en |per |sobre |amb |\d)", re.I)
 
 
 def clean_name(value: str) -> str:
     """Strip heading words around an explicit name; never add or infer text."""
     value = NAME_PREFIX.sub('', value.strip()).strip(' "“”«»\'')
-    value = re.sub(r"\s+de [\d.,]+\s*MW[pn]?$", '', value)
-    return re.split(r" amb la instal·lació", value)[0].strip()
+    value = re.split(r"\s+de [\d.,]+\s*(?:MW|kW)[pn]?\b", value)[0]
+    value = re.split(r" amb la instal·lació", value)[0].strip()
+    return '' if NOT_A_NAME.search(value) else value
 
 
 def project_name(doc: Document, title: str) -> dict | None:
