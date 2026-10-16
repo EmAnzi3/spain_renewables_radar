@@ -23,6 +23,12 @@ def event(raw=RAW,title=TITLE,identity='DOCM-2026-7037'):
     return parse_event(source_code='DOCM',external_id=identity,publication_date='2026-10-05',title=title,url=URL,raw_text=raw)
 
 
+def legacy(raw=RAW,title=TITLE,identity='DOCM-2026-7037'):
+    # Record as stored by the pre-2026-10-16 generic parser (first MW value: existing PV 7,4 MW).
+    from dataclasses import replace
+    return replace(event(raw,title,identity),power_mw=7.4)
+
+
 class StorageTests(unittest.TestCase):
     def test_frozen_original_matches_reviewed_hash(self):
         self.assertEqual(hashlib.sha256(RAW.encode()).hexdigest(),REVIEWED_RAW_SHA)
@@ -38,7 +44,7 @@ class StorageTests(unittest.TestCase):
         old=event();new=project_storage(old)
         for k in ('source_code','external_id','publication_date','title','url','raw_text','promoter','expediente','event_type','commercial_stage'):
             self.assertEqual(getattr(old,k),getattr(new,k))
-        self.assertEqual(old.power_mw,7.4)
+        self.assertEqual(new.power_mw,7.2)
 
     def test_original_quantity_spans_no_mwh_or_kva_conversion(self):
         evidence=storage_evidence(TITLE,RAW)
@@ -113,7 +119,7 @@ class MigrationTests(unittest.TestCase):
         return repair_and_record(self.conn,str(self.root/'repair'))
 
     def test_existing_wrong_record_is_backed_up_corrected_and_idempotent(self):
-        save_event(self.conn,event());before=source_fingerprint(self.conn)
+        save_event(self.conn,legacy());before=source_fingerprint(self.conn)
         result=self.run_repair()
         self.assertEqual(result['corrected_events'],1);self.assertTrue(Path(result['backup_path']).is_file())
         self.assertEqual(before,source_fingerprint(self.conn))
@@ -130,12 +136,12 @@ class MigrationTests(unittest.TestCase):
         self.assertEqual(save_event(self.conn,project_storage(event())),(False,False))
 
     def test_modified_original_or_other_prior_projection_stops(self):
-        save_event(self.conn,event(raw=RAW+' altered'))
+        save_event(self.conn,legacy(raw=RAW+' altered'))
         with self.assertRaises(ValueError):self.run_repair()
         self.assertEqual(self.conn.execute('SELECT power_mw FROM events').fetchone()[0],7.4)
 
     def test_shared_project_is_not_rebuilt_arbitrarily(self):
-        save_event(self.conn,event());save_event(self.conn,event(identity='DOCM-2026-8888'))
+        save_event(self.conn,legacy());save_event(self.conn,legacy(identity='DOCM-2026-8888'))
         with self.assertRaises(ValueError):self.run_repair()
         self.assertEqual(self.conn.execute('SELECT power_mw FROM projects').fetchone()[0],7.4)
 
@@ -145,12 +151,12 @@ class MigrationTests(unittest.TestCase):
         with self.assertRaises(ValueError):validate_docm_storage(self.conn)
 
     def test_source_invariant_failure_rolls_back(self):
-        save_event(self.conn,event())
+        save_event(self.conn,legacy())
         with patch('app.docm_storage.source_fingerprint',side_effect=['before','changed']), self.assertRaises(ValueError):self.run_repair()
         self.assertEqual(self.conn.execute('SELECT power_mw FROM events').fetchone()[0],7.4)
 
     def test_geography_recovers_from_official_municipality_only(self):
-        save_event(self.conn,event());self.run_repair()
+        save_event(self.conn,legacy());self.run_repair()
         result=enrich_missing_project_geography(self.conn,[Municipality('Almagro','13013','Ciudad Real','Castilla-La Mancha')])
         self.assertEqual(result['resolved'],1)
         self.assertEqual(self.conn.execute('SELECT province FROM projects').fetchone()[0],'Ciudad Real')

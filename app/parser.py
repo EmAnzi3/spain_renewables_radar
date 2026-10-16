@@ -122,24 +122,54 @@ def detect_technology(text:str)->str|None:
     if has_storage:return "BESS"
     return None
 
+POWER_RE=re.compile(r"(?<![\w.,])(\d{1,3}(?:\.\d{3}){1,2}(?:,\d+)?|\d{1,7}(?:[.,]\d+)?)\s*(MW|kW)(p|ac|n|nom|inst)?\b",re.I)  # never inside cadastral refs (…0000KW)
+POWER_LABEL=re.compile(r"potencia\s+(?:total\s+)?(?:instalada|nominal|total|de\s+la\s+(?:instalaci[oó]n|planta))(?:\s+(?:total|instalaci[oó]n|prevista|a\s+instalar))?[^.;]{0,25}$|"
+                       r"(?:planta|instalaci[oó]n|parque|central|proyecto|m[oó]dulo de almacenamiento)[^.;]{0,60}?\bde\s*$|"
+                       r"potencia\s+total\s+(?:a\s+instalar|del\s+parque)[^.;]{0,25}$",re.I)
+POWER_LABEL_AFTER=re.compile(r"^\s*(?:de\s+potencia\s+(?:instalada|nominal)|instalad[oa]s?\b)",re.I)
+POWER_PEAK=re.compile(r"potencia\s+(?:de\s+)?pico[^.;]{0,40}$",re.I)
+POWER_COMPONENT=re.compile(r"(?:inversor(?:es)?|transformador(?:es)?|cada\s+uno|"
+                           r"unitari[ao]|aerogeneradores?\s+(?:de|modelo)|modelo|acceso|evacuaci[oó]n|(?:capacidad|potencia|punto)\s+de\s+conexi[oó]n|l[ií]nea|subestaci[oó]n|"
+                           r"inyectada|limit(?:ad[ao]s?|ar[aá])\s+(?:electr[oó]nicamente\s+)?a|existente|reducci[oó]n|concedida)(?:(?!potencia)[^.;]){0,35}$",re.I)
+POWER_COMPONENT_AFTER=re.compile(r"^(?:[^.;]{0,40}?\bcada\s+un[oa]\b|\s*(?:por\s+inversor|de\s+potencia\s+(?:unitaria|de\s+acceso)|de\s+capacidad\s+de\s+acceso|"
+                                 r"de\s+acceso|\(?\d*\s*motogenerador))",re.I)
+
 def _parse_spanish_number(raw:str)->float:
-    return float(raw.replace(".","").replace(",", ".")) if "," in raw else float(raw)
+    """Spanish/Catalan notation: '4.990' and '1.000' are thousands; '4,99' and '0.99' decimals."""
+    if "," in raw:return float(raw.replace(".","").replace(",","."))
+    if re.fullmatch(r"\d{1,3}(?:\.\d{3})+",raw):return float(raw.replace(".",""))
+    return float(raw)
+
+def power_candidates(text:str)->list[tuple[int,float,int]]:
+    """(score, MW, position). Plant installed/nominal capacity wins over peak DC; inverter,
+    turbine-unit, access, injection-limit, evacuation and existing-plant values never win."""
+    out=[]
+    for m in POWER_RE.finditer(text or ""):
+        raw,unit,suffix=m.group(1),m.group(2).lower(),(m.group(3) or "").lower()
+        try:value=_parse_spanish_number(raw)
+        except ValueError:continue
+        if unit=="mw" and "," not in raw and value>=1000 and re.fullmatch(r"\d{1,3}\.\d{3}",raw):
+            value=float(raw)  # '1.299 MWp' is 1,299 MW; no single plant act declares >1 GW this way
+        mw=value/1000.0 if unit=="kw" else value
+        if mw<=0:continue
+        before=text[max(0,m.start()-90):m.start()];after=text[m.end():m.end()+45]
+        if re.search(r"\d[\s\u0080-\u009f\u2019\u00a0\u202f]$",before):continue  # fragment of a number broken by text extraction ('15\x92785 MW')
+        score=0
+        if POWER_LABEL.search(before) or POWER_LABEL_AFTER.search(after) or re.search(r"[kM]Wp\s*/\s*$",before) or suffix=="inst":score+=2
+        if suffix=="p" or POWER_PEAK.search(before):score-=1
+        inverter_total=re.search(r"potencia\s+(?:nominal|total|en)\s+(?:de\s+(?:los\s+)?)?inversores[^.;]{0,12}$",before,re.I)
+        grid_only=re.search(r"(?:acceso|evacuaci[oó]n|l[ií]nea|subestaci[oó]n)(?:(?!potencia)[^.;]){0,35}$",before,re.I)
+        if inverter_total:score=max(score,2)  # Valencian acts: installed capacity = inverter nominal power
+        elif suffix=="p" and grid_only and not POWER_COMPONENT_AFTER.search(after):pass  # a MWp value is a plant, never a line
+        elif POWER_COMPONENT.search(before) or POWER_COMPONENT_AFTER.search(after):score-=3
+        out.append((score,mw,m.start()))
+    return out
 
 def extract_power_mw(text:str)->float|None:
-    values=[]
-    for m in MW_RE.finditer(text or ""):
-        try:
-            values.append(_parse_spanish_number(m.group(1)))
-        except ValueError:
-            pass
-    if values:
-        return values[0]
-    for m in KW_RE.finditer(text or ""):
-        try:
-            return _parse_spanish_number(m.group(1))/1000.0
-        except ValueError:
-            pass
-    return None
+    candidates=[c for c in power_candidates(text) if c[0]>-3]
+    if not candidates:return None
+    best=max(c[0] for c in candidates)
+    return next(c[1] for c in candidates if c[0]==best)
 
 def _clean_project_name(value:str)->str:
     value=value.strip(" '“”«»")
