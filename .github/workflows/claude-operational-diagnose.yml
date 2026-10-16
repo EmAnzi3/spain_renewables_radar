@@ -1,5 +1,5 @@
 name: claude-operational-diagnose
-run-name: Export published Pages site to probe-results (read-only)
+run-name: Export DOGC held-for-review originals (pages text) to probe-results (read-only)
 on:
   workflow_dispatch:
 permissions:
@@ -8,18 +8,34 @@ permissions:
 jobs:
   export:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
     steps:
-      - name: Copy the exact published Pages artifact into probe-results
+      - name: Extract pages of DOGC held acts from certified shard artifacts
         env: {GH_TOKEN: '${{ github.token }}'}
         run: |
           set +e
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898283+github-actions[bot]@users.noreply.github.com"
           git clone -q --depth 1 -b probe-results "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" pr
-          d=pr/site/38820291492; mkdir -p $d
-          { gh api repos/${{ github.repository }}/actions/artifacts/12014495285/zip > pages.zip; ls -la pages.zip
-            mkdir pages; cd pages; unzip -o ../pages.zip; ls -la; for t in *.tar; do tar -xf "$t"; done; ls -la; cd ..
-            cp pages/index.html pages/build_receipt.json $d/; } > $d/export.log 2>&1
-          ls -la $d >> $d/export.log
-          cd pr && git add -A && git commit -qm "published site 38820291492" && git push -q origin probe-results
+          out=pr/dogc_review; rm -rf $out; mkdir -p $out
+          cat > x.py <<'PY'
+          import json,sys,glob,os
+          aid,out=sys.argv[1],sys.argv[2]
+          held=[]
+          for f in glob.glob('a/**/unresolved.json',recursive=True)+glob.glob('a/**/identity_review.json',recursive=True):
+              try:held+=json.load(open(f))
+              except Exception as e:print('bad',f,e)
+          pages={os.path.basename(f).split('.')[0]:f for f in glob.glob('a/**/*.pages.json',recursive=True)}
+          n=0
+          for r in held:
+              did=str(r.get('document_id'));p=pages.get(did);n+=bool(p)
+              json.dump({'record':r,'pages':json.load(open(p)) if p else None},open(os.path.join(out,did+'.json'),'w'),ensure_ascii=False)
+          print(aid,'held',len(held),'with_pages',n,'pages_files',len(pages))
+          PY
+          for id in 12007175662 12006970232 12006725881 12006696709 12006675683 12006546293 12006376485 12006255927 12006147061 12006073410 12005950452 12005804491 12005759097 12005698183 12005624743 12005618767 12005346890 12005319302 12005317237 12005304731 12005238086 12005197981 12004354843 12004528837; do
+            rm -rf a a.zip; mkdir a
+            gh api repos/${{ github.repository }}/actions/artifacts/$id/zip > a.zip && (cd a && unzip -q ../a.zip)
+            if [ "$id" = "12007175662" ]; then (cd a && find . -type f | sed -E 's/[0-9a-f]{64}/HASH/;s/[0-9]{5,}/N/g' | sort | uniq -c | sort -rn | head -80) > $out/tree_sample.txt; fi
+            python3 x.py "$id" "$out"
+          done > $out/export.log 2>&1
+          cd pr && git add -A && git commit -qm "dogc held-for-review originals" && git push -q origin probe-results
